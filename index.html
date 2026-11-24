@@ -216,12 +216,12 @@ footer{color:var(--muted);font-size:13px;border-top:1px solid var(--line);paddin
 
   <div class="golink" role="note" aria-label="Адреса Інфо-хабу">
     <svg class="art" viewBox="0 0 240 140" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><rect class="s" x="40" y="14" width="160" height="98" rx="10"/><rect class="t" x="54" y="28" width="132" height="14" rx="7"/><path d="M66 58h70M66 74h104M66 90h80"/><path class="t" d="M28 112h184l12 14H16z"/><path class="f" stroke="none" d="M168 70l30 12-13 4-4 13z"/></g></svg>
-    <div class="gl-t"><small>Адреса Інфо-хабу — набери в браузері:</small><b>tinyurl.com/it-zpt</b></div>
-    <div class="qr" id="qr" role="img" aria-label="QR-код адреси tinyurl.com/it-zpt" hidden></div>
+    <div class="gl-t"><small>Адреса Інфо-хабу — набери в браузері:</small><b id="glAddr">exzeek.github.io/infohab</b></div>
+    <div class="qr" id="qr" role="img" aria-label="QR-код адреси Інфо-хабу" hidden></div>
     <button class="copy" id="glCopy" type="button">Копіювати</button>
   </div>
 
-  <a class="liveban" id="liveBan" href="https://tinyurl.com/infohab-reitynh" target="_blank" rel="noopener" hidden>
+  <a class="liveban" id="liveBan" href="https://script.google.com/macros/s/AKfycbztFLbTQFgylh9B6Huokdc215jvFbO__SL2QS5vMfdMe3-HLtRAT-PJhF2RPOCPrnVU/exec" target="_blank" rel="noopener" hidden>
     <span class="lb-ic" aria-hidden="true">🏆</span>
     <span class="lb-t"><b>Живий рейтинг класу</b><small>На великий екран без входу в акаунт · оновлення кожні 15 с · <span style="font-family:var(--f-mono)">tinyurl.com/infohab-reitynh</span></small></span>
     <span class="lb-go">Відкрити →</span>
@@ -238,7 +238,7 @@ footer{color:var(--muted);font-size:13px;border-top:1px solid var(--line);paddin
   <main id="list"></main>
 <button class="totop" id="totop" type="button" aria-label="Нагору" hidden>↑</button>
 
-  <footer id="foot"><a href="vse/" style="font-weight:700">Усі уроки, вправи, ігри та проєкти одним списком →</a><br>Адреса цієї сторінки: <b>tinyurl.com/it-zpt</b> · Дані — з таблиці «Каталог уроків інформатики», 12 листопада 2026.</footer>
+  <footer id="foot"><a href="vse/" style="font-weight:700">Усі уроки, вправи, ігри та проєкти одним списком →</a><br>Адреса цієї сторінки: <b class="hubAddr">exzeek.github.io/infohab</b> · Дані — з таблиці «Каталог уроків інформатики», 12 листопада 2026.</footer>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
@@ -1138,7 +1138,7 @@ function cardHTML(t,c){
   const kindCls=r=>r.kind==="Архів"?" arch":r.who==="t"?" t":"";
   const lbl=t.sum?"Підсумок розділу":"";
   return `<article class="card${t.sum?" sum":""}" id="t${TOPICS.indexOf(t)}" style="--c:var(${c.c})"><div class="code"><span>${esc(t.t)}</span>${lbl?`<small>${lbl}</small>`:""}</div><h3>${esc(t.title)}</h3>${t.story?`<p class="story">${esc(t.story)}</p>`:""}${st.mode==="t"&&noSl(t)?`<span class="nosl">⚠ без слайдів</span>`:""}<div class="res">`+
-    visibleRes(t).map(r=>`<div class="r"><a class="go" href="${r.url}" target="_blank" rel="noopener"><span class="kind${kindCls(r)}">${r.kind}</span><span class="lbl">${esc(r.label)}${r.short?`<small>tinyurl.com/${r.short}</small>`:""}</span></a>${st.mode==="t"?`<button class="copy" data-u="${r.url}">Копіювати</button>`:""}</div>`).join("")+
+    visibleRes(t).map(r=>`<div class="r"><a class="go" href="${r.url}" target="_blank" rel="noopener"><span class="kind${kindCls(r)}">${r.kind}</span><span class="lbl">${esc(r.label)}${r.short&&!/^(a\/|https:\/\/exzeek)/.test(r.url)?`<small>tinyurl.com/${r.short}</small>`:""}</span></a>${st.mode==="t"?`<button class="copy" data-u="${r.url}">Копіювати</button>`:""}</div>`).join("")+
     `</div></article>`;
 }
 // Поточний розділ класу = останній розділ із темами (його відкрито, інші згорнуто)
@@ -1238,7 +1238,8 @@ function render(){
 (()=>{const b=document.getElementById("totop");if(!b)return;addEventListener("scroll",()=>{b.hidden=scrollY<700},{passive:true});b.onclick=()=>scrollTo({top:0,behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"})})();
 
 function setMode(m){st.mode=m;try{localStorage.setItem("hub-mode",m)}catch(e){}if(m==="s"&&(st.k==="0"||st.k==="arch"||st.k==="gal")){location.hash="";st.k="all"}render()}
-$("#glCopy").onclick=e=>{const b=e.currentTarget;navigator.clipboard?.writeText("https://tinyurl.com/it-zpt").then(()=>{b.textContent="Скопійовано";setTimeout(()=>b.textContent="Копіювати",1500)},()=>{})};
+const HUB=location.origin+location.pathname.replace(/index\.html$/,"");document.querySelectorAll("#glAddr,.hubAddr").forEach(e=>e.textContent=HUB.replace(/^https?:\/\//,"").replace(/\/$/,""));
+$("#glCopy").onclick=e=>{const b=e.currentTarget;navigator.clipboard?.writeText(HUB).then(()=>{b.textContent="Скопійовано";setTimeout(()=>b.textContent="Копіювати",1500)},()=>{})};
 $("#m-s").onclick=()=>setMode("s");
 $("#m-t").onclick=()=>setMode("t");
 $("#q").oninput=e=>{st.q=e.target.value;render()};
@@ -1246,7 +1247,7 @@ addEventListener("hashchange",()=>{const j=fromHash();if(j){st.q="";$("#q").valu
 if(st.mode==="s"&&(st.k==="arch"||st.k==="gal"))st.k="all";
 render();
 if(jump) setTimeout(()=>goTo(jump),80);
-try{const qr=qrcode(0,"M");qr.addData("https://tinyurl.com/it-zpt");qr.make();const box=$("#qr");box.innerHTML=qr.createSvgTag({cellSize:4,margin:1,scalable:true});box.hidden=false}catch(e){}
+try{const qr=qrcode(0,"M");qr.addData(HUB);qr.make();const box=$("#qr");box.innerHTML=qr.createSvgTag({cellSize:4,margin:1,scalable:true});box.hidden=false}catch(e){}
 </script>
 
 </body></html>

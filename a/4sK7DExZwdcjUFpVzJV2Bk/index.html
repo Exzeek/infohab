@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>БазаЛаб — бази даних</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/*
+VOICE: робочий інструмент, як Access, але спокійніший і зрозуміліший для 9 класу.
+IDEA: настільна СКБД — заголовок вікна, стрічка інструментів, область переходів, вкладки об'єктів.
+PICTURE: сама робоча область (таблиця, схема даних, бланк запиту) — вона і є головне зображення.
+COLOUR and TYPE: малиновий Access #a4262c як домінанта, теплий світлий ґрунт, Golos Text, JetBrains Mono для SQL.
+LAYOUT: шапка + стрічка зверху, ліворуч область переходів, праворуч вкладки та подання; на телефоні — стовпчиком.
+*/
+:root{color-scheme:light dark;--bg:light-dark(#f2efea,#151619);--panel:light-dark(#ffffff,#1f2024);--panel2:light-dark(#f8f6f2,#26272c);--ink:light-dark(#1c1b1a,#ecebe8);--mut:light-dark(#6a655d,#a7a39c);--line:light-dark(#ddd8cf,#36373d);--acc:#a4262c;--accd:light-dark(#8a1d23,#e0666b);--acc2:light-dark(#fbeaea,#3a2124);--ok:light-dark(#1b7a45,#63d394);--okb:light-dark(#e6f4ec,#1d3326);--bad:light-dark(#b42318,#ff8f85);--badb:light-dark(#fdecea,#3b1f1d);--sel:light-dark(#fff3cf,#3d3520);--key:#c98a00}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 "Golos Text",system-ui,sans-serif;overflow-x:clip}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+svg.i{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.app{display:grid;grid-template-rows:auto auto 1fr auto;height:100vh}
+header.top{background:var(--acc);color:#fff;display:flex;align-items:center;gap:12px;padding:8px 14px;flex-wrap:wrap}
+.brand{font-weight:700;font-size:18px;letter-spacing:.2px;display:flex;align-items:center;gap:8px}
+.brand small{font-weight:400;opacity:.8;font-size:13px}
+.dbname{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);border-radius:6px;padding:5px 9px;color:#fff;width:min(260px,40vw)}
+.savest{font-size:12.5px;opacity:.85;margin-inline-start:auto}
+.topbtn{background:#fff;color:var(--acc);border:0;border-radius:6px;padding:7px 12px;font-weight:600;display:flex;gap:6px;align-items:center;min-height:36px}
+#navToggle{display:none;background:transparent;border:1px solid rgba(255,255,255,.5);color:#fff;border-radius:6px;min-height:36px;padding:0 10px}
+.ribbon{background:var(--panel);border-bottom:1px solid var(--line);display:flex;gap:4px;overflow-x:auto;padding:6px 8px}
+.rg{display:flex;flex-direction:column;border-inline-end:1px solid var(--line);padding:0 8px;flex:none}
+.rg:last-child{border:0}
+.rgb{display:flex;gap:2px}
+.rgt{font-size:11.5px;color:var(--mut);text-align:center;margin-top:2px}
+.rb{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:1px solid transparent;border-radius:6px;padding:5px 8px;font-size:12.5px;min-width:64px;max-width:96px;line-height:1.15;text-align:center}
+.rb svg.i{width:24px;height:24px;color:var(--acc)}
+.rb:hover{background:var(--acc2);border-color:var(--line)}
+.main{display:grid;grid-template-columns:250px minmax(0,1fr);min-height:0}
+nav#nav{background:var(--panel);border-inline-end:1px solid var(--line);overflow:auto;padding:8px 0}
+.navh{font-size:12px;color:var(--mut);padding:2px 12px 6px;display:flex;justify-content:space-between}
+.ng{margin-bottom:6px}
+.ngh{display:flex;align-items:center;gap:7px;font-weight:600;font-size:13px;padding:6px 12px;color:var(--accd);border-bottom:1px solid var(--line)}
+.ngh span{margin-inline-start:auto;color:var(--mut);font-weight:400}
+.ni{display:flex;align-items:center}
+.ni.on{background:var(--acc2)}
+.nib{flex:1;text-align:start;background:none;border:0;padding:7px 12px 7px 28px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-height:34px}
+.nim{background:none;border:0;width:34px;min-height:34px;color:var(--mut);font-size:16px}
+.nim:hover,.nib:hover{color:var(--acc)}
+.nempty{padding:4px 28px;color:var(--mut);font-size:13px;font-style:italic}
+.work{display:grid;grid-template-rows:auto 1fr;min-height:0;min-width:0}
+.tabs{display:flex;gap:2px;overflow-x:auto;background:var(--bg);padding:6px 8px 0;border-bottom:1px solid var(--line)}
+.tab{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-bottom:0;background:var(--panel2);border-radius:7px 7px 0 0;padding:6px 6px 6px 10px;white-space:nowrap;font-size:13.5px;flex:none}
+.tab.on{background:var(--panel);font-weight:600;box-shadow:inset 0 3px 0 var(--acc)}
+.tab .x{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:4px;color:var(--mut)}
+.tab .x:hover{background:var(--acc2);color:var(--acc)}
+#view{background:var(--panel);overflow:auto;min-height:0;display:flex;flex-direction:column}
+#view>*{flex:none}#view>.sheetwrap,#view>.fstage,#view>.fsplit{flex:1 0 auto}
+.vt{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--line);background:var(--panel2);position:sticky;top:0;z-index:5}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:7px;overflow:hidden}
+.seg button{border:0;background:var(--panel);padding:6px 12px;min-height:34px;font-size:13.5px}
+.seg button.on{background:var(--acc);color:#fff}
+.btn{border:1px solid var(--line);background:var(--panel);border-radius:7px;padding:6px 12px;min-height:34px;display:inline-flex;align-items:center;gap:6px;font-size:13.5px}
+.btn:hover{border-color:var(--acc);color:var(--acc)}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:#fff}
+.btn.pri:hover{background:var(--accd);color:#fff}
+.btn.sm{min-height:28px;padding:3px 8px;font-size:12.5px}
+.btn.wide{width:100%;justify-content:flex-start;min-height:42px}
+.inp{border:1px solid var(--line);background:var(--panel);border-radius:7px;padding:6px 9px;min-height:34px;font-size:14px}
+.sp{flex:1}
+.cnt{font-size:13px;color:var(--mut)}
+.hint{margin:10px 12px 0;padding:9px 12px;border-radius:8px;background:var(--acc2);font-size:13.5px;display:flex;gap:8px;align-items:flex-start}
+.hint svg.i{color:var(--acc);margin-top:1px}
+.hint b{color:var(--accd)}
+.pad{padding:12px}
+/* datasheet */
+.sheetwrap{overflow:auto;padding:12px;flex:1}
+table.sheet{border-collapse:separate;border-spacing:0;font-size:14px;min-width:100%}
+.sheet th,.sheet td{border-inline-end:1px solid var(--line);border-bottom:1px solid var(--line);padding:0;white-space:nowrap}
+.sheet thead th{position:sticky;top:0;background:var(--panel2);font-weight:600;text-align:start;padding:7px 10px;z-index:2;border-top:1px solid var(--line);cursor:pointer;user-select:none}
+.sheet thead th:first-child,.sheet td.rs{border-inline-start:1px solid var(--line)}
+.sheet thead th .k{color:var(--key)}
+.sheet td.rs{width:30px;min-width:30px;text-align:center;color:var(--mut);background:var(--panel2);cursor:pointer;font-size:12px}
+.sheet tr.selr td{background:var(--sel)}
+.sheet tr.warn td.rs{background:var(--badb);color:var(--bad)}
+.sheet tr.newr td{background:var(--panel2)}
+.ci{border:0;background:transparent;padding:7px 10px;width:100%;min-width:110px;min-height:34px;font-size:14px}
+.ci.num{text-align:end}
+.ci.ro{color:var(--mut)}
+.ci:focus{background:var(--panel);outline:2px solid var(--acc);outline-offset:-2px}
+.cb{width:18px;height:18px;margin:8px 14px;accent-color:var(--acc)}
+.sheet td.v{padding:7px 10px}
+.sheet td.n{text-align:end}
+.empty{padding:40px 20px;text-align:center;color:var(--mut)}
+/* design grid */
+table.dg{border-collapse:collapse;width:100%;max-width:980px}
+.dg th{font-size:12.5px;color:var(--mut);text-align:start;font-weight:600;padding:6px 6px;border-bottom:1px solid var(--line)}
+.dg td{padding:4px 6px;border-bottom:1px solid var(--line)}
+.dg .inp{width:100%}
+.keyb{width:34px;height:34px;border-radius:7px;border:1px solid var(--line);background:var(--panel);display:grid;place-items:center;color:var(--mut)}
+.keyb.on{background:#fff4d1;border-color:var(--key);color:var(--key)}
+.typehelp{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px;margin-top:14px;max-width:980px}
+.typehelp div{border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px;background:var(--panel2)}
+.typehelp b{display:block;color:var(--accd)}
+/* relations */
+.relcanvas{position:relative;overflow:auto;min-height:440px;margin:12px;border:1px dashed var(--line);border-radius:10px;background:radial-gradient(var(--line) 1px,transparent 1px) 0 0/18px 18px}
+#rsvg{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
+#rsvg path.hit{pointer-events:stroke;cursor:pointer;stroke:transparent;stroke-width:14;fill:none}
+#rsvg path.ln{stroke:var(--acc);stroke-width:2;fill:none}
+#rsvg path.ln.loose{stroke:var(--mut);stroke-dasharray:5 4}
+#rsvg text{fill:var(--acc);font:700 14px "Golos Text",sans-serif}
+.tbox{position:absolute;width:200px;background:var(--panel);border:1px solid var(--line);border-radius:9px;box-shadow:0 4px 14px rgba(0,0,0,.08);z-index:2}
+.tbox .th{background:var(--acc);color:#fff;font-weight:600;padding:7px 10px;border-radius:8px 8px 0 0;cursor:grab;touch-action:none;display:flex;gap:6px;align-items:center}
+.tbox ul{list-style:none;margin:0;padding:4px 0;max-height:220px;overflow:auto}
+.tbox li{padding:4px 10px;font-size:13.5px;display:flex;gap:6px;align-items:center;cursor:grab}
+.tbox li:hover,.tbox li.over{background:var(--acc2)}
+.tbox li .k{color:var(--key)}
+.rellist{margin:0 12px 16px}
+.rellist table{border-collapse:collapse;width:100%;font-size:13.5px}
+.rellist td,.rellist th{border-bottom:1px solid var(--line);padding:6px 8px;text-align:start}
+/* query */
+.qtop{display:flex;gap:12px;flex-wrap:wrap;padding:12px;border-bottom:1px solid var(--line);background:radial-gradient(var(--line) 1px,transparent 1px) 0 0/18px 18px;min-height:120px;align-items:flex-start}
+.qtop .tbox{position:static}
+.qtop .tbox li{cursor:pointer}
+.qtop .tbox .th{cursor:default}
+.qtop .tbox .th button{margin-inline-start:auto;background:none;border:0;color:#fff;font-size:16px;width:26px;height:26px}
+.qwrap{overflow:auto;padding:12px}
+table.qbe{border-collapse:collapse;font-size:13.5px}
+.qbe th{text-align:end;padding:4px 8px;font-weight:600;color:var(--mut);white-space:nowrap;background:var(--panel2);position:sticky;left:0;z-index:1}
+.qbe td{border:1px solid var(--line);padding:2px;min-width:170px}
+.qbe td input:not([type=checkbox]),.qbe td select{width:100%;border:0;background:transparent;padding:6px;min-height:32px}
+.qbe td input:focus,.qbe td select:focus{outline:2px solid var(--acc);outline-offset:-2px}
+.qbe tr.qt td{border:0;text-align:center}
+.qbe tr.qt button{background:none;border:0;color:var(--mut);width:28px;height:26px}
+.qbe tr.qt button:hover{color:var(--acc)}
+.qbe .tcell{padding:6px;color:var(--mut)}
+.qbe input.crit{background:light-dark(#fffaf0,#24221c)!important}
+.chips{display:flex;flex-wrap:wrap;gap:6px;padding:0 12px 12px}
+.chip{border:1px solid var(--line);background:var(--panel);border-radius:20px;padding:4px 10px;font:13px "JetBrains Mono",monospace;min-height:30px}
+.chip:hover{border-color:var(--acc);color:var(--acc)}
+pre.sql{font:14px/1.6 "JetBrains Mono",monospace;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:14px;margin:12px;white-space:pre-wrap}
+.qerr{margin:12px;padding:12px;border-radius:8px;background:var(--badb);color:var(--bad)}
+/* forms */
+.fsplit{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:0;flex:1}
+.fpanel{border-inline-end:1px solid var(--line);padding:12px;background:var(--panel2);overflow:auto}
+.fpanel h4{margin:14px 0 6px;font-size:13px;color:var(--accd)}
+.fpanel h4:first-child{margin-top:0}
+.fpanel label.fl{display:grid;gap:3px;margin-bottom:8px;font-size:13px}
+.fpanel .inp{width:100%}
+.itl{display:grid;gap:4px}
+.it{display:flex;gap:4px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:3px 4px 3px 8px;font-size:13px}
+.it span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.it button{background:none;border:0;width:26px;height:26px;color:var(--mut)}
+.it button:hover{color:var(--acc)}
+.it input{border:1px solid var(--line);border-radius:5px;padding:2px 6px;width:90px;background:var(--panel)}
+.avail{display:flex;flex-wrap:wrap;gap:4px}
+.swatches{display:flex;gap:6px;flex-wrap:wrap}
+.sw{width:30px;height:30px;border-radius:50%;border:2px solid transparent}
+.sw.on{border-color:var(--ink)}
+.fstage{padding:18px;overflow:auto;background:var(--bg)}
+.formcard{max-width:640px;margin:0 auto;background:var(--panel);border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.08);overflow:hidden;border:1px solid var(--line)}
+.fhead{background:var(--fc,#a4262c);color:#fff;padding:16px 20px;font-weight:700;line-height:1.15}
+.fbody{padding:16px 20px;display:grid;gap:10px}
+.fbody.two{grid-template-columns:1fr 1fr}
+.frow{display:grid;gap:3px}
+.frow>span{font-size:13px;color:var(--mut);font-weight:500}
+.frow .ci{border:1px solid var(--line);border-radius:7px;background:var(--panel)}
+.frow .cb{margin:6px 0}
+.flabel{grid-column:1/-1;font-weight:700;color:var(--fc,#a4262c);border-bottom:2px solid var(--fc,#a4262c);padding-top:6px}
+.fnav{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:10px 20px;border-top:1px solid var(--line);background:var(--panel2);font-size:13.5px}
+.fnav .btn{min-width:38px;justify-content:center}
+.newbadge{background:var(--okb);color:var(--ok);border-radius:6px;padding:2px 8px;font-size:12.5px;font-weight:600}
+/* reports */
+.rpage{max-width:820px;margin:0 auto;background:#fff;color:#1c1b1a;padding:36px 42px;box-shadow:0 6px 24px rgba(0,0,0,.1);border-radius:4px;font:14px/1.45 "Golos Text",sans-serif}
+.rpage .rhead{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #a4262c;padding-bottom:8px;margin-bottom:16px;gap:12px}
+.rpage h1{font-size:26px;margin:0;color:#a4262c;line-height:1.1}
+.rpage .rdate{font-size:12.5px;color:#666}
+.rpage h2{font-size:16px;margin:18px 0 6px;color:#1c1b1a;background:#f6eeee;padding:5px 9px;border-radius:4px}
+.rpage table.rt{border-collapse:collapse;width:100%;font-size:13.5px}
+.rpage .rt th{text-align:start;border-bottom:1.5px solid #333;padding:5px 6px;font-size:12.5px}
+.rpage .rt td{border-bottom:1px solid #e3e0da;padding:5px 6px}
+.rpage .rt td.n,.rpage .rt th.n{text-align:end}
+.rpage .gsum{font-size:12.5px;color:#555;text-align:end;padding:4px 6px}
+.rpage .rbk{border:1px solid #e3e0da;border-radius:6px;padding:8px 10px;margin:6px 0;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:2px 14px;font-size:13.5px}
+.rpage .rbk b{color:#666;font-weight:500}
+.rpage .rfoot{margin-top:18px;border-top:1px solid #ccc;padding-top:6px;font-size:12.5px;color:#555;display:flex;justify-content:space-between}
+/* project */
+.proj{padding:16px;display:grid;gap:16px;max-width:1100px}
+.pgrid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:16px}
+.card{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:14px 16px}
+.card h3{margin:0 0 10px;font-size:16px}
+.score{display:flex;gap:16px;flex-wrap:wrap;align-items:center}
+.big{font-size:44px;font-weight:700;color:var(--acc);line-height:1}
+.stat{font-size:13px;color:var(--mut)}
+.stat b{display:block;font-size:20px;color:var(--ink)}
+.chk{display:grid;gap:6px}
+.ck{display:grid;grid-template-columns:28px minmax(0,1fr);gap:8px;align-items:start;padding:7px 8px;border-radius:8px;border:1px solid var(--line)}
+.ck.done{background:var(--okb);border-color:transparent}
+.ck .m{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--line);font-size:13px;font-weight:700}
+.ck.done .m{background:var(--ok);border-color:var(--ok);color:#fff}
+.ck small{display:block;color:var(--mut)}
+.stage{font-size:12px;font-weight:700;color:var(--accd);margin:8px 0 2px}
+.themes{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px}
+.theme{border:1px solid var(--line);border-radius:9px;padding:9px 10px;background:var(--panel2);text-align:start;font-size:13px}
+.theme b{display:block;font-size:14px;margin-bottom:2px}
+.theme.on{border-color:var(--acc);box-shadow:inset 0 0 0 1px var(--acc);background:var(--acc2)}
+/* welcome & start */
+.welcome{padding:22px;max-width:980px}
+.welcome h2{font-size:28px;margin:0 0 6px;line-height:1.1}
+.steps{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;margin-top:16px}
+.step{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--panel2);display:grid;gap:6px;align-content:start}
+.step .n{font-weight:700;color:var(--acc);font-size:13px}
+.step b{font-size:15px}
+.step p{margin:0;font-size:13.5px;color:var(--mut)}
+#start{position:fixed;inset:0;background:var(--bg);z-index:50;overflow:auto}
+.sthead{background:var(--acc);color:#fff;padding:clamp(24px,5vw,56px) max(5vw,16px) 28px}
+.sthead h1{font-size:clamp(30px,5vw,48px);margin:0 0 8px;line-height:1.05}
+.sthead p{margin:0;max-width:640px;opacity:.92;font-size:16px}
+.stbody{padding:24px max(5vw,16px);display:grid;gap:22px;max-width:1240px}
+.stcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.stc{border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:16px;text-align:start;display:grid;gap:8px;align-content:start;min-height:150px}
+.stc:hover{border-color:var(--acc);box-shadow:0 6px 18px rgba(164,38,44,.12)}
+.stc svg.i{width:34px;height:34px;color:var(--acc)}
+.stc b{font-size:16px}
+.stc span{font-size:13.5px;color:var(--mut)}
+.recent{display:grid;gap:6px}
+.rec{display:flex;gap:8px;align-items:center;border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:6px 6px 6px 12px}
+.rec .rn{flex:1}
+.rec small{color:var(--mut);display:block}
+.warnbox{border-inline-start:4px solid var(--key);background:light-dark(#fff8e6,#2b2618);padding:10px 14px;border-radius:6px;font-size:14px}
+/* modal & toasts */
+#modal{position:fixed;inset:0;background:rgba(20,16,16,.45);display:grid;place-items:center;z-index:100;padding:12px}
+#modal[hidden]{display:none}
+.mbox{background:var(--panel);border-radius:14px;width:min(480px,100%);max-height:90vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.mbox.wide{width:min(760px,100%)}
+.mbox h3{margin:0;padding:14px 18px;border-bottom:1px solid var(--line);font-size:17px}
+.mbody{padding:14px 18px;display:grid;gap:10px}
+.mfoot{display:flex;justify-content:flex-end;gap:8px;padding:12px 18px;border-top:1px solid var(--line)}
+.fld{display:grid;gap:4px;font-size:13.5px}
+.fld .inp,.fld select{width:100%}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cbl{display:flex;gap:8px;align-items:center;font-size:14px;min-height:30px}
+.cbl input{width:18px;height:18px;accent-color:var(--acc)}
+.merr{color:var(--bad);margin:0;font-size:13.5px}
+.mnote{font-size:13px;color:var(--mut);margin:0}
+.prev{overflow:auto;max-height:200px;border:1px solid var(--line);border-radius:8px}
+.prev table{border-collapse:collapse;font-size:12.5px}
+.prev td,.prev th{border:1px solid var(--line);padding:3px 6px;white-space:nowrap}
+#toasts{position:fixed;bottom:44px;right:14px;display:grid;gap:8px;z-index:200;max-width:min(420px,calc(100vw - 28px))}
+.toast{background:var(--panel);border:1px solid var(--line);border-inline-start:4px solid var(--ok);border-radius:8px;padding:10px 14px;box-shadow:0 8px 24px rgba(0,0,0,.15);font-size:14px;animation:tin .25s ease}
+.toast.err{border-inline-start-color:var(--bad)}
+@keyframes tin{from{transform:translateY(8px);opacity:0}}
+@media (prefers-reduced-motion:reduce){.toast{animation:none}}
+footer.status{background:var(--acc);color:#fff;font-size:12.5px;padding:4px 12px;display:flex;gap:14px;overflow:hidden;white-space:nowrap}
+footer.status span{overflow:hidden;text-overflow:ellipsis}
+@media (max-width:860px){
+ .main{grid-template-columns:minmax(0,1fr)}
+ nav#nav{display:none;position:fixed;top:0;bottom:0;left:0;width:min(290px,85vw);z-index:60;box-shadow:0 0 40px rgba(0,0,0,.3)}
+ body.navopen nav#nav{display:block}
+ #navToggle{display:inline-block}
+ .fsplit,.pgrid{grid-template-columns:minmax(0,1fr)}
+ .fpanel{border-inline-end:0;border-bottom:1px solid var(--line)}
+ .savest{display:none}
+}
+@media (max-width:600px){.rpage{padding:20px 16px}.row2{grid-template-columns:1fr}.fbody.two{grid-template-columns:1fr}}
+@media print{body *{visibility:hidden}.rpage,.rpage *{visibility:visible}.rpage{position:absolute;left:0;top:0;box-shadow:none}}
+</style>
+</head>
+<body>
+<div class="app">
+ <header class="top">
+  <button id="navToggle" data-act="navtoggle" aria-label="Область переходів">☰</button>
+  <div class="brand"><svg class="i" viewBox="0 0 24 24" style="width:24px;height:24px"><ellipse cx="12" cy="5.5" rx="7.5" ry="2.8"/><path d="M4.5 5.5v13c0 1.5 3.4 2.8 7.5 2.8s7.5-1.3 7.5-2.8v-13M4.5 12c0 1.5 3.4 2.8 7.5 2.8s7.5-1.3 7.5-2.8"/></svg>БазаЛаб <small>середовище баз даних</small></div>
+  <input class="dbname" id="dbname" data-ch="dbname" aria-label="Назва бази даних">
+  <span class="savest" id="saveState"></span>
+  <button class="topbtn" data-act="saveFile"><svg class="i" viewBox="0 0 24 24"><path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14"/></svg>Зберегти файл</button>
+ </header>
+ <div class="ribbon" id="ribbon">
+  <div class="rg"><div class="rgb">
+   <button class="rb" data-act="newTable"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M3 14h18M9 9v11M15 9v11"/></svg>Таблиця</button>
+   <button class="rb" data-act="newTableDesign"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 4v16"/><path d="m14 13 4 4M18 13l-4 4"/></svg>Конструктор таблиць</button>
+   <button class="rb" data-act="newQuery"><svg class="i" viewBox="0 0 24 24"><path d="M4 5h16l-6 7v6l-4 2v-8z"/></svg>Макет запиту</button>
+   <button class="rb" data-act="newForm"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>Форма</button>
+   <button class="rb" data-act="newReport"><svg class="i" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 15h7M9 18h4"/></svg>Майстер звітів</button>
+  </div><div class="rgt">Створення</div></div>
+  <div class="rg"><div class="rgb">
+   <button class="rb" data-act="openRels"><svg class="i" viewBox="0 0 24 24"><rect x="2" y="4" width="8" height="7" rx="1.5"/><rect x="14" y="13" width="8" height="7" rx="1.5"/><path d="M10 7.5h3a2 2 0 0 1 2 2v3.5"/></svg>Схема даних</button>
+  </div><div class="rgt">Знаряддя бази даних</div></div>
+  <div class="rg"><div class="rgb">
+   <button class="rb" data-act="import"><svg class="i" viewBox="0 0 24 24"><path d="M12 15V3m0 12-4-4m4 4 4-4"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg>Імпорт Excel / CSV</button>
+   <button class="rb" data-act="export"><svg class="i" viewBox="0 0 24 24"><path d="M12 3v12m0-12-4 4m4-4 4 4"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg>Експорт в Excel / CSV</button>
+  </div><div class="rgt">Зовнішні дані</div></div>
+  <div class="rg"><div class="rgb">
+   <button class="rb" data-act="openFile"><svg class="i" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Відкрити файл</button>
+   <button class="rb" data-act="closeDB"><svg class="i" viewBox="0 0 24 24"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h11"/></svg>Закрити базу</button>
+  </div><div class="rgt">Файл</div></div>
+  <div class="rg"><div class="rgb">
+   <button class="rb" data-act="openProject"><svg class="i" viewBox="0 0 24 24"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/></svg>Мій проєкт</button>
+  </div><div class="rgt">Оцінювання</div></div>
+ </div>
+ <div class="main">
+  <nav id="nav" aria-label="Область переходів"></nav>
+  <div class="work">
+   <div class="tabs" id="tabs" role="tablist"></div>
+   <div id="view"></div>
+  </div>
+ </div>
+ <footer class="status"><span id="stView">Готово</span><span id="stInfo"></span></footer>
+</div>
+<div id="start"></div>
+<div id="modal" hidden></div>
+<div id="toasts" aria-live="polite"></div>
+<input type="file" id="fileDB" accept=".json,application/json" hidden>
+<input type="file" id="fileImp" accept=".csv,.txt,.xlsx,.xls" hidden>
+<script>
+{
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const cssq=s=>window.CSS&&CSS.escape?CSS.escape(s):String(s).replace(/["\\]/g,'\\$&');
+const uid=()=>Math.random().toString(36).slice(2,10);
+const TYPES=['Лічильник','Короткий текст','Довгий текст','Число','Грошова одиниця','Дата/час','Так/Ні'];
+const NUMT=['Лічильник','Число','Грошова одиниця'];
+const AGG=['Sum','Avg','Min','Max','Count'];
+const TOTALS=['Групування',...AGG,'Умова'];
+const ICO={
+ table:'<svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M3 14h18M9 9v11"/></svg>',
+ query:'<svg class="i" viewBox="0 0 24 24"><path d="M4 5h16l-6 7v6l-4 2v-8z"/></svg>',
+ form:'<svg class="i" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>',
+ report:'<svg class="i" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 15h7"/></svg>',
+ rels:'<svg class="i" viewBox="0 0 24 24"><rect x="2" y="4" width="8" height="7" rx="1.5"/><rect x="14" y="13" width="8" height="7" rx="1.5"/><path d="M10 7.5h3a2 2 0 0 1 2 2v3.5"/></svg>',
+ project:'<svg class="i" viewBox="0 0 24 24"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/></svg>',
+ key:'<svg class="i k" viewBox="0 0 24 24" style="width:14px;height:14px"><circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M17 6l3 3M15 8l2 2"/></svg>',
+ tip:'<svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>',
+ open:'<svg class="i" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>',
+ plus:'<svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>',
+ play:'<svg class="i" viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z"/></svg>',
+ sch:'<svg class="i" viewBox="0 0 24 24"><path d="M3 10l9-6 9 6-9 6z"/><path d="M7 12.5V17c0 1.5 2.5 3 5 3s5-1.5 5-3v-4.5"/></svg>'
+};
+let DB=null,DBID=null;
+const S={tabs:[],active:null,focus:null,lastCrit:null};
+const T=n=>DB.tables.find(t=>t.name===n),Q=n=>DB.queries.find(q=>q.name===n),F=n=>DB.forms.find(f=>f.name===n),R=n=>DB.reports.find(r=>r.name===n);
+const fieldOf=(t,n)=>t&&t.fields.find(f=>f.name===n);
+const cur=()=>S.tabs.find(t=>t.id===S.active);
+const label=n=>String(n).replace(/_/g,' ');
+
+/* ---------- storage ---------- */
+const LS={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
+function save(now){clearTimeout(save.t);const go=()=>{if(!DB)return;DB.meta.saved=Date.now();const ok=LS.set('bazalab:db:'+DBID,DB);const idx=LS.get('bazalab:index')||{};idx[DBID]={name:DB.name,saved:DB.meta.saved,student:DB.meta.student||''};LS.set('bazalab:index',idx);$('#saveState').textContent=ok?'Збережено на цьому комп’ютері · '+new Date().toLocaleTimeString('uk-UA',{hour:'2-digit',minute:'2-digit'}):'Браузер не зберігає — натисніть «Зберегти файл»'};now?go():save.t=setTimeout(go,350)}
+function getDL(){if(getDL.p)return getDL.p;if(!(window.claude&&window.claude.use))return Promise.resolve(null);getDL.p=Promise.resolve().then(()=>window.claude.use('downloads')).catch(()=>null);return getDL.p}
+function freeName(base,list){if(!list.includes(base))return base;let i=2;while(list.includes(base+' '+i))i++;return base+' '+i}
+async function downloadFile(filename,data,copyText){
+ const d=await getDL();
+ if(d){try{await d.save({filename,data});toast(`Файл «${filename}» збережено. Шукайте його в папці «Завантаження».`);return true}catch(e){if(e&&e.code==='declined'){toast('Збереження скасовано.');return false}}}
+ if(copyText!=null){showCopy(filename,copyText);return false}
+ toast('У цьому вікні завантаження файлів недоступне. Відкрийте БазаЛаб за посиланням у новій вкладці браузера.','err');return false}
+function showCopy(filename,text){modal({title:'Збережіть вміст вручну',wide:true,ok:null,cancel:'Закрити',body:`<p class="mnote">Завантаження тут недоступне. Скопіюйте текст і збережіть у Блокноті як <b>${esc(filename)}</b>, потім відкрийте через «Відкрити файл».</p><textarea class="inp" style="width:100%;height:220px;font:12px monospace" readonly>${esc(text)}</textarea><button class="btn pri" type="button" data-copy>Скопіювати</button>`,onOpen:b=>{b.querySelector('[data-copy]').onclick=async()=>{try{await navigator.clipboard.writeText(text);toast('Скопійовано')}catch(e){const ta=b.querySelector('textarea');ta.select();toast('Натисніть Ctrl+C, щоб скопіювати','err')}}}})}
+
+/* ---------- ui utils ---------- */
+function toast(msg,kind){const d=document.createElement('div');d.className='toast'+(kind?' '+kind:'');d.textContent=msg;$('#toasts').appendChild(d);setTimeout(()=>d.remove(),kind==='err'?7000:4000)}
+function err(msg){if(DB){DB.meta.errors=(DB.meta.errors||0)+1;save()}toast(msg,'err')}
+function modal({title,body,ok='OK',cancel='Скасувати',wide,onOpen,validate}){return new Promise(res=>{const m=$('#modal');m.innerHTML=`<div class="mbox ${wide?'wide':''}" role="dialog" aria-modal="true" aria-label="${esc(title)}"><h3>${esc(title)}</h3><div class="mbody">${body}</div><div class="mfoot">${cancel?`<button class="btn" type="button" data-m="0">${cancel}</button>`:''}${ok?`<button class="btn pri" type="button" data-m="1">${ok}</button>`:''}</div></div>`;m.hidden=false;const box=m.firstChild;
+ const close=v=>{m.hidden=true;m.innerHTML='';document.removeEventListener('keydown',kd,true);res(v)};
+ const go=()=>{const v=collect(box);if(validate){const e=validate(v,box);if(e){let p=box.querySelector('.merr');if(!p){p=document.createElement('p');p.className='merr';box.querySelector('.mbody').appendChild(p)}p.textContent=e;return}}close(v)};
+ const kd=ev=>{if(ev.key==='Escape'){ev.stopPropagation();close(null)}else if(ev.key==='Enter'&&ev.target.tagName==='INPUT'&&ev.target.type!=='checkbox'&&ok){ev.preventDefault();go()}};
+ box.addEventListener('click',ev=>{const pv=ev.target.closest('[data-pickv]');if(pv){close({pick:pv.dataset.pickv});return}const b=ev.target.closest('[data-m]');if(b)b.dataset.m==='1'?go():close(null)});
+ document.addEventListener('keydown',kd,true);onOpen&&onOpen(box);const f=box.querySelector('input:not([type=checkbox]):not([readonly]),select');(f||box.querySelector('.btn.pri')||box.querySelector('.btn'))?.focus()})}
+function collect(box){const v={};box.querySelectorAll('[name]').forEach(i=>{if(i.type==='checkbox'){if(i.dataset.multi!=null){v[i.name]=v[i.name]||[];if(i.checked)v[i.name].push(i.value)}else v[i.name]=i.checked}else if(i.type==='radio'){if(i.checked)v[i.name]=i.value}else v[i.name]=i.value});return v}
+async function askText(title,lbl,def='',validate){const r=await modal({title,body:`<label class="fld"><span>${esc(lbl)}</span><input class="inp" name="v" value="${esc(def)}"></label>`,validate:validate?v=>validate(v.v.trim()):null});return r?r.v.trim():null}
+async function confirmBox(title,text,ok='Видалити'){return !!(await modal({title,body:`<p style="margin:0">${text}</p>`,ok}))}
+async function pick(title,opts,note=''){const r=await modal({title,ok:null,cancel:'Закрити',body:(note?`<p class="mnote">${note}</p>`:'')+opts.map(o=>`<button class="btn wide" type="button" data-pickv="${esc(o[0])}">${o[1]}</button>`).join('')});return r&&r.pick}
+
+/* ---------- values ---------- */
+const pad=n=>String(n).padStart(2,'0');
+function toISO(s){if(s==null||s==='')return null;if(s instanceof Date&&!isNaN(s))return `${s.getFullYear()}-${pad(s.getMonth()+1)}-${pad(s.getDate())}`;s=String(s).trim().replace(/^#|#$/g,'');let m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/),y,mo,d;if(m){y=+m[1];mo=+m[2];d=+m[3]}else if(m=s.match(/^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{2,4})$/)){d=+m[1];mo=+m[2];y=+m[3];if(y<100)y+=2000}else return null;if(mo<1||mo>12||d<1||d>31)return null;return `${y}-${pad(mo)}-${pad(d)}`}
+const today=()=>toISO(new Date());
+const isNumLike=v=>typeof v==='number'||(typeof v==='string'&&v.trim()!==''&&!isNaN(+v.replace(',','.')));
+const num=v=>typeof v==='number'?v:+String(v).replace(',','.');
+function eq(a,b){if(a==null||b==null||a===''||b==='')return false;if(typeof a!=='boolean'&&typeof b!=='boolean'&&isNumLike(a)&&isNumLike(b))return num(a)===num(b);return String(a).toLowerCase()===String(b).toLowerCase()}
+function cmp(a,b,type){const na=a==null||a==='',nb=b==null||b==='';if(na||nb)return na&&nb?0:na?1:-1;if(typeof a==='boolean'||typeof b==='boolean')return (a?1:0)-(b?1:0);if((NUMT.includes(type)||typeof a==='number')&&isNumLike(a)&&isNumLike(b))return num(a)-num(b);if(type==='Дата/час'){const x=toISO(a)||String(a),y=toISO(b)||String(b);return x<y?-1:x>y?1:0}return String(a).localeCompare(String(b),'uk',{sensitivity:'base',numeric:true})}
+function fmt(v,type){if(v==null||v==='')return '';if(typeof v==='boolean'||type==='Так/Ні')return v?'Так':'Ні';if(type==='Дата/час'&&/^\d{4}-\d\d-\d\d/.test(v))return v.slice(8,10)+'.'+v.slice(5,7)+'.'+v.slice(0,4);if(type==='Грошова одиниця'&&isNumLike(v))return num(v).toFixed(2).replace('.',',')+' ₴';if(typeof v==='number')return String(Math.round(v*1000)/1000).replace('.',',');return String(v)}
+function conv(f,raw){if(raw===''||raw==null)return {ok:true,v:f.type==='Так/Ні'?false:null};switch(f.type){
+ case 'Число':case 'Грошова одиниця':{const s=String(raw).replace(/\s/g,'').replace(',','.').replace(/₴|грн/g,'');const n=Number(s);return s!==''&&isFinite(n)?{ok:true,v:n}:{ok:false,msg:`«${raw}» — не число. Поле «${f.name}» має тип «${f.type}», тут можна вводити лише цифри.`}}
+ case 'Лічильник':return {ok:false,msg:'Поле типу «Лічильник» заповнюється автоматично — його не можна змінити.'};
+ case 'Так/Ні':return {ok:true,v:typeof raw==='boolean'?raw:/^(так|true|yes|1|-1|істина|\+)$/i.test(String(raw).trim())};
+ case 'Дата/час':{const d=toISO(raw);return d?{ok:true,v:d}:{ok:false,msg:`«${raw}» не схоже на дату. Приклад правильного запису: 14.03.2010`}}
+ default:{const s=String(raw);if(f.type==='Короткий текст'&&s.length>255)return {ok:false,msg:'«Короткий текст» вміщує до 255 символів. Для довших записів змініть тип поля на «Довгий текст».'};return {ok:true,v:s}}}}
+const typeGroup=t=>NUMT.includes(t)?'n':t==='Дата/час'?'d':t==='Так/Ні'?'b':'s';
+function validName(n,taken){if(!n)return 'Введіть назву.';if(/[.\[\]!`]/.test(n))return 'У назві не можна використовувати символи . [ ] ! `';if(n.length>64)return 'Назва задовга (до 64 символів).';if(taken&&taken.some(x=>x.toLowerCase()===n.toLowerCase()))return `Об’єкт «${n}» уже існує. Оберіть іншу назву.`;return null}
+const allNames=()=>[...DB.tables,...DB.queries].map(o=>o.name);
+function uniq(base,list){let i=1;while(list.some(n=>n.toLowerCase()===(base+i).toLowerCase()))i++;return base+i}
+
+/* ---------- db model ---------- */
+function blankDB(name){return {v:1,name,tables:[],rels:[],queries:[],forms:[],reports:[],layout:{},meta:{created:Date.now(),activeMs:0,errors:0,flags:{},student:'',cls:'',theme:''}}}
+function mkTable(name,fields,rows=[]){const t={name,fields:fields.map(([n,ty,k,d])=>({name:n,type:ty,key:!!k,desc:d||''})),rows:[],auto:0};rows.forEach(r=>{const o={_id:uid()};t.fields.forEach((f,i)=>{o[f.name]=f.type==='Лічильник'?++t.auto:(r[i]??null)});t.rows.push(o)});return t}
+function newRow(t){const o={_id:uid()};t.fields.forEach(f=>{o[f.name]=f.type==='Лічильник'?++t.auto:f.type==='Так/Ні'?false:null});return o}
+const blankCol=()=>({field:'',total:'Групування',sort:'',show:true,crit:'',or:''});
+function schoolDB(){const db=blankDB('Школа');
+ const st=[["Гуйко Тетяна","9-А","067-123-45-01","Київ","2010-03-14"],["Іванченко Павло","9-А","050-222-31-17","Львів","2010-07-02"],["Коваль Олена","9-Б","063-555-12-40","Київ","2010-11-23"],["Мельник Андрій","9-Б","097-410-88-12","Одеса","2010-01-30"],["Шевчук Ірина","10-А","068-301-77-65","Харків","2009-05-18"],["Бондаренко Максим","10-А","099-640-21-03","Київ","2009-09-09"],["Ткаченко Софія","10-Б","073-118-90-44","Львів","2009-12-01"],["Кравець Денис","9-А","066-702-15-28","Київ","2010-04-27"],["Савчук Марія","9-Б","095-833-42-19","Львів","2010-08-15"],["Лисенко Богдан","10-Б","067-944-60-37","Одеса","2009-02-11"],["Олійник Анна","10-А","050-377-28-56","Київ","2009-06-06"],["Поліщук Артем","9-А","093-581-03-72","Харків","2010-10-19"]];
+ db.tables.push(mkTable('Учні',[['ID_учня','Лічильник',1],["Прізвище_та_ім'я",'Короткий текст'],['Клас','Короткий текст'],['Номер_телефону','Короткий текст'],['Місто','Короткий текст'],['Дата_народження','Дата/час']],st.map(r=>[null,...r])));
+ const sb=[['Інформатика','Гончаренко В. П.'],['Математика','Руденко Л. М.'],['Українська мова','Захарченко О. І.'],['Фізика','Петренко С. А.'],['Англійська мова','Данилюк Н. В.'],['Історія України','Мороз І. Б.']];
+ db.tables.push(mkTable('Предмети',[['ID_предмета','Лічильник',1],['Предмет','Короткий текст'],['Вчитель','Короткий текст']],sb.map(r=>[null,...r])));
+ let s=11;const rnd=()=>(s=(s*16807)%2147483647)/2147483647;const gr=[];
+ for(let i=1;i<=st.length;i++)for(let j=1;j<=sb.length;j++)if((i+j)%2===0||j===1)gr.push([null,i,j,4+Math.floor(rnd()*9)]);
+ db.tables.push(mkTable('Оцінки',[['ID_оцінки','Лічильник',1],['ID_учня','Число'],['ID_предмета','Число'],['Річна_оцінка','Число']],gr));
+ db.rels.push({id:uid(),pt:'Учні',pf:'ID_учня',ct:'Оцінки',cf:'ID_учня',integ:true},{id:uid(),pt:'Предмети',pf:'ID_предмета',ct:'Оцінки',cf:'ID_предмета',integ:true});
+ db.meta.template='Школа';db.layout={'Учні':{x:20,y:20},'Оцінки':{x:290,y:60},'Предмети':{x:560,y:20}};
+ db.queries.push({name:'Приклад — учні з Києва',tables:['Учні'],totals:false,cols:[{...blankCol(),field:"Учні.Прізвище_та_ім'я"},{...blankCol(),field:'Учні.Клас',sort:'ASC'},{...blankCol(),field:'Учні.Номер_телефону'},{...blankCol(),field:'Учні.Місто',crit:'"Київ"'}]});
+ return db}
+function migrate(db){db.tables=db.tables||[];db.rels=db.rels||[];db.queries=db.queries||[];db.forms=db.forms||[];db.reports=db.reports||[];db.layout=db.layout||{};db.meta=Object.assign({created:Date.now(),activeMs:0,errors:0,flags:{},student:'',cls:'',theme:''},db.meta||{});db.meta.flags=db.meta.flags||{};db.tables.forEach(t=>{t.auto=t.auto||0;t.rows.forEach(r=>{if(!r._id)r._id=uid()})});db.forms.forEach(f=>{f.items=f.items||[]});return db}
+
+/* ---------- integrity ---------- */
+function checkSet(t,row,f,v){
+ if(f.key&&f.type!=='Лічильник'){if(v==null||v==='')return `Ключове поле «${f.name}» не може бути порожнім.`;if(t.rows.some(r=>r!==row&&eq(r[f.name],v)))return `Значення «${fmt(v,f.type)}» уже є в ключовому полі «${f.name}». Значення ключа мають бути унікальними.`}
+ for(const r of DB.rels){if(!r.integ)continue;
+  if(r.ct===t.name&&r.cf===f.name&&v!=null&&v!==''){const p=T(r.pt);if(p&&!p.rows.some(x=>eq(x[r.pf],v)))return `У таблиці «${r.pt}» немає запису, де «${r.pf}» = ${fmt(v,f.type)}. Спочатку додайте його туди — так працює цілісність даних.`}
+  if(r.pt===t.name&&r.pf===f.name&&row&&row[f.name]!=null&&!eq(row[f.name],v)){const c=T(r.ct);if(c&&c.rows.some(x=>eq(x[r.cf],row[f.name])))return `Не можна змінити це значення: від нього залежать записи в таблиці «${r.ct}».`}}
+ return null}
+function canDelete(t,row){for(const r of DB.rels){if(!r.integ||r.pt!==t.name)continue;const c=T(r.ct);if(c&&c.rows.some(x=>eq(x[r.cf],row[r.pf])))return `Запис не можна видалити: таблиця «${r.ct}» містить пов’язані з ним записи (цілісність даних). Спочатку видаліть їх.`}return null}
+
+/* ---------- expressions & criteria ---------- */
+function prefix(tn,r){const o={};for(const k in r)if(k!=='_id')o[tn+'.'+k]=r[k];return o}
+function resolveRef(q,s){s=s.trim();let m=s.match(/^\[?([^\[\].:]+?)\]?\.\[?([^\[\].]+?)\]?$/);if(m){const t=T(m[1].trim());if(t&&q.tables.includes(t.name)){const f=fieldOf(t,m[2].trim());if(f)return {t:t.name,f:f.name,type:f.type,key:t.name+'.'+f.name}}}
+ m=s.match(/^\[?([^\[\].]+?)\]?$/);if(m){const n=m[1].trim();for(const tn of q.tables){const f=fieldOf(T(tn),n);if(f)return {t:tn,f:f.name,type:f.type,key:tn+'.'+f.name}}}return null}
+const FN={YEAR:a=>a?+String(a).slice(0,4):null,MONTH:a=>a?+String(a).slice(5,7):null,DAY:a=>a?+String(a).slice(8,10):null,ROUND:(a,n=0)=>a==null?null:Math.round(num(a)*10**n)/10**n,INT:a=>a==null?null:Math.floor(num(a)),ABS:a=>a==null?null:Math.abs(num(a)),LEN:a=>String(a??'').length,UCASE:a=>String(a??'').toUpperCase(),LCASE:a=>String(a??'').toLowerCase(),LEFT:(a,n)=>String(a??'').slice(0,n),RIGHT:(a,n)=>String(a??'').slice(-n),DATE:()=>today(),NOW:()=>today()};
+function compileExpr(src,q){const toks=[];const re=/\s*(?:(\d+(?:[.,]\d+)?)|"([^"]*)"|'([^']*)'|(\[[^\]]+\](?:\.\[[^\]]+\])?)|([A-Za-zА-Яа-яІіЇїЄєҐґ_][\wА-Яа-яІіЇїЄєҐґ'ʼ]*(?:\.[\wА-Яа-яІіЇїЄєҐґ'ʼ]+)?)|(<>|<=|>=|[-+*\/&()<>=,]))/y;src=src.trim();let pos=0;
+ while(pos<src.length){re.lastIndex=pos;const m=re.exec(src);if(!m)throw new Error(`Не вдалося розібрати вираз «${src}» біля «${src.slice(pos,pos+8)}».`);pos=re.lastIndex;
+  if(m[1]!=null)toks.push({t:'num',v:+m[1].replace(',','.')});else if(m[2]!=null||m[3]!=null)toks.push({t:'str',v:m[2]??m[3]});
+  else if(m[4]!=null){const r=resolveRef(q,m[4].replace(/\]\.\[/,'.'));if(!r)throw new Error(`Невідоме поле ${m[4]} у виразі.`);toks.push({t:'fld',k:r.key})}
+  else if(m[5]!=null){const nx=src.slice(pos).trimStart()[0];if(nx==='(')toks.push({t:'fn',v:m[5].toUpperCase()});else{const r=resolveRef(q,m[5]);if(!r)throw new Error(`Невідоме поле «${m[5]}». Беріть назви полів у квадратні дужки, наприклад [Ціна].`);toks.push({t:'fld',k:r.key})}}
+  else toks.push({t:'op',v:m[6]});if(/^\s*$/.test(src.slice(pos)))break}
+ let i=0;const pk=()=>toks[i],nx=()=>toks[i++];const isOp=v=>pk()&&pk().t==='op'&&pk().v===v;
+ const NUMOP=(a,b,f)=>r=>{const x=a(r),y=b(r);return x==null||y==null||x===''||y===''?null:f(num(x),num(y))};
+ function E(){let a=Tm();while(isOp('+')||isOp('-')||isOp('&')){const o=nx().v,b=Tm(),x=a;a=o==='&'?r=>String(x(r)??'')+String(b(r)??''):o==='-'?NUMOP(x,b,(p,q2)=>p-q2):r=>{const p=x(r),q2=b(r);if(p==null||q2==null)return null;return isNumLike(p)&&isNumLike(q2)?num(p)+num(q2):String(p)+String(q2)}}return a}
+ function Tm(){let a=Fc();while(isOp('*')||isOp('/')){const o=nx().v,b=Fc(),x=a;a=NUMOP(x,b,o==='*'?(p,q2)=>p*q2:(p,q2)=>q2===0?null:p/q2)}return a}
+ function Fc(){const t=nx();if(!t)throw new Error('Вираз обірвано.');if(t.t==='num'||t.t==='str'){const v=t.v;return()=>v}if(t.t==='fld'){const k=t.k;return r=>r[k]}
+  if(t.t==='op'&&t.v==='-'){const f=Fc();return r=>{const v=f(r);return v==null?null:-num(v)}}
+  if(t.t==='op'&&t.v==='('){const e=E();if(!isOp(')'))throw new Error('Не вистачає дужки «)».');nx();return e}
+  if(t.t==='fn'){const fn=FN[t.v];if(!fn)throw new Error(`Невідома функція ${t.v}(). Доступні: Year, Month, Day, Round, Len, Left, Right, Date.`);nx();const args=[];if(!isOp(')')){args.push(E());while(isOp(',')){nx();args.push(E())}}if(!isOp(')'))throw new Error('Не вистачає дужки «)».');nx();return r=>fn(...args.map(a=>a(r)))}
+  throw new Error(`Неочікуваний символ «${t.v}» у виразі.`)}
+ const e=E();if(i<toks.length)throw new Error(`Зайве у виразі: «${toks[i].v??''}».`);return e}
+function opnd(s,type){s=String(s).trim();let m;if(m=s.match(/^"(.*)"$/)||s.match(/^'(.*)'$/))s=m[1];else if(/^#.*#$/.test(s))return toISO(s)||s;else if(/^date\(\)$/i.test(s))return today();if(type==='Дата/час')return toISO(s)||s;if(NUMT.includes(type)&&isNumLike(s))return num(s);return s}
+function wild(p){return new RegExp('^'+String(p).replace(/[.+^${}()|\\]/g,'\\$&').replace(/\*/g,'.*').replace(/\?/g,'.').replace(/#/g,'\\d')+'$','i')}
+function splitOr(s){const out=[];let cur='',q=null;const L=s.length;for(let i=0;i<L;i++){const c=s[i];if(q){cur+=c;if(c===q)q=null;continue}if(c==='"'||c==="'"){q=c;cur+=c;continue}const rest=s.slice(i);const m=rest.match(/^\s+(or|або)\s+/i);if(m&&cur.trim()){out.push(cur);cur='';i+=m[0].length-1;continue}cur+=c}out.push(cur);return out.map(x=>x.trim()).filter(Boolean)}
+function critFn(text,type,params,q){let s=String(text).trim().replace(/\[([^\]]+)\]/g,(m,n)=>resolveRef(q,n)?m:'"'+String(params[n]??'').replace(/"/g,'')+'"');const fns=splitOr(s).map(p=>atom(p,type));return v=>fns.some(f=>f(v))}
+function atom(p,type){let m,neg=false;if(m=p.match(/^(?:not|не)\s+(.+)$/i)){if(!/^null$/i.test(m[1].trim())){neg=true;p=m[1].trim()}}const f=atom2(p,type);return neg?v=>!f(v):f}
+function atom2(p,type){let m;
+ if(/^is\s+null$/i.test(p))return v=>v==null||v==='';
+ if(/^is\s+not\s+null$/i.test(p)||/^not\s+null$/i.test(p))return v=>!(v==null||v==='');
+ if(m=p.match(/^between\s+(.+?)\s+and\s+(.+)$/i)||p.match(/^між\s+(.+?)\s+(?:і|та)\s+(.+)$/i)){const a=opnd(m[1],type),b=opnd(m[2],type);return v=>v!=null&&v!==''&&cmp(v,a,type)>=0&&cmp(v,b,type)<=0}
+ if(m=p.match(/^(?:like|як)\s+(.+)$/i)){const rx=wild(opnd(m[1],'Короткий текст'));return v=>v!=null&&rx.test(type==='Дата/час'?fmt(v,type):String(v))}
+ if(m=p.match(/^(<=|>=|<>|=|<|>)\s*(.*)$/)){const op=m[1],b=opnd(m[2],type);return v=>{if(v==null||v==='')return false;const c=cmp(v,b,type);return op==='='?c===0:op==='<>'?c!==0:op==='<'?c<0:op==='>'?c>0:op==='<='?c<=0:c>=0}}
+ const b=opnd(p,type);
+ if(type==='Так/Ні'){const bv=/^(так|true|yes|-1|1|істина)$/i.test(String(b));return v=>!!v===bv}
+ if(typeof b==='string'&&/[*?]/.test(b)){const rx=wild(b);return v=>v!=null&&rx.test(String(v))}
+ return v=>v!=null&&v!==''&&cmp(v,b,type)===0}
+function paramsOf(q){const out=[];q.cols.forEach(c=>{[c.crit,c.or].forEach(s=>{String(s||'').replace(/\[([^\]]+)\]/g,(m,n)=>{if(!resolveRef(q,n)&&!out.includes(n))out.push(n);return m})})});return out}
+async function askParams(names){const r=await modal({title:'Введіть значення параметрів',ok:'OK',body:names.map((n,i)=>`<label class="fld"><span>${esc(n)}</span><input class="inp" name="p${i}"></label>`).join('')});if(!r)return null;const p={};names.forEach((n,i)=>p[n]=r['p'+i]);return p}
+
+/* ---------- query engine ---------- */
+function colSpecs(q,c){let f=c.field.trim(),alias=null;const m=f.match(/^([^:\[\]."]+?)\s*:\s*(.+)$/);if(m){alias=m[1].trim();f=m[2].trim()}
+ const star=f.match(/^\[?([^\[\]]+?)\]?\.\*$/);if(star){const t=T(star[1]);if(!t||!q.tables.includes(t.name))throw new Error(`Таблиці «${star[1]}» немає в запиті.`);return t.fields.map(x=>({name:x.name,get:r=>r[t.name+'.'+x.name],type:x.type,col:c,sql:`[${t.name}].[${x.name}]`,t:t.name}))}
+ const r=resolveRef(q,f);if(r)return [{name:alias||r.f,alias,get:o=>o[r.key],type:r.type,col:c,sql:`[${r.t}].[${r.f}]`,t:r.t}];
+ const fn=compileExpr(f,q);return [{name:alias||'Вираз'+(q.cols.indexOf(c)+1),alias:alias||'Вираз'+(q.cols.indexOf(c)+1),get:fn,type:'Число',col:c,sql:f,expr:true}]}
+function allSpecs(q){const out=[];q.cols.forEach(c=>{if(c.field&&c.field.trim())out.push(...colSpecs(q,c))});return out}
+function outNames(specs,q){const vis=specs.filter(s=>s.col.show!==false&&!(q.totals&&s.col.total==='Умова'));const names=vis.map(s=>q.totals&&AGG.includes(s.col.total)&&!s.alias?`${s.col.total}_${s.name}`:s.name);return vis.map((s,i)=>names.filter(n=>n===names[i]).length>1&&s.t?s.t+'.'+names[i]:names[i])}
+function joinOrder(q){const rest=q.tables.filter(n=>T(n));if(!rest.length)return rest;const out=[rest.shift()];while(rest.length){let i=rest.findIndex(tn=>DB.rels.some(r=>(r.pt===tn&&out.includes(r.ct))||(r.ct===tn&&out.includes(r.pt))));if(i<0)i=0;out.push(rest.splice(i,1)[0])}return out}
+function joinRows(q){const tabs=joinOrder(q);if(!tabs.length)throw new Error('Додайте до запиту хоча б одну таблицю (кнопка «+ Таблиця»).');let rows=T(tabs[0]).rows.map(r=>prefix(tabs[0],r));const used=[tabs[0]];
+ for(const tn of tabs.slice(1)){const t=T(tn);const conds=DB.rels.filter(r=>(r.pt===tn&&used.includes(r.ct))||(r.ct===tn&&used.includes(r.pt))).map(r=>r.pt===tn?{mine:r.pf,other:r.ct+'.'+r.cf}:{mine:r.cf,other:r.pt+'.'+r.pf});const out=[];
+  for(const a of rows)for(const b of t.rows){if(conds.every(c=>eq(a[c.other],b[c.mine]))){out.push(Object.assign({},a,prefix(tn,b)));if(out.length>30000)throw new Error('Забагато рядків у результаті. Схоже, таблиці не зв’язані — створіть зв’язок у «Схемі даних».')}}
+  rows=out;used.push(tn)}return rows}
+function aggr(kind,vals,type){const nn=vals.filter(v=>v!=null&&v!=='');if(kind==='Count')return nn.length;if(!nn.length)return null;if(kind==='Sum')return nn.reduce((s,v)=>s+num(v),0);if(kind==='Avg')return Math.round(nn.reduce((s,v)=>s+num(v),0)/nn.length*100)/100;const srt=nn.slice().sort((a,b)=>cmp(a,b,type));return kind==='Min'?srt[0]:srt[srt.length-1]}
+function runQuery(q,params={}){const specs=allSpecs(q);if(!specs.length)throw new Error('Бланк запиту порожній. Клацніть поля в таблиці вгорі, щоб додати їх.');let rows=joinRows(q);
+ const isAgg=s=>q.totals&&AGG.includes(s.col.total);
+ const crow=k=>{const seen=new Set();return specs.filter(s=>{if(!(s.col[k]||'').trim()||isAgg(s)||seen.has(s.col))return false;seen.add(s.col);return true}).map(s=>({get:s.get,fn:critFn(s.col[k],s.type,params,q)}))};
+ const r1=crow('crit'),r2=crow('or');if(r1.length||r2.length)rows=rows.filter(r=>(r1.length&&r1.every(c=>c.fn(c.get(r))))||(r2.length&&r2.every(c=>c.fn(c.get(r)))));
+ let data;const vis=specs.filter(s=>s.col.show!==false&&!(q.totals&&s.col.total==='Умова'));
+ if(q.totals){const gs=specs.filter(s=>s.col.total==='Групування');const groups=new Map();rows.forEach(r=>{const k=JSON.stringify(gs.map(s=>s.get(r)));if(!groups.has(k))groups.set(k,[]);groups.get(k).push(r)});if(!gs.length&&!groups.size)groups.set('[]',[]);
+  data=[...groups.values()].map(g=>specs.map(s=>isAgg(s)?aggr(s.col.total,g.map(s.get),s.type):g.length?s.get(g[0]):null));
+  const hv=specs.map((s,i)=>isAgg(s)&&(s.col.crit||'').trim()?{i,fn:critFn(s.col.crit,'Число',params,q)}:null).filter(Boolean);if(hv.length)data=data.filter(d=>hv.every(h=>h.fn(d[h.i])))}
+ else data=rows.map(r=>specs.map(s=>s.get(r)));
+ const sorts=specs.map((s,i)=>({i,dir:s.col.sort==='DESC'?-1:s.col.sort==='ASC'?1:0,type:isAgg(s)&&s.col.total!=='Min'&&s.col.total!=='Max'?'Число':s.type})).filter(x=>x.dir);
+ if(sorts.length)data.sort((a,b)=>{for(const s of sorts){const c=cmp(a[s.i],b[s.i],s.type)*s.dir;if(c)return c}return 0});
+ const names=outNames(specs,q);const idx=vis.map(s=>specs.indexOf(s));
+ return {cols:vis.map((s,i)=>({name:names[i],type:isAgg(s)&&['Sum','Avg','Count'].includes(s.col.total)?'Число':s.type})),rows:data.map(d=>idx.map(i=>d[i]))}}
+function critSQL(e,text){return '('+splitOr(text.trim()).map(p=>{if(/^(<=|>=|<>|=|<|>)/.test(p)||/^(like|between|is|not|як|між)\s/i.test(p))return `${e} ${p}`;if(/^".*"$|^'.*'$|^#.*#$|^\[.*\]$/.test(p)||isNumLike(p))return `${e} = ${p}`;return `${e} = "${p}"`}).join(' OR ')+')'}
+function sqlOf(q){try{const specs=allSpecs(q);if(!specs.length)return '-- Бланк запиту порожній';const names=outNames(specs,q);const vis=specs.filter(s=>s.col.show!==false&&!(q.totals&&s.col.total==='Умова'));
+ const sel=vis.map((s,i)=>{let e=s.sql;if(q.totals&&AGG.includes(s.col.total))e=`${s.col.total}(${e})`;return e!==`[${s.t}].[${names[i]}]`&&(s.expr||s.alias||(q.totals&&AGG.includes(s.col.total)))?`${e} AS [${names[i]}]`:e});
+ const tabs=joinOrder(q);let from=`[${tabs[0]}]`;const used=[tabs[0]];
+ tabs.slice(1).forEach(tn=>{const rs=DB.rels.filter(r=>(r.pt===tn&&used.includes(r.ct))||(r.ct===tn&&used.includes(r.pt)));from=rs.length?`(${from} INNER JOIN [${tn}] ON ${rs.map(r=>`[${r.pt}].[${r.pf}] = [${r.ct}].[${r.cf}]`).join(' AND ')})`:`${from}, [${tn}]`;used.push(tn)});
+ if(tabs.length>1&&from.startsWith('('))from=from.slice(1,-1);
+ const isAgg=s=>q.totals&&AGG.includes(s.col.total);
+ const w=k=>{const seen=new Set();return specs.filter(s=>{if(!(s.col[k]||'').trim()||isAgg(s)||seen.has(s.col))return false;seen.add(s.col);return true}).map(s=>critSQL(s.sql,s.col[k])).join(' AND ')};
+ const a=w('crit'),b=w('or');const where=a&&b?`(${a}) OR (${b})`:a||b;
+ let sql=`SELECT ${sel.join(', ')}\nFROM ${from}`;if(where)sql+=`\nWHERE ${where}`;
+ if(q.totals){const g=specs.filter(s=>s.col.total==='Групування').map(s=>s.sql);if(g.length)sql+=`\nGROUP BY ${g.join(', ')}`;const h=specs.filter(s=>isAgg(s)&&(s.col.crit||'').trim()).map(s=>critSQL(`${s.col.total}(${s.sql})`,s.col.crit));if(h.length)sql+=`\nHAVING ${h.join(' AND ')}`}
+ const o=specs.filter(s=>s.col.sort).map(s=>`${isAgg(s)?`${s.col.total}(${s.sql})`:s.sql}${s.col.sort==='DESC'?' DESC':''}`);if(o.length)sql+=`\nORDER BY ${o.join(', ')}`;return sql+';'}catch(e){return '-- '+e.message}}
+function srcCols(src){const k=src.slice(0,1),n=src.slice(2);if(k==='T'){const t=T(n);return t?t.fields.map(f=>({name:f.name,type:f.type})):[]}const q=Q(n);if(!q)return [];try{const specs=allSpecs(q);const names=outNames(specs,q);return specs.filter(s=>s.col.show!==false&&!(q.totals&&s.col.total==='Умова')).map((s,i)=>({name:names[i],type:s.type}))}catch(e){return []}}
+function srcData(src,params){const k=src.slice(0,1),n=src.slice(2);if(k==='T'){const t=T(n);if(!t)throw new Error(`Таблицю «${n}» не знайдено.`);return {cols:t.fields.map(f=>({name:f.name,type:f.type})),rows:t.rows.map(r=>t.fields.map(f=>r[f.name]))}}const q=Q(n);if(!q)throw new Error(`Запит «${n}» не знайдено.`);return runQuery(q,params||{})}
+const srcParams=src=>src&&src[0]==='Q'&&Q(src.slice(2))?paramsOf(Q(src.slice(2))):[];
+
+/* ---------- rendering shell ---------- */
+function renderAll(){$('#dbname').value=DB.name;renderNav();renderTabs();renderView()}
+function renderNav(){if(!DB)return;const c=cur();const on=(k,n)=>c&&c.obj===k&&c.name===n;
+ const g=(title,kind,arr)=>`<div class="ng"><div class="ngh">${ICO[kind]}${title}<span>${arr.length}</span></div>${arr.map(o=>`<div class="ni ${on(kind,o.name)?'on':''}"><button class="nib" data-act="open" data-k="${kind}" data-n="${esc(o.name)}" title="${esc(o.name)}">${esc(o.name)}</button><button class="nim" data-act="objmenu" data-k="${kind}" data-n="${esc(o.name)}" aria-label="Дії з «${esc(o.name)}»">⋯</button></div>`).join('')||'<div class="nempty">поки немає</div>'}</div>`;
+ $('#nav').innerHTML=`<div class="navh"><span>Усі об’єкти Access</span></div>`+g('Таблиці','table',DB.tables)+g('Запити','query',DB.queries)+g('Форми','form',DB.forms)+g('Звіти','report',DB.reports)}
+function tabLabel(t){return t.obj==='rels'?'Схема даних':t.obj==='project'?'Мій проєкт':t.obj==='home'?'Початок':t.name}
+function renderTabs(){$('#tabs').innerHTML=S.tabs.map(t=>`<button class="tab ${t.id===S.active?'on':''}" role="tab" aria-selected="${t.id===S.active}" data-act="tab" data-id="${t.id}">${ICO[t.obj]||''}${esc(tabLabel(t))}<span class="x" data-act="closetab" data-id="${t.id}" aria-label="Закрити">×</span></button>`).join('')}
+function open(obj,name,view){let t=S.tabs.find(x=>x.obj===obj&&(x.name===name||!name));if(!t){t={id:uid(),obj,name,view:view||defView(obj,name),st:{}};S.tabs.push(t)}else if(view)t.view=view;S.active=t.id;document.body.classList.remove('navopen');renderTabs();renderNav();renderView()}
+function defView(obj,name){if(obj==='query'){const q=Q(name);return q&&q.cols.some(c=>c.field)?'data':'design'}if(obj==='report'||obj==='form'||obj==='table')return 'data';return ''}
+function closeTab(id){const i=S.tabs.findIndex(t=>t.id===id);if(i<0)return;S.tabs.splice(i,1);if(S.active===id)S.active=(S.tabs[i]||S.tabs[i-1]||{}).id||null;renderTabs();renderNav();renderView()}
+function setView(v){const t=cur();if(!t)return;t.view=v;if(t.obj==='query'&&v==='data'){runTab(t);return}renderView()}
+const HINTS={
+ 'table:data':'Вводьте дані просто в клітинки. Рядок із <b>*</b> — новий запис. Клацніть заголовок стовпчика, щоб відсортувати. Ключ <svg class="i" viewBox="0 0 24 24" style="width:14px;height:14px;color:#c98a00"><circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M17 6l3 3M15 8l2 2"/></svg> позначає ключове поле.',
+ 'table:design':'<b>Конструктор.</b> Задайте ім’я поля і тип даних. Ключове поле має унікальні значення — найчастіше це ID з типом «Лічильник». Назви пишіть без пробілів: <b>Дата_народження</b>.',
+ 'rels:':'Перетягніть поле однієї таблиці на відповідне поле іншої (наприклад, <b>ID_учня → ID_учня</b>) або натисніть «+ Зв’язок». Клацніть лінію, щоб змінити або видалити зв’язок.',
+ 'query:design':'<b>1</b> Додайте таблиці (+ Таблиця). <b>2</b> Клацніть поля в таблиці — вони перейдуть у бланк. <b>3</b> Впишіть умову відбору (підказки нижче). <b>4</b> Натисніть «Запуск».',
+ 'query:data':'Це результат запиту. Щоб змінити умови — перейдіть у «Конструктор».',
+ 'query:sql':'Так виглядає ваш запит мовою SQL — саме його «розуміє» СКБД. Конструктор складає SQL автоматично.',
+ 'form:data':'Форма показує один запис. Кнопки внизу — перехід між записами, «Новий» додає запис.',
+ 'form:design':'Змінюйте заголовок, колір, порядок полів, додайте «Підпис» (наприклад, «Контактна інформація») — праворуч одразу видно результат.',
+ 'report:data':'Звіт — гарне подання даних для друку. «Завантажити звіт» зберігає файл, який можна надрукувати (Ctrl+P).',
+ 'report:design':'Майстер звітів: оберіть джерело, поля, групування (наприклад, за Класом) і сортування.'};
+function hint(t){const h=HINTS[t.obj+':'+(t.view||'')];return h?`<div class="hint">${ICO.tip}<div>${h}</div></div>`:''}
+function renderView(){const el=$('#view');const t=cur();if(S.lastId!==(t&&t.id)){S.lastId=t&&t.id;el.scrollTop=0}$('#stView').textContent=t?tabLabel(t):'Готово';$('#stInfo').textContent=DB?`Таблиць: ${DB.tables.length} · Запитів: ${DB.queries.length} · Форм: ${DB.forms.length} · Звітів: ${DB.reports.length}`:'';
+ if(!t){el.innerHTML=welcomeHTML();return}
+ try{({table:t.view==='design'?viewTDesign:viewTable,rels:viewRels,query:t.view==='design'?viewQDesign:t.view==='sql'?viewSQL:viewQData,form:t.view==='design'?viewFDesign:viewForm,report:t.view==='design'?viewRDesign:viewReport,project:viewProject})[t.obj](t,el)}catch(e){console.error(e);el.innerHTML=`<div class="qerr">Помилка відображення: ${esc(e.message)}</div>`}
+ if(S.focus){const f=S.focus;S.focus=null;const n=$(`#view [data-row="${cssq(f.row)}"][data-f="${cssq(f.f)}"]`)||(f.sel&&$(f.sel));if(n){n.focus();if(n.select&&n.type!=='checkbox')try{n.select()}catch(e){}}}}
+function rerender(){const a=document.activeElement;let sel=null,ss=null;if(a&&$('#view').contains(a)){if(a.id)sel='#'+cssq(a.id);else if(a.dataset&&a.dataset.ch)sel=`#view [data-ch="${a.dataset.ch}"]`+['row','f','i','k','t','x'].map(k=>a.dataset[k]!=null?`[data-${k}="${cssq(a.dataset[k])}"]`:'').join('');try{ss=[a.selectionStart,a.selectionEnd]}catch(e){}}
+ renderView();if(sel){const n=$(sel);if(n){n.focus();try{if(ss&&ss[0]!=null)n.setSelectionRange(ss[0],ss[1])}catch(e){}}}}
+function welcomeHTML(){return `<div class="welcome"><h2>${esc(DB.name)}</h2><p class="cnt">Відкрийте об’єкт ліворуч або почніть з кроків нижче — вони йдуть так само, як теми підручника.</p><div class="steps">
+ ${[['1','Структура','Створіть таблиці в Конструкторі, задайте типи даних і ключові поля, зв’яжіть їх у Схемі даних.','newTableDesign','Конструктор таблиць'],['2','Форми','Створіть форму для зручного введення даних і додайте власний підпис.','newForm','Створити форму'],['3','Запити','Знайдіть потрібні дані: умови відбору, параметри, кілька таблиць, сортування.','newQuery','Макет запиту'],['4','Звіти','Покажіть дані гарно: з групуванням і сортуванням.','newReport','Майстер звітів'],['5','Імпорт та експорт','Перенесіть дані з Excel або вивантажте таблицю в Excel.','import','Імпорт Excel / CSV']].map(s=>`<div class="step"><span class="n">Крок ${s[0]}</span><b>${s[1]}</b><p>${s[2]}</p><button class="btn" data-act="${s[3]}">${s[4]}</button></div>`).join('')}
+ <div class="step"><span class="n">Оцінка</span><b>Мій проєкт</b><p>Чекліст вимог з автоматичною перевіркою і кнопка «Надіслати вчителю».</p><button class="btn pri" data-act="openProject">Відкрити проєкт</button></div></div>
+ <div class="warnbox" style="margin-top:16px">Комп’ютери в класі спільні: база зберігається лише в цьому браузері. Наприкінці уроку натисніть <b>«Зберегти файл»</b> (вгорі праворуч), а наступного разу — <b>«Відкрити файл»</b>.</div></div>`}
+
+/* ---------- table: datasheet ---------- */
+const DLS=new Map();
+function fkAttr(t,f){const r=DB.rels.find(r=>r.ct===t.name&&r.cf===f.name);if(!r)return '';const p=T(r.pt);if(!p)return '';const id='dl-'+(r.id||uid());if(!DLS.has(id)){const lf=p.fields.find(x=>x.name!==r.pf&&typeGroup(x.type)==='s');DLS.set(id,`<datalist id="${id}">${p.rows.map(x=>`<option value="${esc(x[r.pf])}">${lf?esc(x[lf.name]??''):''}</option>`).join('')}</datalist>`)}return `list="${id}"`}
+function flushDL(){const h=[...DLS.values()].join('');DLS.clear();return h}
+function cellInput(t,f,row,cls='ci'){const v=row?row[f.name]:null,rid=row?row._id:'new';const base=`data-ch="cell" data-t="${esc(t.name)}" data-row="${rid}" data-f="${esc(f.name)}" aria-label="${esc(f.name)}"`;
+ switch(f.type){case 'Лічильник':return `<input class="${cls} ro num" readonly tabindex="-1" value="${row?esc(v??''):'(Новий)'}" data-row="${rid}" data-f="${esc(f.name)}" aria-label="${esc(f.name)}">`;
+ case 'Так/Ні':return `<input type="checkbox" class="cb" ${v?'checked':''} ${base}>`;
+ case 'Дата/час':return `<input type="date" class="${cls}" value="${esc(v||'')}" ${base}>`;
+ case 'Число':case 'Грошова одиниця':return `<input class="${cls} num" inputmode="decimal" value="${v==null?'':esc(String(v).replace('.',','))}" ${fkAttr(t,f)} ${base}>`;
+ default:return `<input class="${cls}" value="${esc(v??'')}" ${fkAttr(t,f)} ${base}>`}}
+function viewTable(tab,el){const t=T(tab.name);if(!t){el.innerHTML='<div class="empty">Таблицю не знайдено.</div>';return}const st=tab.st;
+ let rows=t.rows.slice();if(st.q){const q=st.q.toLowerCase();rows=rows.filter(r=>t.fields.some(f=>fmt(r[f.name],f.type).toLowerCase().includes(q)))}
+ if(st.sort){const f=fieldOf(t,st.sort);if(f)rows.sort((a,b)=>cmp(a[f.name],b[f.name],f.type)*st.dir)}
+ const kf=t.fields.find(f=>f.key);
+ el.innerHTML=`<div class="vt"><div class="seg"><button class="on">Таблиця</button><button data-act="view" data-v="design">Конструктор</button></div>
+ <button class="btn" data-act="addrow">${ICO.plus}Новий запис</button><button class="btn" data-act="delrow">Видалити запис</button>
+ <input class="inp" id="tsearch" data-in="tsearch" placeholder="Пошук у таблиці…" value="${esc(st.q||'')}" style="width:190px" aria-label="Пошук">
+ <span class="sp"></span><span class="cnt">Записів: ${t.rows.length}${st.q?` · знайдено ${rows.length}`:''}${st.sort?` · сортування: ${esc(st.sort)} ${st.dir>0?'↑':'↓'}`:''}</span></div>${hint(tab)}
+ ${t.fields.length?`<div class="sheetwrap"><table class="sheet"><thead><tr><th aria-label="Вибір запису"></th>${t.fields.map(f=>`<th data-act="sortcol" data-f="${esc(f.name)}" title="${esc(f.type)} — клацніть для сортування">${f.key?ICO.key+' ':''}${esc(f.name)}${st.sort===f.name?(st.dir>0?' ↑':' ↓'):''}</th>`).join('')}</tr></thead><tbody>
+ ${rows.map(r=>`<tr class="${st.sel===r._id?'selr':''} ${kf&&(r[kf.name]==null||r[kf.name]==='')?'warn':''}" data-rid="${r._id}"><td class="rs" data-act="selrow" data-id="${r._id}">${st.sel===r._id?'▶':''}</td>${t.fields.map(f=>`<td>${cellInput(t,f,r)}</td>`).join('')}</tr>`).join('')}
+ <tr class="newr"><td class="rs">*</td>${t.fields.map(f=>`<td>${cellInput(t,f,null)}</td>`).join('')}</tr></tbody></table></div>`:`<div class="empty">У таблиці ще немає полів. <button class="btn pri" data-act="view" data-v="design">Відкрити Конструктор</button></div>`}${flushDL()}`}
+
+/* ---------- table: design ---------- */
+function viewTDesign(tab,el){const t=T(tab.name);if(!t){el.innerHTML='<div class="empty">Таблицю не знайдено.</div>';return}
+ el.innerHTML=`<div class="vt"><div class="seg"><button data-act="view" data-v="data">Таблиця</button><button class="on">Конструктор</button></div>
+ <label class="cnt">Назва таблиці <input class="inp" data-ch="trename" value="${esc(t.name)}" style="width:180px"></label><button class="btn pri" data-act="addfield">${ICO.plus}Додати поле</button><span class="sp"></span><span class="cnt">Полів: ${t.fields.length}</span></div>${hint(tab)}
+ <div class="pad"><table class="dg"><thead><tr><th style="width:52px">Ключ</th><th>Ім’я поля</th><th style="width:190px">Тип даних</th><th>Опис (необов’язково)</th><th style="width:110px"></th></tr></thead><tbody>
+ ${t.fields.map((f,i)=>`<tr><td><button class="keyb ${f.key?'on':''}" data-act="togkey" data-i="${i}" aria-pressed="${f.key}" aria-label="Ключове поле ${esc(f.name)}" title="Ключове поле">${ICO.key}</button></td>
+ <td><input class="inp" data-ch="fname" data-i="${i}" value="${esc(f.name)}" aria-label="Ім’я поля"></td>
+ <td><select class="inp" data-ch="ftype" data-i="${i}" aria-label="Тип даних">${TYPES.map(x=>`<option ${x===f.type?'selected':''}>${x}</option>`).join('')}</select></td>
+ <td><input class="inp" data-ch="fdesc" data-i="${i}" value="${esc(f.desc||'')}" aria-label="Опис"></td>
+ <td><button class="btn sm" data-act="fmove" data-i="${i}" data-d="-1" aria-label="Вгору">↑</button> <button class="btn sm" data-act="fmove" data-i="${i}" data-d="1" aria-label="Вниз">↓</button> <button class="btn sm" data-act="fdel" data-i="${i}" aria-label="Видалити поле">✕</button></td></tr>`).join('')}
+ </tbody></table>
+ <div class="typehelp"><div><b>Лічильник</b>Номер 1, 2, 3… ставиться автоматично. Ідеально для ключа ID.</div><div><b>Короткий текст</b>Імена, класи, міста, телефони (до 255 символів).</div><div><b>Довгий текст</b>Примітки, описи — довгий текст.</div><div><b>Число</b>Кількість, бали, оцінки, ID з іншої таблиці.</div><div><b>Грошова одиниця</b>Ціни та суми в гривнях.</div><div><b>Дата/час</b>Дати народження, змагань, видачі книг.</div><div><b>Так/Ні</b>Логічне значення: оплачено, присутній.</div></div></div>`}
+
+/* ---------- relationships ---------- */
+function relRows(){return DB.rels.map(r=>`<tr><td><b>${esc(r.pt)}</b>.${esc(r.pf)}</td><td>→</td><td><b>${esc(r.ct)}</b>.${esc(r.cf)}</td><td>${relKind(r)}</td><td>${r.integ?'так':'ні'}</td><td><button class="btn sm" data-act="reledit" data-id="${r.id}">Змінити</button> <button class="btn sm" data-act="reldel" data-id="${r.id}">Видалити</button></td></tr>`).join('')}
+function relKind(r){const p=fieldOf(T(r.pt),r.pf),c=fieldOf(T(r.ct),r.cf);if(!p||!c)return '—';if(p.key&&c.key)return 'один-до-одного';if(p.key)return 'один-до-багатьох';return 'невизначений'}
+function viewRels(tab,el){let maxY=0,maxX=0;DB.tables.forEach((t,i)=>{if(!DB.layout[t.name])DB.layout[t.name]={x:20+(i%3)*270,y:20+Math.floor(i/3)*250};const p=DB.layout[t.name];maxY=Math.max(maxY,p.y);maxX=Math.max(maxX,p.x)});
+ el.innerHTML=`<div class="vt"><button class="btn pri" data-act="reladd">${ICO.plus}Зв’язок</button><button class="btn" data-act="relauto">Розставити таблиці</button><span class="sp"></span><span class="cnt">Зв’язків: ${DB.rels.length}</span></div>${hint(tab)}
+ <div class="relcanvas" id="rc" style="min-height:${maxY+280}px">
+ <svg id="rsvg" width="${maxX+260}" height="${maxY+280}"></svg>
+ ${DB.tables.map(t=>{const p=DB.layout[t.name];return `<div class="tbox" data-tb="${esc(t.name)}" style="left:${p.x}px;top:${p.y}px"><div class="th" data-drag="${esc(t.name)}">${esc(t.name)}</div><ul>${t.fields.map(f=>`<li draggable="true" data-t="${esc(t.name)}" data-fl="${esc(f.name)}">${f.key?ICO.key:'<span style="width:14px;display:inline-block"></span>'}${esc(f.name)}</li>`).join('')}</ul></div>`}).join('')||'<div class="empty">Спочатку створіть таблиці.</div>'}
+ </div>
+ <div class="rellist">${DB.rels.length?`<table><thead><tr><th>Головна таблиця (1)</th><th></th><th>Пов’язана таблиця (∞)</th><th>Тип</th><th>Цілісність</th><th></th></tr></thead><tbody>${relRows()}</tbody></table>`:'<p class="cnt">Зв’язків ще немає.</p>'}</div>`;
+ requestAnimationFrame(drawRels)}
+function drawRels(){const c=$('#rc'),svg=$('#rsvg');if(!c||!svg)return;const cr=c.getBoundingClientRect();let W=0,H=0;$$('.tbox',c).forEach(b=>{W=Math.max(W,b.offsetLeft+b.offsetWidth+40);H=Math.max(H,b.offsetTop+b.offsetHeight+40)});svg.setAttribute('width',W);svg.setAttribute('height',H);c.style.minHeight=Math.max(440,H)+'px';
+ const pos=(t,f)=>{const li=c.querySelector(`li[data-t="${cssq(t)}"][data-fl="${cssq(f)}"]`);if(!li)return null;const r=li.getBoundingClientRect(),ul=li.parentElement.getBoundingClientRect();const y=Math.min(Math.max(r.top+r.height/2,ul.top+6),ul.bottom-6);return {l:r.left-cr.left+c.scrollLeft,r:r.right-cr.left+c.scrollLeft,y:y-cr.top+c.scrollTop}};
+ svg.innerHTML=DB.rels.map(r=>{const a=pos(r.pt,r.pf),b=pos(r.ct,r.cf);if(!a||!b)return '';let x1,x2,d1,d2;if(a.r<=b.l){x1=a.r;x2=b.l;d1=1;d2=-1}else if(b.r<=a.l){x1=a.l;x2=b.r;d1=-1;d2=1}else{x1=a.r;x2=b.r;d1=1;d2=1}
+  const k=Math.max(40,Math.abs(x2-x1)/2);const d=`M${x1} ${a.y} C${x1+d1*k} ${a.y} ${x2+d2*k} ${b.y} ${x2} ${b.y}`;
+  return `<path class="ln ${r.integ?'':'loose'}" d="${d}"/>${r.integ?`<text x="${x1+d1*10-(d1<0?8:0)}" y="${a.y-6}">1</text><text x="${x2+d2*10-(d2<0?12:0)}" y="${b.y-6}">∞</text>`:''}<path class="hit" d="${d}" data-act="reledit" data-id="${r.id}"><title>${esc(r.pt+'.'+r.pf+' → '+r.ct+'.'+r.cf)}</title></path>`}).join('')}
+async function relDialog(pre,existing){if(DB.tables.length<2){err('Для зв’язку потрібно щонайменше дві таблиці.');return}
+ const tOpts=sel=>DB.tables.map(t=>`<option ${t.name===sel?'selected':''}>${esc(t.name)}</option>`).join('');
+ const p=existing?{t1:existing.pt,f1:existing.pf,t2:existing.ct,f2:existing.cf,integ:existing.integ}:Object.assign({t1:DB.tables[0].name,t2:DB.tables[1].name,integ:true},pre||{});
+ const r=await modal({title:existing?'Змінити зв’язок':'Створити зв’язок',ok:existing?'OK':'Створити',body:`<div class="row2"><label class="fld"><span>Таблиця</span><select class="inp" name="t1">${tOpts(p.t1)}</select></label><label class="fld"><span>Пов’язана таблиця</span><select class="inp" name="t2">${tOpts(p.t2)}</select></label>
+ <label class="fld"><span>Поле</span><select class="inp" name="f1"></select></label><label class="fld"><span>Поле</span><select class="inp" name="f2"></select></label></div>
+ <label class="cbl"><input type="checkbox" name="integ" ${p.integ?'checked':''}>Забезпечення цілісності даних</label><p class="mnote" data-kind></p>`,
+ onOpen:b=>{const s=n=>b.querySelector(`[name=${n}]`);const fill=(tn,fn,sel)=>{const t=T(s(tn).value);s(fn).innerHTML=t.fields.map(f=>`<option ${f.name===sel?'selected':''}>${esc(f.name)}</option>`).join('')};
+  const kind=()=>{const a=fieldOf(T(s('t1').value),s('f1').value),c=fieldOf(T(s('t2').value),s('f2').value);b.querySelector('[data-kind]').textContent='Тип зв’язку: '+(a&&c?(a.key&&c.key?'один-до-одного':a.key||c.key?'один-до-багатьох':'невизначений (жодне з полів не є ключовим)'):'—')};
+  fill('t1','f1',p.f1);fill('t2','f2',p.f2);kind();s('t1').onchange=()=>{fill('t1','f1');kind()};s('t2').onchange=()=>{fill('t2','f2');kind()};s('f1').onchange=kind;s('f2').onchange=kind}});
+ if(!r)return;if(r.t1===r.t2){err('Оберіть дві різні таблиці.');return}
+ let pt=r.t1,pf=r.f1,ct=r.t2,cf=r.f2;const A=fieldOf(T(pt),pf),B=fieldOf(T(ct),cf);
+ if(!A.key&&B.key){[pt,pf,ct,cf]=[ct,cf,pt,pf]}
+ const P=fieldOf(T(pt),pf),C=fieldOf(T(ct),cf);
+ if(typeGroup(P.type)!==typeGroup(C.type)){err(`Типи полів не збігаються: «${P.name}» — ${P.type}, «${C.name}» — ${C.type}. Для зв’язку з полем «Лічильник» використовуйте тип «Число».`);return}
+ let integ=r.integ;if(integ&&!P.key){toast('Цілісність можна ввімкнути, лише якщо одне з полів ключове. Зв’язок створено без неї.','err');integ=false}
+ if(integ){const bad=T(ct).rows.filter(x=>x[cf]!=null&&x[cf]!==''&&!T(pt).rows.some(y=>eq(y[pf],x[cf])));if(bad.length){err(`Не вдалося ввімкнути цілісність: у таблиці «${ct}» є ${bad.length} записів зі значеннями «${cf}», яких немає в таблиці «${pt}».`);return}}
+ if(DB.rels.some(x=>x!==existing&&((x.pt===pt&&x.pf===pf&&x.ct===ct&&x.cf===cf)||(x.pt===ct&&x.pf===cf&&x.ct===pt&&x.cf===pf)))){err('Такий зв’язок уже існує.');return}
+ if(existing)Object.assign(existing,{pt,pf,ct,cf,integ});else DB.rels.push({id:uid(),pt,pf,ct,cf,integ});save();renderView();toast('Зв’язок збережено: '+pt+'.'+pf+' → '+ct+'.'+cf)}
+
+/* ---------- query design ---------- */
+function viewQDesign(tab,el){const q=Q(tab.name);if(!q){el.innerHTML='<div class="empty">Запит не знайдено.</div>';return}
+ if(!q.cols.length||q.cols[q.cols.length-1].field)q.cols.push(blankCol());
+ const fl=q.tables.filter(T).flatMap(tn=>[tn+'.*',...T(tn).fields.map(f=>tn+'.'+f.name)]);
+ const tcol=c=>{if(!c.field)return '';try{const s=colSpecs(q,c)[0];return s.t||'вираз'}catch(e){return '<span style="color:var(--bad)">помилка</span>'}};
+ el.innerHTML=`<div class="vt"><div class="seg"><button class="on">Конструктор</button><button data-act="view" data-v="data">Таблиця</button><button data-act="view" data-v="sql">SQL</button></div>
+ <button class="btn pri" data-act="qrun">${ICO.play}Запуск</button><button class="btn" data-act="qaddtab">${ICO.plus}Таблиця</button><button class="btn ${q.totals?'pri':''}" data-act="qtotals" aria-pressed="${!!q.totals}">Σ Підсумки</button>
+ <label class="cnt">Назва <input class="inp" data-ch="qrename" value="${esc(q.name)}" style="width:200px"></label></div>${hint(tab)}
+ <div class="qtop">${q.tables.map(tn=>{const t=T(tn);return `<div class="tbox"><div class="th">${esc(tn)}<button data-act="qrmtab" data-n="${esc(tn)}" aria-label="Прибрати таблицю">×</button></div><ul>${t?`<li data-act="qadd" data-v="${esc(tn)}.*"><b>*</b> (усі поля)</li>`+t.fields.map(f=>`<li data-act="qadd" data-v="${esc(tn+'.'+f.name)}">${f.key?ICO.key:'<span style="width:14px;display:inline-block"></span>'}${esc(f.name)}</li>`).join(''):'<li>таблицю видалено</li>'}</ul></div>`}).join('')||`<div class="empty" style="padding:20px">Запит порожній. <button class="btn pri" data-act="qaddtab">${ICO.plus}Додати таблицю</button></div>`}</div>
+ <div class="qwrap"><table class="qbe"><tbody>
+ <tr class="qt"><th></th>${q.cols.map((c,i)=>`<td>${c.field?`<button data-act="qmv" data-i="${i}" data-d="-1" aria-label="Ліворуч">◀</button><button data-act="qmv" data-i="${i}" data-d="1" aria-label="Праворуч">▶</button><button data-act="qdel" data-i="${i}" aria-label="Видалити стовпчик">✕</button>`:''}</td>`).join('')}</tr>
+ <tr><th>Поле:</th>${q.cols.map((c,i)=>`<td><input list="qfl" data-ch="qcol" data-i="${i}" data-k="field" value="${esc(c.field)}" placeholder="${c.field?'':'клацніть поле вгорі'}" aria-label="Поле ${i+1}"></td>`).join('')}</tr>
+ <tr><th>Таблиця:</th>${q.cols.map(c=>`<td class="tcell">${tcol(c)}</td>`).join('')}</tr>
+ ${q.totals?`<tr><th>Групування:</th>${q.cols.map((c,i)=>`<td><select data-ch="qcol" data-i="${i}" data-k="total" aria-label="Групування ${i+1}">${TOTALS.map(x=>`<option ${x===(c.total||'Групування')?'selected':''}>${x}</option>`).join('')}</select></td>`).join('')}</tr>`:''}
+ <tr><th>Сортування:</th>${q.cols.map((c,i)=>`<td><select data-ch="qcol" data-i="${i}" data-k="sort" aria-label="Сортування ${i+1}"><option value="">(немає)</option><option value="ASC" ${c.sort==='ASC'?'selected':''}>За зростанням</option><option value="DESC" ${c.sort==='DESC'?'selected':''}>За спаданням</option></select></td>`).join('')}</tr>
+ <tr><th>Відображення:</th>${q.cols.map((c,i)=>`<td style="text-align:center"><input type="checkbox" class="cb" data-ch="qcol" data-i="${i}" data-k="show" ${c.show!==false?'checked':''} aria-label="Відображення ${i+1}"></td>`).join('')}</tr>
+ <tr><th>Умова відбору:</th>${q.cols.map((c,i)=>`<td><input class="crit" data-ch="qcol" data-i="${i}" data-k="crit" value="${esc(c.crit||'')}" aria-label="Умова відбору ${i+1}"></td>`).join('')}</tr>
+ <tr><th>або:</th>${q.cols.map((c,i)=>`<td><input class="crit" data-ch="qcol" data-i="${i}" data-k="or" value="${esc(c.or||'')}" aria-label="Умова або ${i+1}"></td>`).join('')}</tr>
+ </tbody></table><datalist id="qfl">${fl.map(x=>`<option value="${esc(x)}">`).join('')}</datalist></div>
+ <div class="cnt" style="padding:0 12px 6px">Вставити в умову (клацніть клітинку «Умова відбору», потім приклад):</div>
+ <div class="chips">${['"Київ"','<>"Київ"','>=10','<7','Between 7 And 9','Like "К*"','Like "*енко"','"9-А" Or "9-Б"','Is Null','Is Not Null','>#01.01.2010#','[Введіть клас:]'].map(x=>`<button class="chip" data-act="qins" data-v="${esc(x)}">${esc(x)}</button>`).join('')}</div>
+ <div class="cnt" style="padding:0 12px 16px">Обчислюване поле: у рядку «Поле» напишіть, наприклад, <code>Вартість: [Ціна]*[Кількість]</code> або <code>Рік: Year([Дата_народження])</code>.</div>`}
+async function runTab(tab){const q=Q(tab.name);if(!q)return;const ps=paramsOf(q);let params={};if(ps.length){params=await askParams(ps);if(!params){if(tab.view==='data'){tab.view='design';renderView()}return}}
+ try{tab.st.res=runQuery(q,params);tab.st.err=null}catch(e){tab.st.res=null;tab.st.err=e.message;err(e.message)}tab.view='data';renderView()}
+function viewQData(tab,el){const q=Q(tab.name);if(!q){el.innerHTML='<div class="empty">Запит не знайдено.</div>';return}
+ const res=tab.st.res;if(!res&&!tab.st.err&&!tab.st.pending){tab.st.pending=true;setTimeout(()=>{tab.st.pending=false;runTab(tab)},0)}
+ el.innerHTML=`<div class="vt"><div class="seg"><button data-act="view" data-v="design">Конструктор</button><button class="on">Таблиця</button><button data-act="view" data-v="sql">SQL</button></div><button class="btn" data-act="qrun">${ICO.play}Запустити ще раз</button><span class="sp"></span><span class="cnt">${res?'Записів: '+res.rows.length:''}</span></div>${hint(tab)}
+ ${tab.st.err?`<div class="qerr">${esc(tab.st.err)}</div>`:res?dataSheet(res):'<div class="empty">Виконується…</div>'}`}
+function dataSheet(res){if(!res.rows.length)return `<div class="sheetwrap"><table class="sheet"><thead><tr><th></th>${res.cols.map(c=>`<th>${esc(c.name)}</th>`).join('')}</tr></thead></table><div class="empty">Жоден запис не відповідає умовам.</div></div>`;
+ return `<div class="sheetwrap"><table class="sheet"><thead><tr><th></th>${res.cols.map(c=>`<th style="cursor:default">${esc(c.name)}</th>`).join('')}</tr></thead><tbody>${res.rows.map((r,i)=>`<tr><td class="rs">${i+1}</td>${r.map((v,j)=>`<td class="v ${NUMT.includes(res.cols[j].type)||typeof v==='number'?'n':''}">${esc(fmt(v,res.cols[j].type))}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`}
+function viewSQL(tab,el){const q=Q(tab.name);const sql=q?sqlOf(q):'';el.innerHTML=`<div class="vt"><div class="seg"><button data-act="view" data-v="design">Конструктор</button><button data-act="view" data-v="data">Таблиця</button><button class="on">SQL</button></div><button class="btn" data-act="copysql">Скопіювати SQL</button></div>${hint(tab)}<pre class="sql">${esc(sql)}</pre>`}
+
+/* ---------- forms ---------- */
+const COLORS=['#a4262c','#1f5f99','#1b7a45','#7a3fb0','#c25b00','#2e3a46'];
+function formHTML(f,t,row,live,extra=''){const items=f.items.length?f.items:t.fields.map(x=>({f:x.name}));
+ return `<div class="formcard" style="--fc:${esc(f.color||'#a4262c')}"><div class="fhead" style="font-size:${+f.size||24}px">${esc(f.title||f.name)}</div><div class="fbody ${f.layout==='two'?'two':''}">
+ ${items.map(it=>{if(it.label!=null)return `<div class="flabel" style="font-size:${+it.size||18}px">${esc(it.label)}</div>`;const fd=fieldOf(t,it.f);if(!fd)return '';return `<label class="frow"><span>${fd.key?ICO.key+' ':''}${esc(it.cap||label(fd.name))}</span>${live?cellInput(t,fd,row):`<input class="ci" disabled value="${esc(row?fmt(row[fd.name],fd.type):'')}">`}</label>`}).join('')}</div>${extra}</div>`}
+function viewForm(tab,el){const f=F(tab.name);const t=f&&T(f.source);if(!f||!t){el.innerHTML=`<div class="empty">Джерело форми не знайдено.</div>`;return}const st=tab.st;st.i=st.i||0;
+ const n=t.rows.length;if(!n)st.newMode=true;if(st.i>=n)st.i=Math.max(0,n-1);const row=st.newMode?null:t.rows[st.i];
+ el.innerHTML=`<div class="vt"><div class="seg"><button class="on">Форма</button><button data-act="view" data-v="design">Конструктор</button></div><span class="cnt">Джерело: таблиця «${esc(t.name)}»</span></div>${hint(tab)}
+ <div class="fstage">${formHTML(f,t,row,true,`<div class="fnav"><span>Запис:</span><button class="btn sm" data-act="fnav" data-d="first" aria-label="Перший">⏮</button><button class="btn sm" data-act="fnav" data-d="prev" aria-label="Попередній">◀</button>
+ <span>${st.newMode?'<span class="newbadge">новий запис</span>':`${st.i+1} з ${n}`}</span><button class="btn sm" data-act="fnav" data-d="next" aria-label="Наступний">▶</button><button class="btn sm" data-act="fnav" data-d="last" aria-label="Останній">⏭</button>
+ <span class="sp"></span><button class="btn sm" data-act="fnav" data-d="new">${ICO.plus}Новий</button>${row?'<button class="btn sm" data-act="fdelrow">Видалити</button>':''}</div>`)}</div>${flushDL()}`}
+function viewFDesign(tab,el){const f=F(tab.name);const t=f&&T(f.source);if(!f||!t){el.innerHTML=`<div class="empty">Джерело форми не знайдено.</div>`;return}
+ if(!f.items.length)f.items=t.fields.map(x=>({f:x.name}));const used=f.items.filter(i=>i.f).map(i=>i.f);
+ el.innerHTML=`<div class="vt"><div class="seg"><button data-act="view" data-v="data">Форма</button><button class="on">Конструктор</button></div><label class="cnt">Назва форми <input class="inp" data-ch="frename" value="${esc(f.name)}" style="width:180px"></label></div>${hint(tab)}
+ <div class="fsplit"><div class="fpanel"><h4>Заголовок</h4><label class="fl">Текст заголовка<input class="inp" data-ch="fprop" data-k="title" value="${esc(f.title||'')}"></label>
+ <label class="fl">Розмір шрифту: ${+f.size||24}<input type="range" min="14" max="44" value="${+f.size||24}" data-ch="fprop" data-k="size"></label>
+ <h4>Колір</h4><div class="swatches">${COLORS.map(c=>`<button class="sw ${c===f.color?'on':''}" style="background:${c}" data-act="fcolor" data-v="${c}" aria-label="Колір ${c}"></button>`).join('')}</div>
+ <h4>Макет</h4><div class="seg"><button class="${f.layout!=='two'?'on':''}" data-act="flayout" data-v="one">Один стовпчик</button><button class="${f.layout==='two'?'on':''}" data-act="flayout" data-v="two">Два стовпчики</button></div>
+ <h4>Елементи форми (порядок)</h4><div class="itl">${f.items.map((it,i)=>`<div class="it">${it.label!=null?`<input data-ch="fitem" data-i="${i}" data-k="label" value="${esc(it.label)}" style="flex:1;width:auto" aria-label="Текст підпису"><input type="number" min="12" max="36" data-ch="fitem" data-i="${i}" data-k="size" value="${+it.size||18}" style="width:56px" aria-label="Розмір шрифту">`:`<span>${esc(it.f)}</span><input data-ch="fitem" data-i="${i}" data-k="cap" value="${esc(it.cap||'')}" placeholder="підпис" aria-label="Підпис поля">`}<button data-act="fimv" data-i="${i}" data-d="-1" aria-label="Вгору">↑</button><button data-act="fimv" data-i="${i}" data-d="1" aria-label="Вниз">↓</button><button data-act="fidel" data-i="${i}" aria-label="Прибрати">✕</button></div>`).join('')}</div>
+ <div style="margin-top:8px"><button class="btn sm" data-act="fiaddlabel">${ICO.plus}Підпис (розділ)</button></div>
+ <h4>Доступні поля</h4><div class="avail">${t.fields.filter(x=>!used.includes(x.name)).map(x=>`<button class="btn sm" data-act="fiadd" data-v="${esc(x.name)}">${ICO.plus}${esc(x.name)}</button>`).join('')||'<span class="cnt">усі поля вже у формі</span>'}</div></div>
+ <div class="fstage">${formHTML(f,t,t.rows[0],false)}</div></div>`}
+
+/* ---------- reports ---------- */
+function reportHTML(r,data){const ix=n=>data.cols.findIndex(c=>c.name===n);const fields=r.fields.filter(n=>ix(n)>=0&&n!==r.group);const ty=n=>data.cols[ix(n)].type;
+ let rows=data.rows.slice();const gi=r.group?ix(r.group):-1,si=r.sort?ix(r.sort):-1;
+ rows.sort((a,b)=>(gi>=0?cmp(a[gi],b[gi],data.cols[gi].type):0)||(si>=0?cmp(a[si],b[si],data.cols[si].type)*(r.dir==='DESC'?-1:1):0));
+ const isN=n=>NUMT.includes(ty(n))&&!/^ID/i.test(n)&&!fieldIsKey(n);
+ const body=rs=>r.layout==='block'?rs.map(row=>`<div class="rbk">${fields.map(n=>`<div><b>${esc(label(n))}:</b> ${esc(fmt(row[ix(n)],ty(n)))}</div>`).join('')}</div>`).join(''):`<table class="rt"><thead><tr>${fields.map(n=>`<th class="${isN(n)?'n':''}">${esc(label(n))}</th>`).join('')}</tr></thead><tbody>${rs.map(row=>`<tr>${fields.map(n=>`<td class="${isN(n)?'n':''}">${esc(fmt(row[ix(n)],ty(n)))}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+ const sum=rs=>{if(!r.summary)return `<div class="gsum">Записів: ${rs.length}</div>`;const nn=fields.filter(isN);return `<div class="gsum">Записів: ${rs.length}${nn.map(n=>{const v=aggr('Avg',rs.map(x=>x[ix(n)]));return v==null?'':` · середнє «${esc(label(n))}»: ${fmt(v,'Число')}`}).join('')}</div>`};
+ let html='';if(gi>=0){const groups=new Map();rows.forEach(x=>{const k=fmt(x[gi],data.cols[gi].type)||'(порожньо)';if(!groups.has(k))groups.set(k,[]);groups.get(k).push(x)});groups.forEach((rs,k)=>{html+=`<h2>${esc(label(r.group))}: ${esc(k)}</h2>${body(rs)}${sum(rs)}`})}else html=body(rows)+sum(rows);
+ return `<div class="rpage"><div class="rhead"><h1>${esc(r.title||r.name)}</h1><div class="rdate">${fmt(today(),'Дата/час')}</div></div>${rows.length?html:'<p>Немає даних.</p>'}<div class="rfoot"><span>Усього записів: ${rows.length}${DB.meta.student?' · Підготував(-ла): '+esc(DB.meta.student):''}</span><span>Сторінка 1 з 1</span></div></div>`}
+function fieldIsKey(n){return DB.tables.some(t=>t.fields.some(f=>f.name===n&&f.key))}
+function repData(tab,r){const ps=srcParams(r.source);if(ps.length&&!tab.st.params)return {need:ps};try{return {data:srcData(r.source,tab.st.params)}}catch(e){return {error:e.message}}}
+function viewReport(tab,el){const r=R(tab.name);if(!r){el.innerHTML='<div class="empty">Звіт не знайдено.</div>';return}const d=repData(tab,r);
+ if(d.need&&!tab.st.asking){tab.st.asking=true;setTimeout(async()=>{const p=await askParams(d.need);tab.st.asking=false;if(p){tab.st.params=p;renderView()}},0)}
+ el.innerHTML=`<div class="vt"><div class="seg"><button class="on">Звіт</button><button data-act="view" data-v="design">Конструктор</button></div><button class="btn pri" data-act="rdl">Завантажити звіт (HTML для друку)</button>${srcParams(r.source).length?'<button class="btn" data-act="rparams">Змінити параметри</button>':''}</div>${hint(tab)}
+ <div class="fstage">${d.error?`<div class="qerr">${esc(d.error)}</div>`:d.need?'<div class="empty">Введіть параметри запиту…</div>':reportHTML(r,d.data)}</div>`}
+function viewRDesign(tab,el){const r=R(tab.name);if(!r){el.innerHTML='<div class="empty">Звіт не знайдено.</div>';return}const cols=srcCols(r.source);const names=cols.map(c=>c.name);const avail=names.filter(n=>!r.fields.includes(n));
+ const d=repData(tab,r);const prev=d.data?reportHTML(r,d.data):d.error?`<div class="qerr">${esc(d.error)}</div>`:reportHTML(r,{cols,rows:[]});
+ const srcOpts=[...DB.tables.map(t=>['T:'+t.name,'Таблиця: '+t.name]),...DB.queries.map(q=>['Q:'+q.name,'Запит: '+q.name])];
+ el.innerHTML=`<div class="vt"><div class="seg"><button data-act="view" data-v="data">Звіт</button><button class="on">Конструктор</button></div><label class="cnt">Назва звіту <input class="inp" data-ch="rrename" value="${esc(r.name)}" style="width:180px"></label></div>${hint(tab)}
+ <div class="fsplit"><div class="fpanel"><h4>1. Таблиці та запити</h4><select class="inp" data-ch="rprop" data-k="source" aria-label="Джерело">${srcOpts.map(o=>`<option value="${esc(o[0])}" ${o[0]===r.source?'selected':''}>${esc(o[1])}</option>`).join('')}</select>
+ <h4>2. Вибрані поля</h4><div class="itl">${r.fields.map((n,i)=>`<div class="it"><span>${esc(n)}</span><button data-act="rfmv" data-i="${i}" data-d="-1" aria-label="Вгору">↑</button><button data-act="rfmv" data-i="${i}" data-d="1" aria-label="Вниз">↓</button><button data-act="rfdel" data-i="${i}" aria-label="Прибрати">✕</button></div>`).join('')||'<span class="cnt">оберіть поля нижче</span>'}</div>
+ <div class="cnt" style="margin:6px 0 4px">Доступні поля:</div><div class="avail">${avail.map(n=>`<button class="btn sm" data-act="rfadd" data-v="${esc(n)}">${ICO.plus}${esc(n)}</button>`).join('')||'<span class="cnt">усі поля вибрано</span>'}</div>
+ <h4>3. Групування</h4><select class="inp" data-ch="rprop" data-k="group" aria-label="Групування"><option value="">(без групування)</option>${names.map(n=>`<option ${n===r.group?'selected':''}>${esc(n)}</option>`).join('')}</select>
+ <h4>4. Сортування</h4><div class="row2"><select class="inp" data-ch="rprop" data-k="sort" aria-label="Поле сортування"><option value="">(немає)</option>${names.map(n=>`<option ${n===r.sort?'selected':''}>${esc(n)}</option>`).join('')}</select><select class="inp" data-ch="rprop" data-k="dir" aria-label="Напрям"><option value="ASC">За зростанням</option><option value="DESC" ${r.dir==='DESC'?'selected':''}>За спаданням</option></select></div>
+ <h4>5. Макет і заголовок</h4><div class="seg"><button class="${r.layout!=='block'?'on':''}" data-act="rlayout" data-v="table">Табличний</button><button class="${r.layout==='block'?'on':''}" data-act="rlayout" data-v="block">Блоковий</button></div>
+ <label class="fl" style="margin-top:8px">Заголовок звіту<input class="inp" data-ch="rprop" data-k="title" value="${esc(r.title||'')}"></label>
+ <label class="cbl"><input type="checkbox" data-ch="rprop" data-k="summary" ${r.summary?'checked':''}>Підсумки: середнє для числових полів</label></div>
+ <div class="fstage">${prev}</div></div>`}
+
+/* ---------- project ---------- */
+const STAGES=['','Структура бази даних','Форми','Запити','Звіти','Імпорт та експорт'];
+const CHECKS=[
+ {s:1,t:'Щонайменше 2 таблиці (краще 3)',h:'Створення → Конструктор таблиць',ok:()=>DB.tables.length>=2},
+ {s:1,t:'У кожній таблиці є ключове поле, і воно заповнене',h:'Конструктор → кнопка з ключем',ok:()=>DB.tables.length>0&&DB.tables.every(t=>{const k=t.fields.find(f=>f.key);return k&&t.rows.every(r=>r[k.name]!=null&&r[k.name]!=='')})},
+ {s:1,t:'Використано щонайменше 3 різні типи даних',h:'Конструктор → стовпчик «Тип даних»',ok:()=>new Set(DB.tables.flatMap(t=>t.fields.map(f=>f.type))).size>=3},
+ {s:1,t:'Таблиці зв’язані, цілісність даних увімкнено',h:'Знаряддя бази даних → Схема даних',ok:()=>DB.rels.some(r=>r.integ)},
+ {s:1,t:'У головній таблиці щонайменше 10 записів',h:'Відкрийте таблицю й заповніть записи',ok:()=>DB.tables.some(t=>t.rows.length>=10)},
+ {s:2,t:'Форма для введення даних з власним заголовком або підписом',h:'Створення → Форма, потім Конструктор',ok:()=>DB.forms.some(f=>T(f.source)&&(f.items.some(i=>i.label)||(f.title&&f.title!==f.source)))},
+ {s:3,t:'Запит з умовою відбору',h:'Макет запиту → рядок «Умова відбору»',ok:()=>DB.queries.some(q=>q.cols.some(c=>c.field&&((c.crit||'').trim()||(c.or||'').trim())&&!/\[[^\]]+\]/.test((c.crit||'')+(c.or||''))))},
+ {s:3,t:'Запит з параметром [Введіть …]',h:'Умова відбору: [Введіть клас:]',ok:()=>DB.queries.some(q=>paramsOf(q).length>0)},
+ {s:3,t:'Запит до кількох зв’язаних таблиць',h:'Макет запиту → + Таблиця (дві і більше)',ok:()=>DB.queries.some(q=>q.tables.filter(T).length>=2&&q.cols.some(c=>c.field))},
+ {s:3,t:'Запит із сортуванням',h:'Рядок «Сортування» в бланку запиту',ok:()=>DB.queries.some(q=>q.cols.some(c=>c.field&&c.sort))},
+ {s:4,t:'Звіт з групуванням',h:'Створення → Майстер звітів → Групування',ok:()=>DB.reports.some(r=>r.group&&r.fields.length)},
+ {s:5,t:'Імпорт або експорт даних (Excel / CSV)',h:'Зовнішні дані → Імпорт або Експорт',ok:()=>!!(DB.meta.flags.imported||DB.meta.flags.exported)}];
+const THEMES=[['Спортивна секція','Спортсмени · Види_спорту · Результати'],['Шкільна бібліотека','Книги · Читачі · Видачі'],['Фільмотека','Фільми · Жанри · Перегляди'],['Інтернет-магазин','Товари · Покупці · Замовлення'],['Кіберспорт','Гравці · Команди · Матчі'],['Шкільна теплиця','Рослини · Грядки · Догляд']];
+function evalProject(){const res=CHECKS.map(c=>{let ok=false;try{ok=!!c.ok()&&!DB.meta.template}catch(e){}return {...c,done:ok}});const n=res.filter(x=>x.done).length;const pen=Math.min(2,Math.floor((DB.meta.errors||0)/15));return {res,n,pen,score:n?Math.max(1,n-pen):0}}
+const fmtTime=ms=>{const m=Math.round(ms/60000);return m<60?m+' хв':Math.floor(m/60)+' год '+(m%60)+' хв'};
+function viewProject(tab,el){const m=DB.meta;const ev=evalProject();
+ el.innerHTML=`<div class="proj"><div class="pgrid"><div class="card"><h3>Учень / учениця</h3><div class="row2"><label class="fld"><span>Прізвище та ім’я</span><input class="inp" data-ch="meta" data-k="student" value="${esc(m.student)}"></label><label class="fld"><span>Клас</span><input class="inp" data-ch="meta" data-k="cls" value="${esc(m.cls)}" placeholder="9-А" list="clsl"></label></div><datalist id="clsl"><option value="9-А"><option value="9-Б"><option value="9-В"></datalist>
+ <h3 style="margin-top:14px">Тема проєкту</h3><div class="themes">${THEMES.map(t=>`<button class="theme ${m.theme===t[0]?'on':''}" data-act="theme" data-v="${esc(t[0])}"><b>${esc(t[0])}</b>${esc(t[1])}</button>`).join('')}</div>
+ <label class="fld" style="margin-top:8px"><span>Або своя тема</span><input class="inp" data-ch="meta" data-k="theme" value="${esc(THEMES.some(t=>t[0]===m.theme)?'':m.theme)}" placeholder="Наприклад: Музична школа"></label></div>
+ <div class="card"><h3>Попередня оцінка</h3><div class="score"><div><div class="big">${ev.score}<span style="font-size:20px;color:var(--mut)">/12</span></div><div class="stat">виконано вимог: ${ev.n} з 12</div></div>
+ <div class="stat"><b>${fmtTime(m.activeMs||0)}</b>час роботи</div><div class="stat"><b>${m.errors||0}</b>помилок${ev.pen?` (−${ev.pen} бал)`:''}</div><div class="stat"><b>${DB.tables.reduce((s,t)=>s+t.rows.length,0)}</b>записів</div></div>
+ ${m.template?`<div class="warnbox" style="margin-top:10px">Це навчальний приклад «${esc(m.template)}». Проєкт виконуйте у власній базі: «Закрити базу» → «Порожня база даних».</div>`:''}<p class="mnote" style="margin:10px 0">Оцінка рахується автоматично: 1 бал за кожну вимогу, мінус бал за кожні 15 помилок (максимум −2). Остаточну оцінку ставить учитель.</p>
+ <button class="btn pri" data-act="sendTeacher" style="min-height:44px">Надіслати вчителю (зберегти файл проєкту)</button>
+ <p class="mnote" style="margin-top:8px">Файл з’явиться в «Завантаженнях». Надішліть його вчителю туди, куди він скаже (Classroom, Telegram, пошта).</p></div></div>
+ <div class="card"><h3>Вимоги до проєкту</h3><div class="chk">${[1,2,3,4,5].map(s=>`<div class="stage">Етап ${s}. ${STAGES[s]}</div>`+ev.res.filter(c=>c.s===s).map(c=>`<div class="ck ${c.done?'done':''}"><span class="m">${c.done?'✓':''}</span><div>${esc(c.t)}<small>${c.done?'Виконано':'Як: '+esc(c.h)}</small></div></div>`).join('')).join('')}</div></div></div>`}
+
+/* ---------- import / export ---------- */
+function loadXLSX(){if(window.XLSX)return Promise.resolve(window.XLSX);return new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';s.onload=()=>window.XLSX?res(window.XLSX):rej(new Error('x'));s.onerror=()=>rej(new Error('Не вдалося завантажити модуль Excel. Збережіть файл як CSV і спробуйте ще раз.'));document.head.appendChild(s)})}
+function parseCSV(text){text=text.replace(/^\ufeff/,'');const first=text.split(/\r?\n/)[0]||'';const cnt=c=>first.split(c).length;const d=[';',',','\t'].sort((a,b)=>cnt(b)-cnt(a))[0];const rows=[];let row=[],cell='',q=false;
+ for(let i=0;i<text.length;i++){const c=text[i];if(q){if(c==='"'){if(text[i+1]==='"'){cell+='"';i++}else q=false}else cell+=c}else if(c==='"')q=true;else if(c===d){row.push(cell);cell=''}else if(c==='\n'||c==='\r'){if(c==='\r'&&text[i+1]==='\n')i++;row.push(cell);rows.push(row);row=[];cell=''}else cell+=c}
+ if(cell||row.length){row.push(cell);rows.push(row)}return rows.filter(r=>r.some(x=>String(x).trim()!==''))}
+function inferType(vals){const v=vals.filter(x=>x!=null&&String(x).trim()!=='');if(!v.length)return 'Короткий текст';if(v.every(x=>x instanceof Date||(typeof x==='string'&&toISO(x)&&/[.\-\/]/.test(x))))return 'Дата/час';if(v.every(x=>typeof x==='boolean'||/^(так|ні|true|false)$/i.test(String(x).trim())))return 'Так/Ні';if(v.every(x=>typeof x==='number'||(isNumLike(String(x))&&!/^0\d/.test(String(x).trim())&&!/^\+/.test(String(x).trim()))))return 'Число';return v.some(x=>String(x).length>255)?'Довгий текст':'Короткий текст'}
+async function doImport(file){let aoa;try{if(/\.xlsx?$/i.test(file.name)){const X=await loadXLSX();const wb=X.read(await file.arrayBuffer(),{type:'array',cellDates:true});const ws=wb.Sheets[wb.SheetNames[0]];aoa=X.utils.sheet_to_json(ws,{header:1,raw:true,defval:null})}else aoa=parseCSV(await file.text())}catch(e){err(e.message||'Не вдалося прочитати файл.');return}
+ aoa=(aoa||[]).filter(r=>r&&r.some(x=>x!=null&&String(x).trim()!==''));if(!aoa.length){err('Файл порожній.');return}
+ const base=file.name.replace(/\.[^.]+$/,'').replace(/[.\[\]!`]/g,'_').slice(0,40)||'Імпорт';
+ const r=await modal({title:'Імпорт даних: '+file.name,wide:true,ok:'Імпортувати',body:`<div class="prev"><table>${aoa.slice(0,6).map(row=>`<tr>${row.map(c=>`<td>${esc(c instanceof Date?toISO(c):c)}</td>`).join('')}</tr>`).join('')}</table></div><p class="mnote">Показано перші рядки, усього рядків: ${aoa.length}.</p>
+ <label class="cbl"><input type="checkbox" name="hdr" checked>Перший рядок містить назви полів</label>
+ <label class="cbl"><input type="radio" name="mode" value="new" checked>Створити нову таблицю</label><label class="fld" style="margin-inline-start:26px"><span>Назва нової таблиці</span><input class="inp" name="tname" value="${esc(DB.tables.some(t=>t.name===base)?uniq(base,allNames()):base)}"></label>
+ <label class="cbl" style="margin-inline-start:26px"><input type="checkbox" name="addid" checked>Додати ключове поле ID (Лічильник)</label>
+ ${DB.tables.length?`<label class="cbl"><input type="radio" name="mode" value="append">Додати записи до наявної таблиці (стовпчики за назвами полів)</label><select class="inp" name="target" style="margin-inline-start:26px">${DB.tables.map(t=>`<option>${esc(t.name)}</option>`).join('')}</select>`:''}`,
+ validate:v=>v.mode==='new'?validName(v.tname.trim(),allNames()):null});
+ if(!r)return;const hdr=r.hdr?aoa[0].map((h,i)=>String(h??'').trim().replace(/\s+/g,'_').replace(/[.\[\]!`]/g,'')||'Поле'+(i+1)):aoa[0].map((h,i)=>'Поле'+(i+1));const data=r.hdr?aoa.slice(1):aoa;
+ hdr.forEach((h,i)=>{let n=h,k=2;while(hdr.slice(0,i).includes(n))n=h+'_'+k++;hdr[i]=n});
+ if(r.mode==='append'){const t=T(r.target);let bad=0,added=0;const map=hdr.map(h=>t.fields.find(f=>f.name.toLowerCase()===h.toLowerCase()));if(!map.some(Boolean)){err('Жодна назва стовпчика не збігається з полями таблиці «'+t.name+'».');return}
+  data.forEach(row=>{const o=newRow(t);map.forEach((f,i)=>{if(!f||f.type==='Лічильник')return;const c=conv(f,row[i] instanceof Date?toISO(row[i]):row[i]);if(c.ok)o[f.name]=c.v;else bad++});const kf=t.fields.find(f=>f.key&&f.type!=='Лічильник');if(kf&&(o[kf.name]==null||t.rows.some(x=>eq(x[kf.name],o[kf.name])))){bad++;return}t.rows.push(o);added++});
+  DB.meta.flags.imported=true;save();renderNav();open('table',t.name,'data');toast(`Додано записів: ${added}${bad?` · пропущено значень з помилками: ${bad}`:''}`);return}
+ const types=hdr.map((h,i)=>inferType(data.map(row=>row[i])));const fields=[];if(r.addid&&!hdr.some(h=>/^id$/i.test(h)))fields.push(['ID','Лічильник',1]);hdr.forEach((h,i)=>fields.push([h,types[i],!r.addid&&i===0]));
+ const t=mkTable(r.tname.trim(),fields);let bad=0;data.forEach(row=>{const o=newRow(t);hdr.forEach((h,i)=>{const f=fieldOf(t,h);if(f.type==='Лічильник')return;const c=conv(f,row[i] instanceof Date?toISO(row[i]):row[i]);if(c.ok)o[h]=c.v;else bad++});t.rows.push(o)});
+ DB.tables.push(t);DB.meta.flags.imported=true;save();renderNav();open('table',t.name,'data');toast(`Створено таблицю «${t.name}»: ${t.rows.length} записів.${bad?' Значень з помилками: '+bad:''} Перевірте типи даних у Конструкторі.`)}
+async function doExport(){const objs=[...DB.tables.map(t=>['T:'+t.name,'Таблиця: '+t.name]),...DB.queries.map(q=>['Q:'+q.name,'Запит: '+q.name])];if(!objs.length){err('Немає що експортувати — створіть таблицю.');return}
+ const c=cur();const pre=c&&(c.obj==='table'?'T:'+c.name:c.obj==='query'?'Q:'+c.name:'');
+ const r=await modal({title:'Експорт даних',ok:'Експортувати',body:`<label class="fld"><span>Що експортувати</span><select class="inp" name="src">${objs.map(o=>`<option value="${esc(o[0])}" ${o[0]===pre?'selected':''}>${esc(o[1])}</option>`).join('')}</select></label>
+ <label class="cbl"><input type="radio" name="fmt" value="xlsx" checked>Excel (.xlsx)</label><label class="cbl"><input type="radio" name="fmt" value="csv">CSV (.csv, відкривається в Excel і Google Таблицях)</label>`});if(!r)return;
+ let data;try{const ps=srcParams(r.src);let p={};if(ps.length){p=await askParams(ps);if(!p)return}data=srcData(r.src,p)}catch(e){err(e.message);return}
+ const name=r.src.slice(2).replace(/[\\/:*?"<>|]/g,'_');
+ if(r.fmt==='csv'){const q=v=>{const s=String(v);return /[;"\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s};const txt='\ufeff'+[data.cols.map(c=>q(c.name)).join(';'),...data.rows.map(row=>row.map((v,i)=>q(fmt(v,data.cols[i].type).replace(' ₴',''))).join(';'))].join('\r\n');if(await downloadFile(name+'.csv',txt,txt)){DB.meta.flags.exported=true;save()}return}
+ try{const X=await loadXLSX();const aoa=[data.cols.map(c=>c.name),...data.rows.map(row=>row.map((v,i)=>{const t=data.cols[i].type;if(v==null)return null;if(t==='Дата/час'&&/^\d{4}-\d\d-\d\d/.test(v)){const [y,m,d]=v.split('-').map(Number);return new Date(y,m-1,d)}if(typeof v==='boolean')return v?'Так':'Ні';return v}))];
+  const ws=X.utils.aoa_to_sheet(aoa,{cellDates:true});ws['!cols']=data.cols.map((c,i)=>({wch:Math.min(40,Math.max(c.name.length,...data.rows.map(r=>fmt(r[i],c.type).length))+2)}));const wb=X.utils.book_new();X.utils.book_append_sheet(wb,ws,name.slice(0,31));const buf=X.write(wb,{bookType:'xlsx',type:'array'});
+  if(await downloadFile(name+'.xlsx',new Uint8Array(buf))){DB.meta.flags.exported=true;save()}}catch(e){err(e.message||'Помилка експорту.')}}
+
+/* ---------- start screen ---------- */
+function renderStart(){const idx=LS.get('bazalab:index')||{};const rec=Object.entries(idx).sort((a,b)=>(b[1].saved||0)-(a[1].saved||0));
+ $('#start').hidden=false;$('#start').innerHTML=`<div class="sthead"><h1>БазаЛаб</h1><p>Середовище для роботи з базами даних прямо в браузері — таблиці, зв’язки, запити, форми та звіти, як у Microsoft Access. Нічого не треба встановлювати.</p></div>
+ <div class="stbody"><div class="stcards"><button class="stc" data-act="startBlank">${ICO.plus}<b>Порожня база даних</b><span>Почніть свій проєкт з нуля.</span></button>
+ <button class="stc" data-act="startSchool">${ICO.sch}<b>Приклад «Школа»</b><span>Таблиці Учні, Предмети, Оцінки з підручника — для тренування запитів і звітів.</span></button>
+ <button class="stc" data-act="openFile">${ICO.open}<b>Відкрити файл</b><span>Продовжити роботу з файлу, збереженого минулого уроку (.json).</span></button></div>
+ <div class="warnbox">Комп’ютери в класі спільні, і хтось інший може працювати тут після вас. Наприкінці кожного уроку натискайте <b>«Зберегти файл»</b>, а наступного разу — <b>«Відкрити файл»</b>.</div>
+ ${rec.length?`<div><h3 style="margin:0 0 8px">Нещодавні бази на цьому комп’ютері</h3><div class="recent">${rec.map(([id,v])=>`<div class="rec"><div class="rn"><b>${esc(v.name)}</b><small>${v.student?esc(v.student)+' · ':''}${v.saved?new Date(v.saved).toLocaleString('uk-UA'):''}</small></div><button class="btn" data-act="startRecent" data-id="${id}">Відкрити</button><button class="btn" data-act="delRecent" data-id="${id}" aria-label="Видалити з цього комп’ютера">✕</button></div>`).join('')}</div></div>`:''}</div>`}
+function loadDB(db,id){DB=migrate(db);DBID=id||uid();S.tabs=[];S.active=null;$('#start').hidden=true;$('#start').innerHTML='';save(true);renderAll()}
+
+/* ---------- actions ---------- */
+const ACT={},CH={},IN={};
+ACT.navtoggle=()=>document.body.classList.toggle('navopen');
+ACT.tab=b=>{S.active=b.dataset.id;renderTabs();renderNav();renderView()};
+ACT.closetab=(b,e)=>{e.stopPropagation();closeTab(b.dataset.id)};
+ACT.open=b=>open(b.dataset.k,b.dataset.n);
+ACT.view=b=>setView(b.dataset.v);
+ACT.startBlank=async()=>{const n=await askText('Нова база даних','Назва бази даних (файлу)','Мій проєкт',v=>v?null:'Введіть назву.');if(n)loadDB(blankDB(n))};
+ACT.startSchool=()=>{loadDB(schoolDB());open('table','Учні')};
+ACT.startRecent=b=>{const db=LS.get('bazalab:db:'+b.dataset.id);if(!db){err('Базу не знайдено на цьому комп’ютері.');renderStart();return}loadDB(db,b.dataset.id)};
+ACT.delRecent=async b=>{const idx=LS.get('bazalab:index')||{};if(!await confirmBox('Видалити базу з цього комп’ютера?',`База «${esc(idx[b.dataset.id]?.name||'')}» буде видалена з пам’яті браузера. Файли, які ви зберегли, не зміняться.`))return;delete idx[b.dataset.id];LS.set('bazalab:index',idx);LS.del('bazalab:db:'+b.dataset.id);renderStart()};
+ACT.openFile=()=>{$('#fileDB').value='';$('#fileDB').click()};
+ACT.saveFile=()=>{if(!DB)return;const txt=JSON.stringify(DB);const nm=(DB.meta.student?DB.meta.student.replace(/\s+/g,'_')+'_':'')+DB.name.replace(/[\\/:*?"<>|\s]+/g,'_');downloadFile(nm+'.bazalab.json',txt,txt)};
+ACT.closeDB=()=>{save(true);DB=null;S.tabs=[];S.active=null;renderStart()};
+ACT.openProject=()=>open('project');
+ACT.openRels=()=>open('rels');
+ACT.newTable=async()=>{const n=await askText('Нова таблиця','Назва таблиці',uniq('Таблиця',allNames()),v=>validName(v,allNames()));if(!n)return;DB.tables.push(mkTable(n,[['ID','Лічильник',1]]));save();open('table',n,'data');toast('Таблицю створено з ключовим полем ID. Додайте поля в Конструкторі або просто вводьте дані.')};
+ACT.newTableDesign=async()=>{const n=await askText('Нова таблиця','Назва таблиці',uniq('Таблиця',allNames()),v=>validName(v,allNames()));if(!n)return;DB.tables.push(mkTable(n,[['ID','Лічильник',1]]));save();open('table',n,'design')};
+ACT.newQuery=async()=>{if(!DB.tables.length){err('Спочатку створіть таблицю.');return}const q={name:uniq('Запит',allNames()),tables:[],cols:[],totals:false};const r=await modal({title:'Додавання таблиць',ok:'Додати вибрані таблиці',body:`<p class="mnote">Оберіть таблиці для запиту:</p>${DB.tables.map((t,i)=>`<label class="cbl"><input type="checkbox" name="ts" data-multi value="${esc(t.name)}" ${i===0?'checked':''}>${esc(t.name)}</label>`).join('')}`});if(!r)return;q.tables=r.ts;DB.queries.push(q);save();open('query',q.name,'design')};
+ACT.newForm=async()=>{if(!DB.tables.length){err('Спочатку створіть таблицю.');return}const c=cur();const r=await modal({title:'Нова форма',ok:'Створити',body:`<label class="fld"><span>Для якої таблиці форма?</span><select class="inp" name="t">${DB.tables.map(t=>`<option ${c&&c.obj==='table'&&c.name===t.name?'selected':''}>${esc(t.name)}</option>`).join('')}</select></label>`});if(!r)return;const name=freeName('Форма '+r.t,DB.forms.map(f=>f.name));DB.forms.push({name,source:r.t,title:r.t,size:24,color:'#a4262c',layout:'one',items:T(r.t).fields.map(x=>({f:x.name}))});save();open('form',name,'data')};
+ACT.newReport=async()=>{const objs=[...DB.tables.map(t=>['T:'+t.name,'Таблиця: '+t.name]),...DB.queries.map(q=>['Q:'+q.name,'Запит: '+q.name])];if(!objs.length){err('Спочатку створіть таблицю.');return}const r=await modal({title:'Майстер звітів',ok:'Далі',body:`<label class="fld"><span>Таблиці та запити</span><select class="inp" name="s">${objs.map(o=>`<option value="${esc(o[0])}">${esc(o[1])}</option>`).join('')}</select></label>`});if(!r)return;const base=r.s.slice(2);const name=freeName('Звіт '+base,DB.reports.map(x=>x.name));const cols=srcCols(r.s).map(c=>c.name).filter(n=>!fieldIsKey(n));DB.reports.push({name,source:r.s,fields:cols,group:'',sort:'',dir:'ASC',title:base,layout:'table',summary:false});save();open('report',name,'design')};
+ACT.import=()=>{$('#fileImp').value='';$('#fileImp').click()};
+ACT.export=()=>doExport();
+ACT.objmenu=async b=>{const k=b.dataset.k,n=b.dataset.n;const names={table:'таблицю',query:'запит',form:'форму',report:'звіт'};const v=await pick(n,[['open','Відкрити'],['design','Конструктор'],['rename','Перейменувати'],['copy','Копіювати'],['delete','Видалити '+names[k]]]);if(!v)return;
+ if(v==='open')open(k,n,defView(k,n));else if(v==='design')open(k,n,'design');else if(v==='rename')renameObj(k,n);else if(v==='copy')copyObj(k,n);else if(v==='delete')deleteObj(k,n)};
+function listOf(k){return {table:DB.tables,query:DB.queries,form:DB.forms,report:DB.reports}[k]}
+function takenFor(k,except){return (k==='table'||k==='query'?allNames():listOf(k).map(o=>o.name)).filter(x=>x!==except)}
+async function renameObj(k,n){const nn=await askText('Перейменувати','Нова назва',n,v=>v===n?null:validName(v,takenFor(k,n)));if(!nn||nn===n)return;doRename(k,n,nn)}
+function doRename(k,n,nn){const o=listOf(k).find(x=>x.name===n);if(!o)return false;const er=validName(nn,takenFor(k,n));if(er){err(er);return false}o.name=nn;
+ if(k==='table'){DB.rels.forEach(r=>{if(r.pt===n)r.pt=nn;if(r.ct===n)r.ct=nn});DB.queries.forEach(q=>{q.tables=q.tables.map(x=>x===n?nn:x);q.cols.forEach(c=>{if(c.field.startsWith(n+'.'))c.field=nn+c.field.slice(n.length)})});DB.forms.forEach(f=>{if(f.source===n)f.source=nn});DB.reports.forEach(r=>{if(r.source==='T:'+n)r.source='T:'+nn});if(DB.layout[n]){DB.layout[nn]=DB.layout[n];delete DB.layout[n]}}
+ if(k==='query')DB.reports.forEach(r=>{if(r.source==='Q:'+n)r.source='Q:'+nn});
+ S.tabs.forEach(t=>{if(t.obj===k&&t.name===n)t.name=nn});save();renderTabs();renderNav();renderView();return true}
+function copyObj(k,n){const o=listOf(k).find(x=>x.name===n);const c=JSON.parse(JSON.stringify(o));c.name=freeName(n+' копія',takenFor(k));if(k==='table')c.rows.forEach(r=>r._id=uid());listOf(k).push(c);save();renderNav();open(k,c.name)}
+async function deleteObj(k,n){const extra=k==='table'?' Разом із нею буде видалено її зв’язки.':'';if(!await confirmBox('Видалити «'+n+'»?','Цю дію не можна скасувати.'+extra))return;const L=listOf(k);L.splice(L.findIndex(x=>x.name===n),1);if(k==='table'){DB.rels=DB.rels.filter(r=>r.pt!==n&&r.ct!==n);delete DB.layout[n]}S.tabs.filter(t=>t.obj===k&&t.name===n).forEach(t=>closeTab(t.id));save();renderNav();renderView()}
+/* table data */
+ACT.sortcol=b=>{const st=cur().st;const f=b.dataset.f;if(st.sort===f){if(st.dir>0)st.dir=-1;else{st.sort=null}}else{st.sort=f;st.dir=1}renderView()};
+ACT.selrow=b=>{cur().st.sel=b.dataset.id;renderView()};
+ACT.addrow=()=>{const tab=cur();const t=T(tab.name);const f=t.fields.find(x=>x.type!=='Лічильник');if(!f){err('Спочатку додайте поля в Конструкторі.');return}tab.st.q='';renderView();const n=$('#view tr.newr [data-ch="cell"]');n&&n.focus()};
+ACT.delrow=async()=>{const tab=cur();const t=T(tab.name);const id=tab.st.sel;const row=t.rows.find(r=>r._id===id);if(!row){err('Спочатку виберіть запис — клацніть сіру клітинку зліва від рядка.');return}const m=canDelete(t,row);if(m){err(m);return}if(!await confirmBox('Видалити запис?','Запис буде видалено назавжди.'))return;t.rows.splice(t.rows.indexOf(row),1);tab.st.sel=null;save();renderView()};
+IN.tsearch=el=>{cur().st.q=el.value;rerender()};
+CH.cell=el=>{const t=T(el.dataset.t);if(!t)return;const f=fieldOf(t,el.dataset.f);if(!f)return;const raw=el.type==='checkbox'?el.checked:el.value.trim();const c=conv(f,raw);if(!c.ok){err(c.msg);rerender();return}
+ let row=el.dataset.row==='new'?null:t.rows.find(r=>r._id===el.dataset.row);const isNew=!row;if(isNew&&(c.v==null||c.v===false))return;
+ if(!isNew&&eq(row[f.name],c.v)&&typeof c.v!=='boolean')return;
+ const m=checkSet(t,row,f,c.v);if(m){err(m);rerender();return}
+ const tab=cur();if(isNew){row=newRow(t);t.rows.push(row);if(tab&&tab.obj==='form'){tab.st.newMode=false;tab.st.i=t.rows.length-1}}
+ row[f.name]=c.v;save();if(isNew){const fi=t.fields.indexOf(f);const nx=t.fields.slice(fi+1).find(x=>x.type!=='Лічильник')||f;S.focus={row:row._id,f:nx.name};renderView()}else if(el.closest('tr'))el.closest('tr').classList.toggle('warn',!!t.fields.find(x=>x.key&&(row[x.name]==null||row[x.name]==='')))};
+document.addEventListener('focusin',e=>{const el=e.target;const tab=cur();if(!tab)return;if(el.dataset&&el.dataset.ch==='cell'&&tab.obj==='table'&&el.dataset.row!=='new'&&tab.st.sel!==el.dataset.row){tab.st.sel=el.dataset.row;$$('#view tr.selr').forEach(r=>{r.classList.remove('selr');r.querySelector('.rs').textContent=''});const tr=el.closest('tr');if(tr){tr.classList.add('selr');tr.querySelector('.rs').textContent='▶'}}
+ if(el.dataset&&el.dataset.ch==='qcol'&&(el.dataset.k==='crit'||el.dataset.k==='or'))S.lastCrit={i:+el.dataset.i,k:el.dataset.k}});
+/* table design */
+const curT=()=>T(cur().name);
+ACT.addfield=()=>{const t=curT();t.fields.push({name:uniq('Поле',t.fields.map(f=>f.name)),type:'Короткий текст',key:false,desc:''});t.rows.forEach(r=>r[t.fields[t.fields.length-1].name]=null);save();S.focus={sel:`#view [data-ch="fname"][data-i="${t.fields.length-1}"]`,row:'',f:''};renderView()};
+CH.trename=el=>{const t=curT();if(!doRename('table',t.name,el.value.trim()))el.value=t.name};
+CH.fname=el=>{const t=curT();const i=+el.dataset.i;const f=t.fields[i];const nn=el.value.trim();if(nn===f.name)return;const e=validName(nn,t.fields.filter(x=>x!==f).map(x=>x.name));if(e){err(e.replace('Об’єкт','Поле'));el.value=f.name;return}const old=f.name;f.name=nn;t.rows.forEach(r=>{r[nn]=r[old];delete r[old]});
+ DB.rels.forEach(r=>{if(r.pt===t.name&&r.pf===old)r.pf=nn;if(r.ct===t.name&&r.cf===old)r.cf=nn});DB.queries.forEach(q=>q.cols.forEach(c=>{if(c.field===t.name+'.'+old)c.field=t.name+'.'+nn}));DB.forms.forEach(fm=>{if(fm.source===t.name)fm.items.forEach(it=>{if(it.f===old)it.f=nn})});DB.reports.forEach(r=>{if(r.source==='T:'+t.name){r.fields=r.fields.map(x=>x===old?nn:x);if(r.group===old)r.group=nn;if(r.sort===old)r.sort=nn}});save()};
+CH.fdesc=el=>{curT().fields[+el.dataset.i].desc=el.value;save()};
+CH.ftype=el=>{const t=curT();const f=t.fields[+el.dataset.i];const nt=el.value;if(nt==='Лічильник'){if(t.fields.some(x=>x!==f&&x.type==='Лічильник')){err('У таблиці може бути лише одне поле типу «Лічильник».');el.value=f.type;return}if(t.rows.length){err('Не можна змінити тип на «Лічильник», коли в таблиці вже є записи. Створіть нове поле.');el.value=f.type;return}}
+ if(DB.rels.some(r=>(r.pt===t.name&&r.pf===f.name)||(r.ct===t.name&&r.cf===f.name))&&typeGroup(nt)!==typeGroup(f.type)){err('Це поле бере участь у зв’язку. Спочатку видаліть зв’язок у Схемі даних.');el.value=f.type;return}
+ let lost=0;const g={...f,type:nt};t.rows.forEach(r=>{const v=r[f.name];if(v==null||v==='')return;const c=conv(g,typeof v==='boolean'?(v?'так':''):f.type==='Дата/час'?fmt(v,'Дата/час'):v);if(c.ok)r[f.name]=c.v;else{r[f.name]=null;lost++}});f.type=nt;save();if(lost)toast(`Тип змінено. ${lost} значень не підходять до типу «${nt}» і були очищені.`,'err');else toast('Тип поля «'+f.name+'»: '+nt)};
+ACT.togkey=b=>{const t=curT();const f=t.fields[+b.dataset.i];if(f.key){f.key=false;save();renderView();return}
+ if(f.type!=='Лічильник'){const vals=t.rows.map(r=>r[f.name]);if(vals.some(v=>v==null||v==='')){err(`Поле «${f.name}» не може бути ключовим: у деяких записах воно порожнє.`);return}if(new Set(vals.map(v=>String(v).toLowerCase())).size!==vals.length){err(`Поле «${f.name}» не може бути ключовим: значення повторюються.`);return}}
+ t.fields.forEach(x=>x.key=false);f.key=true;save();renderView()};
+ACT.fmove=b=>{const t=curT();const i=+b.dataset.i,j=i+ +b.dataset.d;if(j<0||j>=t.fields.length)return;[t.fields[i],t.fields[j]]=[t.fields[j],t.fields[i]];save();renderView()};
+ACT.fdel=async b=>{const t=curT();const f=t.fields[+b.dataset.i];if(DB.rels.some(r=>(r.pt===t.name&&r.pf===f.name)||(r.ct===t.name&&r.cf===f.name))){err('Поле бере участь у зв’язку. Спочатку видаліть зв’язок у Схемі даних.');return}if(!await confirmBox(`Видалити поле «${f.name}»?`,'Усі дані цього поля буде втрачено.'))return;t.fields.splice(t.fields.indexOf(f),1);t.rows.forEach(r=>delete r[f.name]);save();renderView()};
+/* relations */
+ACT.reladd=()=>relDialog();
+ACT.reledit=async b=>{const r=DB.rels.find(x=>x.id===b.dataset.id);if(!r)return;const v=await pick('Зв’язок '+r.pt+' → '+r.ct,[['edit','Змінити зв’язок'],['del','Видалити зв’язок']],`${esc(r.pt)}.${esc(r.pf)} → ${esc(r.ct)}.${esc(r.cf)} · ${relKind(r)} · цілісність: ${r.integ?'так':'ні'}`);if(v==='edit')relDialog(null,r);if(v==='del')ACT.reldel(b)};
+ACT.reldel=async b=>{const r=DB.rels.find(x=>x.id===b.dataset.id);if(!r)return;if(!await confirmBox('Видалити зв’язок?',`${esc(r.pt)}.${esc(r.pf)} → ${esc(r.ct)}.${esc(r.cf)}`))return;DB.rels.splice(DB.rels.indexOf(r),1);save();renderView()};
+ACT.relauto=()=>{DB.tables.forEach((t,i)=>DB.layout[t.name]={x:20+(i%3)*270,y:20+Math.floor(i/3)*250});save();renderView()};
+let drag=null;
+document.addEventListener('pointerdown',e=>{const h=e.target.closest('#rc [data-drag]');if(!h)return;const box=h.parentElement;drag={n:h.dataset.drag,box,sx:e.clientX,sy:e.clientY,x:box.offsetLeft,y:box.offsetTop};h.setPointerCapture(e.pointerId);e.preventDefault()});
+document.addEventListener('pointermove',e=>{if(!drag)return;const x=Math.max(0,drag.x+e.clientX-drag.sx),y=Math.max(0,drag.y+e.clientY-drag.sy);drag.box.style.left=x+'px';drag.box.style.top=y+'px';DB.layout[drag.n]={x,y};drawRels()});
+document.addEventListener('pointerup',()=>{if(drag){drag=null;save()}});
+document.addEventListener('dragstart',e=>{const li=e.target.closest&&e.target.closest('#rc li[data-fl]');if(!li)return;e.dataTransfer.setData('text/plain',li.dataset.t+'\u0001'+li.dataset.fl);e.dataTransfer.effectAllowed='link'});
+document.addEventListener('dragover',e=>{const li=e.target.closest&&e.target.closest('#rc li[data-fl]');if(li){e.preventDefault();$$('#rc li.over').forEach(x=>x.classList.remove('over'));li.classList.add('over')}});
+document.addEventListener('drop',e=>{const li=e.target.closest&&e.target.closest('#rc li[data-fl]');if(!li)return;e.preventDefault();li.classList.remove('over');const [t1,f1]=(e.dataTransfer.getData('text/plain')||'').split('\u0001');if(!t1||t1===li.dataset.t)return;relDialog({t1,f1,t2:li.dataset.t,f2:li.dataset.fl})});
+window.addEventListener('resize',()=>drawRels());
+/* query */
+const curQ=()=>Q(cur().name);
+ACT.qrun=()=>{const t=cur();runTab(t)};
+ACT.qaddtab=async()=>{const q=curQ();const r=await modal({title:'Додавання таблиць',ok:'Додати вибрані таблиці',body:DB.tables.map(t=>`<label class="cbl"><input type="checkbox" name="ts" data-multi value="${esc(t.name)}">${esc(t.name)}${q.tables.includes(t.name)?' <span class="cnt">(уже в запиті)</span>':''}</label>`).join('')});if(!r)return;r.ts.forEach(n=>{if(!q.tables.includes(n))q.tables.push(n)});save();renderView()};
+ACT.qrmtab=b=>{const q=curQ();const n=b.dataset.n;q.tables=q.tables.filter(x=>x!==n);q.cols=q.cols.filter(c=>!c.field.startsWith(n+'.'));save();renderView()};
+ACT.qadd=b=>{const q=curQ();let c=q.cols.find(x=>!x.field);if(!c){c=blankCol();q.cols.push(c)}c.field=b.dataset.v;save();renderView()};
+ACT.qtotals=()=>{const q=curQ();q.totals=!q.totals;save();renderView()};
+ACT.qmv=b=>{const q=curQ();const i=+b.dataset.i,j=i+ +b.dataset.d;if(j<0||j>=q.cols.length||!q.cols[j].field)return;[q.cols[i],q.cols[j]]=[q.cols[j],q.cols[i]];save();renderView()};
+ACT.qdel=b=>{const q=curQ();q.cols.splice(+b.dataset.i,1);save();renderView()};
+ACT.qins=b=>{const q=curQ();let L=S.lastCrit;if(!L||!q.cols[L.i]||!q.cols[L.i].field){const i=q.cols.findIndex(c=>c.field);if(i<0){err('Спочатку додайте поле в бланк запиту.');return}L={i,k:'crit'}}const c=q.cols[L.i];c[L.k]=b.dataset.v;S.lastCrit=L;save();S.focus={sel:`#view [data-ch="qcol"][data-i="${L.i}"][data-k="${L.k}"]`,row:'',f:''};renderView()};
+CH.qcol=el=>{const q=curQ();const c=q.cols[+el.dataset.i];if(!c)return;const k=el.dataset.k;c[k]=el.type==='checkbox'?el.checked:el.value;save();if(k==='field'||k==='total'){if(c.field){try{colSpecs(q,c)}catch(e){err(e.message)}}rerender()}};
+CH.qrename=el=>{const q=curQ();if(!doRename('query',q.name,el.value.trim()))el.value=q.name};
+ACT.copysql=async()=>{try{await navigator.clipboard.writeText(sqlOf(curQ()));toast('SQL скопійовано')}catch(e){toast('Виділіть текст і натисніть Ctrl+C','err')}};
+/* form */
+const curF=()=>F(cur().name);
+ACT.fnav=b=>{const st=cur().st;const t=T(curF().source);const n=t.rows.length;const d=b.dataset.d;if(d==='new'){st.newMode=true}else{if(st.newMode){st.newMode=false;st.i=n-1}else st.i=d==='first'?0:d==='last'?n-1:d==='prev'?Math.max(0,st.i-1):Math.min(n-1,st.i+1)}renderView();if(d==='new'){const x=$('#view [data-row="new"][data-ch="cell"]');x&&x.focus()}};
+ACT.fdelrow=async()=>{const st=cur().st;const t=T(curF().source);const row=t.rows[st.i];if(!row)return;const m=canDelete(t,row);if(m){err(m);return}if(!await confirmBox('Видалити запис?','Запис буде видалено назавжди.'))return;t.rows.splice(st.i,1);st.i=Math.max(0,st.i-1);save();renderView()};
+CH.fprop=el=>{const f=curF();f[el.dataset.k]=el.dataset.k==='size'?+el.value:el.value;save();rerender()};
+IN.fprop=el=>{if(el.type==='range'){const f=curF();f.size=+el.value;const h=$('#view .fhead');if(h)h.style.fontSize=el.value+'px'}};
+ACT.fcolor=b=>{curF().color=b.dataset.v;save();renderView()};
+ACT.flayout=b=>{curF().layout=b.dataset.v;save();renderView()};
+CH.fitem=el=>{const f=curF();const it=f.items[+el.dataset.i];it[el.dataset.k]=el.dataset.k==='size'?+el.value:el.value;save();rerender()};
+ACT.fimv=b=>{const f=curF();const i=+b.dataset.i,j=i+ +b.dataset.d;if(j<0||j>=f.items.length)return;[f.items[i],f.items[j]]=[f.items[j],f.items[i]];save();renderView()};
+ACT.fidel=b=>{curF().items.splice(+b.dataset.i,1);save();renderView()};
+ACT.fiadd=b=>{curF().items.push({f:b.dataset.v});save();renderView()};
+ACT.fiaddlabel=()=>{curF().items.unshift({label:'Контактна інформація',size:18});save();renderView();toast('Підпис додано вгорі. Змініть текст і перемістіть стрілками ↑ ↓.')};
+CH.frename=el=>{const f=curF();if(!doRename('form',f.name,el.value.trim()))el.value=f.name};
+/* report */
+const curR=()=>R(cur().name);
+CH.rprop=el=>{const r=curR();const k=el.dataset.k;r[k]=el.type==='checkbox'?el.checked:el.value;if(k==='source'){r.fields=srcCols(r.source).map(c=>c.name).filter(n=>!fieldIsKey(n));r.group='';r.sort='';cur().st.params=null}save();rerender()};
+ACT.rfadd=b=>{curR().fields.push(b.dataset.v);save();renderView()};
+ACT.rfdel=b=>{curR().fields.splice(+b.dataset.i,1);save();renderView()};
+ACT.rfmv=b=>{const r=curR();const i=+b.dataset.i,j=i+ +b.dataset.d;if(j<0||j>=r.fields.length)return;[r.fields[i],r.fields[j]]=[r.fields[j],r.fields[i]];save();renderView()};
+ACT.rlayout=b=>{curR().layout=b.dataset.v;save();renderView()};
+ACT.rparams=()=>{cur().st.params=null;renderView()};
+CH.rrename=el=>{const r=curR();if(!doRename('report',r.name,el.value.trim()))el.value=r.name};
+let REPCSS='';try{REPCSS=[...document.querySelector('style').sheet.cssRules].filter(r=>r.selectorText&&r.selectorText.includes('.rpage')).map(r=>r.cssText).join('\n')}catch(e){}
+ACT.rdl=()=>{const r=curR();const d=repData(cur(),r);if(!d.data){err(d.error||'Спочатку введіть параметри.');return}const html=`<!DOCTYPE html><html lang="uk"><head><meta charset="utf-8"><title>${esc(r.title||r.name)}</title><style>body{margin:0;padding:24px;background:#eee;font-family:system-ui,sans-serif}${REPCSS}@media print{body{background:#fff;padding:0}.rpage{box-shadow:none}}</style></head><body>${reportHTML(r,d.data)}</body></html>`;downloadFile((r.title||r.name).replace(/[\\/:*?"<>|]/g,'_')+'.html',html,html)};
+/* project */
+CH.meta=el=>{DB.meta[el.dataset.k]=el.value.trim();save();if(el.dataset.k==='theme')rerender()};
+ACT.theme=b=>{DB.meta.theme=b.dataset.v;save();renderView()};
+ACT.sendTeacher=async()=>{const m=DB.meta;if(!m.student||!m.cls){err('Впишіть прізвище, ім’я та клас — інакше вчитель не знатиме, чия це робота.');return}const ev=evalProject();m.lastCheck={at:Date.now(),done:ev.n,score:ev.score,items:ev.res.map(c=>({t:c.t,done:c.done}))};save(true);const txt=JSON.stringify(DB);await downloadFile(`${m.cls}_${m.student.replace(/\s+/g,'_')}_проєкт_БД.bazalab.json`,txt,txt)};
+CH.dbname=el=>{if(!DB)return;DB.name=el.value.trim()||DB.name;el.value=DB.name;save();if(!cur())renderView()};
+
+/* ---------- global events ---------- */
+document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b||b.disabled)return;const f=ACT[b.dataset.act];if(f&&(DB||/^(start|delRecent|openFile)/.test(b.dataset.act)))f(b,e)});
+document.addEventListener('change',e=>{const el=e.target.closest('[data-ch]');if(el&&CH[el.dataset.ch]&&DB)CH[el.dataset.ch](el,e)});
+document.addEventListener('input',e=>{const el=e.target.closest('[data-in],[data-ch]');if(!el||!DB)return;const k=el.dataset.in||el.dataset.ch;if(IN[k])IN[k](el,e)});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.matches&&e.target.matches('#view .ci[data-ch="cell"]')){e.preventDefault();e.target.blur();const td=e.target.closest('td');const tr=td&&td.parentElement;if(!tr)return;const idx=[...tr.children].indexOf(td);const nx=tr.nextElementSibling;const n=nx&&nx.children[idx]&&nx.children[idx].querySelector('input');setTimeout(()=>{const m=n&&document.contains(n)?n:$('#view tr.newr')?.children[idx]?.querySelector('input');m&&m.focus()},0)}});
+$('#fileDB').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;try{const db=JSON.parse(await f.text());if(!db||!Array.isArray(db.tables))throw new Error();loadDB(db);toast(`Відкрито «${db.name}»${db.meta&&db.meta.student?' · '+db.meta.student:''}`);if(db.meta&&db.meta.student)open('project')}catch(x){toast('Це не файл бази БазаЛаб (.json).','err')}});
+$('#fileImp').addEventListener('change',e=>{const f=e.target.files[0];if(f&&DB)doImport(f)});
+let lastAct=Date.now();['pointerdown','keydown'].forEach(ev=>document.addEventListener(ev,()=>{lastAct=Date.now()},true));
+setInterval(()=>{if(DB&&!document.hidden&&Date.now()-lastAct<120000){DB.meta.activeMs=(DB.meta.activeMs||0)+15000;save()}},15000);
+setTimeout(getDL,1500);
+renderStart();
+}
+</script>
+</body>
+</html>

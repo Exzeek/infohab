@@ -1,0 +1,349 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Цифрова служба класу</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Manrope:wght@400;600;700;800&display=swap">
+<style>
+/* Layout: шапка-«бланк замовлення», вкладки уроків, одна колонка кроків-чеклистів ~780px */
+:root{
+  --bg:#eef3f5; --surface:#ffffff; --surface-2:#e4edf1; --line:#cbd8df;
+  --fg:#12222c; --dim:#546874; --accent:#0d7f86; --accent-ink:#ffffff; --amber:#b77900;
+  --ok:#1d8a4c; --ok-bg:#e1f4e8; --bad:#c43b3b; --bad-bg:#fbe6e6; --sheet:#188038;
+  --display:"Unbounded","Arial Black",system-ui,sans-serif;
+  --body:"Manrope","Segoe UI",system-ui,sans-serif;
+  --mono:ui-monospace,"Cascadia Mono",Consolas,monospace;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0c151b; --surface:#13212a; --surface-2:#1a2d37; --line:#2b414d;
+  --fg:#e5eef2; --dim:#94a9b4; --accent:#3cc4c0; --accent-ink:#06191b; --amber:#f0b43a;
+  --ok:#4fcf89; --ok-bg:#163a29; --bad:#f07070; --bad-bg:#3d1d1f; --sheet:#5bc37a; color-scheme:dark; } }
+:root[data-theme="dark"]{
+  --bg:#0c151b; --surface:#13212a; --surface-2:#1a2d37; --line:#2b414d;
+  --fg:#e5eef2; --dim:#94a9b4; --accent:#3cc4c0; --accent-ink:#06191b; --amber:#f0b43a;
+  --ok:#4fcf89; --ok-bg:#163a29; --bad:#f07070; --bad-bg:#3d1d1f; --sheet:#5bc37a; color-scheme:dark; }
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg); color:var(--fg); font-family:var(--body); font-size:16px; line-height:1.55}
+.wrap{max-width:780px; margin:0 auto; padding:20px 16px 64px}
+h1,h2,h3{font-family:var(--display); text-wrap:balance; margin:0}
+h2{font-size:1.25rem; margin-bottom:6px}
+h3{font-size:1rem; margin:0 0 8px}
+p{margin:0 0 10px}
+.dim{color:var(--dim)}
+button{font-family:inherit; font-size:inherit}
+:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+a{color:var(--accent)}
+code,.f{font-family:var(--mono); font-size:.88rem; background:var(--surface-2); border-radius:6px; padding:1px 6px; overflow-wrap:anywhere}
+.top{display:flex; flex-direction:column; gap:12px; padding-block:6px 18px}
+.kicker{font-size:.78rem; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); font-weight:800}
+h1{font-size:clamp(1.9rem,7vw,3.1rem); font-weight:800; letter-spacing:-.02em; line-height:1.05}
+.brief{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:8px}
+.brief div{background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:8px 12px; font-size:.86rem}
+.brief b{display:block; font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; color:var(--dim)}
+.who{display:flex; flex-wrap:wrap; gap:10px}
+.who input{flex:1 1 200px; min-width:0; background:var(--surface); border:1px solid var(--line); color:var(--fg); border-radius:10px; padding:10px 12px; font:inherit}
+.who input#cls{flex:0 1 120px}
+.meter{display:flex; align-items:center; gap:10px; font-size:.85rem; color:var(--dim)}
+.meter .bar{flex:1; height:8px; background:var(--surface-2); border-radius:8px; overflow:hidden}
+.meter .bar i{display:block; height:100%; width:0; background:var(--accent); transition:width .4s}
+.tabs{display:flex; gap:6px; overflow-x:auto; padding-bottom:4px; margin-bottom:18px}
+.tab{flex:0 0 auto; background:transparent; border:1px solid var(--line); color:var(--dim); border-radius:999px; padding:8px 15px; cursor:pointer; font-weight:700; font-size:.9rem}
+.tab[aria-selected="true"]{background:var(--fg); color:var(--bg); border-color:var(--fg)}
+.tab .n{opacity:.7; margin-left:4px; font-weight:600; font-variant-numeric:tabular-nums}
+.stack{display:flex; flex-direction:column; gap:14px}
+.card{background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:18px}
+.card.note{border-left:4px solid var(--amber)}
+.tag{display:inline-block; font-size:.72rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--accent); border:1px solid var(--accent); border-radius:999px; padding:1px 9px; margin-bottom:8px}
+.steps{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px}
+.steps li{display:grid; grid-template-columns:28px 1fr; gap:10px; align-items:start; padding:10px 12px; border:1px solid var(--line); border-radius:11px; background:var(--surface-2)}
+.steps li.done{border-color:var(--ok); background:var(--ok-bg)}
+.steps input[type=checkbox]{width:22px; height:22px; margin:2px 0 0; accent-color:var(--ok); cursor:pointer}
+.steps label{cursor:pointer}
+.steps .sub{display:block; font-size:.88rem; color:var(--dim); margin-top:3px}
+.tw{overflow-x:auto}
+table.t{width:100%; border-collapse:collapse; font-size:.9rem}
+table.t th,table.t td{padding:7px 8px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top}
+table.t th{font-size:.76rem; text-transform:uppercase; letter-spacing:.06em; color:var(--dim)}
+.btn{display:inline-block; background:var(--accent); color:var(--accent-ink); border:none; padding:10px 18px; border-radius:999px; cursor:pointer; font-weight:800; text-decoration:none}
+.btn.ghost{background:transparent; color:var(--fg); border:1px solid var(--line)}
+.btn.sheet{background:var(--sheet); color:#fff}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:12px}
+.q{display:grid; grid-template-columns:1fr auto auto; gap:10px; align-items:center; padding:10px 0; border-bottom:1px solid var(--line)}
+.q:last-child{border-bottom:none}
+@media(max-width:560px){ .q{grid-template-columns:1fr 1fr} .q .qt{grid-column:1/-1} }
+.q input{background:var(--bg); border:1px solid var(--line); color:var(--fg); border-radius:9px; padding:8px 10px; font:inherit; width:140px; max-width:100%; font-variant-numeric:tabular-nums}
+.q input.ok{border-color:var(--ok); background:var(--ok-bg)} .q input.bad{border-color:var(--bad); background:var(--bad-bg)}
+.q .st{font-size:.85rem; font-weight:700; min-width:90px}
+.q .st.ok{color:var(--ok)} .q .st.bad{color:var(--bad)}
+.crit{display:grid; grid-template-columns:28px 1fr auto; gap:10px; align-items:start; padding:9px 0; border-bottom:1px solid var(--line)}
+.crit:last-child{border-bottom:none}
+.crit input{width:22px; height:22px; accent-color:var(--ok)}
+.crit .pts{font-weight:800; color:var(--amber); font-variant-numeric:tabular-nums}
+.big{font-family:var(--display); font-size:3.4rem; font-weight:800; color:var(--accent); line-height:1}
+textarea{width:100%; min-height:140px; background:var(--bg); color:var(--fg); border:1px solid var(--line); border-radius:10px; padding:10px; font:inherit}
+textarea.copy{min-height:90px; font:13px/1.4 var(--mono)}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="kicker">Інформатика · 9 клас · Практична робота · Google Таблиці</div>
+    <h1>Цифрова служба класу</h1>
+    <p class="dim" style="max-width:62ch">Директор школи хоче знати, скільки дев'ятикласники сплять, скільки часу проводять із гаджетами й чи ходять на гуртки. Ваша група — аналітична служба: зберіть дані, наведіть у них лад, знайдіть відповіді й підготуйте звіт.</p>
+    <div class="brief">
+      <div><b>Тривалість</b>3 уроки</div>
+      <div><b>Формат</b>група з 2–3 учнів</div>
+      <div><b>Інструменти</b>Google Форми й Таблиці</div>
+      <div><b>Результат</b>таблиця, звіт PDF, висновок</div>
+    </div>
+    <div class="who">
+      <input id="name" placeholder="Ім'я та прізвище (або склад групи)" autocomplete="off" aria-label="Ім'я та прізвище">
+      <input id="cls" placeholder="Клас" autocomplete="off" aria-label="Клас">
+    </div>
+    <div class="meter"><span>Виконано кроків</span><div class="bar"><i id="meter"></i></div><span id="meterTxt">0%</span></div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" data-t="l1" aria-selected="true">Урок 1 · Збір<span class="n" id="n-l1"></span></button>
+    <button class="tab" role="tab" data-t="l2" aria-selected="false">Урок 2 · Очищення й запити<span class="n" id="n-l2"></span></button>
+    <button class="tab" role="tab" data-t="l3" aria-selected="false">Урок 3 · Звіт<span class="n" id="n-l3"></span></button>
+    <button class="tab" role="tab" data-t="chk" aria-selected="false">Самоперевірка<span class="n" id="n-chk"></span></button>
+    <button class="tab" role="tab" data-t="res" aria-selected="false">Оцінювання</button>
+  </nav>
+
+  <!-- УРОК 1 -->
+  <section id="p-l1" class="stack">
+    <div class="card">
+      <span class="tag">Теми: форми для введення даних · збір даних</span>
+      <h2>Створіть анкету й зберіть відповіді</h2>
+      <p class="dim">Відмічайте кожен виконаний крок — так ви бачитимете свій прогрес.</p>
+    </div>
+    <div class="card">
+      <h3>Питання анкети</h3>
+      <div class="tw"><table class="t">
+        <thead><tr><th>Питання</th><th>Тип у Google Формі</th><th>Навіщо саме так</th></tr></thead>
+        <tbody>
+          <tr><td>Код учня (наприклад, У07)</td><td>Коротка відповідь</td><td>Ніяких імен — захищаємо приватність</td></tr>
+          <tr><td>Стать</td><td>Один із кількох (Х / Д)</td><td>Однакові значення для групування</td></tr>
+          <tr><td>Клас</td><td>Спадний список</td><td>Без варіантів «9а», «9-А», «9 А»</td></tr>
+          <tr><td>Скільки годин ви спите?</td><td>Коротка відповідь + перевірка: число від 0 до 24</td><td>У таблицю потрапить число, а не «8 год»</td></tr>
+          <tr><td>Скільки годин на день із гаджетами?</td><td>Коротка відповідь + перевірка: число від 0 до 24</td><td>Не буде неможливих «30 годин»</td></tr>
+          <tr><td>Чи відвідуєте гурток?</td><td>Один із кількох (Так / Ні)</td><td>Без «так», «ТАК», «НІ»</td></tr>
+          <tr><td>Улюблений застосунок</td><td>Спадний список + «Інше»</td><td>Без «тікток» і «Tik Tok»</td></tr>
+          <tr><td>Настрій сьогодні</td><td>Лінійна шкала 1–5</td><td>Число, яке можна усереднити</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+    <div class="card">
+      <h3>Кроки</h3>
+      <ol class="steps" data-group="l1">
+        <li><input type="checkbox" id="s1-1"><label for="s1-1">Створіть нову Google Форму з назвою «Цифрова служба класу — група N».</label></li>
+        <li><input type="checkbox" id="s1-2"><label for="s1-2">Додайте 8 питань з таблиці вище з потрібними типами.</label></li>
+        <li><input type="checkbox" id="s1-3"><label for="s1-3">Для двох питань про години увімкніть перевірку відповіді: число між 0 і 24.<span class="sub">Меню ⋮ у правому нижньому куті питання → перевірка відповіді.</span></label></li>
+        <li><input type="checkbox" id="s1-4"><label for="s1-4">Зробіть усі питання обов'язковими.</label></li>
+        <li><input type="checkbox" id="s1-5"><label for="s1-5">Перевірте форму в режимі попереднього перегляду (значок ока): спробуйте ввести «25» і «вісім».</label></li>
+        <li><input type="checkbox" id="s1-6"><label for="s1-6">На вкладці «Відповіді» зв'яжіть форму з новою Google Таблицею.</label></li>
+        <li><input type="checkbox" id="s1-7"><label for="s1-7">Обміняйтеся посиланнями з іншими групами: кожен учень заповнює щонайменше 5 анкет.</label></li>
+        <li><input type="checkbox" id="s1-8"><label for="s1-8">Відкрийте таблицю відповідей і перевірте, що записи з'являються.</label></li>
+      </ol>
+    </div>
+    <div class="card note">
+      <h3>Подумайте</h3>
+      <p>Чому перевірка відповіді у формі краща за виправлення помилок потім? Запишіть одне речення — воно знадобиться у висновку.</p>
+    </div>
+  </section>
+
+  <!-- УРОК 2 -->
+  <section id="p-l2" class="stack" hidden>
+    <div class="card">
+      <span class="tag">Теми: типи даних · структурування · запити</span>
+      <h2>Наведіть лад у даних і знайдіть відповіді</h2>
+      <p>Працюйте з <b>таблицею-заготовкою</b>: у ній 41 рядок, а частина з них — з помилками, як у справжньому житті. Натисніть кнопку — Google створить вашу власну копію.</p>
+      <div class="row"><a class="btn sheet" href="https://docs.google.com/spreadsheets/d/1iq-SsdSX5xPb72pIjSA_YAm59o3KuCqPVD-O04PRSPg/copy" target="_blank" rel="noopener">Створити копію заготовки</a></div>
+      <p class="dim" style="margin-top:10px">Свої дані з уроку 1 опрацюйте так само наприкінці, якщо залишиться час.</p>
+    </div>
+    <div class="card">
+      <h3>Частина 1. Очищення даних</h3>
+      <ol class="steps" data-group="l2">
+        <li><input type="checkbox" id="s2-1"><label for="s2-1">Видаліть повністю порожній рядок.</label></li>
+        <li><input type="checkbox" id="s2-2"><label for="s2-2">Видаліть рядки-дублікати.<span class="sub">Виділіть дані → меню «Дані» → «Очищення даних» → видалення дублікатів. Скільки знайшлося?</span></label></li>
+        <li><input type="checkbox" id="s2-3"><label for="s2-3">Знайдіть числа, записані як текст («8 год») і виправте їх.<span class="sub">«Правка» → «Знайти й замінити»: знайти <code> год</code>, замінити на порожнє. Числа мають вирівнятися праворуч.</span></label></li>
+        <li><input type="checkbox" id="s2-4"><label for="s2-4">Уніфікуйте написання: «так» → «Так», «НІ» → «Ні», «тікток» і «Tik Tok» → «TikTok».</label></li>
+        <li><input type="checkbox" id="s2-5"><label for="s2-5">Знайдіть неможливі й порожні значення та видаліть ці рядки.<span class="sub">Підказка: відсортуйте стовпці «Сон» і «Гаджети» — помилки опиняться на краю.</span></label></li>
+        <li><input type="checkbox" id="s2-6"><label for="s2-6">Захистіть стовпці E і F від нових помилок: «Дані» → «Перевірка даних» → число від 0 до 24.</label></li>
+        <li><input type="checkbox" id="s2-7"><label for="s2-7">Перевірте: залишилося 36 записів (рядки 2–37).</label></li>
+      </ol>
+    </div>
+    <div class="card">
+      <h3>Частина 2. Запити</h3>
+      <p>Знайдіть відповіді формулами в окремих клітинках (наприклад, у стовпці K). Стовпці: E — сон, F — гаджети, G — гурток, D — клас, H — застосунок.</p>
+      <div class="tw"><table class="t">
+        <thead><tr><th>Запитання директора</th><th>Формула-підказка</th></tr></thead>
+        <tbody>
+          <tr><td>Скільки учнів сплять менше 7 годин?</td><td><span class="f">=COUNTIF(E2:E37;"&lt;7")</span></td></tr>
+          <tr><td>Скільки учнів ходять на гурток <b>і</b> проводять із гаджетами понад 3 години?</td><td><span class="f">=COUNTIFS(G2:G37;"Так";F2:F37;"&gt;3")</span></td></tr>
+          <tr><td>Скільки в середньому годин із гаджетами?</td><td><span class="f">=ROUND(AVERAGE(F2:F37);1)</span></td></tr>
+          <tr><td>Середній сон у 9-Б?</td><td><span class="f">=AVERAGEIF(D2:D37;"9-Б";E2:E37)</span></td></tr>
+          <tr><td>Скільки учнів обрали TikTok?</td><td>Складіть формулу самостійно</td></tr>
+        </tbody>
+      </table></div>
+      <p class="dim" style="margin-top:10px">Якщо формула показує помилку, замініть <code>;</code> на <code>,</code> — роздільник залежить від мовних налаштувань таблиці.</p>
+      <ol class="steps" data-group="l2">
+        <li><input type="checkbox" id="s2-8"><label for="s2-8">Виконайте 5 запитів формулами й підпишіть кожну відповідь.</label></li>
+        <li><input type="checkbox" id="s2-9"><label for="s2-9">Увімкніть фільтр («Дані» → «Створити фільтр») і покажіть лише учнів 9-А, які сплять менше 7 годин.</label></li>
+        <li><input type="checkbox" id="s2-10"><label for="s2-10">🔴 Для сильніших: отримайте список кодів і годин учнів, які сидять у гаджетах понад 5 годин, від найбільшого.<span class="sub"><span class="f">=QUERY(A1:I37;"select B, F where F &gt; 5 order by F desc";1)</span></span></label></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- УРОК 3 -->
+  <section id="p-l3" class="stack" hidden>
+    <div class="card">
+      <span class="tag">Теми: звіти · імпорт та експорт · дані, інформація, знання</span>
+      <h2>Підготуйте звіт для директора</h2>
+    </div>
+    <div class="card">
+      <h3>Кроки</h3>
+      <ol class="steps" data-group="l3">
+        <li><input type="checkbox" id="s3-1"><label for="s3-1">Створіть зведену таблицю: «Вставити» → «Зведена таблиця» на новому аркуші.<span class="sub">Рядки — Клас; значення — Сон (середнє), Гаджети (середнє), Код учня (кількість).</span></label></li>
+        <li><input type="checkbox" id="s3-2"><label for="s3-2">Створіть другу зведену таблицю: кількість учнів за улюбленим застосунком.</label></li>
+        <li><input type="checkbox" id="s3-3"><label for="s3-3">Побудуйте дві діаграми з назвами й підписаними осями: стовпчасту (гаджети за класами) і кругову (застосунки).</label></li>
+        <li><input type="checkbox" id="s3-4"><label for="s3-4">Оформіть аркуш-звіт: заголовок, дата, зведені таблиці, діаграми, ваші підписи.</label></li>
+        <li><input type="checkbox" id="s3-5"><label for="s3-5">Експортуйте: «Файл» → «Завантажити» → PDF (аркуш-звіт) і CSV (очищені дані).</label></li>
+        <li><input type="checkbox" id="s3-6"><label for="s3-6">Перевірте імпорт: у новій таблиці «Файл» → «Імпортувати» → ваш CSV. Чи 36 записів? Чи числа залишилися числами?</label></li>
+        <li><input type="checkbox" id="s3-7"><label for="s3-7">Напишіть висновок у полі нижче і вставте його в звіт.</label></li>
+        <li><input type="checkbox" id="s3-8"><label for="s3-8">Надайте вчителю доступ до таблиці (переглядач) і надішліть PDF.</label></li>
+      </ol>
+    </div>
+    <div class="card">
+      <h3>Висновок (5–6 речень)</h3>
+      <p class="dim">Дайте відповідь на кожне питання одним реченням: Що в нашій роботі було даними, а що — інформацією? Яке знання ми отримали? Які помилки були в даних і як форма могла б їм запобігти? Чому опитування класу — не «великі дані»? Як ми захистили приватність учнів? Яку пораду дамо директору?</p>
+      <label for="concl" class="dim" style="font-size:.85rem">Ваш висновок</label>
+      <textarea id="concl" placeholder="У нашій роботі даними були…"></textarea>
+      <p class="dim" style="font-size:.85rem" id="words">0 слів</p>
+    </div>
+  </section>
+
+  <!-- САМОПЕРЕВІРКА -->
+  <section id="p-chk" class="stack" hidden>
+    <div class="card">
+      <h2>Самоперевірка за таблицею-заготовкою</h2>
+      <p class="dim">Впишіть результати зі своєї очищеної таблиці. Десяткові числа можна писати з комою або крапкою.</p>
+      <div id="qs"></div>
+      <div class="row"><button class="btn" type="button" id="checkAll">Перевірити все</button><span id="chkScore" class="dim"></span></div>
+    </div>
+  </section>
+
+  <!-- ОЦІНЮВАННЯ -->
+  <section id="p-res" class="stack" hidden>
+    <div class="card">
+      <h2>Критерії оцінювання</h2>
+      <p class="dim">Відмітьте, що ви виконали. Учитель перевірить вашу таблицю й звіт і виставить остаточну оцінку.</p>
+      <div id="crit"></div>
+    </div>
+    <div class="card">
+      <div style="display:flex; flex-wrap:wrap; gap:16px; align-items:flex-end; justify-content:space-between">
+        <div><div class="dim" style="font-size:.78rem; text-transform:uppercase; letter-spacing:.08em; font-weight:800">Самооцінка</div><div class="big" id="selfGrade">0</div><div class="dim">з 12 балів</div></div>
+        <div class="dim" id="summary" style="max-width:40ch"></div>
+      </div>
+      <div class="row"><button class="btn" type="button" id="dl">Завантажити результат (.csv)</button><button class="btn ghost" type="button" id="cp">Скопіювати</button></div>
+      <div id="copyHost"></div>
+    </div>
+  </section>
+</div>
+
+<script>
+const $=(s,el=document)=>el.querySelector(s);
+const h=(t,c,x)=>{const e=document.createElement(t); if(c) e.className=c; if(x!=null) e.textContent=x; return e;};
+
+/* відповіді для заготовки (перевірено на очищених даних: 36 записів) */
+const QS=[
+  {q:"Скільки рядків ви видалили під час очищення?", a:5, tol:0, hint:"2 дублікати, порожній рядок, неможливе значення, порожнє значення."},
+  {q:"Скільки записів залишилося?", a:36, tol:0, hint:"41 − видалені рядки."},
+  {q:"Скільки учнів сплять менше 7 годин?", a:5, tol:0, hint:"COUNTIF зі знаком «<7»."},
+  {q:"Скільки учнів ходять на гурток і мають понад 3 години з гаджетами?", a:11, tol:0, hint:"Перевірте, що «так» і «ТАК» уже виправлено."},
+  {q:"Середній час із гаджетами (до десятих)?", a:3.9, tol:0.06, hint:"Чи видалили рядок із 30 годинами?"},
+  {q:"Середній сон у 9-Б (до десятих)?", a:7.8, tol:0.06, hint:"AVERAGEIF за стовпцем D."},
+  {q:"Скільки учнів обрали TikTok після виправлення написання?", a:4, tol:0, hint:"Враховуйте «тікток» і «Tik Tok»."},
+  {q:"Який застосунок найпопулярніший?", text:"youtube", hint:"Зведена таблиця за застосунками."}
+];
+const CRIT=[
+  ["Форма: 8 питань з правильними типами полів",1],
+  ["Перевірка відповіді для чисел, обов'язкові поля, жодних особистих даних",1],
+  ["Відповіді зібрано в Google Таблицю",1],
+  ["Видалено дублікати й порожні рядки",1],
+  ["Числа з текстом виправлено, написання уніфіковано",1],
+  ["Неможливі й порожні значення оброблено, налаштовано перевірку даних",1],
+  ["Виконано 5 запитів формулами та фільтр",2],
+  ["Зведена таблиця з групуванням і підсумками",1],
+  ["Дві діаграми з назвами й підписами",1],
+  ["Експорт PDF і CSV, імпорт перевірено",1],
+  ["Висновок з відповідями на всі питання",1]
+];
+
+/* кроки-чеклисти */
+const steps=[...document.querySelectorAll(".steps input[type=checkbox]")];
+steps.forEach(cb=>cb.addEventListener("change",()=>{ cb.closest("li").classList.toggle("done",cb.checked); update(); }));
+
+/* самоперевірка */
+const qState=QS.map(()=>null);
+QS.forEach((x,i)=>{
+  const r=h("div","q"); const t=h("div","qt",(i+1)+". "+x.q);
+  const inp=h("input"); inp.id="q"+i; inp.setAttribute("aria-label",x.q); inp.inputMode=x.text?"text":"decimal"; inp.placeholder=x.text?"назва":"число";
+  const st=h("span","st"); r.append(t,inp,st); $("#qs").appendChild(r);
+  const go=()=>{ const v=inp.value.trim(); if(!v){ st.textContent=""; inp.className=""; qState[i]=null; update(); return; }
+    let ok; if(x.text) ok=v.toLowerCase().replace(/\s/g,"")===x.text; else { const n=parseFloat(v.replace(",",".")); ok=!isNaN(n)&&Math.abs(n-x.a)<=x.tol; }
+    qState[i]=ok; inp.className=ok?"ok":"bad"; st.className="st "+(ok?"ok":"bad"); st.textContent=ok?"Правильно":"Ще раз"; st.title=ok?"":x.hint;
+    if(!ok){ st.textContent="Ще раз"; } update(); };
+  inp.addEventListener("change",go); inp.addEventListener("keydown",e=>{ if(e.key==="Enter") go(); });
+  x._go=go; x._st=st;
+});
+$("#checkAll").addEventListener("click",()=>{ QS.forEach(x=>x._go()); QS.forEach((x,i)=>{ if(qState[i]===false) x._st.textContent="Ще раз · "+x.hint; }); });
+
+/* критерії */
+const critState=CRIT.map(()=>false);
+CRIT.forEach(([t,p],i)=>{ const r=h("div","crit"); const cb=h("input"); cb.type="checkbox"; cb.id="c"+i;
+  const l=h("label",null,t); l.htmlFor="c"+i; r.append(cb,l,h("span","pts",p+" б")); $("#crit").appendChild(r);
+  cb.addEventListener("change",()=>{ critState[i]=cb.checked; update(); }); });
+
+/* висновок */
+$("#concl").addEventListener("input",()=>{ const n=$("#concl").value.trim().split(/\s+/).filter(Boolean).length; $("#words").textContent=n+" слів"; });
+
+function update(){
+  ["l1","l2","l3"].forEach(g=>{ const all=[...document.querySelectorAll(`#p-${g} .steps input`)]; $("#n-"+g).textContent=`${all.filter(c=>c.checked).length}/${all.length}`; });
+  const ok=qState.filter(v=>v===true).length; $("#n-chk").textContent=`${ok}/${QS.length}`; $("#chkScore").textContent=`Правильно: ${ok} з ${QS.length}`;
+  const p=Math.round(steps.filter(c=>c.checked).length/steps.length*100); $("#meter").style.width=p+"%"; $("#meterTxt").textContent=p+"%";
+  const g=CRIT.reduce((s,[,pt],i)=>s+(critState[i]?pt:0),0); $("#selfGrade").textContent=g;
+  $("#summary").textContent=`Кроків виконано: ${p}%. Самоперевірка: ${ok} з ${QS.length}.`;
+}
+update();
+
+/* вкладки */
+function showTab(id){ document.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-selected",String(b.dataset.t===id)));
+  ["l1","l2","l3","chk","res"].forEach(k=>$("#p-"+k).hidden=k!==id); window.scrollTo({top:0}); }
+document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>showTab(b.dataset.t)));
+
+/* результат */
+function resRow(){
+  const name=$("#name").value.trim()||"Учень (без імені)", cls=$("#cls").value.trim();
+  const g=CRIT.reduce((s,[,pt],i)=>s+(critState[i]?pt:0),0), ok=qState.filter(v=>v===true).length;
+  const p=Math.round(steps.filter(c=>c.checked).length/steps.length*100);
+  const header=["ПІБ / група","Клас","Дата","Практична","Кроків %","Самоперевірка","Самооцінка (12)","Висновок"];
+  const row=[name,cls,new Date().toLocaleString("uk-UA"),"Цифрова служба класу",p,`${ok}/${QS.length}`,g,'"'+$("#concl").value.replace(/"/g,"'").replace(/\s+/g," ").trim()+'"'];
+  return {header,row,name};
+}
+function copyRes(){
+  const {header,row}=resRow(); const t=header.join("\t")+"\n"+row.join("\t");
+  const fb=()=>{ let ta=$("#copyHost textarea"); if(!ta){ ta=h("textarea","copy"); ta.readOnly=true; $("#copyHost").appendChild(ta);} ta.value=t; ta.select(); };
+  try{ navigator.clipboard.writeText(t).then(()=>{ $("#cp").textContent="Скопійовано ✓"; }).catch(fb); }catch(e){ fb(); }
+}
+$("#cp").addEventListener("click",copyRes);
+$("#dl").addEventListener("click",async()=>{
+  const {header,row,name}=resRow(); const csv="﻿"+header.join(";")+"\n"+row.join(";");
+  const filename="praktychna_"+name.replace(/[^\wа-яіїєґА-ЯІЇЄҐ]+/g,"_")+".csv";
+  try{ if(window.claude&&typeof window.claude.use==="function"){ const d=await window.claude.use("downloads"); if(d){ await d.save({filename,data:csv}); return; } } }catch(e){}
+  copyRes();
+});
+</script>
+
+</body></html>

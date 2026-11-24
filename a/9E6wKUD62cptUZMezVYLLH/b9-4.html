@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Білети · 9 клас · Розділ 4. Програмні проєкти</title>
+<style>
+:root{--cl:#0c8599;--bg:#f5f6fa;--card:#fff;--ink:#1f2433;--muted:#5b6275;--line:#e3e6ee;--ok:#2b8a3e;--r:16px}
+@media (prefers-color-scheme:dark){:root{--cl:#3bc9db;--bg:#151821;--card:#1f2330;--ink:#eef0f6;--muted:#a3aabb;--line:#2e3344}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Nunito","Segoe UI",system-ui,sans-serif;font-size:16px;line-height:1.45}
+header{background:var(--cl);color:#fff;padding:14px 18px}
+header small{opacity:.85;display:block}header h1{margin:2px 0 0;font-size:1.35rem}
+main{max-width:1100px;margin:0 auto;padding:14px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 14px;position:sticky;top:0;background:var(--bg);padding:6px 0;z-index:5}
+.tabs button,.btn{border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 14px;font:inherit;font-weight:800;cursor:pointer}
+.tabs button[aria-selected=true],.btn.main{background:var(--cl);border-color:var(--cl);color:#fff}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:8px 0}
+input,select{font:inherit;padding:7px 10px;border:2px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
+.lead{color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
+.tk{background:var(--card);border-radius:var(--r);border:2px solid var(--line);padding:12px 14px;break-inside:avoid}
+.tk h3{margin:0 0 6px;color:var(--cl);display:flex;justify-content:space-between}
+.cd{border-top:1px dashed var(--line);padding:8px 0}
+.cd .lv{font-weight:900;font-size:.85rem}
+.cd .q{font-weight:700;white-space:pre-wrap}
+.cd ul{margin:4px 0 0;padding-left:18px}.cd li{white-space:pre-wrap}
+.cd .src{font-size:.75rem;color:var(--muted)}
+.ans{display:none;background:#e6f4ea;color:#1b5e20;border-radius:8px;padding:4px 8px;margin-top:4px;font-size:.92rem}
+@media (prefers-color-scheme:dark){.ans{background:#1d3a26;color:#b7f0c3}}
+body.show .ans{display:block}
+table{border-collapse:collapse;width:100%;background:var(--card);border-radius:var(--r);overflow:hidden}
+th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left}
+td input{width:100%}td select{width:100%}
+.tot{font-weight:900;color:var(--cl);font-size:1.1rem}
+.topic h2{color:var(--cl);margin:18px 0 6px}
+[hidden]{display:none!important}
+@media print{header,.tabs,.noprint{display:none!important}body{background:#fff;color:#000}.tk{border:1px solid #999;page-break-inside:avoid}.grid{display:block}.tk{margin-bottom:10px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header><small id="eb"></small><h1 id="ht"></h1></header>
+<main>
+<div class="tabs" role="tablist">
+ <button role="tab" aria-selected="true" data-t="t1">🎫 Білети</button>
+ <button role="tab" aria-selected="false" data-t="t2">📚 Усі картки</button>
+ <button role="tab" aria-selected="false" data-t="t3">📝 Журнал</button>
+</div>
+<section id="t1">
+ <p class="lead">Кожен білет = 🟢 базова (3 б) + 🟡 середня (4 б) + 🔴 складна (5 б) з трьох різних тем = <b>12 балів</b>. Номер серії дає ті самі білети знову (зручно для паралельних класів).</p>
+ <div class="row noprint"><label>Білетів: <input id="n" type="number" min="1" max="40" value="20" style="width:80px"></label>
+  <label>Серія: <input id="seed" type="number" value="1" style="width:90px"></label>
+  <button class="btn main" id="gen">🎲 Скласти білети</button>
+  <label><input type="checkbox" id="sa"> Показати відповіді</label>
+  <button class="btn" id="pr">🖨️ Друк</button></div>
+ <div class="grid" id="tickets"></div>
+</section>
+<section id="t2" hidden><p class="lead">По 4 картки на тему. Можна давати усно або на дошці. Відповіді — зеленим (увімкни «Показати відповіді» на вкладці «Білети» або тут).</p>
+ <div class="row noprint"><label><input type="checkbox" id="sa2"> Показати відповіді</label></div><div id="all"></div></section>
+<section id="t3" hidden>
+ <p class="lead">Впиши учнів і бали за кожну картку білета. Підсумок рахується сам. Дані зберігаються лише на цьому комп'ютері.</p>
+ <table><thead><tr><th>Учень</th><th>Білет №</th><th>🟢 /3</th><th>🟡 /4</th><th>🔴 /5</th><th>Разом</th></tr></thead><tbody id="jb"></tbody></table>
+ <div class="row noprint"><button class="btn" id="add">+ Рядок</button><button class="btn main" id="csv">⬇️ CSV для журналу</button><button class="btn" id="copy">📋 Скопіювати таблицю</button><span id="msg" class="lead"></span></div>
+</section>
+</main>
+<script>
+const D={"grade": 9, "sec": 4, "secName": "Програмні проєкти", "saga": "Кав'ярня «Байт»", "topics": [{"n": 1, "title": "Списки та кортежі", "cards": [{"q": "menu = [\"лате\", \"какао\", \"чай\"]. Що виведе print(menu[1])?", "body": [], "ans": "какао", "lv": 1, "pts": 3}, {"q": "З'єднай метод списку з дією.", "body": ["1) append(x)", "2) insert(i, x)", "3) pop()", "4) remove(x)", "—", "А) Забрати й повернути останній", "Б) Вставити на позицію i", "В) Видалити перше значення x", "Г) Додати в кінець"], "ans": "1–Г, 2–Б, 3–А, 4–В", "lv": 1, "pts": 3}, {"q": "prices = {\"лате\": 45, \"какао\": 38, \"чай\": 20}. Що виведе print(prices[\"какао\"])?", "body": [], "ans": "38 (У словнику значення шукають за ключем у квадратних дужках. values() — усі значення, keys() — усі ключі.)", "lv": 2, "pts": 4}, {"q": "Бариста написав код меню з 3 помилками. Познач їх. Запиши номери рядків і як виправити.", "body": ["1) menu = [\"лате\", \"чай\"]  ⟶  Список напоїв", "2) menu.add(\"какао\")  ⟶  Додати какао в кінець", "3) size = (250, 350)  ⟶  Незмінні розміри склянок", "4) size.append(450)  ⟶  Додати новий розмір", "5) prices = {\"лате\": 45}  ⟶  Ціни за назвою", "6) print(prices[45])  ⟶  Вивести ціну лате"], "ans": "Рядки 2, 4, 6. метод — append; кортеж не змінюється; ключ — \"лате\"", "lv": 3, "pts": 5}]}, {"n": 2, "title": "Алгоритми впорядкування", "cards": [{"q": "Що таке сортування?", "body": ["А) Пошук одного елемента", "Б) Підрахунок суми списку", "В) Розташування даних у порядку", "Г) Видалення повторів зі списку"], "ans": "В) Розташування даних у порядку", "lv": 1, "pts": 3}, {"q": "З'єднай алгоритм з ідеєю.", "body": ["1) Бульбашкове", "2) Вибором", "3) Вставками", "4) Злиттям", "—", "А) Порівнює сусідів і міняє місцями", "Б) Шукає найменший і ставить на початок", "В) Вставляє кожен елемент на своє місце", "Г) Ділить навпіл, сортує, зливає"], "ans": "1–А, 2–Б, 3–В, 4–Г", "lv": 1, "pts": 3}, {"q": "Один прохід бульбашки (за зростанням) по [5, 2, 4, 1]. Яким стане список? (через кому)", "body": [], "ans": "2, 4, 1, 5", "lv": 2, "pts": 4}, {"q": "Код рейтингу напоїв має 3 помилки. Познач рядки. Запиши номери рядків і як виправити.", "body": ["1) sales = [64, 9, 51, 27]  ⟶  Продажі напоїв", "2) top = sales.sort()  ⟶  Новий відсортований список", "3) top = sorted(sales, reverse=False)  ⟶  Від найбільшого до найменшого", "4) print(top[0])  ⟶  Найкращий результат", "5) sales.sorted()  ⟶  Відсортувати сам список", "6) print(max(sales))  ⟶  Перевірка максимуму"], "ans": "Рядки 2, 3, 5. sort() повертає None; спадання — reverse=True; у списку метод .sort()", "lv": 3, "pts": 5}]}, {"n": 3, "title": "Опрацювання текстових даних", "cards": [{"q": "Рядки в Python…", "body": ["А) Можуть бути лише англійськими", "Б) Незмінні: метод дає новий", "В) Змінюються на місці методом", "Г) Не мають довжини взагалі"], "ans": "Б) Незмінні: метод дає новий", "lv": 1, "pts": 3}, {"q": "З'єднай метод рядка з дією.", "body": ["1) lower()", "2) upper()", "3) strip()", "4) split()", "—", "А) Усі літери малі", "Б) Прибрати пробіли по краях", "В) Усі літери великі", "Г) Розбити на список слів"], "ans": "1–А, 2–В, 3–Б, 4–Г", "lv": 1, "pts": 3}, {"q": "t = \"Смачна кава\". Що виведе print(t[0:6])?", "body": [], "ans": "смачна", "lv": 2, "pts": 4}, {"q": "Аналізатор відгуків має 3 помилки. Познач рядки з помилками. Запиши номери рядків і як виправити.", "body": ["1) text = \"Кава СУПЕР смачна\"  ⟶  Відгук", "2) text.lower()  ⟶  Зробити текст малими літерами", "3) words = text.split  ⟶  Розбити на слова", "4) print(len(words))  ⟶  Кількість слів", "5) print(text.replace(\"СУПЕР\"))  ⟶  Прибрати «СУПЕР»", "6) print(text[0])  ⟶  Перша літера"], "ans": "Рядки 2, 3, 5. рядок незмінний: text = text.lower(); потрібні дужки: split(); replace має два аргументи: (\"СУПЕР\", \"\")", "lv": 3, "pts": 5}]}, {"n": 4, "title": "Бібліотеки мови програмування", "cards": [{"q": "Яким словом підключають модуль у Python?", "body": ["А) import", "Б) using", "В) require", "Г) include"], "ans": "А) import", "lv": 1, "pts": 3}, {"q": "З'єднай модуль із завданням кав'ярні.", "body": ["1) random", "2) math", "3) datetime", "4) statistics", "—", "А) Час замовлення", "Б) Середній чек", "В) Округлити виручку вгору", "Г) Обрати каву дня"], "ans": "1–Г, 2–В, 3–А, 4–Б", "lv": 1, "pts": 3}, {"q": "Склади програму: обрати випадкову каву дня з меню. Запиши літери в правильному порядку.", "body": ["А) coffee = random.choice(menu)", "Б) print(\"Кава дня:\", coffee)", "В) import random", "Г) menu = [\"лате\", \"раф\", \"какао\"]"], "ans": "В → Г → А → Б", "lv": 2, "pts": 4}, {"q": "Програма виручки має 3 помилки. Познач рядки з помилками. Запиши номери рядків і як виправити.", "body": ["1) import Math  ⟶  Підключити math", "2) from random import randint  ⟶  Узяти randint", "3) sales = [120, 85, 99]  ⟶  Виручка за 3 дні", "4) print(sqrt(16))  ⟶  Корінь після import math", "5) bonus = randint(1, 10)  ⟶  Випадковий бонус", "6) print(random.choice(sales))  ⟶  Випадковий день"], "ans": "Рядки 1, 4, 6. назви модулів малими: math; після import math — math.sqrt; random не імпортовано повністю", "lv": 3, "pts": 5}]}, {"n": 5, "title": "Технологія створення програмних продуктів", "cards": [{"q": "Чим програмний продукт відрізняється від простого скрипту?", "body": ["А) Має повний життєвий цикл", "Б) Ніколи не оновлюється", "В) Містить рівно один файл", "Г) Пишеться лише одним автором"], "ans": "А) Має повний життєвий цикл", "lv": 1, "pts": 3}, {"q": "З'єднай папку чи файл проєкту з вмістом.", "body": ["1) src/", "2) tests/", "3) docs/README.md", "4) requirements.txt", "—", "А) Список бібліотек", "Б) Опис проєкту", "В) Вихідний код: main.py, модулі", "Г) Файли тестів"], "ans": "1–В, 2–Г, 3–Б, 4–А", "lv": 1, "pts": 3}, {"q": "У файлі main.py є рядок from greetings import say_hello. Як називається файл модуля? (з розширенням)", "body": [], "ans": "greetings.py", "lv": 2, "pts": 4}, {"q": "План проєкту має 3 помилки. Познач пункти з помилками. Запиши номери рядків і як виправити.", "body": ["1) Тестувати лише після релізу  ⟶  Знайти баги якомога дешевше", "2) Розбити код на модулі  ⟶  Щоб команда працювала паралельно", "3) Увесь код в одному main.py на 5000 рядків  ⟶  Зручно шукати помилки", "4) Зберігати версії в Git  ⟶  Можна повернутися назад", "5) Кожен пише у своєму стилі  ⟶  Код легко читати всім", "6) Описати проєкт у README.md  ⟶  Новачок швидко розбереться"], "ans": "Рядки 1, 3, 5. що раніше знайдено помилку, то дешевше; модулі — легше шукати; єдиний стиль — PEP 8", "lv": 3, "pts": 5}]}, {"n": 6, "title": "Документація програмного проєкту", "cards": [{"q": "Що таке документація програмного проєкту?", "body": ["А) Окремий модуль із кодом оплати", "Б) Рекламний банер застосунку", "В) Список усіх помилок проєкту", "Г) Опис роботи й використання"], "ans": "Г) Опис роботи й використання", "lv": 1, "pts": 3}, {"q": "З'єднай вид документації з читачем.", "body": ["1) Інструкція користувача", "2) Технічна документація", "3) README", "4) Коментар у коді", "—", "А) Той, хто читає цей рядок", "Б) Кожен, хто відкрив проєкт", "В) Розробник", "Г) Бариста й клієнт"], "ans": "1–Г, 2–В, 3–Б, 4–А", "lv": 1, "pts": 3}, {"q": "Яким символом починається однорядковий коментар у Python?", "body": [], "ans": "#", "lv": 2, "pts": 4}, {"q": "README має 3 помилки. Познач рядки з помилками. Запиши номери рядків і як виправити.", "body": ["1) # Байт — передзамовлення кави  ⟶  Назва", "2) Встановлення: просто запустіть  ⟶  Як встановити залежності", "3) Використання: python main.py  ⟶  Як запустити", "4) Пароль адміністратора: 1234  ⟶  Корисна інформація", "5) Функції: меню, кошик, оплата  ⟶  Що вміє", "6) Детальніше — у коді  ⟶  Де шукати допомогу"], "ans": "Рядки 2, 4, 6. вкажіть pip install -r requirements.txt; паролі в документації — небезпечно; посилання на docs/ або контакти", "lv": 3, "pts": 5}]}, {"n": 7, "title": "Тестування та налагодження програмних проєктів", "cards": [{"q": "Чим тестування відрізняється від налагодження?", "body": ["А) Це одне й те саме слово", "Б) Обидва лише пишуть документацію", "В) Тест виправляє, налагодження шукає", "Г) Тест шукає, налагодження виправляє"], "ans": "Г) Тест шукає, налагодження виправляє", "lv": 1, "pts": 3}, {"q": "З'єднай вид помилки з прикладом.", "body": ["1) Синтаксична", "2) Помилка виконання", "3) Логічна", "4) Інтерфейсна", "—", "А) Ділення на нуль", "Б) Знижка рахується вдвічі", "В) Забута двокрапка після if", "Г) Кнопка «Оплатити» не видна"], "ans": "1–В, 2–А, 3–Б, 4–Г", "lv": 1, "pts": 3}, {"q": "Як називається структурований перелік кроків для перевірки програми? (одне слово)", "body": [], "ans": "чекліст", "lv": 2, "pts": 4}, {"q": "Функція знижки має 3 баги. Познач рядки з помилками. Запиши номери рядків і як виправити.", "body": ["1) def discount(price, student):  ⟶  Знижка 10 % студентам", "2)     if student = True:  ⟶  Перевірити, чи студент", "3)         return price * 0.1  ⟶  Ціна зі знижкою 10 %", "4)     return price  ⟶  Без знижки", "5) print(discount(50, True))  ⟶  Тест: має бути 45.0", "6) print(discount(\"50\", False))  ⟶  Тест: має бути 50"], "ans": "Рядки 2, 3, 6. порівняння — ==; ціна зі знижкою — price * 0.9; аргумент має бути числом, не рядком", "lv": 3, "pts": 5}]}]};
+</script>
+<script>
+"use strict";
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+$("#eb").textContent="Інформатика · "+D.grade+" клас · Розділ "+D.sec+" · для вчителя";
+$("#ht").textContent="Картки-білети: "+D.secName;
+document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{document.querySelectorAll(".tabs button").forEach(x=>x.setAttribute("aria-selected",x===b));["t1","t2","t3"].forEach(id=>$("#"+id).hidden=id!==b.dataset.t)});
+const LV={1:"🟢 Базовий · 3 б",2:"🟡 Середній · 4 б",3:"🔴 Складний · 5 б"};
+const cardHTML=(c,t)=>`<div class="cd"><div class="lv">${LV[c.lv]}</div><div class="q">${esc(c.q)}</div>${c.body&&c.body.length?"<ul>"+c.body.map(x=>"<li>"+esc(x)+"</li>").join("")+"</ul>":"<p style=\"margin:4px 0\">Відповідь: ____________</p>"}<div class="ans">✓ ${esc(c.ans)}</div><div class="src">Тема ${t.n}. ${esc(t.title)}</div></div>`;
+$("#all").innerHTML=D.topics.map(t=>`<div class="topic"><h2>Тема ${t.n}. ${esc(t.title)}</h2><div class="grid">${t.cards.map(c=>`<div class="tk">${cardHTML(c,t)}</div>`).join("")}</div></div>`).join("");
+function rng(seed){let a=seed>>>0||1;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function gen(){const n=Math.max(1,Math.min(40,+$("#n").value||20)),R=rng(+$("#seed").value||1);
+ const pool=lv=>D.topics.flatMap(t=>t.cards.filter(c=>c.lv===lv).map(c=>({c,t})));
+ const P={1:pool(1),2:pool(2),3:pool(3)};const used={1:[],2:[],3:[]};
+ const take=(lv,avoid)=>{let cand=P[lv].filter(x=>!avoid.includes(x.t.n)&&!used[lv].includes(x));if(!cand.length){used[lv]=[];cand=P[lv].filter(x=>!avoid.includes(x.t.n));}if(!cand.length)cand=P[lv];const x=cand[Math.floor(R()*cand.length)];used[lv].push(x);return x};
+ let h="";for(let i=1;i<=n;i++){const a=take(1,[]),b=take(2,[a.t.n]),c=take(3,[a.t.n,b.t.n]);
+  h+=`<div class="tk"><h3><span>Білет № ${i}</span><span>12 б</span></h3>${cardHTML(a.c,a.t)}${cardHTML(b.c,b.t)}${cardHTML(c.c,c.t)}</div>`;}
+ $("#tickets").innerHTML=h;}
+$("#gen").onclick=gen;gen();
+const sync=v=>{document.body.classList.toggle("show",v);$("#sa").checked=v;$("#sa2").checked=v};
+$("#sa").onchange=e=>sync(e.target.checked);$("#sa2").onchange=e=>sync(e.target.checked);
+$("#pr").onclick=()=>window.print();
+// журнал
+const KEY="tickets-"+D.grade+"-"+D.sec;let J=[];try{J=JSON.parse(localStorage.getItem(KEY)||"[]")}catch(e){}
+if(!J.length)J=Array.from({length:5},()=>({n:"",t:"",a:0,b:0,c:0}));
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(J))}catch(e){}};
+const opts=m=>Array.from({length:m+1},(_,i)=>`<option>${i}</option>`).join("");
+function draw(){$("#jb").innerHTML=J.map((r,i)=>`<tr><td><input data-i="${i}" data-k="n" value="${esc(r.n)}" aria-label="Учень"></td><td><input data-i="${i}" data-k="t" value="${esc(r.t)}" style="width:70px" aria-label="Білет"></td>
+ <td><select data-i="${i}" data-k="a">${opts(3)}</select></td><td><select data-i="${i}" data-k="b">${opts(4)}</select></td><td><select data-i="${i}" data-k="c">${opts(5)}</select></td><td class="tot">${(+r.a)+(+r.b)+(+r.c)}</td></tr>`).join("");
+ $("#jb").querySelectorAll("select").forEach(s=>s.value=J[s.dataset.i][s.dataset.k]);
+ $("#jb").querySelectorAll("input,select").forEach(el=>el.oninput=el.onchange=()=>{J[el.dataset.i][el.dataset.k]=el.value;save();if(el.tagName==="SELECT")draw()});}
+draw();$("#add").onclick=()=>{J.push({n:"",t:"",a:0,b:0,c:0});save();draw()};
+const csv=()=>"Учень;Білет;Базова;Середня;Складна;Разом\n"+J.filter(r=>r.n).map(r=>[r.n,r.t,r.a,r.b,r.c,(+r.a)+(+r.b)+(+r.c)].join(";")).join("\n");
+$("#csv").onclick=()=>{try{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["﻿"+csv()],{type:"text/csv"}));a.download="bilety-"+D.grade+"-"+D.sec+".csv";a.click();$("#msg").textContent="Файл збережено."}catch(e){$("#msg").textContent="Не вдалося — скористайся «Скопіювати таблицю»."}};
+$("#copy").onclick=async()=>{try{await navigator.clipboard.writeText(csv().replace(/;/g,"\t"));$("#msg").textContent="Скопійовано — встав у Google Таблицю."}catch(e){$("#msg").textContent="Браузер не дав скопіювати."}};
+</script>
+</body>
+</html>

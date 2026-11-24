@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Арена героїв</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;800&family=Nunito:wght@500;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d1022;--card:#171b36;--card2:#20264a;--line:#2e3566;--ink:#eef1ff;--mute:#9aa3d6;--acc:#ffd23f;--acc2:#4dd4ff;--ok:#3ddc84;--bad:#ff5c7a;--wall:#3a46c8;--send:#ffb020}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Nunito,system-ui,sans-serif;font-size:16px}
+body{min-height:100vh}
+h1,h2,h3{font-family:Unbounded,sans-serif;margin:.2em 0 .5em;line-height:1.15}
+button{font-family:Nunito,sans-serif;font-weight:800;font-size:16px;border:0;border-radius:14px;padding:12px 16px;cursor:pointer;background:var(--card2);color:var(--ink)}
+button.pri{background:var(--acc);color:#2a1d00}
+button.sec{background:var(--acc2);color:#002a36}
+button:disabled{opacity:.45;cursor:default}
+input,select,textarea{font-family:Nunito,sans-serif;font-size:16px;background:var(--card2);color:var(--ink);border:2px solid var(--line);border-radius:10px;padding:9px 10px;width:100%}
+textarea{font-family:"JetBrains Mono",monospace;font-size:13px}
+.mono{font-family:"JetBrains Mono",monospace}
+.wrap{max-width:1100px;margin:0 auto;padding:16px}
+.card{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:16px;margin-bottom:14px}
+.mute{color:var(--mute)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:760px){.grid2{grid-template-columns:1fr}}
+.hide{display:none!important}
+/* home */
+.home{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:760px){.home{grid-template-columns:1fr}}
+.tile{background:var(--card);border:2px solid var(--line);border-radius:20px;padding:20px;text-align:left;display:block;width:100%}
+.tile b{font-family:Unbounded,sans-serif;font-size:18px;display:block;margin:6px 0}
+.tile .big{font-size:42px}
+.tile:hover{border-color:var(--acc)}
+/* builder */
+.pick{display:flex;flex-wrap:wrap;gap:6px}
+.pick button{padding:8px 10px;font-size:22px;border:2px solid transparent;background:var(--card2)}
+.pick button.on{border-color:var(--acc)}
+.sw{width:36px;height:36px;border-radius:50%;padding:0!important}
+.blocks{display:flex;flex-direction:column;gap:6px}
+.blk{border-radius:10px;padding:8px 12px;font-weight:800;color:#fff;position:relative;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.blk select{width:auto;padding:4px 6px;font-size:14px;background:rgba(0,0,0,.25);border-color:rgba(255,255,255,.35);color:#fff}
+.b-ev{background:#c88a00;border-radius:16px 16px 10px 10px}
+.b-mv{background:#3b6fd8}
+.b-pw{background:#9b4fd8}
+.b-ai{background:#d2603a}
+.b-in{margin-left:18px}
+.stat{display:grid;grid-template-columns:110px 1fr 34px;gap:8px;align-items:center;margin:6px 0}
+.stat input{padding:0;height:26px;accent-color:var(--acc)}
+.budget{font-family:Unbounded,sans-serif;font-size:14px}
+.budget.bad{color:var(--bad)}
+.codebox{font-family:"JetBrains Mono",monospace;font-size:13px;word-break:break-all;background:#0a0d1c;border-radius:10px;padding:10px;border:1px dashed var(--line)}
+canvas#prev{background:#0a0d1c;border-radius:14px;width:140px;height:140px}
+/* host */
+#stage{position:fixed;inset:0;background:#05060f;display:flex}
+#stage canvas{flex:1;min-width:0}
+#side{width:260px;background:#0b0e20;border-left:2px solid var(--line);padding:12px;overflow:auto}
+#side h3{font-size:15px}
+.lb{display:flex;align-items:center;gap:8px;padding:5px 6px;border-radius:8px;font-weight:800}
+.lb .em{font-size:22px}
+.lb .sc{margin-left:auto;font-family:"JetBrains Mono",monospace}
+.lb.me{background:rgba(255,210,63,.15)}
+.timer{font-family:Unbounded,sans-serif;font-size:34px;color:var(--acc)}
+.rcode{font-family:"JetBrains Mono",monospace;font-size:32px;font-weight:700;letter-spacing:4px;color:var(--acc2)}
+.pill{display:inline-block;border-radius:999px;padding:3px 10px;font-size:13px;font-weight:800;background:var(--card2)}
+.pill.ok{background:rgba(61,220,132,.18);color:var(--ok)}
+.pill.bad{background:rgba(255,92,122,.18);color:var(--bad)}
+#over{position:fixed;inset:0;background:rgba(5,6,15,.92);display:flex;align-items:center;justify-content:center;padding:16px;z-index:5}
+#over .card{max-width:760px;width:100%;max-height:92vh;overflow:auto}
+.podium{display:flex;align-items:flex-end;justify-content:center;gap:10px;margin:10px 0 16px}
+.pod{text-align:center;background:var(--card2);border-radius:14px 14px 0 0;padding:8px;width:120px}
+.pod .em{font-size:40px}
+table{border-collapse:collapse;width:100%;font-size:14px}
+td,th{padding:6px;border-bottom:1px solid var(--line);text-align:left}
+/* pad */
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:360px;margin:12px auto;touch-action:none;user-select:none;-webkit-user-select:none}
+.pad button{height:92px;font-size:38px;border-radius:20px;background:var(--card2);touch-action:none}
+.pad button.act{background:var(--acc2);color:#002a36}
+.pw{display:block;width:100%;max-width:360px;margin:10px auto;height:96px;font-size:26px;border-radius:24px;background:var(--acc);color:#2a1d00;touch-action:none}
+.pw.cd{background:var(--card2);color:var(--mute)}
+.me-card{display:flex;align-items:center;gap:12px}
+.me-card .em{font-size:44px}
+.hint{font-size:14px;color:var(--mute)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<!-- HOME -->
+<section id="v-home" class="wrap">
+  <div class="mute" style="font-weight:800">Інформатика · гра для всього класу</div>
+  <h1 style="font-size:30px">🕹 Арена героїв</h1>
+  <p class="mute">Створи свого героя з блоків: як він рухається, яку має силу й як поводиться на автопілоті. Потім усі герої класу виходять на одну арену на великому екрані: до 12 гравців, монетки, привиди й сили.</p>
+  <div class="home">
+    <button class="tile" data-go="make"><span class="big">🛠</span><b>Майстерня героя</b><span class="mute">Збери героя з блоків і отримай його код</span></button>
+    <button class="tile" data-go="play"><span class="big">🎮</span><b>Пульт гравця</b><span class="mute">Телефон чи ПК як джойстик (онлайн-режим)</span></button>
+    <button class="tile" data-go="host"><span class="big">📺</span><b>Великий екран</b><span class="mute">Для вчителя: арена на проєкторі</span></button>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <h3 style="font-size:16px">Три способи грати</h3>
+    <ol class="mute" style="margin:0;padding-left:20px;line-height:1.6">
+      <li><b style="color:var(--ink)">Онлайн:</b> учні відкривають «Пульт гравця», вводять код кімнати з екрана й керують героєм з телефона. Потрібен вхід у Claude з доступом до цієї сторінки.</li>
+      <li><b style="color:var(--ink)">Битва алгоритмів:</b> учні надсилають <b>код героя</b>, учитель вставляє коди на екрані, і герої грають самі за правилами автопілота, які запрограмували учні. Вхід не потрібен.</li>
+      <li><b style="color:var(--ink)">Клавіатура:</b> до 2 гравців на одному ПК (WASD + Q, стрілки + Enter) разом з героями-ботами.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- BUILDER -->
+<section id="v-make" class="wrap hide">
+  <div class="row" style="justify-content:space-between"><h2 style="font-size:22px">🛠 Майстерня героя</h2><button data-go="home">← Меню</button></div>
+  <div class="grid2">
+    <div>
+      <div class="card">
+        <div class="row"><canvas id="prev" width="140" height="140"></canvas>
+          <div style="flex:1;min-width:160px"><label class="mute">Ім'я героя</label><input id="bName" maxlength="12" placeholder="Напр. Блискавка"><div class="hint" style="margin-top:6px">Без прізвищ — лише нікнейм.</div></div></div>
+        <div style="margin-top:12px" class="mute">Вигляд</div>
+        <div class="pick" id="bEmoji"></div>
+        <div class="pick" id="bColor" style="margin-top:8px"></div>
+      </div>
+      <div class="card">
+        <div class="row" style="justify-content:space-between"><b>Очки навичок</b><span class="budget" id="bBudget"></span></div>
+        <div class="hint">Розподіли 9 очок. Кожна навичка від 1 до 5. Сильний у всьому не буває — у цьому і є баланс!</div>
+        <div class="stat"><span>⚡ Швидкість</span><input type="range" min="1" max="5" id="bSp"><b id="vSp"></b></div>
+        <div class="stat"><span>⏱ Перезарядка</span><input type="range" min="1" max="5" id="bCd"><b id="vCd"></b></div>
+        <div class="stat"><span>💪 Сила дії</span><input type="range" min="1" max="5" id="bDu"><b id="vDu"></b></div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <b>Програма героя</b><div class="hint" style="margin-bottom:8px">Блоки, як у Scratch. Змінюй значення у віконцях.</div>
+        <div class="blocks" id="bBlocks"></div>
+      </div>
+      <div class="card">
+        <b>Код героя</b><div class="hint">Для «Битви алгоритмів»: надішли цей код учителю.</div>
+        <div class="codebox" id="bCode" style="margin:8px 0"></div>
+        <div class="row"><button class="sec" id="bCopy">📋 Копіювати код</button><button class="pri" id="bPlay">🎮 Грати онлайн</button></div>
+        <div class="hint" id="bMsg" style="margin-top:6px"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PLAYER PAD -->
+<section id="v-play" class="wrap hide">
+  <div class="row" style="justify-content:space-between"><h2 style="font-size:20px">🎮 Пульт гравця</h2><button data-go="home">← Меню</button></div>
+  <div id="pJoin" class="card">
+    <div class="me-card"><span class="em" id="pEm">🙂</span><div><b id="pName">Герой</b><div class="hint">Героя можна змінити в <a href="#make" style="color:var(--acc2)">Майстерні</a></div></div></div>
+    <label class="mute" style="display:block;margin-top:12px">Код кімнати з великого екрана</label>
+    <input id="pRoom" inputmode="numeric" maxlength="4" class="mono" placeholder="1234" style="font-size:28px;letter-spacing:6px;text-align:center">
+    <button class="pri" id="pGo" style="width:100%;margin-top:10px">Увійти на арену</button>
+    <div class="hint" id="pMsg" style="margin-top:8px"></div>
+  </div>
+  <div id="pPad" class="hide">
+    <div class="card" style="padding:10px 14px"><div class="row" style="justify-content:space-between"><div class="me-card"><span class="em" id="pEm2" style="font-size:30px"></span><b id="pName2"></b></div><span class="pill" id="pConn">…</span></div>
+      <div class="row" style="justify-content:space-between;margin-top:6px"><span id="pScore" class="mono">🪙 0</span><span id="pRank" class="mute"></span><span id="pTime" class="mono"></span></div></div>
+    <div class="pad">
+      <span></span><button data-d="u">▲</button><span></span>
+      <button data-d="l">◀</button><button data-d="s" style="font-size:22px">■</button><button data-d="r">▶</button>
+      <span></span><button data-d="d">▼</button><span></span>
+    </div>
+    <button class="pw" id="pPw">✨ СИЛА</button>
+    <p class="hint" style="text-align:center">На ПК: стрілки або WASD, сила — пробіл.</p>
+  </div>
+</section>
+
+<!-- HOST SETUP -->
+<section id="v-host" class="wrap hide">
+  <div class="row" style="justify-content:space-between"><h2 style="font-size:22px">📺 Великий екран</h2><button data-go="home">← Меню</button></div>
+  <div class="grid2">
+    <div class="card">
+      <b>Онлайн-кімната</b>
+      <div class="row" style="margin:8px 0"><span class="rcode" id="hCode">----</span><span class="pill" id="hConn">перевіряю…</span></div>
+      <div class="hint" id="hConnMsg">Учні відкривають цю сторінку → «Пульт гравця» → вводять код.</div>
+      <div style="margin-top:10px"><b id="hOnlineN">0</b> <span class="mute">гравців онлайн</span></div>
+      <div id="hOnlineList" class="row" style="margin-top:6px"></div>
+    </div>
+    <div class="card">
+      <b>Битва алгоритмів: коди героїв</b>
+      <div class="hint">Вставте коди героїв, кожен з нового рядка. Ці герої грають самі, за своїм автопілотом.</div>
+      <textarea id="hCodes" rows="5" style="margin-top:8px" placeholder="AR1-…"></textarea>
+      <div class="row" style="margin-top:8px"><button id="hDemo">+ 4 демо-герої</button><span class="hint" id="hCodesMsg"></span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="row">
+      <label>Гравців з клавіатури <select id="hLocal" style="width:auto"><option value="0">0</option><option value="1">1 (WASD + Q)</option><option value="2">2 (+ стрілки + Enter)</option></select></label>
+      <label>Привидів <select id="hGhosts" style="width:auto"><option>2</option><option selected>3</option><option>4</option></select></label>
+      <label>Раунд <select id="hTime" style="width:auto"><option value="90">1,5 хв</option><option value="120" selected>2 хв</option><option value="180">3 хв</option></select></label>
+    </div>
+    <div class="row" style="margin-top:12px"><button class="pri" id="hStart" style="font-size:20px;padding:14px 28px">▶ Почати раунд</button><span class="hint" id="hCount"></span></div>
+    <p class="hint">Максимум 12 героїв на арені. Монетка = 1, велика монетка = 5 і привиди 6 с тікають (зловив привида = +10). Привид наздогнав — мінус 5 монет.</p>
+  </div>
+</section>
+
+<!-- STAGE -->
+<div id="stage" class="hide"><canvas id="cv"></canvas><aside id="side">
+  <div class="row" style="justify-content:space-between"><span class="timer" id="sTime">2:00</span><span class="rcode" id="sCode" style="font-size:18px"></span></div>
+  <h3>Таблиця</h3><div id="sLb"></div>
+  <div class="hint" style="margin-top:10px">Esc — завершити раунд</div>
+</aside></div>
+<div id="over" class="hide"><div class="card" id="overBody"></div></div>
+
+<script>
+"use strict";
+// ---------- helpers ----------
+const $=s=>document.querySelector(s);
+const el=(t,a={},...k)=>{const e=document.createElement(t);for(const[x,y]of Object.entries(a)){if(x==="class")e.className=y;else if(x.startsWith("on"))e.addEventListener(x.slice(2),y);else e.setAttribute(x,y)}for(const c of k)e.append(c instanceof Node?c:document.createTextNode(String(c)));return e};
+const ls={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const EMO=["😎","🤖","🐱","🦊","🐸","🐼","🦁","👽","🐙","🦄","🐲","👾"];
+const COL=["#ff5c7a","#ffd23f","#3ddc84","#4dd4ff","#9b6bff","#ff8a3d","#ff6bd6","#e8ecff"];
+const POW={dash:{n:"Ривок",i:"💨",d:"стрибок на 2–4 клітинки вперед"},shield:{n:"Щит",i:"🛡",d:"привиди не страшні"},freeze:{n:"Заморозка",i:"❄️",d:"найближчий суперник завмирає"},magnet:{n:"Магніт",i:"🧲",d:"збирає монетки довкола"}};
+const AI_T={coin:"до найближчої монетки",big:"до великої монетки",leader:"за лідером"};
+const AI_G={flee:"тікати",power:"увімкнути силу",ignore:"не зважати"};
+const AI_P={ghost:"привид поруч",rival:"суперник поруч",ready:"сила готова"};
+const DEF={n:"",e:"😎",c:"#ffd23f",sp:3,cd:3,du:3,pw:"dash",ai:{t:"coin",g:"flee",p:"ghost"}};
+function sanitize(h){
+  h=Object.assign({},DEF,h||{});
+  h.n=String(h.n||"").replace(/[\u0000-\u001f<>]/g,"").slice(0,12)||"Герой";
+  if(!EMO.includes(h.e))h.e="😎";
+  if(!COL.includes(h.c))h.c=COL[0];
+  for(const k of["sp","cd","du"])h[k]=clamp(Math.round(+h[k]||1),1,5);
+  while(h.sp+h.cd+h.du>9){if(h.sp>=h.cd&&h.sp>=h.du)h.sp--;else if(h.cd>=h.du)h.cd--;else h.du--}
+  if(!POW[h.pw])h.pw="dash";
+  const ai=Object.assign({},DEF.ai,h.ai||{});
+  if(!AI_T[ai.t])ai.t="coin";if(!AI_G[ai.g])ai.g="flee";if(!AI_P[ai.p])ai.p="ghost";
+  h.ai=ai;return h;
+}
+function encode(h){const j=JSON.stringify([h.n,EMO.indexOf(h.e),COL.indexOf(h.c),h.sp,h.cd,h.du,h.pw,h.ai.t,h.ai.g,h.ai.p]);return "AR1-"+btoa(unescape(encodeURIComponent(j))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")}
+function decode(s){try{s=String(s).trim();if(!s.startsWith("AR1-"))return null;let b=s.slice(4).replace(/-/g,"+").replace(/_/g,"/");while(b.length%4)b+="=";const a=JSON.parse(decodeURIComponent(escape(atob(b))));if(!Array.isArray(a))return null;return sanitize({n:a[0],e:EMO[a[1]],c:COL[a[2]],sp:a[3],cd:a[4],du:a[5],pw:a[6],ai:{t:a[7],g:a[8],p:a[9]}})}catch(e){return null}}
+
+// ---------- routing ----------
+const views=["home","make","play","host"];
+function go(v){location.hash=v}
+function route(){
+  const v=(location.hash||"#home").slice(1).split("-")[0];
+  if(G.running&&v!=="host")endRound(true);
+  for(const x of views)$("#v-"+x).classList.toggle("hide",x!==(views.includes(v)?v:"home"));
+  if(v==="make")renderBuilder();
+  if(v==="play")initPlay();
+  if(v==="host")initHost();
+}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-go]");if(b)go(b.dataset.go)});
+window.addEventListener("hashchange",route);
+
+// ---------- builder ----------
+let hero=sanitize(ls.get("arena.hero",DEF));
+function save(){ls.set("arena.hero",hero)}
+function sel(opts,val,on){const s=el("select",{});for(const[k,v]of Object.entries(opts)){const o=el("option",{value:k},v);if(k===val)o.selected=true;s.append(o)}s.addEventListener("change",()=>on(s.value));return s}
+function renderBuilder(){
+  $("#bName").value=hero.n==="Герой"?"":hero.n;
+  const pe=$("#bEmoji");pe.textContent="";for(const e of EMO)pe.append(el("button",{class:e===hero.e?"on":"",onclick:()=>{hero.e=e;upd()}},e));
+  const pc=$("#bColor");pc.textContent="";for(const c of COL){const b=el("button",{class:"sw"+(c===hero.c?" on":""),onclick:()=>{hero.c=c;upd()},"aria-label":"колір"});b.style.background=c;pc.append(b)}
+  $("#bSp").value=hero.sp;$("#bCd").value=hero.cd;$("#bDu").value=hero.du;
+  const bl=$("#bBlocks");bl.textContent="";
+  bl.append(
+    el("div",{class:"blk b-ev"},"🏁 коли почався раунд"),
+    el("div",{class:"blk b-mv b-in"},"швидкість = "+hero.sp+"  ·  перезарядка = "+(cdSec(hero.cd))+" с"),
+    el("div",{class:"blk b-ev"},"🎮 коли натиснуто ✨ СИЛА"),
+    el("div",{class:"blk b-pw b-in"},"використати ",sel(Object.fromEntries(Object.entries(POW).map(([k,v])=>[k,v.i+" "+v.n])),hero.pw,v=>{hero.pw=v;upd()}),el("span",{style:"font-weight:600;opacity:.85"},"("+POW[hero.pw].d+", "+durTxt(hero)+")")),
+    el("div",{class:"blk b-ev"},"🤖 автопілот: завжди"),
+    el("div",{class:"blk b-ai b-in"},"рухатись ",sel(AI_T,hero.ai.t,v=>{hero.ai.t=v;upd()})),
+    el("div",{class:"blk b-ai b-in"},"якщо привид ближче 3 клітинок → ",sel(AI_G,hero.ai.g,v=>{hero.ai.g=v;upd()})),
+    el("div",{class:"blk b-ai b-in"},"використати силу, коли ",sel(AI_P,hero.ai.p,v=>{hero.ai.p=v;upd()}))
+  );
+  upd(true);
+}
+function cdSec(cd){return 11-cd*1.5}
+function durTxt(h){const d=h.du;return h.pw==="dash"?(1+Math.ceil(d/2))+" клітинки":h.pw==="freeze"?(1+d*0.5).toFixed(1)+" с":h.pw==="magnet"?(d*1.5).toFixed(1)+" с":(1+d*0.8).toFixed(1)+" с"}
+function upd(noRe){
+  hero.n=($("#bName").value||"").trim()||"Герой";
+  hero.sp=+$("#bSp").value;hero.cd=+$("#bCd").value;hero.du=+$("#bDu").value;
+  const sum=hero.sp+hero.cd+hero.du;
+  $("#vSp").textContent=hero.sp;$("#vCd").textContent=hero.cd;$("#vDu").textContent=hero.du;
+  const bb=$("#bBudget");bb.textContent="Використано "+sum+" з 9";bb.classList.toggle("bad",sum>9);
+  $("#bPlay").disabled=sum>9;$("#bCopy").disabled=sum>9;
+  $("#bCode").textContent=sum>9?"Забагато очок: зменш якусь навичку.":encode(hero);
+  if(sum<=9)save();
+  drawPrev();
+  if(!noRe)renderBuilder();
+}
+for(const id of["#bName","#bSp","#bCd","#bDu"])$(id).addEventListener("input",()=>upd(id==="#bName"));
+$("#bCopy").addEventListener("click",async()=>{try{await navigator.clipboard.writeText(encode(hero));$("#bMsg").textContent="✓ Скопійовано. Надішли код учителю."}catch(e){$("#bMsg").textContent="Виділи код і скопіюй вручну."}});
+$("#bPlay").addEventListener("click",()=>go("play"));
+function drawHero(ctx,x,y,r,h,ang){
+  ctx.save();ctx.translate(x,y);
+  ctx.fillStyle=h.c;ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle="rgba(0,0,0,.25)";ctx.beginPath();ctx.arc(0,r*0.15,r*0.82,0,Math.PI);ctx.fill();
+  ctx.font=Math.round(r*1.25)+"px 'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(h.e,0,r*0.05);
+  ctx.restore();
+}
+function drawPrev(){const c=$("#prev"),x=c.getContext("2d");x.clearRect(0,0,140,140);drawHero(x,70,62,40,hero);x.fillStyle="#eef1ff";x.font="800 15px Nunito";x.textAlign="center";x.fillText(hero.n,70,124)}
+
+// ---------- room ----------
+let roomApi=null,roomTried=false;
+const roomP=(async()=>{try{if(!window.claude||!claude.use)return null;roomApi=await claude.use("room");return roomApi}catch(e){return null}finally{roomTried=true}})();
+
+// ---------- player pad ----------
+let P={room:null,dir:"s",pseq:0,joined:false,cdUntil:0};
+function initPlay(){
+  $("#pEm").textContent=hero.e;$("#pName").textContent=hero.n;
+  const h=(location.hash.split("-")[1]||"");if(/^\d{4}$/.test(h))$("#pRoom").value=h;
+  if(P.joined){$("#pJoin").classList.add("hide");$("#pPad").classList.remove("hide")}
+}
+$("#pGo").addEventListener("click",async()=>{
+  const code=$("#pRoom").value.trim();const m=$("#pMsg");
+  if(!/^\d{4}$/.test(code)){m.textContent="Введи 4 цифри з великого екрана.";return}
+  m.textContent="Підключаюсь…";
+  const r=await roomP;
+  if(!r){m.innerHTML="";m.append("Онлайн-режим тут недоступний: потрібен вхід у Claude з доступом до цієї сторінки. ",el("b",{},"Скопіюй код героя в Майстерні й надішли вчителю — твій герой зіграє в «Битві алгоритмів»."));return}
+  try{P.room=await r.join("arena-"+code)}catch(e){m.textContent="Не вдалося увійти в кімнату ("+(e&&e.code||"помилка")+"). Спробуй ще раз або надішли вчителю код героя.";return}
+  P.joined=true;P.code=code;
+  P.room.presence({hero:encode(hero),d:"s",p:0,v:1}).catch(()=>{});
+  P.room.on("st",msg=>{const d=msg.data||{};if(typeof d!=="object")return;
+    if(typeof d.t==="number")$("#pTime").textContent="⏱ "+fmt(d.t);
+    const me=(d.s||[]).find(x=>Array.isArray(x)&&x[0]===myPeer());
+    if(me){$("#pScore").textContent="🪙 "+(+me[1]||0);$("#pRank").textContent=(+me[2]||"?")+" місце";const cd=+me[3]||0;setCd(cd)}
+    if(d.end)$("#pRank").textContent="Раунд завершено · "+$("#pRank").textContent;
+  });
+  P.room.onConnection(c=>{const p=$("#pConn");p.textContent=c?"на зв'язку":"зв'язок…";p.className="pill "+(c?"ok":"bad")},()=>{const p=$("#pConn");p.textContent="немає зв'язку";p.className="pill bad"});
+  $("#pEm2").textContent=hero.e;$("#pName2").textContent=hero.n;
+  $("#pJoin").classList.add("hide");$("#pPad").classList.remove("hide");
+});
+function myPeer(){try{const me=P.room.peers().find(p=>p.sameTab);return me&&me.peer}catch(e){return null}}
+function setDir(d){if(P.dir===d)return;P.dir=d;document.querySelectorAll(".pad button").forEach(b=>b.classList.toggle("act",b.dataset.d===d&&d!=="s"));if(P.room)P.room.presence({d}).catch(()=>{})}
+function firePow(){if(!P.room)return;P.pseq++;P.room.presence({p:P.pseq}).catch(()=>{});const b=$("#pPw");b.classList.add("cd");setTimeout(()=>b.classList.remove("cd"),400)}
+function setCd(s){const b=$("#pPw");if(s>0){b.classList.add("cd");b.textContent="⏳ "+s.toFixed(0)+" с"}else{b.classList.remove("cd");b.textContent="✨ СИЛА"}}
+document.querySelectorAll(".pad button").forEach(b=>{b.addEventListener("pointerdown",e=>{e.preventDefault();setDir(b.dataset.d)})});
+$("#pPw").addEventListener("pointerdown",e=>{e.preventDefault();firePow()});
+
+// ---------- host ----------
+const MAP=["#####################","#o........#........o#","#.##.###..#..###.##.#","#...................#","#.##.#.#######.#.##.#","#....#....#....#....#","####.###.....###.####","#....#.........#....#","#.##.#.#######.#.##.#","#...................#","#.##.###..#..###.##.#","#o........#........o#","#####################"];
+const MW=21,MH=13,DIRS={u:[0,-1],d:[0,1],l:[-1,0],r:[1,0]},OPP={u:"d",d:"u",l:"r",r:"l"};
+const wall=(x,y)=>x<0||y<0||x>=MW||y>=MH||MAP[y][x]==="#";
+const SPAWN=[[1,3],[19,3],[1,9],[19,9],[5,1],[15,1],[5,11],[15,11],[9,3],[11,9],[9,9],[11,3]];
+let H={room:null,code:"",online:new Map()};
+let G={running:false};
+function initHost(){
+  if(!H.code){H.code=String(1000+Math.floor(Math.random()*9000));}
+  $("#hCode").textContent=H.code;
+  if(!H.tried){H.tried=true;hostRoom()}
+  countHeroes();
+}
+async function hostRoom(){
+  const r=await roomP;const c=$("#hConn"),m=$("#hConnMsg");
+  if(!r){c.textContent="онлайн недоступний";c.className="pill bad";m.textContent="Онлайн-режим не підключився в цьому перегляді. Грайте «Битву алгоритмів» (коди героїв) або з клавіатури.";return}
+  try{H.room=await r.join("arena-"+H.code)}catch(e){c.textContent="кімната недоступна";c.className="pill bad";m.textContent="Кімнату не вдалося відкрити ("+(e&&e.code||"помилка")+"). Можна грати за кодами героїв.";return}
+  H.room.onConnection(ok=>{c.textContent=ok?"онлайн":"з'єднання…";c.className="pill "+(ok?"ok":"bad")});
+  H.room.onPeers(ch=>{
+    H.online.clear();
+    for(const p of ch.peers){if(p.sameTab||p.kind!=="viewer")continue;const h=decode(p.presence&&p.presence.hero);if(!h)continue;H.online.set(p.peer,{hero:h,d:String(p.presence.d||"s"),p:+p.presence.p||0})}
+    const list=$("#hOnlineList");list.textContent="";for(const[k,v]of H.online)list.append(el("span",{class:"pill"},v.hero.e+" "+v.hero.n));
+    $("#hOnlineN").textContent=H.online.size;countHeroes();
+    if(G.running)syncOnline();
+  });
+}
+function parseCodes(){const out=[];let bad=0;for(const line of $("#hCodes").value.split(/\s+/)){if(!line.trim())continue;const h=decode(line);if(h)out.push(h);else bad++}return{out,bad}}
+$("#hCodes").addEventListener("input",countHeroes);$("#hLocal").addEventListener("change",countHeroes);
+$("#hDemo").addEventListener("click",()=>{const demo=[
+  {n:"Спринтер",e:"🦊",c:"#ff8a3d",sp:5,cd:2,du:2,pw:"dash",ai:{t:"coin",g:"flee",p:"ghost"}},
+  {n:"Броня",e:"🤖",c:"#4dd4ff",sp:2,cd:3,du:4,pw:"shield",ai:{t:"big",g:"power",p:"ghost"}},
+  {n:"Крижинка",e:"🐼",c:"#e8ecff",sp:3,cd:3,du:3,pw:"freeze",ai:{t:"leader",g:"flee",p:"rival"}},
+  {n:"Магнітик",e:"🐸",c:"#3ddc84",sp:3,cd:2,du:4,pw:"magnet",ai:{t:"coin",g:"flee",p:"ready"}}];
+  $("#hCodes").value=($("#hCodes").value.trim()+"\n"+demo.map(d=>encode(sanitize(d))).join("\n")).trim();countHeroes()});
+function countHeroes(){const{out,bad}=parseCodes();const n=out.length+(+$("#hLocal").value)+H.online.size;$("#hCodesMsg").textContent=out.length+" код(ів)"+(bad?" · "+bad+" нерозпізнано":"");$("#hCount").textContent="Героїв: "+Math.min(n,12)+(n>12?" (зайві не ввійдуть, максимум 12)":"");$("#hStart").disabled=n===0}
+$("#hStart").addEventListener("click",startRound);
+
+// ---------- game ----------
+const cv=$("#cv"),ctx=cv.getContext("2d");
+let keys={};
+addEventListener("keydown",e=>{keys[e.code]=true;if(G.running&&e.code==="Escape")endRound();
+  if(!$("#v-play").classList.contains("hide")&&P.joined){const m={ArrowUp:"u",KeyW:"u",ArrowDown:"d",KeyS:"d",ArrowLeft:"l",KeyA:"l",ArrowRight:"r",KeyD:"r"}[e.code];if(m){setDir(m);e.preventDefault()}if(e.code==="Space"){firePow();e.preventDefault()}}
+  if(G.running&&["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Space"].includes(e.code))e.preventDefault()});
+addEventListener("keyup",e=>{keys[e.code]=false});
+function newEnt(h,kind,i,extra){const s=SPAWN[i%SPAWN.length];return Object.assign({h,kind,x:s[0],y:s[1],sx:s[0],sy:s[1],dir:"s",want:"s",score:0,coins:0,ghosts:0,caught:0,pow:0,cdT:0,shield:2,frozen:0,magnet:0,pseq:0,ang:0,id:kind+i},extra||{})}
+function startRound(){
+  const ents=[];let i=0;
+  const nl=+$("#hLocal").value;
+  if(nl>=1)ents.push(newEnt(sanitize({n:"Гравець 1",e:"😎",c:"#ffd23f",sp:3,cd:3,du:3,pw:"dash"}),"k1",i++));
+  if(nl>=2)ents.push(newEnt(sanitize({n:"Гравець 2",e:"👾",c:"#ff6bd6",sp:3,cd:3,du:3,pw:"freeze"}),"k2",i++));
+  for(const[peer,v]of H.online){if(ents.length>=12)break;ents.push(newEnt(v.hero,"net",i++,{peer,lastP:v.p}))}
+  for(const h of parseCodes().out){if(ents.length>=12)break;ents.push(newEnt(h,"bot",i++))}
+  const coins=[];for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){const c=MAP[y][x];if(c===".")coins.push({x,y,v:1});if(c==="o")coins.push({x,y,v:5})}
+  const ng=+$("#hGhosts").value,gh=[];for(let k=0;k<ng;k++)gh.push({x:8+k%5,y:6,dir:["l","r","u","d"][k%4],sp:2.6,scared:0,home:[8+k%5,6],dead:0,hue:[0,190,300,30][k]});
+  G={running:true,ents,coins,gh,T:+$("#hTime").value,t:0,last:performance.now(),fx:[],lastSt:0,respawn:12,scareT:0};
+  $("#sCode").textContent=H.room?"кімната "+H.code:"";
+  $("#stage").classList.remove("hide");$("#over").classList.add("hide");
+  resize();requestAnimationFrame(loop);
+}
+function syncOnline(){for(const[peer,v]of H.online){if(!G.ents.some(e=>e.peer===peer)&&G.ents.length<12){const e=newEnt(v.hero,"net",G.ents.length,{peer,lastP:v.p});G.ents.push(e)}}}
+function resize(){const r=cv.getBoundingClientRect(),d=devicePixelRatio||1;cv.width=r.width*d;cv.height=r.height*d;ctx.setTransform(d,0,0,d,0,0)}
+addEventListener("resize",()=>{if(G.running)resize()});
+const atC=e=>Math.abs(e.x-Math.round(e.x))<1e-3&&Math.abs(e.y-Math.round(e.y))<1e-3;
+function bfs(sx,sy,goal,maxD=60){ // returns first dir to nearest cell satisfying goal
+  const q=[[sx,sy,null,0]],seen=new Set([sx+","+sy]);
+  while(q.length){const[x,y,f,d]=q.shift();if(f&&goal(x,y))return f;if(d>maxD)continue;for(const k of"udlr"){const[dx,dy]=DIRS[k],nx=x+dx,ny=y+dy,key=nx+","+ny;if(wall(nx,ny)||seen.has(key))continue;seen.add(key);q.push([nx,ny,f||k,d+1])}}
+  return null;
+}
+const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+function nearestGhost(e){let best=null,bd=1e9;for(const g of G.gh){if(g.dead>0||g.scared>0)continue;const d=dist(e,g);if(d<bd){bd=d;best=g}}return[best,bd]}
+function nearestRival(e){let best=null,bd=1e9;for(const o of G.ents){if(o===e)continue;const d=dist(e,o);if(d<bd){bd=d;best=o}}return[best,bd]}
+function aiThink(e){
+  const cx=Math.round(e.x),cy=Math.round(e.y);const[g,gd]=nearestGhost(e);
+  // power use
+  if(e.cdT<=0){const[r,rd]=nearestRival(e);const p=e.h.ai.p;
+    if((p==="ghost"&&gd<3)||(p==="rival"&&rd<3)||p==="ready"||(e.h.ai.g==="power"&&gd<3))usePower(e)}
+  if(g&&gd<3&&e.h.ai.g==="flee"&&e.shield<=0){
+    let best=null,bv=-1;for(const k of"udlr"){const[dx,dy]=DIRS[k];if(wall(cx+dx,cy+dy))continue;const v=Math.hypot(cx+dx-g.x,cy+dy-g.y)+(Math.random()*0.3);if(v>bv){bv=v;best=k}}if(best)return best}
+  let goal;
+  if(e.h.ai.t==="big"&&G.coins.some(c=>c.v===5))goal=(x,y)=>G.coins.some(c=>c.v===5&&c.x===x&&c.y===y);
+  else if(e.h.ai.t==="leader"){const lead=G.ents.filter(o=>o!==e).sort((a,b)=>b.score-a.score)[0];if(lead&&Math.random()<0.6){const lx=Math.round(lead.x),ly=Math.round(lead.y);goal=(x,y)=>(x===lx&&y===ly)||G.coins.some(c=>c.x===x&&c.y===y&&Math.abs(x-lx)+Math.abs(y-ly)<3)}}
+  if(!goal)goal=(x,y)=>G.coins.some(c=>c.x===x&&c.y===y);
+  return bfs(cx,cy,goal)||randDir(cx,cy,e.dir);
+}
+function randDir(cx,cy,cur){const ks=[..."udlr"].filter(k=>!wall(cx+DIRS[k][0],cy+DIRS[k][1])&&k!==OPP[cur]);return ks.length?ks[Math.floor(Math.random()*ks.length)]:OPP[cur]||"s"}
+function usePower(e){
+  if(e.cdT>0||e.frozen>0)return;const h=e.h;e.pow++;e.cdT=cdSec(h.cd);
+  if(h.pw==="dash"){const d=e.dir!=="s"?e.dir:e.want;if(!DIRS[d])return;const n=1+Math.ceil(h.du/2);let cx=Math.round(e.x),cy=Math.round(e.y);for(let k=0;k<n;k++){const nx=cx+DIRS[d][0],ny=cy+DIRS[d][1];if(wall(nx,ny))break;cx=nx;cy=ny;collect(e,cx,cy)}e.x=cx;e.y=cy;fx(e.x,e.y,"💨")}
+  if(h.pw==="shield"){e.shield=1+h.du*0.8;fx(e.x,e.y,"🛡")}
+  if(h.pw==="magnet"){e.magnet=h.du*1.5;fx(e.x,e.y,"🧲")}
+  if(h.pw==="freeze"){const[r,rd]=nearestRival(e);if(r&&rd<7){r.frozen=1+h.du*0.5;fx(r.x,r.y,"❄️")}}
+}
+function fx(x,y,t,c){G.fx.push({x,y,t,life:1,c})}
+function collect(e,x,y){for(let i=G.coins.length-1;i>=0;i--){const c=G.coins[i];if(c.x===x&&c.y===y){G.coins.splice(i,1);e.score+=c.v;e.coins+=c.v;if(c.v===5){for(const g of G.gh)g.scared=6;fx(x,y,"+5","#ffd23f")}}}}
+function moveEnt(e,sp,dt,think){
+  let left=sp*dt;let guard=0;
+  while(left>1e-6&&guard++<4){
+    if(atC(e)){e.x=Math.round(e.x);e.y=Math.round(e.y);const nd=think();
+      if(nd&&nd!=="s"&&!wall(e.x+DIRS[nd][0],e.y+DIRS[nd][1]))e.dir=nd;
+      else if(e.dir==="s"||!DIRS[e.dir]||wall(e.x+DIRS[e.dir][0],e.y+DIRS[e.dir][1])){e.dir="s";return}}
+    else if(e.want&&e.want===OPP[e.dir])e.dir=e.want;
+    if(!DIRS[e.dir])return;
+    const[dx,dy]=DIRS[e.dir];
+    const tx=dx>0?Math.floor(e.x+1e-6)+1:dx<0?Math.ceil(e.x-1e-6)-1:e.x,ty=dy>0?Math.floor(e.y+1e-6)+1:dy<0?Math.ceil(e.y-1e-6)-1:e.y;
+    const rem=Math.abs(tx-e.x)+Math.abs(ty-e.y);
+    if(rem<=left){e.x=tx;e.y=ty;left-=rem}else{e.x+=dx*left;e.y+=dy*left;left=0}
+  }
+}
+function step(dt){
+  G.t+=dt;
+  // inputs
+  for(const e of G.ents){
+    if(e.kind==="k1"){e.want=keys.KeyW?"u":keys.KeyS?"d":keys.KeyA?"l":keys.KeyD?"r":e.want;if(keys.KeyQ){usePower(e)}}
+    if(e.kind==="k2"){e.want=keys.ArrowUp?"u":keys.ArrowDown?"d":keys.ArrowLeft?"l":keys.ArrowRight?"r":e.want;if(keys.Enter||keys.NumpadEnter){usePower(e)}}
+    if(e.kind==="net"){const v=H.online.get(e.peer);if(v){e.want=DIRS[v.d]?v.d:"s";if(v.p!==e.lastP){e.lastP=v.p;usePower(e)}e.off=0}else e.off=(e.off||0)+dt}
+  }
+  for(const e of G.ents){
+    e.cdT=Math.max(0,e.cdT-dt);e.shield=Math.max(0,e.shield-dt);e.magnet=Math.max(0,e.magnet-dt);
+    if(e.frozen>0){e.frozen-=dt;continue}
+    const sp=2.6+e.h.sp*0.45;
+    if(e.kind==="bot")moveEnt(e,sp,dt,()=>aiThink(e));
+    else moveEnt(e,sp,dt,()=>e.want);
+    if(e.dir!=="s")e.ang=Math.atan2(DIRS[e.dir][1],DIRS[e.dir][0]);
+    const cx=Math.round(e.x),cy=Math.round(e.y);
+    if(Math.abs(e.x-cx)<.35&&Math.abs(e.y-cy)<.35)collect(e,cx,cy);
+    if(e.magnet>0)for(let i=G.coins.length-1;i>=0;i--){const c=G.coins[i];if(Math.abs(c.x-e.x)+Math.abs(c.y-e.y)<=2.2)collect(e,c.x,c.y)}
+  }
+  // ghosts
+  for(const g of G.gh){
+    if(g.dead>0){g.dead-=dt;if(g.dead<=0){g.x=g.home[0];g.y=g.home[1];g.dir="u"}continue}
+    g.scared=Math.max(0,g.scared-dt);
+    const sp=g.scared>0?1.8:g.sp+Math.min(1.2,G.t/80);
+    moveEnt(g,sp,dt,()=>{const cx=g.x,cy=g.y;
+      let tgt=null,bd=1e9;for(const e of G.ents){const d=Math.abs(e.x-cx)+Math.abs(e.y-cy);if(d<bd&&e.shield<=0){bd=d;tgt=e}}
+      const opts=[..."udlr"].filter(k=>!wall(cx+DIRS[k][0],cy+DIRS[k][1])&&k!==OPP[g.dir]);
+      const ch=opts.length?opts:[OPP[g.dir]];
+      if(tgt&&bd<9&&Math.random()<0.75){ch.sort((a,b)=>{const da=Math.abs(cx+DIRS[a][0]-tgt.x)+Math.abs(cy+DIRS[a][1]-tgt.y),db=Math.abs(cx+DIRS[b][0]-tgt.x)+Math.abs(cy+DIRS[b][1]-tgt.y);return g.scared>0?db-da:da-db});return ch[0]}
+      return ch[Math.floor(Math.random()*ch.length)]});
+    for(const e of G.ents){if(dist(e,g)<0.6){
+      if(g.scared>0){g.dead=3;g.scared=0;e.score+=10;e.ghosts++;fx(g.x,g.y,"+10","#4dd4ff")}
+      else if(e.shield<=0){const lose=Math.min(5,e.score);e.score-=lose;e.caught++;fx(e.x,e.y,"−"+lose,"#ff5c7a");e.x=e.sx;e.y=e.sy;e.dir="s";e.shield=2.5}
+    }}
+  }
+  // respawn coins
+  G.respawn-=dt;if(G.respawn<=0){G.respawn=10;const free=[];for(let y=0;y<MH;y++)for(let x=0;x<MW;x++)if(MAP[y][x]!=="#"&&!G.coins.some(c=>c.x===x&&c.y===y))free.push([x,y]);for(let k=0;k<12&&free.length;k++){const[x,y]=free.splice(Math.floor(Math.random()*free.length),1)[0];G.coins.push({x,y,v:1})}if(!G.coins.some(c=>c.v===5)){const o=[[1,1],[19,1],[1,11],[19,11]][Math.floor(Math.random()*4)];G.coins.push({x:o[0],y:o[1],v:5})}}
+  for(const f of G.fx)f.life-=dt*0.9;G.fx=G.fx.filter(f=>f.life>0);
+  // broadcast
+  if(H.room&&G.t-G.lastSt>1){G.lastSt=G.t;const rk=ranked();H.room.emit("st",{t:Math.max(0,G.T-G.t),s:rk.filter(e=>e.peer).map(e=>[e.peer,e.score,rk.indexOf(e)+1,+e.cdT.toFixed(0)])}).catch(()=>{})}
+  if(G.t>=G.T)endRound();
+}
+const ranked=()=>G.ents.slice().sort((a,b)=>b.score-a.score);
+function fmt(s){s=Math.max(0,Math.ceil(s));return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")}
+function draw(){
+  const W=cv.clientWidth,Hh=cv.clientHeight;const cs=Math.floor(Math.min(W/MW,Hh/MH));const ox=Math.floor((W-cs*MW)/2),oy=Math.floor((Hh-cs*MH)/2);
+  ctx.fillStyle="#05060f";ctx.fillRect(0,0,W,Hh);
+  const X=x=>ox+x*cs+cs/2,Y=y=>oy+y*cs+cs/2;
+  ctx.strokeStyle="#3a46c8";ctx.lineWidth=Math.max(2,cs*0.12);ctx.fillStyle="#141a4a";
+  for(let y=0;y<MH;y++)for(let x=0;x<MW;x++)if(MAP[y][x]==="#"){ctx.fillRect(ox+x*cs+1,oy+y*cs+1,cs-2,cs-2)}
+  ctx.lineJoin="round";for(let y=0;y<MH;y++)for(let x=0;x<MW;x++)if(MAP[y][x]==="#"){const x0=ox+x*cs,y0=oy+y*cs;ctx.beginPath();if(!wall(x,y-1))ctx.moveTo(x0,y0),ctx.lineTo(x0+cs,y0);if(!wall(x,y+1))ctx.moveTo(x0,y0+cs),ctx.lineTo(x0+cs,y0+cs);if(!wall(x-1,y))ctx.moveTo(x0,y0),ctx.lineTo(x0,y0+cs);if(!wall(x+1,y))ctx.moveTo(x0+cs,y0),ctx.lineTo(x0+cs,y0+cs);ctx.stroke()}
+  const pulse=0.75+0.25*Math.sin(G.t*6);
+  for(const c of G.coins){ctx.fillStyle="#ffd23f";ctx.beginPath();ctx.arc(X(c.x),Y(c.y),c.v===5?cs*0.26*pulse:cs*0.09,0,Math.PI*2);ctx.fill()}
+  for(const g of G.gh){if(g.dead>0)continue;const x=X(g.x),y=Y(g.y),r=cs*0.4;ctx.fillStyle=g.scared>0?(g.scared<2&&Math.floor(G.t*6)%2?"#fff":"#3b5bff"):"hsl("+g.hue+",85%,60%)";ctx.beginPath();ctx.arc(x,y-r*0.1,r,Math.PI,0);ctx.lineTo(x+r,y+r*0.8);for(let k=0;k<4;k++)ctx.lineTo(x+r-(k+0.5)*r/2,y+r*(k%2?0.8:0.5));ctx.lineTo(x-r,y+r*0.8);ctx.fill();ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(x-r*0.35,y-r*0.15,r*0.22,0,7);ctx.arc(x+r*0.35,y-r*0.15,r*0.22,0,7);ctx.fill();ctx.fillStyle="#123";ctx.beginPath();ctx.arc(x-r*0.3,y-r*0.12,r*0.1,0,7);ctx.arc(x+r*0.4,y-r*0.12,r*0.1,0,7);ctx.fill()}
+  for(const e of G.ents){const x=X(e.x),y=Y(e.y),r=cs*0.42;
+    if(e.shield>0){ctx.strokeStyle="rgba(77,212,255,"+(0.5+0.4*Math.sin(G.t*10))+")";ctx.lineWidth=3;ctx.beginPath();ctx.arc(x,y,r*1.3,0,7);ctx.stroke()}
+    if(e.magnet>0){ctx.strokeStyle="rgba(255,210,63,.35)";ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,cs*2.2,0,7);ctx.stroke()}
+    ctx.globalAlpha=e.off>3?0.35:1;drawHero(ctx,x,y,r,e.h);ctx.globalAlpha=1;
+    if(e.frozen>0){ctx.fillStyle="rgba(170,220,255,.55)";ctx.fillRect(x-r,y-r,r*2,r*2)}
+    ctx.font="800 "+Math.max(10,Math.round(cs*0.3))+"px Nunito";ctx.textAlign="center";ctx.fillStyle="#fff";ctx.strokeStyle="#000";ctx.lineWidth=3;ctx.strokeText(e.h.n,x,y-r-4);ctx.fillText(e.h.n,x,y-r-4);
+    if(e.cdT>0){ctx.fillStyle="rgba(255,255,255,.25)";ctx.fillRect(x-r,y+r+3,r*2,4);ctx.fillStyle="#ffd23f";ctx.fillRect(x-r,y+r+3,r*2*(1-e.cdT/cdSec(e.h.cd)),4)}}
+  for(const f of G.fx){ctx.globalAlpha=Math.max(0,f.life);ctx.font="800 "+Math.round(cs*0.5)+"px Nunito";ctx.fillStyle=f.c||"#fff";ctx.textAlign="center";ctx.fillText(f.t,X(f.x),Y(f.y)-(1-f.life)*cs);ctx.globalAlpha=1}
+  $("#sTime").textContent=fmt(G.T-G.t);
+  const lb=$("#sLb");lb.textContent="";ranked().forEach((e,i)=>{const r=el("div",{class:"lb"},el("span",{class:"mute"},(i+1)+"."),el("span",{class:"em"},e.h.e),el("span",{},e.h.n),el("span",{class:"sc"},e.score));if(e.frozen>0)r.append(" ❄️");lb.append(r)});
+}
+function loop(now){if(!G.running)return;const dt=Math.min(0.05,(now-G.last)/1000);G.last=now;step(dt);if(G.running){draw();requestAnimationFrame(loop)}}
+function endRound(silent){
+  if(!G.running)return;G.running=false;$("#stage").classList.add("hide");
+  if(H.room){const rk=ranked();H.room.emit("st",{t:0,end:1,s:rk.filter(e=>e.peer).map(e=>[e.peer,e.score,rk.indexOf(e)+1,0])}).catch(()=>{})}
+  if(silent)return;
+  const rk=ranked(),b=$("#overBody");b.textContent="";
+  b.append(el("h2",{style:"text-align:center"},"🏆 Раунд завершено!"));
+  const pod=el("div",{class:"podium"});[1,0,2].forEach(i=>{const e=rk[i];if(!e)return;const p=el("div",{class:"pod"},el("div",{class:"em"},e.h.e),el("b",{},e.h.n),el("div",{class:"mono"},e.score+" 🪙"));p.style.height=[190,150,120][i]+"px";p.style.borderTop="4px solid "+["#c0c6e0","#ffd23f","#d08a4a"][i];pod.append(p)});b.append(pod);
+  const t=el("table",{});t.append(el("tr",{},...["#","Герой","Сила","Навички ⚡/⏱/💪","🪙","👻 зловив","💥 спійманий","✨ сил"].map(x=>el("th",{},x))));
+  rk.forEach((e,i)=>t.append(el("tr",{},el("td",{},i+1),el("td",{},e.h.e+" "+e.h.n),el("td",{},POW[e.h.pw].i+" "+POW[e.h.pw].n),el("td",{class:"mono"},e.h.sp+"/"+e.h.cd+"/"+e.h.du),el("td",{},e.score),el("td",{},e.ghosts),el("td",{},e.caught),el("td",{},e.pow))));
+  b.append(el("div",{style:"overflow-x:auto"},t));
+  // learning insight: avg score by power
+  const by={};for(const e of rk){(by[e.h.pw]=by[e.h.pw]||[]).push(e.score)}
+  const rows=Object.entries(by).map(([k,v])=>[k,v.reduce((a,c)=>a+c,0)/v.length,v.length]).sort((a,c)=>c[1]-a[1]);
+  const ins=el("div",{class:"card",style:"margin-top:12px;background:var(--card2)"},el("b",{},"🎓 Обговоріть із класом"));
+  const ul=el("ul",{style:"margin:6px 0 0;padding-left:20px;line-height:1.6"});
+  rows.forEach(([k,avg,n])=>ul.append(el("li",{},POW[k].i+" "+POW[k].n+": у середньому "+avg.toFixed(1)+" монет ("+n+" "+(n===1?"герой":"героїв")+")")));
+  ul.append(el("li",{},"Яка сила виявилась найкориснішою? Чи варто змінити баланс навичок?"),el("li",{},"Чий автопілот грав найкраще? Які правила (блоки) в нього?"));
+  ins.append(ul);b.append(ins);
+  b.append(el("div",{class:"row",style:"justify-content:center;margin-top:12px"},el("button",{class:"pri",onclick:()=>{$("#over").classList.add("hide");startRound()}},"🔁 Ще раунд"),el("button",{onclick:()=>{$("#over").classList.add("hide")}},"⚙ Налаштування")));
+  $("#over").classList.remove("hide");
+}
+route();
+</script>
+</body>
+</html>

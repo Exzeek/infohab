@@ -1,0 +1,727 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>4 клас · Як досліджувати об&#39;єкти за допомогою моделей?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;800&family=Nunito:wght@500;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+:root{--class-4:#7a4fd8;--class-4-soft:#efe7ff;--bg:#f6f4fc;--surface:#fff;--ink:#1d1830;--muted:#5d5875;--line:#e2dcf2;
+--ok:#2f9e44;--ok-bg:#e6f6ea;--bad:#e03131;--bad-bg:#fdecec;--send:#ffb020;--send-ink:#2a1a00;--wall:#4a4361;--star:#f5a400;
+--f-d:"Unbounded","Arial Black",sans-serif;--f-b:"Nunito",system-ui,sans-serif;--f-m:"JetBrains Mono",ui-monospace,monospace;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--class-4:#a98af0;--class-4-soft:#2a2244;--bg:#14121c;--surface:#1e1a2b;--ink:#ece8f7;--muted:#a49dbd;--line:#352e4a;--ok:#5cc77a;--ok-bg:#16301d;--bad:#ff6b6b;--bad-bg:#3a1919;--wall:#8a82a6;color-scheme:dark}}
+:root[data-theme=dark]{--class-4:#a98af0;--class-4-soft:#2a2244;--bg:#14121c;--surface:#1e1a2b;--ink:#ece8f7;--muted:#a49dbd;--line:#352e4a;--ok:#5cc77a;--ok-bg:#16301d;--bad:#ff6b6b;--bad-bg:#3a1919;--wall:#8a82a6;color-scheme:dark}
+*{box-sizing:border-box}[hidden]{display:none!important}
+html,body{margin:0;overflow-x:hidden}
+body{background:var(--bg);color:var(--ink);font:500 19px/1.45 var(--f-b)}
+button,input{font:inherit;color:inherit}
+.wrap{max-width:860px;margin:0 auto;padding:16px 14px 110px}
+.wrap>.eyebrow{padding-right:52px}
+.eyebrow{font:800 13px var(--f-b);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+h1{font:800 clamp(24px,5.6vw,36px)/1.15 var(--f-d);color:var(--class-4);margin:6px 0 12px;text-wrap:balance}
+h2{font:800 22px/1.2 var(--f-d);margin:0 0 10px}
+.story{display:flex;gap:12px;align-items:center;background:var(--surface);border:2px solid var(--class-4);border-radius:18px;padding:12px 14px}
+.story .hero{font-size:46px;line-height:1}
+.story p{margin:0;font-size:17px}
+.hud{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}
+.hud div{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:6px 8px;text-align:center;font-weight:800;font-variant-numeric:tabular-nums}
+.hud small{display:block;font:700 12px var(--f-b);color:var(--muted)}
+.tabs{position:sticky;top:0;z-index:20;display:flex;gap:6px;overflow-x:auto;background:var(--bg);padding:8px 0;margin:0 -2px;scrollbar-width:none}
+.tabs button{flex:1 0 auto;border:2px solid var(--line);background:var(--surface);border-radius:999px;padding:9px 13px;font-weight:800;font-size:16px;cursor:pointer;position:relative}
+.tabs button[aria-selected=true]{background:var(--class-4);border-color:var(--class-4);color:#fff}
+.dot{position:absolute;top:2px;right:4px;width:10px;height:10px;border-radius:50%;background:var(--send);animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.2}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px;margin:14px 0;position:relative}
+.card.ok{border-color:var(--ok);background:var(--ok-bg)}
+.card.bad{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.exhead{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:6px}
+.code{font:700 14px var(--f-m);color:var(--class-4)}
+.lv{font-size:14px;font-weight:800;color:var(--muted)}
+.q{font-weight:800;margin:4px 0 10px}
+.hintline{font-size:15px;color:var(--muted);margin:-4px 0 10px}
+.hand{display:inline-block;animation:poke 1s ease-in-out infinite}
+@keyframes poke{50%{transform:translateY(-5px)}}
+.handpt{position:absolute;right:-6px;bottom:-14px;font-size:30px;pointer-events:none;animation:poke 1s ease-in-out infinite;z-index:5;filter:drop-shadow(0 2px 2px #0004)}
+.opts{display:grid;gap:8px}
+.opt,.chip,.btn{border:2px solid var(--line);background:var(--surface);border-radius:14px;padding:10px 12px;text-align:left;cursor:pointer;font-weight:700;position:relative}
+.opt:hover,.chip:hover{border-color:var(--class-4)}
+.opt.sel,.chip.sel{border-color:var(--class-4);background:var(--class-4-soft)}
+.opt.ok,.chip.ok{border-color:var(--ok);background:var(--ok-bg)}
+.opt.bad,.chip.bad{border-color:var(--bad);background:var(--bad-bg)}
+.btn{background:var(--class-4);color:#fff;border-color:var(--class-4);text-align:center;font-weight:800}
+.btn.ghost{background:var(--surface);color:var(--ink);border-color:var(--line)}
+.btn:disabled{opacity:.5;cursor:default}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.fb{margin-top:10px;font-weight:800;min-height:1.2em}
+.fb.ok{color:var(--ok)}.fb.bad{color:var(--bad)}
+.inp{width:100%;border:2px solid var(--line);border-radius:14px;padding:10px 12px;background:var(--surface);font-weight:800}
+.inp:focus{outline:3px solid var(--class-4);outline-offset:1px}
+.seq{min-height:52px;border:2px dashed var(--line);border-radius:14px;padding:8px;display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
+.seq .chip{display:flex;gap:8px}.seq .n{font:700 14px var(--f-m);color:var(--class-4)}
+.sortrow{display:flex;gap:8px;align-items:center;justify-content:space-between;border-bottom:1px dashed var(--line);padding:6px 0;flex-wrap:wrap}
+.sortrow span{font-weight:700;flex:1 1 150px}
+.seg{display:flex;gap:4px}.seg button{border:2px solid var(--line);background:var(--surface);border-radius:10px;padding:5px 9px;font-weight:800;font-size:15px;cursor:pointer}
+.seg button.sel{background:var(--class-4-soft);border-color:var(--class-4)}
+.seg button.ok{border-color:var(--ok);background:var(--ok-bg)}.seg button.bad{border-color:var(--bad);background:var(--bad-bg)}
+.match{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.match .chip{font-size:16px;text-align:center}
+.chip .tag{font:700 13px var(--f-m);color:var(--class-4);margin-right:4px}
+/* grid */
+.gwrap{display:flex;justify-content:center;margin:6px 0 10px}
+.grid{display:grid;gap:3px;background:var(--line);padding:3px;border-radius:12px;position:relative;touch-action:manipulation}
+.cell{background:var(--surface);border-radius:7px;display:grid;place-items:center;font-size:20px;position:relative;user-select:none}
+.cell.wall{background:var(--wall)}
+.cell.start{box-shadow:inset 0 0 0 3px var(--class-4)}
+.cell.trail{background:var(--class-4-soft)}
+.cell.click{cursor:pointer}.cell.click:hover{outline:3px solid var(--class-4);z-index:2}
+.cell.pick{outline:4px solid var(--class-4);z-index:2}
+.cell.okc{outline:4px solid var(--ok);z-index:3}.cell.badc{outline:4px solid var(--bad);z-index:3}
+.robot{position:absolute;display:grid;place-items:center;font-size:26px;transition:left .22s,top .22s;pointer-events:none;z-index:4}
+.robot.crash{animation:shake .35s}
+.lbl{position:absolute;font:700 10px var(--f-m);color:var(--muted);left:3px;top:1px}
+.prog{display:flex;flex-wrap:wrap;gap:5px;min-height:46px;border:2px dashed var(--line);border-radius:12px;padding:6px;margin:6px 0}
+.tok{font:700 20px var(--f-m);width:38px;height:38px;border-radius:10px;border:2px solid var(--class-4);background:var(--class-4-soft);cursor:pointer;display:grid;place-items:center}
+.tok.now{background:var(--class-4);color:#fff}
+.tok.static{cursor:default}
+.pad{display:grid;grid-template-columns:repeat(6,auto);gap:6px;justify-content:start}
+.pad button{font:700 22px var(--f-m);width:48px;height:48px;border-radius:12px;border:2px solid var(--class-4);background:var(--surface);cursor:pointer;color:var(--ink)}
+.pad button.sm{font-size:15px;font-family:var(--f-b);width:auto;padding:0 10px;font-weight:800}
+.progtxt{font:700 22px/1.6 var(--f-m);letter-spacing:2px;background:var(--class-4-soft);border-radius:10px;padding:4px 10px;display:inline-block}
+/* quest */
+.map{position:relative;height:96px;margin:6px 4px 14px}
+.map svg{position:absolute;inset:0;width:100%;height:100%}
+.node{position:absolute;transform:translate(-50%,-50%);width:50px;height:50px;border-radius:50%;background:var(--surface);border:3px solid var(--line);display:grid;place-items:center;font-size:24px}
+.node.done{border-color:var(--class-4);background:var(--class-4-soft)}
+.node.cur{border-color:var(--class-4);animation:pulse 1.2s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 9px color-mix(in srgb,var(--class-4) 25%,transparent)}}
+.walker{position:absolute;font-size:28px;transform:translate(-50%,-110%);transition:left .8s,top .8s;z-index:3}
+.hearts{font-size:22px;letter-spacing:2px}
+.broken{display:inline-block;animation:breakh .6s forwards}
+@keyframes breakh{50%{transform:scale(1.4) rotate(-15deg)}100%{transform:scale(.6);opacity:.3}}
+.xpfly{position:fixed;font:800 20px var(--f-d);color:var(--class-4);pointer-events:none;animation:fly 1s forwards;z-index:60}
+@keyframes fly{to{transform:translateY(-70px);opacity:0}}
+.flash{animation:flash .5s}
+@keyframes flash{30%{box-shadow:0 0 0 6px var(--ok)}}
+.boss{text-align:center}.boss .face{font-size:64px;display:inline-block}
+.boss .face.hit{animation:shake .35s}
+.hpbar{height:16px;border-radius:9px;background:var(--line);overflow:hidden;margin:6px 0}
+.hpbar i{display:block;height:100%;background:var(--bad);transition:width .6s}
+.starsrow{font-size:34px;letter-spacing:4px;min-height:44px}
+.starsrow span{display:inline-block;animation:pop .4s backwards}
+@keyframes pop{from{transform:scale(0)}}
+canvas#conf{position:fixed;inset:0;pointer-events:none;z-index:70}
+/* cards */
+.banner{background:var(--class-4);color:#fff;border-radius:18px;padding:16px}
+.banner b{font:800 20px/1.2 var(--f-d);display:block;margin:4px 0 8px}
+.banner ul{margin:0;padding-left:18px;font-weight:900;text-transform:uppercase;font-size:15px}
+.prog-bar{height:12px;border-radius:7px;background:var(--line);overflow:hidden;margin:10px 0}
+.prog-bar i{display:block;height:100%;background:var(--class-4);transition:width .4s}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.fc{border:2px solid var(--line);background:var(--surface);border-radius:16px;padding:12px;min-height:130px;cursor:pointer;text-align:left}
+.fc .ic{font-size:30px}.fc b{display:block;font-weight:900;margin-top:4px}
+.fc.open{border-color:var(--class-4);background:var(--class-4-soft);font-size:16px}
+/* lab */
+.lvtabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.lvtabs button{border:2px solid var(--line);background:var(--surface);border-radius:12px;padding:6px 10px;font-weight:800;cursor:pointer}
+.lvtabs button.cur{border-color:var(--class-4);background:var(--class-4-soft)}
+.lvtabs button.done::after{content:" ✓";color:var(--ok)}
+.req{font-size:16px;color:var(--muted);margin:4px 0}
+/* result */
+.big{font:800 72px/1 var(--f-d);color:var(--class-4);text-align:center}
+table.br{width:100%;border-collapse:collapse;font-size:16px}
+table.br td{padding:6px 4px;border-bottom:1px solid var(--line)}
+table.br td:last-child{text-align:right;font-weight:800;font-variant-numeric:tabular-nums}
+.warnf{background:#fff4d6;color:#6b4a00;border-radius:10px;padding:6px 10px;font-weight:800;margin:8px 0}
+.lb{width:100%;border-collapse:collapse;font-size:16px}.lb td,.lb th{padding:5px;border-bottom:1px solid var(--line);text-align:left}
+.sendfab{text-decoration:none;position:fixed;right:14px;bottom:14px;z-index:50;background:var(--send);color:var(--send-ink);border:0;border-radius:999px;padding:13px 18px;font:900 16px var(--f-b);box-shadow:0 6px 18px #0003;cursor:pointer}
+a.btn{display:inline-block;text-decoration:none}
+.btn.send{background:var(--send);color:var(--send-ink);border-color:var(--send);border-radius:999px}
+.theme{position:absolute;right:14px;top:14px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 10px;cursor:pointer;font-size:15px}
+.mono{font-family:var(--f-m)}
+table.mt{border-collapse:collapse;margin:6px 0 10px;font-size:17px;min-width:220px}table.mt th,table.mt td{border:2px solid var(--line);padding:6px 10px;text-align:left}table.mt th{background:var(--class-4-soft);font-weight:900}table.mt td:last-child{font-variant-numeric:tabular-nums;font-weight:800}table.mt .ti{width:90px;padding:6px 8px}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+.rwbox{margin:12px auto;text-align:center}.rwgift{font:inherit;font-weight:900;background:var(--send);color:var(--send-ink);border:0;border-radius:999px;padding:10px 22px;cursor:pointer;box-shadow:0 4px 0 #c98500;animation:rwwig 1.2s infinite}.rwin{display:none;background:#fff8db;color:#2b2100;border:3px solid var(--send);border-radius:16px;padding:10px 14px;animation:rwpop .5s;font-size:17px}.rwbox.open .rwgift{display:none}.rwbox.open .rwin{display:block}.rwin b{display:block;margin-bottom:4px}.rwans{margin-top:6px;font:inherit;font-weight:800;border:2px solid #2b2100;background:#fff;color:#2b2100;border-radius:999px;padding:4px 14px;cursor:pointer}@keyframes rwwig{50%{transform:rotate(-3deg) scale(1.05)}}@keyframes rwpop{from{transform:scale(.6);opacity:0}}
+.tokrow{display:flex!important;flex-direction:row!important;flex-wrap:wrap;gap:8px;align-items:center}.tokrow .chip{min-width:3.2rem;justify-content:center;font-size:22px;font-weight:800;padding:8px 14px}
+</style>
+</head>
+<body>
+<canvas id="conf"></canvas>
+<div class="wrap" style="position:relative">
+ <button class="theme" id="themeBtn" aria-label="Світла або темна тема">🌓</button>
+ <div class="eyebrow">Інформатика · 4 клас · Об'єкти та моделі · Зала 15</div>
+ <h1>Як досліджувати об'єкти за допомогою створених моделей?</h1>
+ <div class="story"><div class="hero" aria-hidden="true">🤖</div><p><b>Музей Порядку, Лабораторія дослідників.</b> У Сортика багато таблиць і діаграм, але ніхто не знає, що з них можна дізнатися. Стань дослідником: став питання до моделі, порівнюй, рахуй і передбачай!</p></div>
+ <div class="hud">
+  <div><small>Вправи</small><span id="hEx">0/14</span></div>
+  <div><small>Зірки</small><span id="hSt">⭐ 0</span></div>
+  <div><small>XP</small><span id="hXp">0</span></div>
+  <div><small>Час</small><span id="hT">00:00</span></div>
+ </div>
+ <nav class="tabs" role="tablist">
+  <button role="tab" data-t="ex" aria-selected="true">Вправи</button>
+  <button role="tab" data-t="qu">Квест</button>
+  <button role="tab" data-t="ca">Картки<span class="dot" id="cardDot"></span></button>
+  <button role="tab" data-t="la">Лабораторія</button>
+  <button role="tab" data-t="re">Результат</button>
+ </nav>
+ <section id="t-ex"></section>
+ <section id="t-qu" hidden></section>
+ <section id="t-ca" hidden></section>
+ <section id="t-la" hidden></section>
+ <section id="t-re" hidden></section>
+</div>
+<a class="sendfab" id="fab" href="#" target="_blank" rel="noopener">📤 Надіслати вчителю</a>
+<script>window.BANK = {
+ex: [
+ {lv:"g", type:"choice", title:"Навіщо досліджувати модель?", hint:"Натисни на правильну відповідь", vars:[
+  {q:"Навіщо досліджують модель?", o:["щоб дізнатися нове","щоб її зламати","щоб її розфарбувати","щоб забути"], a:0},
+  {q:"Що можна дізнатися з моделі-таблиці?", o:["де найбільше","колір олівця","ім'я кота","погоду завтра"], a:0},
+  {q:"Модель допомагає…", o:["передбачити","швидко заснути","намалювати","заспівати"], a:0},
+  {q:"Діаграма допомагає швидко…", o:["порівняти числа","вивчити вірш","зварити смачний суп","знайти ключі"], a:0},
+  {q:"Дослідник моделі ставить…", o:["питання","печатку","крапку","оцінку"], a:0},
+  {q:"Модель відповідає лише на питання, для яких у ній є…", o:["дані","фарби","ноти","малюнки"], a:0}
+ ]},
+ {lv:"g", type:"choice", title:"Що покаже модель?", hint:"Подумай і натисни на відповідь", vars:[
+  {q:"Росток росте на 2 см щодня. Зараз 3 см. Яким буде через 2 дні?", o:["7 см","5 см","6 см","4 см"], a:0},
+  {q:"У бочці 12 л, щодня беруть 3 л. На скільки днів вистачить?", o:["4 дні","3 дні","9 днів","15 днів"], a:0},
+  {q:"Велосипедист їде 10 км за годину. Скільки за 2 години?", o:["20 км","12 км","10 км","30 км"], a:0},
+  {q:"Щотижня в музей привозять 5 експонатів. Скільки за 3 тижні?", o:["15","8","20","35"], a:0},
+  {q:"Зранку +3 °C, щогодини тепліше на 2 °C. Скільки буде за 3 години?", o:["+9 °C","+6 °C","+5 °C","+8 °C"], a:0},
+  {q:"У Сортика 20 цукерок, щодня він дає 4. На скільки днів вистачить?", o:["5 днів","4 дні","16 днів","24 дні"], a:0}
+ ]},
+ {lv:"g", type:"sort", title:"Можна дізнатися чи ні?", hint:"Біля кожного питання натисни «Можна» або «Ні»", bins:["Можна","Ні"], vars:[
+  {q:"Модель: «Учні в гуртках: шахи 6, танці 11, футбол 9»", items:[["Де найбільше учнів?",0],["Скільки учнів разом?",0],["На скільки танці більші за шахи?",0],["Як звати тренера?",1],["Коли день народження?",1],["Яка погода завтра?",1]]},
+  {q:"Модель: «Відвідувачі: пн 20, вт 35, ср 15»", items:[["Коли прийшло найменше?",0],["Скільки за три дні?",0],["На скільки вівторок більший?",0],["Яка ціна квитка?",1],["Хто прийшов першим?",1],["Яка музика грала?",1]]},
+  {q:"Модель: «Зібрали кг яблук: Оля 8, Тарас 12»", items:[["Хто зібрав більше?",0],["Скільки разом?",0],["На скільки Тарас більше?",0],["Якого кольору яблука?",1],["Скільки Олі років?",1],["Де росте сад?",1]]}
+ ]},
+ {lv:"g", type:"order", title:"Як досліджують модель?", hint:"Натискай кроки по черзі: перший, другий, третій…", vars:[
+  {q:"Дослідження таблиці відвідувачів", s:["Поставити питання","Подивитися в таблицю","Знайти потрібні числа","Порівняти або порахувати","Зробити висновок"]},
+  {q:"Дослідження росту паростка", s:["Запитати: яким буде за тиждень?","Знайти, на скільки росте щодня","Скласти вираз","Обчислити","Записати висновок"]},
+  {q:"Дослідження діаграми оцінок", s:["Поставити питання","Розглянути стовпчики","Знайти найвищий","Прочитати число","Відповісти на питання"]}
+ ]},
+ {lv:"y", type:"input", title:"Досліди й надрукуй", hint:"Надрукуй число й натисни «Перевірити»", vars:[
+  {q:"Модель: шахи 6, танці 11, футбол 9. Скільки учнів разом?", a:["26"]},
+  {q:"Модель: шахи 6, танці 11, футбол 9. На скільки танці більші за шахи?", a:["5"]},
+  {q:"Модель: пн 20, вт 35, ср 15. Скільки відвідувачів за три дні?", a:["70"]},
+  {q:"Модель: пн 20, вт 35, ср 15. На скільки вівторок більший за середу?", a:["20"]},
+  {q:"Росток 4 см, росте на 3 см щодня. Скільки буде через 3 дні?", a:["13"]},
+  {q:"У музеї 40 експонатів, щомісяця додають 10. Скільки буде через 2 місяці?", a:["60"]}
+ ]},
+ {lv:"y", type:"match", title:"З'єднай питання й дію", hint:"Натисни ліву картку, а потім праву, яка їй пасує", vars:[
+  {q:"Питання до моделі і що зробити", p:[["Де найбільше?","знайти найбільше число"],["Скільки разом?","додати всі числа"],["На скільки більше?","відняти менше"],["Що буде далі?","продовжити правило"]]},
+  {q:"Модель і що вона допомагає дізнатися", p:[["Таблиця оцінок","хто найкращий"],["Карта","як дійти"],["Діаграма погоди","коли тепліше"],["Розклад","коли урок"]]},
+  {q:"Слово в питанні і дія", p:[["разом","додавання"],["на скільки більше","віднімання"],["у скільки разів","ділення"],["по стільки щодня","множення"]]}
+ ]},
+ {lv:"y", type:"multi", title:"Обери всі питання для моделі", hint:"Натисни ВСІ питання, на які модель відповість, а потім «Перевірити»", vars:[
+  {q:"Модель: «Продано на ярмарку: печиво 14, сік 9, пиріжки 17»", o:["Що продали найбільше?","Скільки всього продали?","Чого продали найменше?","Хто спік печиво?","Яка була погода?","Скільки коштував сік?"], a:[0,1,2]},
+  {q:"Модель: «Прочитали книжок: вересень 3, жовтень 7, листопад 5»", o:["У якому місяці найбільше?","Скільки книжок за три місяці?","На скільки жовтень більший?","Як звати автора?","Скільки сторінок у книжці?","Де купили книжки?"], a:[0,1,2]}
+ ]},
+ {lv:"y", type:"bug", title:"Знайди помилку дослідника", hint:"Натисни рядок, де помилка", vars:[
+  {q:"Модель: шахи 6, танці 11, футбол 9", s:["Питання: де найбільше?","Числа: 6, 11, 9","Найбільше — 11","Висновок: найбільше в шахах"], a:3},
+  {q:"Модель: пн 20, вт 35, ср 15", s:["Питання: скільки разом?","Додаємо: 20 + 35 + 15","Разом: 60","Висновок: за три дні 70"], a:2},
+  {q:"Росток 2 см, росте на 2 см щодня", s:["Питання: скільки через 3 дні?","Додаємо тричі по 2","2 + 2 + 2 + 2 = 8","Висновок: через 3 дні 6 см"], a:3}
+ ]},
+ {lv:"y", type:"tread", title:"Прочитай модель-таблицю", hint:"Знайди в таблиці потрібну клітинку і надрукуй число"},
+ {lv:"y", type:"choice", trend:true, title:"У тренді 2026: моделі погоди", hint:"Натисни на правильну відповідь", vars:[
+  {q:"У вересні 2026 року Google показав модель погоди WeatherNext 3. Як часто вона оновлює прогноз?", o:["щогодини","раз на рік","раз на 10 років","ніколи"], a:0},
+  {q:"Моделі погоди зі штучним інтелектом роблять прогноз за хвилини. А старі моделі на суперкомп'ютерах — за…", o:["години","секунду","мить","рік"], a:0},
+  {q:"У січні 2026 року Nvidia показала моделі погоди Earth-2. Одна з них прогнозує погоду на…", o:["15 днів","1 секунду","200 років","вчорашній день"], a:0}
+ ]},
+ {lv:"r", type:"chart", title:"Яка діаграма — правильна модель?", hint:"Порівняй стовпчики з таблицею і натисни правильну діаграму"},
+ {lv:"r", type:"input", title:"Передбач за моделлю", hint:"Порахуй і надрукуй число", vars:[
+  {q:"У Сортика 35 марок, щотижня він купує 5. Скільки буде через 4 тижні?", a:["55"]},
+  {q:"У басейні 50 л води, щогодини виливається 10 л. Скільки лишиться через 3 години?", a:["20"]},
+  {q:"Сходинка 15 см. Скільки сантиметрів висоти у 6 сходинок?", a:["90"]},
+  {q:"Квиток коштує 25 грн. Скільки коштують 4 квитки?", a:["100"]},
+  {q:"Зранку −2 °C, щогодини тепліше на 2 °C. Скільки градусів буде через 3 години?", a:["4","+4"]},
+  {q:"Равлик проповзає 3 м за годину. За скільки годин проповзе 18 м?", a:["6"]}
+ ]},
+ {lv:"r", type:"tfill", title:"Створи модель-таблицю", hint:"Прочитай текст і впиши числа в таблицю"},
+ {lv:"r", type:"tcalc", title:"Досліди модель-таблицю", hint:"Порахуй за таблицею і надрукуй число"}
+],
+quest: [
+ {name:"Питання", ic:"❓", pool:[
+  {q:"З моделі «оцінки класу» можна дізнатися…", o:["хто найкращий","ім'я мами","колір портфеля","погоду"], a:0},
+  {q:"Модель «зріст учнів» відповість…", o:["хто найвищий","хто найсмішніший","хто де живе","хто що їв"], a:0},
+  {q:"Перше в дослідженні — поставити…", o:["питання","оцінку","печатку","крапку"], a:0},
+  {q:"На питання «яка погода завтра?» відповість модель…", o:["прогноз погоди","розклад уроків","меню їдальні","план школи"], a:0},
+  {q:"Модель не відповість, якщо в ній немає…", o:["потрібних даних","яскравих кольорів","малюнків","рамки"], a:0},
+  {q:"Висновок дослідження — це…", o:["відповідь на питання","нове складне питання","малюнок у зошиті","помилка в таблиці"], a:0}
+ ]},
+ {name:"Порівняння", ic:"⚖️", pool:[
+  {q:"Числа 14, 9, 21. Найбільше —", o:["21","14","9","44"], a:0},
+  {q:"Числа 14, 9, 21. Найменше —", o:["9","14","21","5"], a:0},
+  {q:"На скільки 21 більше за 9?", o:["12","30","11","13"], a:0},
+  {q:"Найвищий стовпчик діаграми — це…", o:["найбільше","найменше","середнє число","нуль"], a:0},
+  {q:"Разом 7, 8 і 5 —", o:["20","15","13","18"], a:0},
+  {q:"Щоб дізнатися «на скільки більше», треба…", o:["відняти","додати","помножити","поділити"], a:0}
+ ]},
+ {name:"Передбачення", ic:"🔮", pool:[
+  {q:"Росте на 1 см щодня, зараз 5 см. Через 3 дні —", o:["8 см","6 см","9 см","15 см"], a:0},
+  {q:"Щодня читаю 10 сторінок. За 4 дні —", o:["40","14","10","44"], a:0},
+  {q:"Було 30, щодня мінус 5. Через 2 дні —", o:["20","25","35","10"], a:0},
+  {q:"Модель передбачення допомагає дізнатися…", o:["що буде","що було","хто ти","колір"], a:0},
+  {q:"Зранку +1 °C, щогодини на 2 °C тепліше. Через 2 години —", o:["+5 °C","+3 °C","+4 °C","+2 °C"], a:0},
+  {q:"Квиток 20 грн. За 3 квитки —", o:["60 грн","23 грн","40 грн","80 грн"], a:0}
+ ]},
+ {name:"Таблиця", ic:"📊", table:true}
+],
+cards: [
+ ["🔬","Дослідження моделі","Ставимо питання до моделі й шукаємо відповідь у її даних."],
+ ["❓","Питання","Дослідження починається з питання: де найбільше? скільки разом? що буде?"],
+ ["🏆","Найбільше","Найбільше число таблиці або найвищий стовпчик діаграми."],
+ ["🔻","Найменше","Найменше число таблиці або найнижчий стовпчик."],
+ ["➕","Скільки разом","Додаємо всі потрібні числа моделі."],
+ ["⚖️","На скільки більше","Від більшого числа віднімаємо менше."],
+ ["🔮","Передбачення","Модель із правилом («щодня +2») показує, що буде далі."],
+ ["📊","Діаграма","Допомагає порівняти числа одним поглядом."],
+ ["📋","Таблиця","Зберігає точні числа, які можна рахувати."],
+ ["🚫","Межа моделі","Модель не відповість, якщо в ній немає потрібних даних."],
+ ["✅","Висновок","Коротка відповідь на питання дослідження."],
+ ["🌦️","Прогноз погоди","Велика модель, яку досліджують, щоб передбачити погоду."]
+]
+};
+</script>
+<script>/* ===== Нагороди за пройдене: щоразу інша (жарт, факт, звання, загадка, виклик) ===== */
+window.REWARDS=[
+ {t:"😂 Жарт від Сортика",x:"— Чому комп'ютер пішов до лікаря?<br>— Бо підхопив вірус!"},
+ {t:"😂 Жарт від Сортика",x:"— Чому Сортик завжди спокійний?<br>— Бо в нього все розкладено по поличках!"},
+ {t:"😂 Жарт від Сортика",x:"— Чому комп'ютерна мишка не боїться кота?<br>— Бо вона ловить лише курсор!"},
+ {t:"😂 Жарт від Сортика",x:"Мама питає робота: «Ти прибрав у кімнаті?»<br>Робот: «Так! Видалив усі файли з робочого столу!»"},
+ {t:"😂 Жарт від Сортика",x:"— Чому Глюк-Плутанина знову програв?<br>— Бо переплутав навіть алгоритм власної втечі!"},
+ {t:"😂 Жарт від Сортика",x:"Таблиця каже діаграмі: «Дякую, що показуєш мене у найкращому світлі!»"},
+ {t:"😂 Жарт від Сортика",x:"— Що робот їсть на сніданок?<br>— Мікросхеми з кетчупом… тобто з чіпсами!"},
+ {t:"😂 Жарт від Сортика",x:"— Чому роботи не грають у хованки?<br>— Бо їх завжди видно на карті-моделі!"},
+ {t:"💡 Цікавий факт",x:"Перша комп'ютерна мишка була дерев'яною! Її придумав Дуглас Енгельбарт у 1960-х."},
+ {t:"💡 Цікавий факт",x:"Слово «робот» уперше з'явилося 1920 року в п'єсі чеського письменника Карела Чапека."},
+ {t:"💡 Цікавий факт",x:"1947 року в комп'ютері знайшли справжнього метелика, що заважав роботі. Звідти й пішло слово «баг» — «жучок»."},
+ {t:"💡 Цікавий факт",x:"Перші емодзі намалював японський дизайнер Сігетака Куріта 1999 року. Їх було 176."},
+ {t:"💡 Цікавий факт",x:"Аду Лавлейс називають першою програмісткою: вона записала алгоритм для обчислювальної машини ще в XIX столітті."},
+ {t:"💡 Цікавий факт",x:"Розкладка клавіатури QWERTY дісталася нам від старих друкарських машинок."},
+ {t:"🏅 Твоє нове звання",x:"«Капітан алгоритмів» — командуй роботами впевнено!"},
+ {t:"🏅 Твоє нове звання",x:"«Детектив таблиць» — жодне число від тебе не сховається!"},
+ {t:"🏅 Твоє нове звання",x:"«Головний охоронець порядку Музею»!"},
+ {t:"🏅 Твоє нове звання",x:"«Магістр моделей» — ти знаєш, з чого починати!"},
+ {t:"🏅 Твоє нове звання",x:"«Друг Сортика першого ступеня» 🤖"},
+ {t:"🧩 Загадка",x:"Має клавіші, але не відчиняє двері. Що це?",a:"Клавіатура ⌨️"},
+ {t:"🧩 Загадка",x:"Має хвостик, але не тварина. Бігає столом без ніг. Що це?",a:"Комп'ютерна мишка 🖱️"},
+ {t:"🧩 Загадка",x:"Не людина, а команди виконує. Не їсть, а заряджається. Хто це?",a:"Робот 🤖"},
+ {t:"🧩 Загадка",x:"Є в ній рядки й стовпці, а в клітинках — числа. Що це?",a:"Таблиця 📋"},
+ {t:"🧩 Загадка",x:"Стовпчики є, а будинку немає. Числа порівнює. Що це?",a:"Діаграма 📊"},
+ {t:"⚡ Міні-виклик",x:"За 10 секунд назвіть 3 виконавці, які є у вас удома!"},
+ {t:"⚡ Міні-виклик",x:"Станцюйте танець робота 5 секунд — під рахунок учителя!"},
+ {t:"⚡ Міні-виклик",x:"Знайдіть у класі 2 моделі (карта, глобус, схема…) і покажіть на них!"},
+ {t:"⚡ Міні-виклик",x:"Складіть алгоритм «помахати рукою» з 3 команд і виконайте його разом!"}
+];
+window.pickReward=function(){let used=[];try{used=JSON.parse(localStorage.getItem("sortyk_rw")||"[]")}catch(e){}
+ if(used.length>=REWARDS.length)used=[];const free=REWARDS.map((_,i)=>i).filter(i=>!used.includes(i));const i=free[Math.floor(Math.random()*free.length)];used.push(i);
+ try{localStorage.setItem("sortyk_rw",JSON.stringify(used))}catch(e){}return i};
+window.rewardHTML=function(i){const r=REWARDS[i];return `<div class="rwbox"><button class="rwgift" type="button" onclick="this.parentNode.classList.add('open')">🎁 Відкрий нагороду!</button><div class="rwin"><b>${r.t}</b><div>${r.x}</div>${r.a?`<button class="rwans" type="button" onclick="this.outerHTML='<b>'+this.dataset.a+'</b>'" data-a="${r.a}">Показати відповідь</button>`:""}</div></div>`};
+</script>
+<script>
+"use strict";
+// ===== Налаштування для вчителя =====
+const NORM={ex:12*60, lab:8*60}; NORM.total=NORM.ex+NORM.lab;   // норма часу, секунди
+const TOPIC="4 кл · Зала 15 Як досліджувати об'єкти за допомогою моделей", YEAR="2026-27", KEY="a4t15";
+const FORM="https://docs.google.com/forms/d/e/1FAIpQLSeaDGNzqpEMjZyDt4WUwg3k3FAhGGW4pG1E8IcOk8b4LQsBVw/viewform?usp=pp_url&entry.1997531456=";
+// ===================================
+const B=window.BANK, $=s=>document.querySelector(s), RM=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const ls={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const rnd=n=>Math.floor(Math.random()*n), shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]]}return a};
+const el=(tag,cls,html)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const norm=s=>String(s).toLowerCase().replace(/[ʼ’`]/g,"'").replace(/\s+/g," ").trim().replace(/[.!]$/,"");
+const fmt=t=>{t=Math.round(t);return String(Math.floor(t/60)).padStart(2,"0")+":"+String(t%60).padStart(2,"0")};
+const fmtLong=t=>{t=Math.round(t);return Math.floor(t/60)+" хв "+String(t%60).padStart(2,"0")+" с"};
+
+// ===== Сітка й виконавець =====
+const MV={U:[0,-1],D:[0,1],L:[-1,0],R:[1,0]}, AR={U:"↑",D:"↓",L:"←",R:"→"}, OPP={U:"D",D:"U",L:"R",R:"L"};
+const k2=(x,y)=>x+","+y;
+function simulate(g,prog){let [x,y]=g.start;const path=[[x,y]];const got=new Set();
+ for(let i=0;i<prog.length;i++){const [dx,dy]=MV[prog[i]];const nx=x+dx,ny=y+dy;
+  if(nx<0||ny<0||nx>=g.w||ny>=g.h)return{path,crash:"edge",step:i,end:[x,y],got};
+  if(g.walls.includes(k2(nx,ny)))return{path,crash:"wall",step:i,end:[x,y],got};
+  x=nx;y=ny;path.push([x,y]);(g.stars||[]).forEach(s=>{if(s[0]===x&&s[1]===y)got.add(k2(x,y))})}
+ return{path,end:[x,y],got}}
+function bfs(g,from,to){const q=[[from[0],from[1],""]],seen=new Set([k2(...from)]);
+ while(q.length){const [x,y,p]=q.shift();if(x===to[0]&&y===to[1])return p;
+  for(const d of "URDL"){const nx=x+MV[d][0],ny=y+MV[d][1];if(nx<0||ny<0||nx>=g.w||ny>=g.h)continue;const kk=k2(nx,ny);if(seen.has(kk)||g.walls.includes(kk))continue;seen.add(kk);q.push([nx,ny,p+d])}}
+ return null}
+function randCell(g,avoid){for(;;){const c=[rnd(g.w),rnd(g.h)];if(!avoid.some(a=>a[0]===c[0]&&a[1]===c[1])&&!g.walls.includes(k2(...c)))return c}}
+function genBuild(w,h,nw,minD,maxD,detour){for(let t=0;t<3000;t++){const g={w,h,walls:[]};g.start=[rnd(w),rnd(h)];g.goal=randCell(g,[g.start]);
+  for(let i=0;i<nw;i++){const c=randCell(g,[g.start,g.goal]);g.walls.push(k2(...c))}
+  const p=bfs(g,g.start,g.goal);if(!p)continue;const man=Math.abs(g.start[0]-g.goal[0])+Math.abs(g.start[1]-g.goal[1]);
+  if(p.length>=minD&&p.length<=maxD&&(!detour||p.length>=man+2)){g.best=p.length;g.sol=p;return g}}}
+function genCollect(w,h,nw,limitPlus){for(let t=0;t<3000;t++){const g={w,h,walls:[]};g.start=[rnd(w),rnd(h)];g.goal=randCell(g,[g.start]);
+  g.stars=[randCell(g,[g.start,g.goal])];g.stars.push(randCell(g,[g.start,g.goal,g.stars[0]]));
+  for(let i=0;i<nw;i++){g.walls.push(k2(...randCell(g,[g.start,g.goal,...g.stars])))}
+  let best=null;for(const ord of [[0,1],[1,0]]){const a=bfs(g,g.start,g.stars[ord[0]]),b=a!=null&&bfs(g,g.stars[ord[0]],g.stars[ord[1]]),c=b!=null&&bfs(g,g.stars[ord[1]],g.goal);if(a!=null&&b!=null&&c!=null&&b!==false&&c!==false){const L=a+b+c;if(best==null||L.length<best.length)best=L}}
+  if(best&&best.length>=8&&best.length<=13){g.best=best.length;g.limit=best.length+limitPlus;g.sol=best;return g}}}
+function genWalk(w,h,len){for(;;){const g={w,h,walls:[],start:[rnd(w),rnd(h)]};let p="";let [x,y]=g.start;let ok=true;
+  for(let i=0;i<len;i++){const opts=[..."URDL"].filter(d=>{const nx=x+MV[d][0],ny=y+MV[d][1];return nx>=0&&ny>=0&&nx<w&&ny<h&&(p.length===0||d!==OPP[p[p.length-1]])});if(!opts.length){ok=false;break}const d=opts[rnd(opts.length)];p+=d;x+=MV[d][0];y+=MV[d][1]}
+  if(ok&&(x!==g.start[0]||y!==g.start[1])){g.prog=p;g.end=[x,y];return g}}}
+const COLS="АБВГДЕЖ";
+function drawGrid(g,o={}){const cs=Math.min(48,Math.floor(Math.min(340,innerWidth-70)/g.w));
+ const box=el("div","gwrap"),gr=el("div","grid");gr.style.gridTemplateColumns=`repeat(${g.w},${cs}px)`;gr.style.gridAutoRows=cs+"px";box.appendChild(gr);
+ const cells=[];for(let y=0;y<g.h;y++)for(let x=0;x<g.w;x++){const c=el("div","cell");const kk=k2(x,y);
+  if(g.walls.includes(kk)){c.classList.add("wall");c.setAttribute("aria-label","стіна")}
+  if(g.start[0]===x&&g.start[1]===y&&!o.hideStart)c.classList.add("start");
+  if(g.goal&&g.goal[0]===x&&g.goal[1]===y)c.textContent=o.goalIc||"🏁";
+  (g.stars||[]).forEach(s=>{if(s[0]===x&&s[1]===y)c.textContent="⭐"});
+  if(o.labels)c.appendChild(el("span","lbl",COLS[x]+(y+1)));
+  if(o.onCell){c.classList.add("click");c.tabIndex=0;c.setAttribute("role","button");c.setAttribute("aria-label","клітинка "+COLS[x]+(y+1));c.onclick=()=>o.onCell(x,y,c);c.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();o.onCell(x,y,c)}}}
+  c.dataset.x=x;c.dataset.y=y;gr.appendChild(c);cells.push(c)}
+ const rb=el("div","robot",o.robotIc||"🤖");rb.style.width=rb.style.height=cs+"px";gr.appendChild(rb);
+ const place=(x,y)=>{rb.style.left=(3+x*(cs+3))+"px";rb.style.top=(3+y*(cs+3))+"px"};place(...g.start);
+ return{box,grid:gr,cells,cell:(x,y)=>cells[y*g.w+x],place,robot:rb}}
+function animateRun(G,g,prog,res,done){const steps=res.path;let i=0;G.cells.forEach(c=>c.classList.remove("trail"));
+ const toks=G.toks||[];const tick=()=>{toks.forEach(t=>t.classList.remove("now"));
+  if(i<steps.length){const [x,y]=steps[i];G.place(x,y);if(i>0)G.cell(x,y).classList.add("trail");if(toks[i-1])toks[i-1].classList.add("now");i++;setTimeout(tick,RM?0:260)}
+  else{if(res.crash){G.robot.classList.remove("crash");void G.robot.offsetWidth;G.robot.classList.add("crash")}setTimeout(()=>{toks.forEach(t=>t.classList.remove("now"));done()},RM?0:150)}};tick()}
+function progEditor(holder,{init="",locked=false,onChange}={}){let p=init.split("").filter(Boolean);const wrap=el("div");const strip=el("div","prog");strip.setAttribute("aria-label","Програма");
+ const pad=el("div","pad");const api={get:()=>p.join(""),set:v=>{p=v.split("");draw()},strip,toks:[]};
+ function draw(){strip.innerHTML="";api.toks=[];if(!p.length)strip.appendChild(el("span","",'<span style="color:var(--muted);font-size:15px;padding:6px">Тут з\'явиться програма…</span>'));
+  p.forEach((d,i)=>{const t=el("button","tok",AR[d]);t.title="Натисни, щоб видалити";t.setAttribute("aria-label",AR[d]+" — видалити");t.onclick=()=>{if(locked)return;p.splice(i,1);draw();onChange&&onChange()};strip.appendChild(t);api.toks.push(t)});}
+ ["U","D","L","R"].forEach(d=>{const b=el("button","",AR[d]);b.setAttribute("aria-label","Додати "+({U:"крок угору",D:"крок униз",L:"крок ліворуч",R:"крок праворуч"})[d]);b.onclick=()=>{if(locked||p.length>=24)return;p.push(d);draw();onChange&&onChange()};pad.appendChild(b)});
+ const u=el("button","sm","↶ Назад");u.onclick=()=>{if(locked)return;p.pop();draw();onChange&&onChange()};const c=el("button","sm","🗑");c.setAttribute("aria-label","Очистити");c.onclick=()=>{if(locked)return;p=[];draw();onChange&&onChange()};pad.append(u,c);
+ wrap.append(strip,pad);holder.appendChild(wrap);draw();api.lock=()=>{locked=true;pad.hidden=true};return api}
+const progTxt=p=>p.split("").map(d=>AR[d]).join(" ");
+
+// ===== Сценарії моделей-таблиць (генеруються щоразу заново) =====
+const SCN=[
+ {id:"vis",name:"Відвідувачі музею",col:"День",val:"Відвідувачів",unit:"",rows:["понеділок","вівторок","середа","четвер","пʼятниця"],lo:12,hi:48,
+  sent:(r,v)=>`У ${r==="середа"?"середу":r==="пʼятниця"?"пʼятницю":r} до музею прийшло ${v} відвідувачів.`,ask:r=>`Скільки відвідувачів прийшло у ${r==="середа"?"середу":r==="пʼятниця"?"пʼятницю":r}?`,
+  sit:"Сортик хоче знати, коли в музеї найбільше гостей, щоб того дня покликати ще одного екскурсовода.",
+  goal:["Знайти день, коли гостей найбільше","Порахувати, скільки в музеї зал","Обрати колір для нових квитків","Вивчити погоду на наступний рік"],
+  props:["день тижня","кількість відвідувачів","колір квитків","ім'я касира","музика в залі","погода в Парижі"]},
+ {id:"app",name:"Зібрані яблука",col:"Учень",val:"Кілограмів",unit:" кг",rows:["Оля","Тарас","Ліна","Максим","Софія"],lo:3,hi:19,
+  sent:(r,v)=>`${r} зібрав${/[аяі]$/.test(r)&&r!=="Тарас"&&r!=="Максим"?"ла":""} ${v} кг яблук.`,ask:r=>`Скільки кілограмів яблук зібрав(-ла) ${r}?`,
+  sit:"Клас збирав яблука в шкільному саду. Треба дізнатися, хто зібрав найбільше, щоб нагородити переможця.",
+  goal:["Визначити, хто зібрав найбільше","Дізнатися, який сорт найсмачніший","Порахувати дерева в саду","Вибрати колір кошиків"],
+  props:["ім'я учня","вага зібраних яблук","колір кошика","улюблений мультик","розмір взуття","номер телефону"]},
+ {id:"club",name:"Учні в гуртках",col:"Гурток",val:"Учнів",unit:"",rows:["малювання","танці","шахи","футбол","робототехніка"],lo:4,hi:22,
+  sent:(r,v)=>`На ${r} ходить ${v} учнів.`,ask:r=>`Скільки учнів ходить на ${r}?`,
+  sit:"Директор вирішує, якому гуртку потрібен більший кабінет — там, де найбільше учнів.",
+  goal:["Знайти гурток, де найбільше учнів","Дізнатися, хто найкраще малює","Вибрати форму для футболістів","Скласти меню для їдальні"],
+  props:["назва гуртка","кількість учнів","колір кабінету","ім'я тренера","день народження учнів","улюблені цукерки"]},
+ {id:"fair",name:"Шкільний ярмарок",col:"Товар",val:"Продано, шт.",unit:" шт.",rows:["печиво","сік","листівки","браслети","пиріжки"],lo:5,hi:40,
+  sent:(r,v)=>`На ярмарку продали ${v} шт. — ${r}.`,ask:r=>`Скільки продали товару «${r}»?`,
+  sit:"Наступного року клас знову проводитиме ярмарок. Треба дізнатися, який товар купували найчастіше.",
+  goal:["Знайти товар, який купували найбільше","Обрати музику для свята","Порахувати учнів у класі","Вибрати колір скатертин"],
+  props:["назва товару","скільки штук продано","колір пакета","ім'я покупця","погода на вихідних","зріст продавця"]},
+ {id:"read",name:"Прочитані книжки",col:"Місяць",val:"Книжок",unit:"",rows:["вересень","жовтень","листопад","грудень"],lo:2,hi:14,
+  sent:(r,v)=>`У ${r==="листопад"?"листопаді":r==="грудень"?"грудні":r==="жовтень"?"жовтні":"вересні"} клас прочитав ${v} книжок.`,ask:r=>`Скільки книжок прочитали за ${r}?`,
+  sit:"Бібліотекарка хоче з'ясувати, в якому місяці клас читав найбільше, щоб влаштувати свято читання.",
+  goal:["Знайти місяць, коли читали найбільше","Дізнатися, яка обкладинка найкраща","Порахувати полиці в бібліотеці","Вибрати колір закладок"],
+  props:["місяць","кількість прочитаних книжок","колір обкладинок","вага книжок","ім'я бібліотекарки","погода в місяці"]}
+];
+function genTable(n){const sc=SCN[rnd(SCN.length)];const rows=shuffle(sc.rows).slice(0,n||4);const vals=[];
+ while(vals.length<rows.length){const v=sc.lo+rnd(sc.hi-sc.lo+1);if(!vals.includes(v))vals.push(v)}return{sc:sc.id,rows,vals}}
+const scOf=t=>SCN.find(s=>s.id===t.sc);
+function tableHTML(t,opt={}){const sc=scOf(t);return `<table class="mt"><tr><th>${sc.col}</th><th>${sc.val}</th></tr>`+t.rows.map((r,i)=>`<tr><td>${esc(r)}</td><td>${opt.inputs?`<input class="inp ti" inputmode="numeric" data-i="${i}" aria-label="${esc(r)}">`:t.vals[i]}</td></tr>`).join("")+"</table>"}
+function barsSVG(t,vals){const W=260,H=130,n=vals.length,bw=Math.floor((W-20)/n)-10,mx=Math.max(...vals);
+ return `<svg viewBox="0 0 ${W} ${H+28}" width="100%" style="max-width:300px" role="img">`+vals.map((v,i)=>{const h=Math.round(v/mx*H*.9);const x=14+i*(bw+10);return `<rect x="${x}" y="${H-h}" width="${bw}" height="${h}" rx="4" fill="var(--class-4)"/><text x="${x+bw/2}" y="${H-h-4}" text-anchor="middle" font-size="12" font-weight="800" fill="var(--ink)">${v}</text><text x="${x+bw/2}" y="${H+16}" text-anchor="middle" font-size="11" fill="var(--muted)">${esc(t.rows[i].length>8?t.rows[i].slice(0,6)+".":t.rows[i])}</text>`}).join("")+`<line x1="8" y1="${H}" x2="${W-4}" y2="${H}" stroke="var(--muted)"/></svg>`}
+function calcQ(t){const sc=scOf(t);const k=rnd(3);const i=rnd(t.rows.length);let j=rnd(t.rows.length);if(j===i)j=(i+1)%t.rows.length;
+ if(k===0)return{q:`Скільки всього (${sc.val.toLowerCase()}) разом за таблицею?`,a:t.vals.reduce((a,b)=>a+b,0)};
+ if(k===1){const mx=Math.max(...t.vals),mn=Math.min(...t.vals);return{q:"На скільки найбільше число в таблиці більше за найменше?",a:mx-mn}}
+ const a=Math.max(t.vals[i],t.vals[j]),b=Math.min(t.vals[i],t.vals[j]);const ra=t.rows[t.vals.indexOf(a)],rb=t.rows[t.vals.indexOf(b)];return{q:`На скільки у рядку «${ra}» більше, ніж у рядку «${rb}»?`,a:a-b}}
+function numInput(body,ans,finish,fb,r){const f=el("div","row");const inp=el("input","inp");inp.inputMode="numeric";inp.placeholder="Число";inp.setAttribute("aria-label","Відповідь числом");inp.style.maxWidth="140px";const b=el("button","btn","Перевірити");f.append(inp,b);body.appendChild(f);
+ const go=()=>{if(r.done||!inp.value.trim())return;if(parseFloat(inp.value.replace(",","."))===ans)finish(true);else finish(false,()=>{fb.textContent+=" Відповідь: "+ans})};b.onclick=go;inp.onkeydown=ev=>{if(ev.key==="Enter")go()};return b}
+
+// ===== Додаткові типи вправ =====
+function exExtra(e,r,v,body,finish,fb){const t=e.type;
+ if(t==="multi"){body.appendChild(el("p","q",esc(v.q)));const o=el("div","opts");const sel=new Set();const order=shuffle(v.o.map((_,j)=>j));
+  order.forEach(j=>{const b=el("button","chip","☐ "+esc(v.o[j]));b.onclick=()=>{if(r.done)return;sel.has(j)?sel.delete(j):sel.add(j);b.classList.toggle("sel",sel.has(j));b.innerHTML=(sel.has(j)?"☑ ":"☐ ")+esc(v.o[j]);[...o.children].forEach(x=>x.classList.remove("ok","bad"))};o.appendChild(b)});
+  const b=el("button","btn","Перевірити");b.style.marginTop="10px";body.append(o,b);
+  b.onclick=()=>{if(r.done)return;if(!sel.size){fb.className="fb";fb.textContent="Обери хоча б одну властивість.";return}const ok=sel.size===v.a.length&&v.a.every(j=>sel.has(j));
+   if(!ok)order.forEach((j,n)=>{if(sel.has(j))o.children[n].classList.add(v.a.includes(j)?"ok":"bad")});
+   finish(ok,()=>order.forEach((j,n)=>{if(v.a.includes(j))o.children[n].classList.add("ok")}));if(!ok&&!r.done)fb.textContent+=" (позначено: зелене — правильно, червоне — зайве; можливо, щось пропущено)"};return o.firstChild}
+ if(t==="tread"){const d=r.data,sc=scOf(d);const i=rnd(0)+d.ask;body.appendChild(el("p","q",`Модель «${sc.name}»:`));body.appendChild(el("div","",tableHTML(d)));body.appendChild(el("p","q",esc(sc.ask(d.rows[d.ask]))));return numInput(body,d.vals[d.ask],finish,fb,r)}
+ if(t==="tcalc"){const d=r.data,sc=scOf(d);body.appendChild(el("p","q",`Модель «${sc.name}»:`));body.appendChild(el("div","",tableHTML(d)));body.appendChild(el("p","q",esc(d.q.q)));return numInput(body,d.q.a,finish,fb,r)}
+ if(t==="tfill"){const d=r.data,sc=scOf(d);const order=shuffle(d.rows.map((_,i)=>i));
+  body.appendChild(el("p","q",`Прочитай текст і створи модель-таблицю «${sc.name}»:`));body.appendChild(el("div","story",'<div class="hero">📄</div><p>'+order.map(i=>esc(sc.sent(d.rows[i],d.vals[i]))).join(" ")+"</p>"));
+  const tb=el("div","",tableHTML(d,{inputs:true}));body.appendChild(tb);const b=el("button","btn","Перевірити таблицю");b.style.marginTop="8px";body.appendChild(b);
+  b.onclick=()=>{if(r.done)return;const ins=[...tb.querySelectorAll("input")];if(ins.some(x=>!x.value.trim())){fb.className="fb";fb.textContent="Заповни всі клітинки.";return}let ok=true;
+   ins.forEach((x,i)=>{const good=parseFloat(x.value.replace(",","."))===d.vals[i];x.style.borderColor=good?"var(--ok)":"var(--bad)";if(!good)ok=false});
+   finish(ok,()=>ins.forEach((x,i)=>{x.value=d.vals[i];x.style.borderColor="var(--ok)"}))};return tb.querySelector("input")}
+ if(t==="chart"){const d=r.data,sc=scOf(d);body.appendChild(el("p","q",`Таблиця «${sc.name}». Яка діаграма точно її показує?`));body.appendChild(el("div","",tableHTML(d)));
+  const o=el("div","opts");d.opts.forEach((vals,k)=>{const b=el("button","opt",`<b>Діаграма ${"АБВ"[k]}</b><br>`+barsSVG(d,vals));b.onclick=()=>{if(r.done)return;if(k===d.ok){b.classList.add("ok");finish(true)}else{b.classList.add("bad");b.disabled=true;finish(false,()=>o.children[d.ok].classList.add("ok"))}};o.appendChild(b)});body.appendChild(o);return o.firstChild}
+}
+function genExtra(t){
+ if(t==="tread"){const d=genTable(4);d.ask=rnd(4);return d}
+ if(t==="tcalc"){const d=genTable(4);d.q=calcQ(d);return d}
+ if(t==="tfill")return genTable(4);
+ if(t==="chart"){const d=genTable(4);const v=d.vals;const sw=v.slice();const i=rnd(4);let j=(i+1+rnd(3))%4;[sw[i],sw[j]]=[sw[j],sw[i]];const ch=v.slice();const k=rnd(4);ch[k]=ch[k]+(ch[k]>8?-5:6);
+  const opts=shuffle([v,sw,ch]);d.opts=opts;d.ok=opts.indexOf(v);return d}
+}
+
+// ===== Квест: локація «Дослідження» з таблицями =====
+function tableQs(n){const out=[];for(let k=0;k<n;k++){const d=genTable(4);const sc=scOf(d);let q,a;
+  if(k%2===0){const mx=Math.max(...d.vals);q=`Де найбільше? (${sc.val.toLowerCase()})`;const o=shuffle(d.rows.slice());out.push({h:tableHTML(d),q,o:o.map(x=>x),a:o.indexOf(d.rows[d.vals.indexOf(mx)])})}
+  else{const cq=calcQ(d);const opts=shuffle([cq.a,cq.a+2,Math.max(1,cq.a-3),cq.a+5].filter((x,i,arr)=>arr.indexOf(x)===i).slice(0,4));out.push({h:tableHTML(d),q:cq.q,o:opts.map(String),a:opts.indexOf(cq.a)})}}
+ return out}
+
+const LABDEF={ic:"🔬",title:"Лабораторія дослідника.",intro:"Сортик приніс нову модель — таблицю й діаграму. Досліди її: постав питання, знайди найбільше, порівняй, порахуй і передбач, що буде далі.",
+ names:["Л1 Питання","Л2 Найбільше","Л3 Порівняй","Л4 Разом","Л5 Передбач"],
+ gen(){const R=(a,b)=>a+rnd(b-a+1);const d=genTable(5),sc=scOf(d),html=tableHTML(d)+barsSVG(d,d.vals);
+  const mx=Math.max(...d.vals),mn=Math.min(...d.vals),sum=d.vals.reduce((a,b)=>a+b,0);
+  const s1={k:"ch",html,q:"На яке питання відповість ця модель?",opts:["Де найбільше число?","Яка тоді була погода?","Хто це записав у зошит?","Якого кольору були стіни?"],a:0,order:shuffle([0,1,2,3])};
+  const s2={k:"ch",html,q:`Де найбільше (${sc.val.toLowerCase()})?`,opts:d.rows.slice(),a:d.vals.indexOf(mx),order:shuffle(d.rows.map((_,i)=>i))};
+  const s3={k:"nm",html,q:`На скільки найбільше число таблиці більше за найменше?`,a:mx-mn};
+  const s4={k:"nm",html,q:`Скільки всього разом у моделі (${sc.val.toLowerCase()})? Додай усі числа.`,a:sum};
+  const i=rnd(d.rows.length),k=R(2,5),n=R(2,4);
+  const s5={k:"nm",html,q:`Уяви: число в рядку «${d.rows[i]}» щотижня збільшується на ${k}. Яким воно стане через ${n} тижні?`,a:d.vals[i]+k*n};
+  return[s1,s2,s3,s4,s5]}};
+// ===== Лабораторія (етапи) =====
+const LABN11=LABDEF.names;
+function genLab11(){return LABDEF.gen()}
+function renderLab11(){const T=$("#t-la");T.innerHTML="";const L=S.lab,st=L.m;L.tries=L.tries||[0,0,0,0,0];L.inp=L.inp||{};L.bd=L.bd||{};
+ T.appendChild(el("div","story",`<div class="hero">${LABDEF.ic}</div><p><b>${LABDEF.title}</b> ${LABDEF.intro} На кожен етап — <b>3 спроби</b>. Потім натисни «Здати лабораторію».</p>`));
+ const tabs=el("div","lvtabs");LABN11.forEach((n,i)=>{const b=el("button",(i===labCur?"cur ":"")+(L.done[i]?"done":""),n+(L.tries[i]>=3&&!L.done[i]?" ✗":""));b.onclick=()=>{labCur=i;renderLab11()};tabs.appendChild(b)});T.appendChild(tabs);
+ const card=el("div","card");T.appendChild(card);const fb=el("div","fb");const locked=L.done[labCur]||L.tries[labCur]>=3||(L.submits>=2)||S.finished;const showOk=L.done[labCur]||L.tries[labCur]>=3;
+ const res=ok=>{if(ok){L.done[labCur]=true;addXP(15,card);confetti();fb.className="fb ok";fb.textContent="✔ Етап виконано!"}else{L.tries[labCur]++;card.classList.remove("bad");void card.offsetWidth;card.classList.add("bad");fb.className="fb bad";fb.textContent=L.tries[labCur]>=3?"✘ Спроби вичерпано — етап не зараховано.":"✘ Не так. Залишилось спроб: "+(3-L.tries[labCur])}save();setTimeout(renderLab11,ok?900:1300)};
+ const p=st[labCur];card.appendChild(el("h2","",LABN11[labCur]));
+ if(p.html)card.appendChild(el("div","",p.html));
+ card.appendChild(el("p","q",p.q));
+ if(p.k==="ch"){const o=el("div","opts");p.order.forEach(j=>{const b=el("button","opt",esc(p.opts[j]));if(locked){b.disabled=true;if(j===p.a&&showOk)b.classList.add("ok")}b.onclick=()=>{if(locked)return;b.classList.add(j===p.a?"ok":"bad");res(j===p.a)};o.appendChild(b)});card.appendChild(o)}
+ if(p.k==="nm"){const inp=el("input","inp");inp.inputMode="decimal";inp.style.maxWidth="160px";inp.setAttribute("aria-label","Відповідь");inp.placeholder="число";inp.value=L.inp[labCur]||"";inp.oninput=()=>{L.inp[labCur]=inp.value;save()};
+  if(locked){inp.disabled=true;if(showOk)inp.value=p.a}card.appendChild(inp);
+  if(!locked){const b=el("button","btn","Перевірити етап");b.style.display="block";b.style.marginTop="8px";const go=()=>{const v=String(L.inp[labCur]||"").trim();if(!v){fb.className="fb";fb.textContent="Надрукуй число.";return}res(parseFloat(v.replace(",","."))===p.a)};b.onclick=go;inp.onkeydown=e=>{if(e.key==="Enter")go()};card.appendChild(b)}}
+ if(p.k==="bd"){let ch=L.bd[labCur]||[];const seq=el("div","seq tokrow"),pool=el("div","opts tokrow");
+  const draw=()=>{seq.innerHTML="";if(locked&&showOk){p.ans[0].split(" ").forEach(t=>seq.appendChild(el("span","chip ok",esc(t))))}
+   else if(!ch.length)seq.innerHTML='<span style="color:var(--muted);font-size:15px">Тут з\'явиться вираз…</span>';
+   else ch.forEach((ti,n)=>{const c=el("button","chip",esc(p.tok[ti]));c.onclick=()=>{if(locked)return;ch.splice(n,1);L.bd[labCur]=ch;save();draw()};if(locked)c.disabled=true;seq.appendChild(c)});
+   pool.innerHTML="";p.order.forEach(ti=>{if(ch.includes(ti))return;const c=el("button","chip",esc(p.tok[ti]));c.onclick=()=>{if(locked)return;ch.push(ti);L.bd[labCur]=ch;save();draw()};if(locked)c.disabled=true;pool.appendChild(c)})};
+  draw();card.append(seq,pool);
+  if(!locked){const b=el("button","btn","Перевірити вираз");b.style.marginTop="8px";b.onclick=()=>{if(!ch.length){fb.className="fb";fb.textContent="Склади вираз із карток.";return}const got=ch.map(i=>p.tok[i]).join(" ");res(p.ans.includes(got))};card.appendChild(b)}}
+ card.appendChild(fb);if(L.done[labCur]){fb.className="fb ok";fb.textContent="✔ Етап виконано"}else if(L.tries[labCur]>=3){fb.className="fb bad";fb.textContent="✘ Етап не зараховано (3 спроби). Правильну відповідь показано."}
+ const sub=el("div","card");const n=L.done.filter(Boolean).length;sub.innerHTML=`<p class="req">Виконано етапів: <b>${n} з 5</b></p>`+(L.score!=null?`<p class="req">Здано ${L.submits} раз(и): <b>${Math.round(L.score*100)} %</b></p>`:"");
+ if(L.submits<2&&!S.finished){const b=el("button","btn",L.submits?"Здати повторно (× 0,8)":"✅ Здати лабораторію");twoStep(b,()=>n<5?`Виконано ${n} з 5.`:"",()=>{submitLab();renderLab11()});sub.appendChild(b)}T.appendChild(sub)}
+
+// ===== Стан спроби =====
+let S=ls.get(KEY+"_state",null);
+function newAttempt(){const used=ls.get(KEY+"_used",{});const att=(S?S.attempt:0)+1;
+ S={attempt:att,started:false,tEx:0,tLab:0,tTot:0,xp:0,ex:[],lab:{lv:[],done:[],submits:0,score:null,errs:0,runs:0},quest:{loc:0,res:[],hearts:3},cards:[],finished:false,name:"",cls:"",nick:(S&&S.nick)||""};
+ B.ex.forEach((e,i)=>{const r={tries:0,err:0,done:false,pts:0};
+  if(e.vars){let u=used[i]||[];if(u.length>=e.vars.length)u=[];const free=e.vars.map((_,j)=>j).filter(j=>!u.includes(j));r.v=free[rnd(free.length)];u.push(r.v);used[i]=u}
+  else r.data=genExtra(e.type)||genEx(e.type);S.ex.push(r)});
+ ls.set(KEY+"_used",used);
+ S.lab.m=genLab11();
+ S.quest.qs=[];save()}
+function genEx(t){
+ if(t==="predict"){const g=genWalk(5,5,4+rnd(3));return g}
+ if(t==="count"){for(;;){const g=genWalk(6,6,7+rnd(2));const up=g.start[1]-g.end[1],rt=g.end[0]-g.start[0];const ask=rnd(2)?"up":"right";const v=ask==="up"?up:rt;if(v>=1)return{prog:g.prog,ask,v}}}
+ if(t==="build")return genBuild(6,6,8,7,10,true);
+ if(t==="back"){for(;;){const g=genWalk(5,5,6);const man=Math.abs(g.start[0]-g.end[0])+Math.abs(g.start[1]-g.end[1]);if(man>=3&&man<6)return Object.assign(g,{man})}}
+ if(t==="repeat"){const a=2+rnd(3),b=2+rnd(3),c=1+rnd(3);const P=[["U","R"],["R","D"],["L","U"],["D","L"]][rnd(4)],Q=[...("UDLR")][rnd(4)];const ask=rnd(3);
+  const total=a*2+c, cntQ=(P.filter(x=>x===Q).length*a)+c;return{a,b:c,P,Q,ask,ans:ask===0?total:ask===1?a:cntQ}}
+}
+function bugLevel(){const g=genBuild(6,6,7,7,9,false);let p=g.sol.split("");const i=rnd(p.length);const j=(i+2+rnd(p.length-3))%p.length;
+ p[i]=OPP[p[i]];const ins=[..."URDL"][rnd(4)];p.splice(j,0,ins);g.buggy=p.join("");g.limit=g.best;return g}
+function predictLevel(){const g=genWalk(6,6,7);g.walls=[];return g}
+function save(){ls.set(KEY+"_state",S)}
+
+// ===== Таймер =====
+let curTab="ex";function startTimer(){if(!S.started&&!S.finished){S.started=true;save()}}
+document.addEventListener("pointerdown",e=>{if(e.target.closest("#t-ex,#t-qu,#t-ca,#t-la"))startTimer()},true);
+setInterval(()=>{if(S.started&&!S.finished&&!document.hidden){S.tTot++;if(curTab==="ex")S.tEx++;if(curTab==="la")S.tLab++;if(S.tTot%5===0)save()}hud()},1000);
+function hud(){const done=S.ex.filter(r=>r.done).length;$("#hEx").textContent=done+"/14";$("#hXp").textContent=S.xp;
+ $("#hSt").textContent="⭐ "+S.quest.res.reduce((a,r)=>a+(r?r.stars:0),0);$("#hT").textContent=fmt(S.tTot);
+ $("#cardDot").hidden=S.cards.length>=B.cards.length}
+function addXP(n,from){S.xp+=n;save();hud();if(from&&!RM){const r=from.getBoundingClientRect();const f=el("div","xpfly","+"+n+" XP");f.style.left=(r.left+r.width/2-30)+"px";f.style.top=(r.top)+"px";document.body.appendChild(f);setTimeout(()=>f.remove(),1000)}}
+
+// ===== Конфеті =====
+function confetti(){if(RM)return;const c=$("#conf"),x=c.getContext("2d");c.width=innerWidth;c.height=innerHeight;const cols=["#7a4fd8","#ffb020","#2f9e44","#1e8fd6","#e64980"];
+ const P=Array.from({length:110},()=>({x:Math.random()*c.width,y:-20-Math.random()*c.height*.4,vx:(Math.random()-.5)*3,vy:2+Math.random()*3,r:4+Math.random()*5,c:cols[rnd(5)],a:Math.random()*6}));let f=0;
+ (function loop(){x.clearRect(0,0,c.width,c.height);P.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.a+=.1;x.fillStyle=p.c;x.save();x.translate(p.x,p.y);x.rotate(p.a);x.fillRect(-p.r/2,-p.r/2,p.r,p.r*1.6);x.restore()});if(++f<150)requestAnimationFrame(loop);else x.clearRect(0,0,c.width,c.height)})()}
+
+// ===== Вправи =====
+const LV={g:"🟢 базовий",y:"🟡 середній",r:"🔴 складний"};
+function handOn(target){if(!target)return;target.style.position=target.style.position||"relative";const h=el("span","handpt","👆");h.setAttribute("aria-hidden","true");target.appendChild(h)}
+function renderEx(){const T=$("#t-ex");T.innerHTML="";T.appendChild(el("p","hintline",'Кожна вправа: з першої спроби — 1 бал, з другої — ½, далі — 0. Після «Пройти знову» будуть <b>нові варіанти</b>.'));
+ B.ex.forEach((e,i)=>T.appendChild(exCard(e,i)))}
+function exCard(e,i){const r=S.ex[i],v=e.vars?e.vars[r.v]:null;const c=el("div","card"+(r.done&&r.pts>0?" ok":""));c.id="ex"+i;
+ c.innerHTML=`<div class="exhead"><span class="code">В${i+1}${e.trend?" · у тренді 🔥":""}</span><span class="lv">${LV[e.lv]}</span></div><h2>${esc(e.title)}</h2>`;
+ if(!r.done)c.appendChild(el("p","hintline",'<span class="hand">👆</span> '+esc(e.hint)));
+ const body=el("div");c.appendChild(body);const fb=el("div","fb");
+ c.appendChild(fb);
+ const finish=(ok,showRight)=>{if(ok){r.pts=r.tries===0?1:r.tries===1?.5:0;r.done=true;addXP(r.tries===0?10:r.tries===1?5:0,c);c.classList.add("ok","flash");fb.className="fb ok";fb.textContent=r.pts===1?"✔ Правильно з першої спроби! +1 бал":r.pts?"✔ Правильно з другої спроби: +½ бала":"✔ Правильно, але після кількох спроб: 0 балів"}
+  else{r.err++;r.tries++;c.classList.remove("bad");void c.offsetWidth;c.classList.add("bad");if(r.tries>=3){r.done=true;r.pts=0;fb.className="fb bad";fb.textContent="✘ Три спроби вичерпано. Правильна відповідь показана.";showRight&&showRight()}else{fb.className="fb bad";fb.textContent="✘ Не так. Спробуй ще раз "+(r.tries===1?"(ще можна отримати ½ бала)":"(остання спроба)")}}
+  save();hud();if(r.done){lockAll()}return r.done};
+ let lockAll=()=>c.querySelectorAll("button,input").forEach(b=>{if(!b.closest(".fbk"))b.disabled=true});
+ const t=e.type;
+ if(t==="choice"){body.appendChild(el("p","q",esc(v.q)));const o=el("div","opts");const order=shuffle(v.o.map((_,j)=>j));
+  order.forEach(j=>{const b=el("button","opt",esc(v.o[j]));b.onclick=()=>{if(r.done)return;if(j===v.a){b.classList.add("ok");finish(true)}else{b.classList.add("bad");b.disabled=true;finish(false,()=>o.children[order.indexOf(v.a)].classList.add("ok"))}};o.appendChild(b)});body.appendChild(o);if(!r.done)handOn(o.firstChild)}
+ if(t==="input"){body.appendChild(el("p","q",esc(v.q)));const f=el("div","row");const inp=el("input","inp");inp.placeholder="Надрукуй відповідь";inp.setAttribute("aria-label","Відповідь");const b=el("button","btn","Перевірити");f.append(inp,b);body.appendChild(f);
+  const go=()=>{if(r.done||!inp.value.trim())return;if(v.a.includes(norm(inp.value)))finish(true);else finish(false,()=>{fb.textContent+=" Відповідь: "+v.a[0]})};b.onclick=go;inp.onkeydown=ev=>{if(ev.key==="Enter")go()};if(!r.done)handOn(b)}
+ if(t==="sort"){body.appendChild(el("p","q","Виконавець: "+esc(v.q)));const items=shuffle(v.items);const sel={};const rows=[];
+  items.forEach((it,k)=>{const row=el("div","sortrow");row.appendChild(el("span","",esc(it[0])));const sg=el("div","seg");e.bins.forEach((bn,bi)=>{const bb=el("button","",bn);bb.onclick=()=>{if(r.done)return;sel[k]=bi;[...sg.children].forEach((x,xi)=>{x.classList.toggle("sel",xi===bi);x.classList.remove("bad")})};sg.appendChild(bb)});row.appendChild(sg);rows.push(sg);body.appendChild(row)});
+  const b=el("button","btn","Перевірити");b.style.marginTop="10px";body.appendChild(b);
+  b.onclick=()=>{if(r.done)return;if(Object.keys(sel).length<items.length){fb.className="fb";fb.textContent="Розсортуй усі команди.";return}let ok=true;items.forEach((it,k)=>{if(sel[k]!==it[1]){ok=false;rows[k].children[sel[k]].classList.add("bad")}else rows[k].children[sel[k]].classList.add("ok")});
+   finish(ok,()=>items.forEach((it,k)=>rows[k].children[it[1]].classList.add("ok")))};if(!r.done)handOn(rows[0].firstChild)}
+ if(t==="order"||t==="pick"){body.appendChild(el("p","q",esc(v.q)));const seq=el("div","seq");const pool=el("div","opts");const all=t==="pick"?shuffle(v.s.concat(v.x)):shuffle(v.s);let chosen=[];
+  const draw=()=>{seq.innerHTML=chosen.length?"":'<span style="color:var(--muted);font-size:15px">Твій алгоритм з\'явиться тут</span>';chosen.forEach((s,n)=>{const ch=el("button","chip",`<span class="n">${n+1}.</span>${esc(s)}`);ch.onclick=()=>{if(r.done)return;chosen.splice(n,1);draw()};seq.appendChild(ch)});
+   pool.innerHTML="";all.filter(s=>!chosen.includes(s)).forEach(s=>{const ch=el("button","chip",esc(s));ch.onclick=()=>{if(r.done)return;chosen.push(s);draw()};pool.appendChild(ch)})};draw();
+  const b=el("button","btn","Перевірити");b.style.marginTop="10px";body.append(seq,pool,b);
+  b.onclick=()=>{if(r.done)return;if(chosen.length<v.s.length&&t==="order"){fb.className="fb";fb.textContent="Розстав усі кроки.";return}if(!chosen.length)return;const ok=chosen.length===v.s.length&&chosen.every((s,n)=>s===v.s[n]);
+   if(!ok)[...seq.children].forEach((ch,n)=>ch.classList.add(chosen[n]===v.s[n]?"ok":"bad"));setTimeout(()=>{if(!r.done)[...seq.children].forEach(ch=>ch.classList.remove("ok","bad"))},1200);
+   finish(ok,()=>{chosen=v.s.slice();draw();[...seq.children].forEach(ch=>ch.classList.add("ok"))})};if(!r.done)handOn(pool.firstChild)}
+ if(t==="match"){body.appendChild(el("p","q",esc(v.q)));const m=el("div","match");const L=shuffle(v.p.map((_,j)=>j)),R=shuffle(v.p.map((_,j)=>j));const pair={};let cur=null;const lb=[],rb=[];const tags="ABCD";
+  const paint=()=>{lb.forEach((b,n)=>{b.classList.toggle("sel",cur===L[n]);const pj=pair[L[n]];b.querySelector(".tag").textContent=pj!=null?tags[L.indexOf(L[n])]:""});rb.forEach((b,n)=>{const li=Object.keys(pair).find(k=>pair[k]===R[n]);b.querySelector(".tag").textContent=li!=null?tags[L.indexOf(+li)]:"";b.classList.toggle("sel",li!=null)})};
+  L.forEach((j,n)=>{const b=el("button","chip",'<span class="tag"></span>'+esc(v.p[j][0]));b.onclick=()=>{if(r.done)return;cur=j;delete pair[j];paint()};lb.push(b)});
+  R.forEach((j,n)=>{const b=el("button","chip",'<span class="tag"></span>'+esc(v.p[j][1]));b.onclick=()=>{if(r.done||cur==null)return;Object.keys(pair).forEach(k=>{if(pair[k]===j)delete pair[k]});pair[cur]=j;cur=null;paint()};rb.push(b)});
+  for(let n=0;n<4;n++){m.append(lb[n],rb[n])}body.appendChild(m);const b=el("button","btn","Перевірити");b.style.marginTop="10px";body.appendChild(b);
+  b.onclick=()=>{if(r.done)return;if(Object.keys(pair).length<4){fb.className="fb";fb.textContent="З'єднай усі чотири пари.";return}const ok=v.p.every((_,j)=>pair[j]===j);
+   if(!ok){lb.forEach((bt,n)=>{bt.classList.add(pair[L[n]]===L[n]?"ok":"bad")});setTimeout(()=>{if(!r.done)lb.forEach(bt=>bt.classList.remove("ok","bad"))},1200)}
+   finish(ok,()=>{v.p.forEach((_,j)=>pair[j]=j);paint();lb.concat(rb).forEach(bt=>bt.classList.add("ok"))});if(ok)lb.concat(rb).forEach(bt=>bt.classList.add("ok"))};if(!r.done)handOn(lb[0])}
+ if(t==="bug"){body.appendChild(el("p","q",esc(v.q)));const o=el("div","opts");v.s.forEach((s,j)=>{const b=el("button","opt",`<span class="mono" style="color:var(--class-4)">${j+1}.</span> ${esc(s)}`);b.onclick=()=>{if(r.done)return;if(j===v.a){b.classList.add("ok");finish(true)}else{b.classList.add("bad");b.disabled=true;finish(false,()=>o.children[v.a].classList.add("ok"))}};o.appendChild(b)});body.appendChild(o);if(!r.done)handOn(o.firstChild)}
+ if(t==="predict"){const g=r.data;body.appendChild(el("p","q",`Крок стоїть у клітинці з рамкою. Програма: <span class="progtxt">${progTxt(g.prog)}</span>`));let G;
+  G=drawGrid(g,{onCell:(x,y,cell)=>{if(r.done)return;if(x===g.end[0]&&y===g.end[1]){cell.classList.add("okc");const res=simulate(g,g.prog);animateRun(G,g,g.prog,res,()=>{});finish(true)}else{cell.classList.add("badc");finish(false,()=>{G.cell(...g.end).classList.add("okc");animateRun(G,g,g.prog,simulate(g,g.prog),()=>{})})}}});body.appendChild(G.box);if(!r.done)handOn(G.cell(...g.start))}
+ if(t==="count"){const d=r.data;body.appendChild(el("p","q",`Крок виконав програму: <span class="progtxt">${progTxt(d.prog)}</span><br>${d.ask==="up"?"На скільки клітинок <u>вище</u> від старту він опинився?":"На скільки клітинок <u>правіше</u> від старту він опинився?"}`));
+  body.appendChild(el("p","hintline","Підказка: кожна ↑ — на 1 вище, кожна ↓ — на 1 нижче (← і → так само)."));
+  const f=el("div","row");const inp=el("input","inp");inp.inputMode="numeric";inp.placeholder="Число";inp.setAttribute("aria-label","Відповідь числом");inp.style.maxWidth="140px";const b=el("button","btn","Перевірити");f.append(inp,b);body.appendChild(f);
+  const go=()=>{if(r.done||!inp.value.trim())return;if(parseFloat(inp.value.replace(",","."))===d.v)finish(true);else finish(false,()=>{fb.textContent+=" Відповідь: "+d.v})};b.onclick=go;inp.onkeydown=ev=>{if(ev.key==="Enter")go()};if(!r.done)handOn(b)}
+ if(t==="repeat"){const d=r.data;const P=d.P.map(x=>AR[x]).join(" ");
+  const qs=["Скільки <b>всього кроків</b> зробить Крок?",`Скільки разів Крок виконає пару команд <span class="progtxt">${P}</span>?`,`Скільки разів буде виконана команда <span class="progtxt">${AR[d.Q]}</span>?`];
+  body.appendChild(el("p","q",`Програма Крока:<br><span class="progtxt">🔁 ${d.a} × [ ${P} ]</span><br><span class="progtxt">🔁 ${d.b} × [ ${AR[d.Q]} ]</span><br>${qs[d.ask]}`));
+  body.appendChild(el("p","hintline","🔁 3 × [ → ] означає → → → (команда повторюється 3 рази)."));
+  const f=el("div","row");const inp=el("input","inp");inp.inputMode="numeric";inp.placeholder="Число";inp.setAttribute("aria-label","Відповідь числом");inp.style.maxWidth="140px";const b=el("button","btn","Перевірити");f.append(inp,b);body.appendChild(f);
+  const go=()=>{if(r.done||!inp.value.trim())return;if(parseFloat(inp.value.replace(",","."))===d.ans)finish(true);else finish(false,()=>{fb.textContent+=" Відповідь: "+d.ans})};b.onclick=go;inp.onkeydown=ev=>{if(ev.key==="Enter")go()};if(!r.done)handOn(b)}
+ if(t==="build"||t==="back"){const g0=r.data;let g,need,txt;
+  if(t==="build"){g=g0;need=g.best;txt=`Склади програму, щоб Крок дійшов до 🏁 <b>найкоротшим шляхом</b> — рівно <b>${need}</b> команд. Сірі клітинки — стіни.`}
+  else{g={w:g0.w,h:g0.h,walls:[],start:g0.end,goal:g0.start};need=g0.man;txt=`Крок пройшов від 🏁 програмою <span class="progtxt">${progTxt(g0.prog)}</span> і тепер стоїть у клітинці з рамкою. Склади <b>найкоротшу</b> програму, щоб він повернувся на 🏁 (не більше <b>${need}</b> команд).`}
+  body.appendChild(el("p","q",txt));const G=drawGrid(g,{goalIc:"🏁"});body.appendChild(G.box);const holder=el("div");body.appendChild(holder);const ed=progEditor(holder,{onChange:()=>{G.place(...g.start);G.cells.forEach(c=>c.classList.remove("trail"))}});
+  const b=el("button","btn","▶ Запустити й перевірити");b.style.marginTop="8px";body.appendChild(b);
+  b.onclick=()=>{if(r.done)return;const p=ed.get();if(!p){fb.className="fb";fb.textContent="Спершу склади програму стрілками.";return}b.disabled=true;const res=simulate(g,p);G.toks=ed.toks;
+   animateRun(G,g,p,res,()=>{b.disabled=false;const at=res.end[0]===g.goal[0]&&res.end[1]===g.goal[1];let ok=!res.crash&&at&&p.length<=need;
+    if(!ok){const why=res.crash==="wall"?`Крок урізався в стіну на команді №${res.step+1}.`:res.crash==="edge"?`Крок вийшов за межі зали на команді №${res.step+1}.`:!at?"Крок не дійшов до 🏁.":`Задовго: ${p.length} команд, а треба ${need}.`;
+     const done=finish(false,()=>{const sol=t==="build"?g0.sol:bfs(g,g.start,g.goal);fb.textContent+=" Найкоротший шлях: "+progTxt(sol)});if(!done)fb.textContent="✘ "+why+" Ще спроба: "+(3-r.tries)}
+    else finish(true)})};if(!r.done)handOn(holder.querySelector(".pad button"));if(r.done)ed.lock()}
+ {const hx=exExtra(e,r,v,body,finish,fb);if(hx&&!r.done)handOn(hx)}
+ if(r.done){lockAll();if(r.pts>0){fb.className="fb ok";fb.textContent=r.pts===1?"✔ Виконано з першої спроби":"✔ Виконано"}else{fb.className="fb bad";fb.textContent="✘ Виконано без балів"}c.querySelectorAll(".handpt").forEach(h=>h.remove())}
+ c.addEventListener("pointerdown",()=>c.querySelectorAll(".handpt").forEach(h=>h.remove()),{once:true});
+ return c}
+
+// ===== Квест =====
+const QN=4,QPER=3,BOSSHP=5,QNORM=90;
+function questQs(li){const L=B.quest[li];if(L.table)return tableQs(3);if(L.grid)return [0,1,2].map(()=>({grid:genWalk(5,5,5+rnd(2))}));return shuffle(L.pool).slice(0,QPER)}
+function renderQuest(){const T=$("#t-qu");T.innerHTML="";const Q=S.quest;
+ const map=el("div","map");const pts=[[8,70],[29,30],[50,70],[71,30],[92,60]];
+ let path="M"+pts.map(p=>p[0]+" "+p[1]).join(" L");const doneN=Math.min(Q.loc,5);
+ map.innerHTML=`<svg viewBox="0 0 100 100" preserveAspectRatio="none"><path d="${path}" stroke="var(--line)" stroke-width="3" fill="none" vector-effect="non-scaling-stroke" stroke-dasharray="6 5"/><path id="qpath" d="${path}" stroke="var(--class-4)" stroke-width="5" fill="none" vector-effect="non-scaling-stroke" pathLength="100" stroke-dasharray="100" stroke-dashoffset="${100-Math.min(doneN,4)*25}" style="transition:stroke-dashoffset 1s"/></svg>`;
+ pts.forEach((p,i)=>{const n=el("div","node"+(i<Q.loc?" done":i===Q.loc?" cur":""),i<4?B.quest[i].ic:"👾");n.style.left=p[0]+"%";n.style.top=p[1]+"%";n.title=i<4?B.quest[i].name:"Бос";map.appendChild(n)});
+ const wk=el("div","walker","🤖");const wp=pts[Math.min(Q.loc,4)];wk.style.left=wp[0]+"%";wk.style.top=wp[1]+"%";map.appendChild(wk);T.appendChild(map);
+ T.appendChild(el("p","hintline","Квест іде в рейтинг і XP, на оцінку не впливає. Щоразу — нові питання."));
+ if(Q.loc>4){const c=el("div","card boss");c.innerHTML=`<div class="face">🏆</div><h2>Глюка-Плутанину переможено!</h2><p>Зірки: ${"⭐".repeat(Q.res.reduce((a,r)=>a+(r?r.stars:0),0))}</p>`+rewardHTML(Q.rw!=null?Q.rw:(Q.rw=pickReward(),save(),Q.rw));T.appendChild(c);return}
+ const li=Q.loc,isBoss=li===4;if(!Q.cur||Q.cur.li!==li){Q.cur={li,qs:isBoss?bossQs():questQs(li),i:0,err:0,t0:Date.now(),hp:BOSSHP};Q.hearts=3;save()}
+ const C=Q.cur,card=el("div","card"+(isBoss?" boss":""));T.appendChild(card);
+ const head=el("div","exhead",`<span class="code">${isBoss?"Бос":"Локація "+(li+1)}: ${isBoss?"Глюк-Плутанина":esc(B.quest[li].name)}</span><span class="hearts" aria-label="Життя">${"❤️".repeat(Q.hearts)}${"🤍".repeat(3-Q.hearts)}</span>`);card.appendChild(head);
+ if(isBoss){card.appendChild(el("div","",`<div class="face" id="bface">👾</div><div class="hpbar"><i id="hp" style="width:${C.hp/BOSSHP*100}%"></i></div><small>Здоров'я боса: ${C.hp}/${BOSSHP}</small>`))}
+ const q=C.qs[C.i];const box=el("div");card.appendChild(box);const fb=el("div","fb");card.appendChild(fb);
+ card.appendChild(el("p","hintline",`Питання ${C.i+1} з ${C.qs.length}`));
+ const right=(from)=>{addXP(10,from);card.classList.add("flash");fb.className="fb ok";fb.textContent="✔ Влучно!";
+  if(isBoss){C.hp--;const f=$("#bface");f.classList.add("hit");$("#hp").style.width=(C.hp/BOSSHP*100)+"%"}
+  C.i++;save();setTimeout(()=>{if(C.i>=C.qs.length)endLoc();else renderQuest()},RM?200:800)};
+ const wrong=()=>{C.err++;Q.hearts--;card.classList.remove("bad");void card.offsetWidth;card.classList.add("bad");const hs=head.querySelector(".hearts");hs.innerHTML="❤️".repeat(Q.hearts)+'<span class="broken">💔</span>'+"🤍".repeat(Math.max(0,2-Q.hearts));fb.className="fb bad";
+  if(Q.hearts<=0){fb.textContent="Життя скінчилися — локація починається знову з новими питаннями.";Q.cur=null;save();setTimeout(renderQuest,1400)}else{fb.textContent="✘ Мимо! Спробуй ще раз.";save()}};
+ if(q.grid){const g=q.grid;box.appendChild(el("p","q",`Де зупиниться Крок? <span class="progtxt">${progTxt(g.prog)}</span>`));const G=drawGrid(g,{onCell:(x,y,cell)=>{if(x===g.end[0]&&y===g.end[1]){cell.classList.add("okc");right(cell)}else{cell.classList.add("badc");setTimeout(()=>cell.classList.remove("badc"),700);wrong()}}});box.appendChild(G.box)}
+ else{if(q.h)box.appendChild(el("div","",q.h));box.appendChild(el("p","q",esc(q.q)));const o=el("div","opts");shuffle(q.o.map((_,j)=>j)).forEach(j=>{const b=el("button","opt",esc(q.o[j]));b.onclick=()=>{if(j===q.a){b.classList.add("ok");right(b)}else{b.classList.add("bad");b.disabled=true;wrong()}};o.appendChild(b)});box.appendChild(o)}
+ function endLoc(){const t=(Date.now()-C.t0)/1000;const stars=C.err===0&&t<=QNORM*(isBoss?1.6:1)?3:C.err<=1?2:1;Q.res[li]={stars,err:C.err,t:Math.round(t),errs:C.errList||[]};
+  Q.log=Q.log||[];C.qs.forEach((_,k)=>{});Q.log.push({li,err:C.err});addXP(stars*5);Q.loc++;Q.cur=null;save();confetti();
+  const T2=$("#t-qu");const c2=el("div","card"+(isBoss?" boss":""));c2.innerHTML=(isBoss?'<div class="face">🎉</div><h2>Перемога над Глюком!</h2>':`<h2>${esc(B.quest[li].name)}: пройдено!</h2>`)+`<div class="starsrow">${[0,1,2].map(k=>`<span style="animation-delay:${k*.35}s">${k<stars?"⭐":"☆"}</span>`).join("")}</div><p>Помилок: ${C.err} · час: ${fmtLong(t)}</p>`;const nb=el("button","btn",isBoss?"До карти":"Далі →");nb.onclick=renderQuest;c2.appendChild(nb);T2.innerHTML="";T2.appendChild(c2);hud()}
+}
+function bossQs(){const a=[];[0,1,2].forEach(li=>a.push(...shuffle(B.quest[li].pool).slice(0,1)));a.push(...tableQs(2));return shuffle(a)}
+
+// ===== Картки =====
+function renderCards(){const T=$("#t-ca");T.innerHTML="";
+ T.appendChild(el("div","banner",`<div class="eyebrow" style="color:#fff">⚡ Стоп! Прочитай це першим</div><b>КАРТКИ — ТВОЯ ЗАКОННА ШПАРГАЛКА!</b><ul><li>Усі відповіді тут</li><li>Менше помилок — вища оцінка</li><li>Спершу пригадай — потім відкрий</li><li>+2 XP за картку, +10 XP за всі</li></ul><p style="margin:10px 0 0;font-size:16px">У Лабораторії дослідника треба знайти найбільше, порівняти, порахувати разом і передбачити — картки 3–7 підкажуть, яку дію робити для кожного питання.</p>`));
+ const n=S.cards.length,M=B.cards.length;T.appendChild(el("p","",`<b>Відкрито ${n} з ${M}</b>`));const pb=el("div","prog-bar",`<i style="width:${n/M*100}%"></i>`);T.appendChild(pb);
+ const g=el("div","cards");B.cards.forEach((cd,i)=>{const op=S.cards.includes(i);const b=el("button","fc"+(op?" open":""),op?`<b>${esc(cd[1])}</b>${esc(cd[2])}`:`<div class="ic">${cd[0]}</div><b>${esc(cd[1])}</b><small style="color:var(--muted)">Спершу пригадай… потім натисни</small>`);
+  b.onclick=()=>{if(S.cards.includes(i))return;S.cards.push(i);addXP(2,b);if(S.cards.length===M){addXP(10);confetti()}save();renderCards()};g.appendChild(b)});T.appendChild(g)}
+
+// ===== Лабораторія =====
+const LABN=["Л1 Шлях","Л2 Експонати","Л3 Лабіринт","Л4 Баг","Л5 Передбач"];
+let labCur=0;
+function renderLab(){const T=$("#t-la");T.innerHTML="";const L=S.lab;
+ T.appendChild(el("div","story",'<div class="hero">🛠️</div><p><b>Лабораторія Залу Роботів.</b> 5 завдань для Крока. Програму можна запускати скільки завгодно, а потім натисни «Здати лабораторію». Повторно здати можна лише один раз (бал × 0,8).</p>'));
+ const tabs=el("div","lvtabs");LABN.forEach((n,i)=>{const b=el("button",(i===labCur?"cur ":"")+(L.done[i]?"done":""),n);b.onclick=()=>{labCur=i;renderLab()};tabs.appendChild(b)});T.appendChild(tabs);
+ const g=L.lv[labCur],card=el("div","card");T.appendChild(card);const fb=el("div","fb");
+ const locked=L.score!=null&&L.submits>=2;
+ if(labCur===4){card.appendChild(el("h2","","Передбач, потім перевір"));card.appendChild(el("p","q",`Програма: <span class="progtxt">${progTxt(g.prog)}</span><br>Натисни клітинку, де зупиниться Крок. <b>Лише одна спроба!</b>`));
+  const G=drawGrid(g,{labels:true,onCell:(x,y,cell)=>{if(L.p5!=null||locked)return;L.p5=(x===g.end[0]&&y===g.end[1]);L.done[4]=L.p5;cell.classList.add("pick");save();renderLab()}});card.appendChild(G.box);
+  if(L.p5!=null){G.cell(...g.end).classList.add("okc");const b=el("button","btn","▶ Перевірити запуском");b.onclick=()=>animateRun(G,g,g.prog,simulate(g,g.prog),()=>{fb.className="fb "+(L.p5?"ok":"bad");fb.textContent=L.p5?"✔ Передбачення збіглося з запуском!":"✘ Крок зупинився в іншій клітинці (зелена рамка)."});card.appendChild(b)}
+  card.appendChild(fb)}
+ else{const info=[`Доведи Крока до 🏁. Без стін — розминка.`,`Збери обидва ⭐ і прийди до 🏁. Не більше <b>${g.limit}</b> команд.`,`Лабіринт: дійди до 🏁 <b>найкоротшим</b> шляхом — рівно <b>${g.best}</b> команд.`,`Глюк зіпсував програму! Виправ її (видаляй і додавай команди), щоб Крок дійшов до 🏁. Не більше <b>${g.limit||g.best}</b> команд.`][labCur];
+  card.appendChild(el("h2","",LABN[labCur]));card.appendChild(el("p","q",info));const G=drawGrid(g,{goalIc:"🏁",labels:true});card.appendChild(G.box);const h=el("div");card.appendChild(h);
+  L.prog=L.prog||[];if(L.prog[labCur]==null)L.prog[labCur]=labCur===3?g.buggy:"";
+  const ed=progEditor(h,{init:L.prog[labCur],locked:locked,onChange:()=>{L.prog[labCur]=ed.get();save();G.place(...g.start);G.cells.forEach(c=>c.classList.remove("trail"))}});
+  const b=el("button","btn","▶ Запустити");b.style.marginTop="8px";card.append(b,fb);
+  b.onclick=()=>{const p=ed.get();if(!p)return;L.runs++;b.disabled=true;const res=simulate(g,p);G.toks=ed.toks;animateRun(G,g,p,res,()=>{b.disabled=false;const at=res.end[0]===g.goal[0]&&res.end[1]===g.goal[1];const lim=labCur===0?99:labCur===2?g.best:(g.limit||g.best);const allStars=!g.stars||g.stars.every(s=>res.got.has(k2(...s)));
+   let msg;if(res.crash==="wall")msg=`Урізався в стіну на команді №${res.step+1}`;else if(res.crash==="edge")msg=`Вийшов за межі зали на команді №${res.step+1}`;else if(!allStars)msg="Зібрано не всі ⭐";else if(!at)msg="Не дійшов до 🏁";else if(p.length>lim)msg=`Задовго: ${p.length} команд, можна ${lim}`;
+   const ok=!msg;if(ok&&!L.done[labCur]){L.done[labCur]=true;addXP(15,b);confetti()}save();fb.className="fb "+(ok?"ok":"bad");fb.textContent=ok?"✔ Завдання виконано!":"✘ "+msg+". Виправ програму і запусти знову.";[...tabs.children][labCur].className="cur"+(L.done[labCur]?" done":"")})};
+  if(!L.done.some(Boolean)&&labCur===0)handOn(h.querySelector(".pad button"))}
+ const sub=el("div","card");const n=L.done.filter(Boolean).length;
+ sub.innerHTML=`<p class="req">Виконано: <b>${n} з 5</b> · запусків: ${L.runs}</p>`+(L.score!=null?`<p class="req">Здано ${L.submits} раз(и): <b>${Math.round(L.score*100)} %</b></p>`:"");
+ if(L.submits<2&&!S.finished){const b=el("button","btn",L.submits?"Здати повторно (× 0,8)":"✅ Здати лабораторію");twoStep(b,()=>n<5?`Виконано ${n} з 5.`:"",()=>{submitLab();renderLab()});sub.appendChild(b)}
+ T.appendChild(sub)}
+function submitLab(){const L=S.lab;const n=L.done.filter(Boolean).length;L.submits++;const sc=n/5*(L.submits===2?.8:1);L.score=L.score==null?sc:Math.max(L.score,sc);L.errs+=5-n;L.missing=[0,1,2,3,4].filter(i=>!L.done[i]);save()}
+
+// ===== Оцінка =====
+function compute(){const exPts=S.ex.reduce((a,r)=>a+r.pts,0),exShare=exPts/14,labShare=S.lab.score||0;
+ const exErr=S.ex.reduce((a,r)=>a+r.err,0),errs=exErr+S.lab.errs;
+ const base=12*(.6*exShare+.4*labShare);const pErr=Math.min(3,Math.max(0,errs-2)*.25);const T=S.tTot;const pTime=T<=NORM.total?0:T<=NORM.total*1.5?1:2;
+ let g=Math.max(1,Math.round(base-pErr-pTime));const cap=!(exShare*0.6+labShare*0.4>=.95&&errs<=2&&T<=NORM.total);if(g===12&&cap)g=11;
+ const fast=S.finished&&T<NORM.total*.3;return{exPts,exShare,labShare,errs,exErr,base,pErr,pTime,grade:g,fast}}
+function taskStr(){const a=[];S.ex.forEach((r,i)=>a.push(`В${i+1}:${r.err}${r.done?"":"н"}`));
+ for(let i=0;i<5;i++)a.push(`Л${i+1}:${S.lab.done[i]?0:1}${S.lab.done[i]?"":"н"}`);
+ (S.quest.res||[]).forEach((r,i)=>{if(r)a.push(`К${i+1}.1:${r.err}`)});return a.join(",")}
+function variantStr(){return S.ex.map(r=>r.v!=null?r.v:"g").join("")}
+function line(){const c=compute();const clean=s=>String(s).replace(/[|\n\r]/g," ");
+ const f=["v1",YEAR,TOPIC,S.cls,S.name,S.attempt,variantStr(),S.finished?c.grade:"",c.exPts+"/14",Math.round(c.labShare*100),c.errs,fmtLong(S.tTot),fmtLong(NORM.total),c.fast?"занадто швидко":"",S.finished?"завершено":"не завершено",taskStr()];return f.map(clean).join("|")}
+function openForm(ev){if(!S.name.trim()||!S.cls.trim()){ev.preventDefault();show("re");setTimeout(()=>{const i=$("#nm");if(i){i.focus();i.scrollIntoView({block:"center"})}},50);return}ev.currentTarget.href=FORM+encodeURIComponent(line())}
+$("#fab").onclick=openForm;
+function twoStep(b,msg,fn){let armed=false;const orig=b.textContent;b.onclick=()=>{if(!msg()){fn();return}if(!armed){armed=true;b.textContent=msg()+" Натисни ще раз, щоб підтвердити";setTimeout(()=>{armed=false;b.textContent=orig},4000);return}fn()}}
+
+function renderRes(){const T=$("#t-re");T.innerHTML="";const c=compute();
+ const card=el("div","card");T.appendChild(card);
+ if(S.finished){card.appendChild(el("div","big",c.grade));if(S.rw==null){S.rw=pickReward();save()}card.insertAdjacentHTML("beforeend",rewardHTML(S.rw));card.appendChild(el("p","",'<div style="text-align:center;color:var(--muted);font-weight:800">балів з 12</div>'))}
+ else{card.appendChild(el("h2","","Твій результат"));card.appendChild(el("p","hintline","Коли все зробиш — натисни «Завершити й отримати оцінку». Після цього відповіді змінити не можна."))}
+ if(c.fast)card.appendChild(el("div","warnf","⚠ Занадто швидко: менше ніж 30 % норми часу"));
+ const rows=[["Вправи",`${c.exPts} з 14 (${Math.round(c.exShare*100)} %)`],["Лабораторія",S.lab.score==null?"не здано":Math.round(c.labShare*100)+" %"],["Помилки",`${c.errs} (вправи ${c.exErr}, лабораторія ${S.lab.errs})`],
+  ["Час: вправи / лабораторія",`${fmt(S.tEx)} / ${fmt(S.tLab)}`],["Час разом / норма",`${fmtLong(S.tTot)} / ${fmtLong(NORM.total)}`],["Штраф за помилки",c.pErr?"−"+c.pErr:"0"],["Штраф за час",c.pTime?"−"+c.pTime:"0"],["Спроба №",S.attempt],["Квест (не в оцінці)",`⭐ ${S.quest.res.reduce((a,r)=>a+(r?r.stars:0),0)} з 15`],["XP",S.xp]];
+ const tb=el("table","br");rows.forEach(r=>{const tr=el("tr");tr.innerHTML=`<td>${r[0]}</td><td>${r[1]}</td>`;tb.appendChild(tr)});card.appendChild(tb);
+ if(!S.finished){const b=el("button","btn","🏁 Завершити й отримати оцінку");b.style.marginTop="12px";twoStep(b,()=>{const left=S.ex.filter(r=>!r.done).length;return left?`Не виконано вправ: ${left}.`:""},()=>{if(S.lab.score==null)submitLab();S.finished=true;save();confetti();pushBoard();renderRes();hud()});card.appendChild(b)}
+ else{const b=el("button","btn ghost","🔄 Пройти знову (нові варіанти)");b.style.marginTop="12px";twoStep(b,()=>"Усе обнулиться.",()=>{newAttempt();labCur=0;renderAll();show("ex")});card.appendChild(b)}
+ const sc=el("div","card fbk");sc.innerHTML=`<h2>📤 Надіслати вчителю</h2><p class="hintline">Впиши прізвище, ім'я та клас. Відкриється форма з уже вписаним результатом — натисни в ній «Надіслати». Вхід в акаунт не потрібен.</p>`;
+ const nm=el("input","inp");nm.id="nm";nm.placeholder="Прізвище та ім'я";nm.value=S.name;nm.oninput=()=>{S.name=nm.value;save()};const cl=el("input","inp");cl.placeholder="Клас, напр. 4-А";cl.value=S.cls;cl.style.marginTop="8px";cl.oninput=()=>{S.cls=cl.value;save()};
+ const sb=el("a","btn send","📤 Відкрити форму й надіслати");sb.href="#";sb.target="_blank";sb.rel="noopener";sb.style.marginTop="10px";sb.onclick=openForm;sc.append(nm,cl,sb);if(!S.finished)sc.appendChild(el("p","hintline","Ще не завершено — надішлеться зі статусом «не завершено»."));T.appendChild(sc);
+ const lb=el("div","card fbk");lb.innerHTML=`<h2>🏆 Рейтинг класу</h2><p class="hintline">Лише нікнейм — без прізвищ. З'являється після завершення.</p>`;const nk=el("input","inp");nk.placeholder="Нікнейм для рейтингу";nk.maxLength=16;nk.value=S.nick;nk.oninput=()=>{S.nick=nk.value;save()};lb.appendChild(nk);
+ const nb=el("button","btn ghost","Оновити мій рядок");nb.style.marginTop="8px";nb.onclick=pushBoard;if(S.finished)lb.appendChild(nb);const box=el("div");box.id="board";box.innerHTML='<p class="hintline">Завантаження…</p>';lb.appendChild(box);T.appendChild(lb);loadBoard()}
+
+// ===== Рейтинг (спільне сховище) =====
+let DB=null,UID=null,unsub=null;
+(async()=>{try{if(!window.claude)throw 0;DB=await claude.use("db");const u=await claude.use("user");if(u)UID=await u.id();if(DB)loadBoard()}catch(e){}})();
+function loadBoard(){const box=$("#board");if(!box)return;if(!DB){box.innerHTML='<p class="hintline">Рейтинг доступний, коли сторінку відкрито через claude.ai.</p>';return}
+ if(unsub)return drawBoard(window._rows||[]);const tm=setTimeout(()=>{if(!window._rows)box.innerHTML='<p class="hintline">Рейтинг поки не завантажився.</p>'},10000);
+ try{unsub=DB.collection("board").onSnapshot(sn=>{clearTimeout(tm);window._rows=sn.docs.map(d=>d.data());drawBoard(window._rows)},()=>{clearTimeout(tm)})}catch(e){}}
+function drawBoard(rows){const box=$("#board");if(!box)return;rows=rows.filter(r=>r&&r.nick).sort((a,b)=>(b.grade-a.grade)||(b.xp-a.xp)).slice(0,25);
+ if(!rows.length){box.innerHTML='<p class="hintline">Поки порожньо — будь першим!</p>';return}
+ box.innerHTML='<table class="lb"><tr><th>#</th><th>Нік</th><th>Оцінка</th><th>XP</th><th>⭐</th></tr>'+rows.map((r,i)=>`<tr><td>${i+1}</td><td>${esc(String(r.nick).slice(0,16))}</td><td>${+r.grade||0}</td><td>${+r.xp||0}</td><td>${+r.stars||0}</td></tr>`).join("")+"</table>"}
+async function pushBoard(){if(!DB||!UID||!S.finished)return;const nick=(S.nick||"").trim().slice(0,16);if(!nick)return;const c=compute();
+ try{await DB.collection("board").doc(UID).set({nick,grade:c.grade,xp:S.xp,stars:S.quest.res.reduce((a,r)=>a+(r?r.stars:0),0),t:Date.now()})}catch(e){}}
+
+// ===== Вкладки =====
+function show(t){curTab=t;document.querySelectorAll(".tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.t===t));["ex","qu","ca","la","re"].forEach(k=>$("#t-"+k).hidden=k!==t);
+ if(t==="qu")renderQuest();if(t==="ca")renderCards();if(t==="la")renderLab11();if(t==="re")renderRes();scrollTo({top:Math.min(scrollY,$(".tabs").offsetTop)})}
+document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>show(b.dataset.t));
+$("#themeBtn").onclick=()=>{const r=document.documentElement;const dark=r.dataset.theme?r.dataset.theme==="dark":matchMedia("(prefers-color-scheme: dark)").matches;r.dataset.theme=dark?"light":"dark";ls.set(KEY+"_theme",r.dataset.theme)};
+{const th=ls.get(KEY+"_theme",null);if(th)document.documentElement.dataset.theme=th}
+function renderAll(){renderEx();hud()}
+if(!S||!S.ex||S.ex.length!==B.ex.length)newAttempt();
+renderAll();
+window.__T={S:()=>S,compute,line,simulate,bfs,newAttempt,submitLab,renderAll};
+</script>
+</body>
+</html>

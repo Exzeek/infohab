@@ -1,0 +1,1252 @@
+<!doctype html><html lang="uk"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+/* ---- навігація 22.11 ---- */
+.ov{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.ovc{--c:var(--cx);display:flex;flex-direction:column;gap:8px;background:var(--surface);border:1px solid var(--line);border-left:6px solid var(--c);border-radius:16px;padding:16px 18px;min-width:0}
+.ovc h3{margin:0;font-family:var(--f-display);font-size:20px}.ovc h3 b{color:var(--c);font-size:26px;margin-right:4px}
+.ovc .ks{color:var(--muted);font-weight:700;font-size:14px}
+.ovc .now{font-weight:800;font-size:15px}.ovc .now small{display:block;color:var(--muted);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+.ovc .btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto}
+.ovc button{font:800 14px var(--f-body);border:2px solid var(--c);border-radius:999px;padding:8px 14px;min-height:40px;cursor:pointer;background:var(--surface);color:var(--ink)}
+.ovc button.pri{background:var(--c);color:#fff}
+.ovc button:focus-visible,.chips button:focus-visible,.secbox>summary:focus-visible,.totop:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.chips{position:sticky;top:0;z-index:5;display:flex;gap:8px;overflow-x:auto;padding:8px 2px;background:var(--bg);scrollbar-width:thin}
+.chips button{flex:none;font:800 14px var(--f-body);border:2px solid color-mix(in srgb,var(--c) 55%,var(--line));border-radius:999px;padding:7px 14px;min-height:38px;cursor:pointer;background:var(--surface);color:var(--ink);white-space:nowrap}
+.chips button[aria-pressed="true"]{background:var(--c);border-color:var(--c);color:#fff}
+.chips .sep{flex:none;width:1px;background:var(--line);margin:4px 2px}
+.secbox>summary{list-style:none;cursor:pointer}.secbox>summary::-webkit-details-marker{display:none}
+.secbox>summary.sech::after{content:"▾";margin-left:auto;color:var(--c);font-weight:800;transition:transform .15s}
+.secbox:not([open])>summary.sech::after{transform:rotate(-90deg)}
+.secbox[open]>.grid{margin-top:14px}
+.sech .curb{font:800 12px var(--f-body);color:var(--c);background:color-mix(in srgb,var(--c) 14%,var(--surface));border-radius:999px;padding:3px 10px}
+.subh{margin:18px 0 8px;font:800 13px var(--f-body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.totop{position:fixed;right:16px;bottom:16px;z-index:20;width:48px;height:48px;border-radius:50%;border:0;background:var(--accent);color:#fff;font:800 22px var(--f-body);cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+@media (prefers-reduced-motion:reduce){.secbox>summary.sech::after{transition:none}}
+</style></head><body>
+<title>Інфо-хаб</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: шапка з перемикачем «Учням / Вчителю» → вкладки класів → картки тем, згруповані за класом і розділом */
+:root{
+  --bg:#f4f6fb; --surface:#ffffff; --ink:#18202f; --muted:#5b6578; --line:#dfe4ee;
+  --accent:#2f5bea; --warn:#b45309; --warn-bg:#fdf1e2;
+  --c2:#d98a00; --c3:#1e8fd6; --c4:#7a4fd8; --c5:#c2255c; --c7:#364fc7; --c6:#2f9e4f; --c8:#e0661b; --c9:#0f8a8a; --cx:#5b6578;
+  --f-display:"Unbounded","Arial Black",system-ui,sans-serif;
+  --f-body:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#11141b; --surface:#1a1f2a; --ink:#e8ecf4; --muted:#9aa4b6; --line:#2b3242;
+  --accent:#7d9bff; --warn:#f2b46b; --warn-bg:#3a2b17;
+  --c2:#ffc04d; --c3:#5ab6f0; --c4:#a98af0; --c5:#f06595; --c7:#91a7ff; --c6:#5cc77a; --c8:#f59152; --c9:#3cc0bf; --cx:#9aa4b6; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11141b; --surface:#1a1f2a; --ink:#e8ecf4; --muted:#9aa4b6; --line:#2b3242;
+  --accent:#7d9bff; --warn:#f2b46b; --warn-bg:#3a2b17;
+  --c2:#ffc04d; --c3:#5ab6f0; --c4:#a98af0; --c5:#f06595; --c7:#91a7ff; --c6:#5cc77a; --c8:#f59152; --c9:#3cc0bf; --cx:#9aa4b6; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 64px;display:flex;flex-direction:column;gap:28px}
+
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:20px}
+.brand h1{font-family:var(--f-display);font-weight:800;font-size:clamp(30px,5vw,46px);line-height:1.05;margin:0;letter-spacing:-.01em;text-wrap:balance}
+.brand h1 span{color:var(--accent)}
+.brand p{margin:8px 0 0;color:var(--muted);max-width:52ch}
+
+.mode{display:inline-flex;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px}
+.mode button{font:700 15px var(--f-body);border:0;background:none;color:var(--muted);padding:10px 20px;border-radius:999px;cursor:pointer}
+.mode button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.liveban{display:flex;align-items:center;gap:16px;text-decoration:none;color:var(--ink);background:var(--surface);border:2px solid var(--accent);border-radius:16px;padding:14px 18px;min-width:0}
+.liveban:hover{background:color-mix(in srgb,var(--accent) 10%,var(--surface))}
+.liveban:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.lb-ic{font-size:36px;line-height:1}
+.lb-t{flex:1;min-width:0;display:grid;gap:2px}
+.lb-t b{font-family:var(--f-display);font-size:20px}
+.lb-t small{color:var(--muted);font-size:14px;font-weight:600}
+.lb-go{font-weight:800;color:var(--accent);white-space:nowrap}
+
+.tabs{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:10px}
+.tab{--c:var(--cx);min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;border:2px solid var(--line);background:var(--surface);color:var(--ink);border-radius:16px;padding:12px 12px 14px;cursor:pointer;font-family:var(--f-body);transition:border-color .15s,transform .15s,background .15s}
+.tab:hover{border-color:var(--c);transform:translateY(-2px)}
+.tab .n{font-family:var(--f-display);font-weight:800;font-size:28px;line-height:1;color:var(--c);white-space:nowrap;min-height:30px;display:flex;align-items:baseline}
+.tab .n small{font-size:12px;font-weight:700;margin-left:3px}
+.tab .n.dbl{font-size:20px;flex-direction:column;align-items:flex-start;gap:1px}
+.tab .n.dbl small{margin-left:0;font-size:11px}
+.tab .s{font-size:13px;line-height:1.3;color:var(--muted);font-weight:700;overflow-wrap:anywhere;hyphens:auto;max-width:100%}
+.tabs2{display:flex;flex-wrap:wrap;gap:8px;margin-top:-14px}
+.tab2{--c:var(--cx);display:inline-flex;align-items:baseline;gap:8px;font:700 14px var(--f-body);border:1px solid color-mix(in srgb,var(--c) 35%,var(--line));background:var(--surface);color:var(--ink);border-radius:999px;padding:8px 16px;min-height:40px;cursor:pointer}
+.tab2 b{font-weight:800;color:var(--c)}
+.tab2 small{color:var(--muted);font-weight:700;font-size:13px}
+.tab2:hover{background:color-mix(in srgb,var(--c) 10%,var(--surface))}
+.tab2[aria-selected="true"]{border-color:var(--c);background:color-mix(in srgb,var(--c) 14%,var(--surface))}
+.tab2:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+/* галерея */
+.gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.gcard{--c:var(--cx);background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
+.gcard .cover{aspect-ratio:16/9;display:grid;place-items:center;background:linear-gradient(135deg,color-mix(in srgb,var(--c) 26%,var(--surface)),color-mix(in srgb,var(--c) 7%,var(--surface)));color:var(--c)}
+.gcard .cover svg{width:46%;height:auto;overflow:visible}
+.gcard .gb{padding:14px 16px 16px;display:grid;gap:6px}
+.gcard h3{margin:0;font-size:18px;line-height:1.25;font-weight:800}
+.gcard .by{color:var(--muted);font-size:14px;font-weight:700}
+.gcard .tg{display:flex;flex-wrap:wrap;gap:6px}
+.gcard .tg span{font:800 11px var(--f-body);letter-spacing:.06em;text-transform:uppercase;border-radius:6px;padding:3px 7px;background:var(--c);color:#fff}
+.gcard .tg span.demo{background:var(--warn-bg);color:var(--warn)}
+.gcard a{font-weight:800;color:var(--accent)}
+.gnote{background:var(--surface);border:1px dashed var(--line);border-radius:16px;padding:16px 18px;display:grid;gap:6px}
+.gnote b{font-family:var(--f-display);font-size:17px}
+.tab[aria-selected="true"]{border-color:var(--c);background:color-mix(in srgb,var(--c) 10%,var(--surface))}
+@media (max-width:620px){.tabs{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:6px;scrollbar-width:thin}.tab{flex:0 0 112px;scroll-snap-align:start}.tab:hover{transform:none}}
+
+.search{display:flex;gap:10px;align-items:center}
+.search input{flex:1;min-width:0;font:600 16px var(--f-body);padding:13px 16px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.count{color:var(--muted);font-size:14px;white-space:nowrap;font-variant-numeric:tabular-nums}
+
+.klass{display:flex;flex-direction:column;gap:16px}
+.klass>h2{--c:var(--cx);font-family:var(--f-display);font-weight:700;font-size:22px;margin:8px 0 0;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.klass>h2 b{color:var(--c);font-size:30px}
+.klass>h2 em{font-family:var(--f-body);font-style:normal;font-size:15px;color:var(--muted);font-weight:700}
+.sec{font-size:12px;text-transform:uppercase;letter-spacing:.08em;font-weight:800;color:var(--muted);margin:4px 0 -6px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+
+.card{--c:var(--cx);background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:12px;min-width:0;border-top:5px solid var(--c)}
+.card .code{font:800 12px var(--f-body);letter-spacing:.06em;text-transform:uppercase;color:var(--c)}
+.card h3{margin:0;font-size:19px;line-height:1.25;font-weight:800;text-wrap:balance}
+.card .story{color:var(--muted);font-size:14px;margin:-6px 0 0}
+.res{display:flex;flex-direction:column;gap:8px;margin-top:auto}
+.r{display:flex;align-items:center;gap:10px;min-width:0}
+.r a.go{flex:1;min-width:0;display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);background:color-mix(in srgb,var(--c) 9%,var(--surface));border:1px solid color-mix(in srgb,var(--c) 30%,var(--line));border-radius:12px;padding:10px 12px;transition:background .15s}
+.r a.go:hover{background:color-mix(in srgb,var(--c) 18%,var(--surface))}
+.r a.go:focus-visible,.tab:focus-visible,.mode button:focus-visible,.copy:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.kind{font:800 11px var(--f-body);letter-spacing:.06em;text-transform:uppercase;color:#fff;background:var(--c);border-radius:6px;padding:3px 7px;white-space:nowrap}
+.r .lbl{font-weight:700;font-size:15px;flex:1;min-width:0}
+.r .lbl small{display:block;font:500 12px var(--f-mono);color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.copy{border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:10px;padding:9px 10px;font:700 12px var(--f-body);cursor:pointer;white-space:nowrap}
+.copy:hover{color:var(--ink)}
+.warn{font-size:12px;font-weight:700;color:var(--warn);background:var(--warn-bg);border-radius:6px;padding:2px 7px;margin-top:4px;display:inline-block}
+.empty{color:var(--muted);padding:30px 0;text-align:center}
+footer{color:var(--muted);font-size:13px;border-top:1px solid var(--line);padding-top:16px}
+/* розділи */
+.ktoc{display:flex;flex-wrap:wrap;gap:8px;margin:-4px 0 4px}
+.ktoc button{--c:var(--cx);font:700 14px var(--f-body);border:1px solid color-mix(in srgb,var(--c) 35%,var(--line));background:var(--surface);color:var(--ink);border-radius:999px;padding:7px 14px;cursor:pointer;display:inline-flex;gap:8px;align-items:center}
+.ktoc button:hover{background:color-mix(in srgb,var(--c) 10%,var(--surface))}
+.ktoc button b{color:var(--c);font-family:var(--f-display);font-size:13px}
+.ktoc button small{color:var(--muted);font-weight:700;font-variant-numeric:tabular-nums}
+.ktoc button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.sech{--c:var(--cx);display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 12px;margin:10px 0 0;padding:12px 0 8px;border-bottom:2px solid color-mix(in srgb,var(--c) 40%,var(--line));scroll-margin-top:12px}
+.sech .rn{font:800 12px var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:#fff;background:var(--c);border-radius:6px;padding:3px 8px}
+.sech h3{margin:0;font-family:var(--f-display);font-weight:700;font-size:18px;line-height:1.25;text-wrap:balance}
+.sech em{font-style:normal;color:var(--muted);font-size:14px;font-weight:700;font-variant-numeric:tabular-nums}
+.sech .miss{color:var(--warn);background:var(--warn-bg);border-radius:6px;padding:2px 8px;font-size:12px;font-weight:800}
+.card .code{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.card .code span{font-family:var(--f-display);font-size:15px;letter-spacing:0;text-transform:none}
+.card.sum{border-style:dashed;border-top-style:solid;background:color-mix(in srgb,var(--c) 4%,var(--surface))}
+.kind.t{background:var(--ink);color:var(--bg)}
+.kind.arch{background:var(--muted)}
+.nosl{align-self:flex-start;font:800 12px var(--f-body);color:var(--warn);background:var(--warn-bg);border:1px dashed var(--warn);border-radius:6px;padding:3px 8px;margin-top:-4px}
+.ovc .nosl{margin-top:0}
+/* шапки класів з картинками */
+.khead{display:flex;align-items:center;justify-content:space-between;gap:16px;border-radius:20px;padding:18px 22px;min-height:140px;overflow:hidden;background:linear-gradient(120deg,color-mix(in srgb,var(--c) 20%,var(--surface)),color-mix(in srgb,var(--c) 5%,var(--surface)));border:1px solid color-mix(in srgb,var(--c) 32%,var(--line))}
+.khead .kt{display:grid;gap:4px;min-width:0}
+.khead h2{font-family:var(--f-display);font-weight:800;font-size:clamp(22px,3vw,30px);line-height:1.1;margin:0}
+.khead h2 b{color:var(--c);font-size:1.45em}
+.khead .ks{font-weight:800;font-size:17px}
+.khead .kc{color:var(--muted);font-weight:700;font-size:14px;font-variant-numeric:tabular-nums}
+.art{color:var(--c);flex:none;width:min(230px,40%);height:auto;overflow:visible}
+.art .s{fill:var(--surface)}.art .f{fill:currentColor}.art .t{fill:currentColor;fill-opacity:.22}
+@media (max-width:520px){.khead{padding:14px 16px;min-height:110px}.art{width:118px}}
+/* зміст класу */
+.toc{background:var(--surface);border:1px solid var(--line);border-radius:16px}
+.toc>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:14px 18px;font-weight:800;font-size:17px}
+.toc>summary::-webkit-details-marker{display:none}
+.toc>summary::before{content:"";width:0;height:0;border-left:8px solid var(--c);border-top:6px solid transparent;border-bottom:6px solid transparent;transition:transform .15s}
+.toc[open]>summary::before{transform:rotate(90deg)}
+.toc>summary small{color:var(--muted);font-weight:700;font-size:14px}
+.toc>summary:focus-visible,.toc a:focus-visible,.sech .up:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.toc .cols{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:6px 28px;padding:0 18px 18px;border-top:1px solid var(--line)}
+.toc .sh{display:block;width:100%;text-align:left;background:none;border:0;cursor:pointer;padding:12px 8px 4px;font:800 13px var(--f-body);letter-spacing:.04em;text-transform:uppercase;color:var(--c)}
+.toc ol{list-style:none;margin:0;padding:0;display:grid;gap:1px}
+.toc a{text-decoration:none}
+.toc ol a{display:flex;gap:10px;align-items:baseline;width:100%;text-align:left;background:none;border:0;border-radius:8px;padding:7px 8px;font:600 15px/1.3 var(--f-body);color:var(--ink);cursor:pointer;min-height:36px}
+.toc ol a span{flex:1}
+.toc ol a i{font-style:normal;font-weight:800;color:var(--c);opacity:0;transition:opacity .15s}
+.toc ol a:hover i,.toc ol a:focus-visible i{opacity:1}
+.toc ol a:hover span{text-decoration:underline;text-underline-offset:3px}
+.toc .sh:hover{text-decoration:underline;text-underline-offset:3px}
+.sech .up{margin-left:auto;font-weight:800;font-size:14px;color:var(--c);text-decoration:none;padding:4px 2px}
+.sech .up:hover{text-decoration:underline}
+.toc ol a:hover{background:color-mix(in srgb,var(--c) 11%,var(--surface))}
+.toc ol b{color:var(--c);flex:none;min-width:3.2em;font-variant-numeric:tabular-nums}
+.card{scroll-margin-top:16px}
+.card.flash{animation:fl 1.8s ease}
+@keyframes fl{0%,45%{box-shadow:0 0 0 4px var(--c)}100%{box-shadow:0 0 0 0 transparent}}
+/* коротке посилання */
+.golink{display:flex;align-items:center;gap:20px;flex-wrap:wrap;background:var(--accent);color:#fff;border-radius:22px;padding:18px 24px;overflow:hidden}
+.golink .art{color:#fff;width:150px}
+.golink .art .s{fill:color-mix(in srgb,#fff 18%,var(--accent))}
+.golink .gl-t{flex:1;min-width:0;display:grid;gap:2px}
+.golink small{font-weight:800;font-size:17px;opacity:.92}
+.golink b{font:700 clamp(28px,6.2vw,58px)/1.05 var(--f-mono);letter-spacing:-.02em;overflow-wrap:anywhere}
+.golink .copy{background:#fff;color:var(--accent);border:0;font-size:15px;padding:12px 16px}
+:root[data-theme=dark] .golink .copy{color:#11141b}
+@media (max-width:520px){.golink{padding:16px;gap:12px}.golink .art{display:none}.golink .gl-t{flex:1 1 100%}.golink b{font-size:30px;overflow-wrap:normal;white-space:nowrap}}
+.selbar{display:flex;flex-wrap:wrap;gap:10px}
+.selbar button{font:800 15px var(--f-body);border:2px solid var(--c);background:var(--surface);color:var(--ink);border-radius:999px;padding:10px 18px;min-height:44px;cursor:pointer}
+.selbar button:hover{background:color-mix(in srgb,var(--c) 12%,var(--surface))}
+.selbar button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.toc a[aria-current]{background:color-mix(in srgb,var(--c) 16%,var(--surface));border-radius:8px}
+.qr{flex:none;width:112px;height:112px;background:#fff;border-radius:14px;padding:6px}
+.qr svg{display:block;width:100%;height:100%}
+@media (max-width:520px){.qr{width:92px;height:92px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+:root{--c10:#6741d9}@media (prefers-color-scheme:dark){:root{--c10:#b197fc}}:root[data-theme="dark"]{--c10:#b197fc}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <h1>Інфо-<span>хаб</span></h1>
+      <p id="lead">Усі уроки, квести й тести з інформатики в одному місці. Обери свій клас і тему.</p>
+    </div>
+    <div class="mode" role="group" aria-label="Режим">
+      <button id="m-s" aria-pressed="true">Учням</button>
+      <button id="m-t" aria-pressed="false">Вчителю</button>
+    </div>
+  </header>
+
+  <div class="golink" role="note" aria-label="Адреса Інфо-хабу">
+    <svg class="art" viewBox="0 0 240 140" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><rect class="s" x="40" y="14" width="160" height="98" rx="10"/><rect class="t" x="54" y="28" width="132" height="14" rx="7"/><path d="M66 58h70M66 74h104M66 90h80"/><path class="t" d="M28 112h184l12 14H16z"/><path class="f" stroke="none" d="M168 70l30 12-13 4-4 13z"/></g></svg>
+    <div class="gl-t"><small>Адреса Інфо-хабу — набери в браузері:</small><b>tinyurl.com/it-zpt</b></div>
+    <div class="qr" id="qr" role="img" aria-label="QR-код адреси tinyurl.com/it-zpt" hidden></div>
+    <button class="copy" id="glCopy" type="button">Копіювати</button>
+  </div>
+
+  <a class="liveban" id="liveBan" href="https://tinyurl.com/infohab-reitynh" target="_blank" rel="noopener" hidden>
+    <span class="lb-ic" aria-hidden="true">🏆</span>
+    <span class="lb-t"><b>Живий рейтинг класу</b><small>На великий екран без входу в акаунт · оновлення кожні 15 с · <span style="font-family:var(--f-mono)">tinyurl.com/infohab-reitynh</span></small></span>
+    <span class="lb-go">Відкрити →</span>
+  </a>
+
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Клас"></nav>
+  <nav class="tabs2" id="tabs2" role="tablist" aria-label="Інші розділи"></nav>
+
+  <div class="search">
+    <input id="q" type="search" placeholder="Пошук теми: таблиці, Інтернет, запити…" aria-label="Пошук теми">
+    <span class="count" id="count"></span>
+  </div>
+
+  <main id="list"></main>
+<button class="totop" id="totop" type="button" aria-label="Нагору" hidden>↑</button>
+
+  <footer id="foot">Адреса цієї сторінки: <b>tinyurl.com/it-zpt</b> · Дані — з таблиці «Каталог уроків інформатики», 12 листопада 2026.</footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script>
+const CLASSES={
+  2:{story:"Робот Дослідик",c:"--c2"},
+  3:{story:"Пригоди Тимка",c:"--c3"},
+  4:{story:"Музей Порядку",c:"--c4"},
+  5:{story:"Служба ЦифроДоп",c:"--c5"},
+  7:{story:"Кібербаза",c:"--c7"},
+  6:{story:"Мікроферма",c:"--c6"},
+  8:{story:"Ліга класу",c:"--c8"},
+  9:{story:"Кав'ярня «Байт»",c:"--c9"},
+  10:{story:"ШІ-лабораторія «Нейрон»",c:"--c10"},
+  12:{story:"Острови чисел",c:"--c9"},
+  1:{story:"Читання та інше",c:"--accent"},
+  0:{story:"Для будь-якого уроку",c:"--cx"}
+};
+const LOCAL=new Set(["12KHdEtH8MmaYzqGG2QhgG", "1GJ9zT5aUph4F3sqp3FEkE", "1JakwCyrshnHN3PbRupDCT", "1QX7fY9rbfe6nwra1TXcKE", "1S1rDBQuw7GRvJrK7K7A1L", "1aHzkU4sBAgGKFgZ8Z6i9i", "1ezp2MoThUgCGzbrSCNRPf", "1fRoHpTpEwbWACyzkA2Pmj", "1j6fFCZeqeUcP6ZK5fuLVi", "1qh9vRaQ4BxAoHaNYUedxf", "26zgfkGV839B3YFvjc7jc1", "2LWmpGo3y6N1VgbrVAeQVL", "2NQVwmmYgo55gLHyn6CJM1", "2P6KH8dZH66RzTAPPyjDhy", "2YPspiwS7A9haMjirZyWQD", "2iHKDvrRvPSquDAi9LJJPT", "2tTDWdGwbjfBCNwN9CZeYr", "2y8BxpfCX7n1F9LbvCnMAh", "2zDGx14F9Sv75rCNmNPgm1", "3Q992HWL7W5wYegH6q4eZc", "3QUAB2hgnxEqMzE3Db4U36", "3RekHC2EoTmE2uoAmSA5s8", "3YFcFcaJYmkdauWNWtQoDc", "3YTkr1hsyZt9heq97fod8o", "3fbZXdyPjwSEmVu9b8CYnn", "3fn6PejiNePG911f7ZbWtz", "3i9XUJhUhbzsLLC9RH4Nu7", "3iyhWRiGcEuZH4Uk1WkhMj", "3seCanrBzN8TMMkCwudviU", "3zM3ssTgqF64UPSJpShn8B", "4E3ykybQCtGEjSjrkW98Ko", "4Ki2tSAcTgvDv3ufyFCYEw", "4Mr3Y6HsAvQqmEue3qFSD8", "4qkxtz6rB2i9XCLhCyhof3", "4sK7DExZwdcjUFpVzJV2Bk", "4uE7ZtYNUAxGrdhSvALyk9", "4vjHpFQtQfaNFMESmdbfG1", "5FiJgwSpTNN1AKMvJx42eD", "5Fpff3fBweRHA7FWGjvFdg", "5JDvyNwoqUUK5aH2h49V9F", "5Ns2hyaLpsFFuFAEpuHDVs", "5WfFjg5cU3CVatQTXGCcvk", "5XMj6zirRFbvNR2BptvUhi", "5oXBkuW3ZQbKKGes6QK4Kw", "5xDTp5cfXXHaYWLyRGU53z", "6LCsHUuqLQVkHmvedydD3S", "6WuWG8jshxUGcdhJnK13TJ", "6Y1an4szqVVtwZXv39sRtr", "6aSxrctS6bPPNpFbgJepvK", "6r7BUtiZGWM3ZyCDBL3scT", "6tMGXg91YgrC9cQD7Mxr2Z", "7JTJtgT1ruP8xiUUiYXxrs", "7mJN4G5CpweiaoZ1VdMgN1", "831pWivzpGArL3M4JSNk7n", "839XBKmtDZD95gSGYmLYYC", "8CLvt2jQpHEatxwMNhAfWc", "8H8oBBuK11a8rocTqRE49w", "8X8Hagk6RHcisLFqknQPSz", "8YwUCGEUsPDQuNPqHhQejG", "8eX6dtRWWqBkB6TpeAtNyh", "8fiZPo1XeiokEF1xwf3agV", "8jWbPrvyqYN4RHGDmHe4Yz", "9E6wKUD62cptUZMezVYLLH", "9Jt7qGReEZDJBU4Js57k2A", "9LBkEPc8H5Ku4q5888KCEj", "9LMp8ajuQraEZCVN68U2Ne", "9NgiAzZ4swZ3D9u8UfdPd8", "9qjcf86eP6ssmSreEP6vrw", "A3ufM1tpL6uhWQmQ3Jhakb", "A5F7QdrJfhdMaaFkBNdjRb", "AEHKxTbVVW7wurqmuayKJL", "AFQoSVyJcyTfnGhkMJePvJ", "AMdzJwZqmc8AiNV7RbdFCd", "AS3Z6jyvsCSeo7wtNBDuJh", "ASWq9ocwmUvispX3645dZJ", "AXPPMecGemRq3knw2THz8C", "AYg2d8XrhgQtK36pNUNE4q", "AaNn8zC3LhqqnyRFWLkR1d", "AaZVCjzwXjByfVxYQE1Cr5", "AxJ8X3rgCn7yg7hurMJZeX", "B2cgWDxzFyCZ3d1kx2os6j", "BByWMhqagviUqUrEajGxH6", "BNSjQqZgAsr6W8YTQD3cDJ", "BQCGFyghNZ4WKrrqaRfaok", "BUfRGNrGkZaTe8CHPATqpk", "BVZJJsJ8vhKkWvofqz316L", "BYgd8PF1dBaEdRZEx6gSjP", "Bat7b72YXQDpRHhffgCERk", "Bf9FCmHQWE1J39Yzscu6Ag", "BjYrSsEZdy6azboJWkhm4e", "Bjb63LwTEF45VdDRDYML1p", "BrDBvPuVhVUPUd6RmXFzxx", "BthrPx2m7pB7yw56xBuZKz", "BwetmfjPqvUCY6PhZvXyB8", "C5asg22DTxTY9jZXJfD3Ht", "C5orPkUYHuabSgWa21e8rS", "CDxe2XfpBqWWN78VnFjgW3", "CRqWacxbguYmouWeepj2Vu", "CkfpQze1ZMDuidXP2N9vyX", "CnphkBEQEYanHRcvHcxmrE", "CtHNPPV5c1cYosJfrWhrhP", "DJhegJmyrPzp2cCJuhinmE", "DR36AkuLTiPn18UNnDrivH", "DYXFDQDuU891Q36KWdqsLY", "DfDF68RboP5h2vipfEzmJz", "DjwnaevapKKCbtT8ootCkB", "DmzHqEXZdXSXxgNyv7zLLL", "Duk2eSk7hbwSKeTFADXCgF", "E6nowb5HLqJ8WQX1gDTUxA", "EFku8HZe8eW6cL6NpCNx9G", "EJmUQAY1jd3juDhemz6gXK", "EKnu9rSxpzMvysYqMCFCtN", "ELHdh1oKbz6CxRxZub9w4r", "EPampdQKtXysE1G3rqMvZC", "ERJWHK36X5G1VDXo6FREne", "EjFs51WUKc9yWKeQjxNfoZ", "Em4by1rat8cjDyJQ4bYxAP", "EoHKR6pGUCQ1SktmmAnHAe", "F8CqbBk7kxnBzTjFpTHVuV", "FG1PUVAtWpCQycVoZhEue6", "FGSFsEKyxCixsojAGUNEkU", "FNLEwNmRbSeUJm1royK4ND", "FQQDqFc8Fn38NdY4MTu4Ur", "FgQS3N1XjpGh8W8CwMEZ37", "FsnASq19HJiGWixJaoLTkd", "G19LV7t55Jme5YPqtJEdJu", "G1gh1E2Wu3g4fZLrH46KUb", "G2xWqrw2MdMYeQkZrZVhK9", "G85ns4SMoDTwyHAx524psk", "GC6JRPFFj4omqzZAh3v7oY", "GJ9EGjLZhQ2sM6pypCh82T", "GVobD5Vjn4X7NYNXDVHb6h", "GeFcSHCsguoczCWQyHk1VU", "GeqvcYxEHq62ZjZBHxosig", "GkCKL4PoKc1ai3Dh3HVJ9Q", "GqNfqNjg7yDqGPfhcUZuNM", "HJjmmQxFWAadPEARzkEjDq", "HQuMmmHD1xyLCr5RkErERQ", "HU3czTXrwVPYQDP1GJsHq4", "HUtJvdvXUuV7HBcZj3pqth", "Hb9VvjizJ88hKvEj6UwwQc", "HguhqF9mDVf4r5AxKvmUmS", "HiS4H7PB76aRmRa66apzHM", "HmaTwnuhJTRWrvV7fWCK9H", "HqoG8E2wrAuDHucgKxwaWF", "HrZauJJMQ3DGP13X4N86GU", "J7MEDWw2vta8gcvd455pk7", "J8Pzh21iXq2B7Lp3qzQzRB", "JJCbP3mKvqg2Ko29R4t7e2", "JV16Gb1DGVQuGMUAmAwCrF", "JZQz6ZXnt6qmZiHqtoZLAL", "JqYkkteLQUTkWXkrbuTToB", "JrnfPGAdu7wi8U8LnkxRiJ", "Js44gHxiy3J7WuSQVJJnrT", "JsRRqvqsjRUoyF2MzzzfF8", "JuGFtw9mNB64EAszGBmeRU", "K8MkKZpC69zWZXeJFxJm8C", "KEjfZFBZiMdq7ZrsK45ycW", "KGcjg64Hz91E476JsKeSFL", "KZB2be21vpFrUoVyftqD3i", "Ko62pQS9TpifYfRbfursyX", "Krx1AE6LRqV8jsPA821naR", "KvBPgJ2W5kzLrYDAV5vK76", "L39rrBToq3ReSEwSr593La", "L4d6wnBkk8AfxmPrhkyBHs", "LAZ58AvN2fwCgpUVaGGt9e", "LbomQuGGCksuBPRfUocE9B", "LcyXWhqQ2vGRSqowYChGQv", "Lfi6k5zvHdDJKcbsGKjovp", "Lj3WDcFtEkGRD3aCCK2dvd", "Lk8fG8iHCNTRuXmSNhsDmQ", "Lt545dW26fMfAtE77xn2Zw", "LtxAo5XY8QhYsTuRKtoox8", "LveCC42hWGmkeNfQdc3dPF", "M6o3dMqfiHVwj1nYSnBRyB", "MAmecBaMpaBPNYArvoLWAF", "MBoBAMsDgZkj2r2GSX2TbB", "MByfhAoSqSbTe41XDcLYnC", "MCruqbqw4FVc9Gt9N7Rhs2", "MDihV2rzXHGDyeTvGAUXnv", "MFzPZFKZxNAKiLXepsiEhy", "MMo94uhKC6mW3g6aHw2RK9", "MSG33miZVGLqpjYh2njw66", "MZv9Q4sKrxLFD28TPttSff", "Mf6ZQ7tPoTaeboQx2dh2Xd", "Mrx3WYmw2vLw38htqTX4Ze", "N8nWk6s9qJxtMWec8NqHsV", "NBZEC36CvqEycgg3BBoKyk", "NDZGqUH1biWotdj344JKmh", "Ndg2aXT2FMDFpfE3jfSqoU", "NhaP7vWPikBixtoGdSrB2P", "Np4ecwgvB8Y8UhuvHeDwjB", "NsRZPR8owL7b6pVPRKAqYX", "NuZ2hVbdbeiEPa4gtRDnVd", "PHxMoUFxX4A2ZxN81dYpfV", "PK1p25WjuBa2vpnbVXyX1a", "PQn3pcmqXVtVegiS7e1DX6", "PVd5K2nispavnLRa8pLiSQ", "PbuuPevSDZaCGdz72RngUV", "Prb9xLmqTaJArxXtTu51jU", "PuCU88mVk9vHEzbzwNVRRB", "Q3wj23Xa8MaLBTNgj2eb9V", "Q4xa4RqMFUMhHUbNqjg1z9", "Q61vRbrn3vfYgDFsQxLfiM", "QC7LawYBUMk43ULgXFsvmG", "QEvYKJzGX19rqEb33MoBnA", "QLU7Anjn7ZWWYYmqJA1Zeg", "QMiu51Zf6TzckaCZQaUPp4", "QTTmUVSPjoDudp5GQEDEhg", "QTVdiBQeMhqoXe8x3bsbsE", "QTbefdoRmJxUUb5fkpB7B1", "QYjj812CR6dnXKACHsWgMM", "QdD6scNmErgV7HjxSz7VCY", "Qm8XCqpsYd2om6yJGGevnw", "QpQ8oRcCfzF9yRqG3iGbZS", "RGq43SqeXrUQrDvQGR23UZ", "RRJS4ETJXVhwemxVuFW67Z", "RXqPevv7YiJLFjqkJG1yut", "Rfq81HsqLiHCVyXK8RTuRc", "RugLMCVv9jPn15meTNqpSw", "S4dg8SUBParR5HB6g8mP5B", "S5ZN8K5t5AK5HkMHAzqZef", "S7c5KWUGRbNEu9TrDdLVB1", "SF9RFW5VFAH9NhizaRqxgE", "SPZJBzkzhAQqGRheGJxYN8", "SgWdKuoMkod5VTcKuRHFuB", "StakgYdFDukqyRr92hdEip", "T5ykmtB7Cb1jrj612NPwMg", "TAkoby4CAnafLz8yeQy2fz", "TKiXtai8QNxRAqDAPvrF3g", "TQkyo1zRnBeYkYTeB4hepn", "TQzBoXVSGBVaXbfyJhQqih", "Taf4zVZZxFKour5n51NhMg", "Tb7dHbEef3T3uL6YEEx9vX", "TcTRFXP1USSgpohbgAYooi", "Thaox6i9RNXphKj2GVHigz", "TxvzcRe3CvzHG8BNdVc2M2", "TzJSkiPYCuDSzfVtgLkJmu", "U8QLR2r5Trj3zKfDi4v3Qt", "UBVurzUEoYbSc6hZMXiuLd", "UGPrt7tNfMpJ5HJSh9ybCR", "UMukCvheYSdxz776hdsp4J", "URm4HU649AWN2YCRrjEVdv", "UYwCxdfKGCMiz39XgDguku", "UfEi7LeEHGCDGms2jR6Kik", "UtyZQ2wf6ef5PBfDPyJrE2", "UuSN1i6fPHP8yYCbCqKSEG", "Uwp87XtSAtqkAf14gCRYmR", "UxKDeQtQjrkZBET1hkpDzi", "UySerT9KH5xBE4UTv4vnuu", "VAPhyNu3FY4VNdVriseMAo", "VH8MnvDeVEXYMdkwg2GWU1", "VRUCMeQTV2yrGEQtXwJ4Af", "VfqGPB66ybYVuCJhDpxCDc", "VjDGv7q5jjGhtFeWzPK32D", "Vk2QhHtD9QH3YhGnfgGLwx", "Vt3DqTgtzhoYKn2FnmRPh4", "VtSneBAg2cX1GxqWt694R5", "Vv2NbYyXxxkyXboqAHJ9wh", "W39zHkVCekGeyFkv2BDRNF", "WbURtdmEfbx9JWdajiQs8N", "Wfs6EofehKzvuFArqwKDiK", "WkmqavkVqu5z7Hxi2WE4FD", "X6HXRzXFDPY6WACDaBumj8", "X6TXHBTSE26hDVmvCJr1RK", "X9nbCdZs4iiVfY4Fz2EkJ2", "XDLJVAUdmx2C3V4AccF2hs", "XEoJ75nyr9KdePpd2vsuRD", "XZ9PqyJQsi5kBzFTCrG62n", "XrKesVCC143XhihFVw5QEa", "Xsmoy4DxwCiRZEioZ7duAu", "Y35Bt6ZpwoMGTnu8nkpF13", "YGLRYDRoPCYySAeHfeBYD7", "YMB5r73g3wMnJdfmDgbbmm", "YT657yqwkH1MBs1rqsDvm7", "YZXjRzjKEMWvVrq49qu4rM"]),TMAP={"zapytiv94": "a/NBZEC36CvqEycgg3BBoKyk/", "zapytiv95": "a/SgWdKuoMkod5VTcKuRHFuB/", "zapytiv66q": "VwWiz4FCAbtJaT13Q2FmNh", "zapytiv88": "a/X6HXRzXFDPY6WACDaBumj8/", "zapytiv80": "a/CkfpQze1ZMDuidXP2N9vyX/", "zapytiv89": "a/5WfFjg5cU3CVatQTXGCcvk/", "zapytiv66": "a/C5orPkUYHuabSgWa21e8rS/", "zapytiv31": "a/G2xWqrw2MdMYeQkZrZVhK9/", "zapytiv810": "a/Xsmoy4DxwCiRZEioZ7duAu/", "zapytiv41": "a/GkCKL4PoKc1ai3Dh3HVJ9Q/", "zapytiv42": "a/EjFs51WUKc9yWKeQjxNfoZ/", "zapytiv32": "a/AEHKxTbVVW7wurqmuayKJL/", "zapytiv67": "a/Ndg2aXT2FMDFpfE3jfSqoU/", "zapytiv34": "a/3Q992HWL7W5wYegH6q4eZc/", "zapytiv68u": "a/3fbZXdyPjwSEmVu9b8CYnn/", "zapytiv46": "a/BYgd8PF1dBaEdRZEx6gSjP/", "sortykgra4": "a/EKnu9rSxpzMvysYqMCFCtN/", "zapytiv44": "a/EoHKR6pGUCQ1SktmmAnHAe/", "zapytiv66gra": "a/AaNn8zC3LhqqnyRFWLkR1d/", "zapytiv811": "a/3fn6PejiNePG911f7ZbWtz/", "infobytva8": "a/6tMGXg91YgrC9cQD7Mxr2Z/", "infobytva8v2": "a/FsnASq19HJiGWixJaoLTkd/", "infobytva6": "a/QpQ8oRcCfzF9yRqG3iGbZS/", "timkogra3": "a/CDxe2XfpBqWWN78VnFjgW3/", "chytanka": "a/BwetmfjPqvUCY6PhZvXyB8/", "chytanka8": "a/CtHNPPV5c1cYosJfrWhrhP/", "zapytiv96": "a/PK1p25WjuBa2vpnbVXyX1a/", "infohab-panel": "KAQkL4g1TWqx3X7YFGHad2", "zapytiv088": "https://canva.link/t6m15jzax2a3ggw", "zapytiv089": "https://canva.link/p9tvapcrlvwyywb", "zapytiv066": "https://canva.link/6mc4zdlewf4uclo", "zapytiv031": "https://canva.link/ufom88x8t85cd20", "zapytiv0810": "https://canva.link/7biqb3svk61u64w", "zapytiv067": "https://docs.google.com/presentation/d/19a4JXmfQLcI7NlOIn_H5hrsIMosFRolqpUWREnRVpUk/edit", "zapytiv33": "https://canva.link/1fq4w69b2fq6v1a", "zapytiv43": "https://canva.link/sm8wgnsh742290d", "zapytiv034": "https://canva.link/u39uutjdjy46nkm", "zapytiv068": "https://canva.link/sa8p4ywhh6977rn", "zapytiv046": "https://canva.link/mje6lo7po9a8je7", "infohab-reitynh": "https://script.google.com/macros/s/AKfycbztFLbTQFgylh9B6Huokdc215jvFbO__SL2QS5vMfdMe3-HLtRAT-PJhF2RPOCPrnVU/exec", "zapytiv45": "https://canva.link/1dd6hfkf7kmk2es", "zapytiv0811": "https://gamma.app/docs/rof85bjr4g3dtgn", "infobytva9": "https://canva.link/2dwmr7xf7wr1szz", "zapytiv096": "https://canva.link/bj3x4jw8j2e6bf6"};
+const A=id=>LOCAL.has(id)?"a/"+id+"/":"https://claude.ai/artifact/"+id, T=s=>TMAP[s]||"https://tinyurl.com/"+s;
+// Тематичні картинки для шапки кожного класу
+const SP=(x,y)=>`<path class="f" stroke="none" d="M${x} ${y-12}l4 8 8 4-8 4-4 8-4-8-8-4 8-4z"/>`;
+const ART={
+ 2:`<path d="M120 20v14"/><circle class="f" cx="120" cy="15" r="6"/><rect class="s" x="86" y="34" width="68" height="48" rx="14"/><circle class="f" stroke="none" cx="106" cy="57" r="7"/><circle class="f" stroke="none" cx="134" cy="57" r="7"/><path d="M108 71q12 8 24 0"/><rect class="t" x="94" y="86" width="52" height="40" rx="10"/><path d="M94 98l-24 14M146 98l18-12"/><circle class="s" cx="180" cy="76" r="16"/><path d="M191 88l14 14"/>${SP(40,40)}${SP(206,26)}`,
+ 3:`<path class="s" d="M44 40q38-14 76 4v84q-38-16-76-4z"/><path class="t" d="M196 40q-38-14-76 4v84q38-16 76-4z"/><path d="M60 64h44M60 80h44M60 96h30M136 64h44M136 80h32"/><path class="s" d="M200 20l14 14-42 42-18 4 4-18z"/>${SP(28,26)}`,
+ 4:`<path class="t" d="M46 52l74-36 74 36z"/><circle class="f" stroke="none" cx="120" cy="38" r="6"/><rect class="s" x="52" y="52" width="136" height="10"/><path d="M70 66v46M98 66v46M142 66v46M170 66v46"/><rect class="s" x="107" y="74" width="26" height="24" rx="2"/><path d="M112 92l6-8 5 5 5-7"/><rect class="s" x="42" y="112" width="156" height="14" rx="3"/>${SP(214,30)}`,
+ 5:`<path d="M70 88v-16a30 30 0 0 1 60 0v16"/><rect class="f" stroke="none" x="62" y="80" width="16" height="28" rx="7"/><rect class="f" stroke="none" x="122" y="80" width="16" height="28" rx="7"/><path d="M131 108q0 16-22 16"/><circle class="f" stroke="none" cx="105" cy="124" r="5"/><path class="s" d="M154 22h60a8 8 0 0 1 8 8v28a8 8 0 0 1-8 8h-40l-14 12v-12h-6a8 8 0 0 1-8-8v-28a8 8 0 0 1 8-8z"/><path d="M166 38h36M166 50h22"/><path class="t" d="M22 28h42a8 8 0 0 1 8 8v18a8 8 0 0 1-8 8h-28l-10 10v-10h-4a8 8 0 0 1-8-8v-18a8 8 0 0 1 8-8z"/>`,
+ 6:`<circle class="t" cx="200" cy="32" r="16"/><path d="M200 6v6M200 52v6M174 32h6M220 32h6"/>`+[[44,70],[104,58],[164,78]].map(([x,h])=>`<path d="M${x+20} 96V${h}"/><path class="f" stroke="none" d="M${x+20} ${h+8}q-18-2-20-18q18 0 20 18zM${x+20} ${h+4}q16-4 20-20q-18 2-20 20z"/><path class="s" d="M${x} 96h40l-6 30h-28z"/>`).join(""),
+ 7:`<path d="M32 40l46 22M32 102l46-22M208 40l-46 22M208 102l-46-22" stroke-dasharray="2 9"/>`+[[32,40],[32,102],[208,40],[208,102]].map(([x,y])=>`<circle class="s" cx="${x}" cy="${y}" r="9"/>`).join("")+`<path class="t" d="M120 16l44 14v32q0 40-44 62q-44-22-44-62v-32z"/><rect class="s" x="103" y="64" width="34" height="28" rx="6"/><path d="M110 64v-8a10 10 0 0 1 20 0v8"/><circle class="f" stroke="none" cx="120" cy="78" r="4.5"/>`,
+ 8:`<path class="t" d="M90 22h60v32a30 30 0 0 1-60 0z"/><path d="M90 32h-14a16 16 0 0 0 16 24M150 32h14a16 16 0 0 1-16 24"/><path d="M120 84v18"/><rect class="s" x="96" y="102" width="48" height="16" rx="4"/><path class="f" stroke="none" d="M120 34l4 9 10 1-8 7 3 10-9-6-9 6 3-10-8-7 10-1z"/><circle class="s" cx="196" cy="98" r="22"/><path d="M174 98h44M196 76q-14 22 0 44M196 76q14 22 0 44"/>${SP(40,44)}`,
+ 9:`<path d="M92 48q-8-10 0-20t0-20M114 48q-8-10 0-20t0-20M136 48q-8-10 0-20t0-20"/><path class="s" d="M70 58h88v34a32 32 0 0 1-32 32h-24a32 32 0 0 1-32-32z"/><path d="M158 68h10a15 15 0 0 1 0 30h-12"/><path d="M52 128h124"/><text class="f" stroke="none" x="114" y="98" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="22" font-weight="700">01</text><ellipse class="t" cx="204" cy="108" rx="10" ry="14" transform="rotate(30 204 108)"/>`,
+ 12:`<rect class="s" x="40" y="30" width="70" height="90" rx="12"/><path d="M58 52h34M58 74h10M80 74h12M58 96h10M80 96h12"/><circle class="t" cx="160" cy="62" r="30"/><path d="M148 62h24M160 50v24"/><path class="f" stroke="none" d="M150 104h44v8h-44z"/>`,
+ 1:`<path class="s" d="M40 50q40-14 80 4v76q-40-16-80-4z"/><path class="t" d="M200 50q-40-14-80 4v76q40-16 80-4z"/><path d="M56 74h46M56 90h46M56 106h30"/><text class="f" stroke="none" x="132" y="104" font-family="Unbounded,Arial Black,sans-serif" font-size="34" font-weight="800">Аб</text>${SP(44,24)}${SP(200,22)}`,
+ 0:`<rect class="s" x="72" y="34" width="72" height="72" rx="14"/>`+[[90,52],[108,70],[126,88]].map(([x,y])=>`<circle class="f" stroke="none" cx="${x}" cy="${y}" r="6"/>`).join("")+`<rect class="t" x="154" y="62" width="52" height="52" rx="10" transform="rotate(15 180 88)"/>`
+};
+const art=k=>`<svg class="art" viewBox="0 0 240 140" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">${ART[k]||""}</g></svg>`;
+// Розділи для кожного класу: число — розділ підручника; "g" — ігри року; "a" — уроки за темами; "x" — ігри й матеріали на рік
+const SECT={
+  2:[["g","Карта року: ігри на великий екран"],["p","Практичні роботи розділів"]],
+  3:[["g","Щоденник відкриттів: ігри року"],["a","Уроки з вправами та квестами"],["p","Практичні роботи розділів"],["x","Підсумкові ігри"]],
+  4:[["g","Цифровий музей: ігри року"],["a","Уроки з вправами та квестами"],["p","Практичні роботи розділів"],["x","Підсумкові ігри"]],
+  5:[["g","Ігри на великий екран"],[1,"Вивчаємо основи"],[2,"Користуємось інтернетом"],[3,"Створюємо документ"],[4,"Алгоритми та програми (Scratch)"],[5,"Робота із зображеннями в Canva"]],
+  6:[["g","Ігри на великий екран"],[1,"Створюємо презентацію"],[2,"Інформаційні системи"],[3,"Спілкування онлайн"],[4,"Алгоритми та програми (Scratch)"],[5,"Інформаційна мозаїка"],["x","Ігри та матеріали на рік"]],
+  7:[["g","Ігри на великий екран"],[1,"Мій цифровий простір"],[2,"Візуальний контент"],[3,"Дизайн документів"],[4,"Графічне програмування (Python)"]],
+  8:[["g","Ігри на великий екран"],[1,"Основи інформатики"],[2,"Працюємо із числами"],[3,"Програмування"],[4,"Проєктування графічних інтерфейсів"],[5,"Сайт і його верстка"],["x","Ігри та матеріали на рік"]],
+  9:[["g","Ігри на великий екран"],[1,"Життя з розумними пристроями"],[2,"Дані, інформація, безпека"],[3,"Упорядкування даних"],[4,"Програмні проєкти"],[5,"3D-моделювання"],["x","Ігри та практичні на рік"]],
+  10:[[1,"Нейромережа зсередини"],[2,"Промпт-інженерія"],[3,"Навчи свою модель"],[4,"Детектив дипфейків"],[5,"Безпека ШІ"],[6,"ШІ, що знає підручник (RAG)"],[7,"ШІ-аналітик даних"],[8,"Вайб-кодинг"],[9,"Telegram-бот на Python"],[10,"Власний ШІ-агент"]],
+  12:[["g","Математичні ігри"]],
+  1:[["g","Читацькі сходинки: обирай за рівнем, а не за класом"]],
+  0:[["g","Інструменти для уроку"]]
+};
+// Тема: k — клас, r — розділ, t — номер теми («Т1») або мітка, sum — підсумок розділу (проєкт, картки)
+// who: s — учням, t — лише вчителю; priv — сторінка, можливо, ще не відкрита «за посиланням»
+const TOPICS=[
+ {k:10,r:10,t:"Т10",title:"ШІ-агент без коду",story:"ШІ-лабораторія, епізоди 19–20 · 2 уроки",res:[
+   {kind:"Урок 1",label:"Як думає агент: тригер, інструменти, людина в циклі",url:A("TcTRFXP1USSgpohbgAYooi"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/lejh4d7f4urqi0r",who:"t"}]},
+ {k:10,r:9,t:"Т9",title:"Telegram-бот на Python",story:"ШІ-лабораторія, епізоди 17–18 · 2 уроки",res:[
+   {kind:"Урок 1",label:"Як працює бот: токен, апдейти, обробники",url:A("1fRoHpTpEwbWACyzkA2Pmj"),who:"s",priv:true},
+   {kind:"Урок 2",label:"Практикум: мозок бота на Python (онлайн-компілятор)",url:A("AFQoSVyJcyTfnGhkMJePvJ"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/l3m78y1gtsmd0o5",who:"t"}]},
+ {k:10,r:8,t:"Т8",title:"Вайб-кодинг",story:"ШІ-лабораторія, епізоди 15–16 · 2 уроки",res:[
+   {kind:"Урок 1",label:"ТЗ, тест-кейси й код-рев'ю коду від ШІ",url:A("BUfRGNrGkZaTe8CHPATqpk"),who:"s",priv:true},
+   {kind:"Урок 2",label:"Практикум: застосунок з ШІ через Блокнот і браузер",url:A("1aHzkU4sBAgGKFgZ8Z6i9i"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/ntkd276kjhzfbep",who:"t"}]},
+ {k:10,r:7,t:"Т7",title:"ШІ-аналітик даних",story:"ШІ-лабораторія, епізоди 13–14 · 2 уроки",res:[
+   {kind:"Урок 1",label:"Перевір висновок ШІ: викиди, кореляція, таблиця",url:A("DmzHqEXZdXSXxgNyv7zLLL"),who:"s",priv:true},
+   {kind:"Урок 2",label:"Практикум: аналіз опитування з чат-ботом + перевірка формулами",url:A("BNSjQqZgAsr6W8YTQD3cDJ"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/rj56o0t1v1x0nol",who:"t"}]},
+ {k:10,r:6,t:"Т6",title:"ШІ, що знає підручник (RAG)",story:"ШІ-лабораторія, епізоди 11–12 · 2 уроки",res:[
+   {kind:"Урок 1",label:"Як працює RAG: пошук фрагментів, промпт, перевірка",url:A("Em4by1rat8cjDyJQ4bYxAP"),who:"s",priv:true},
+   {kind:"Урок 2",label:"Практикум: RAG вручну з чат-ботом",url:A("7mJN4G5CpweiaoZ1VdMgN1"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/x3ycpjtx795ae2u",who:"t"}]},
+ {k:10,r:5,t:"Т5",title:"Безпека ШІ",story:"ШІ-лабораторія, епізоди 9–10 · 2 уроки",res:[
+   {kind:"Урок 1",label:"Атаки промптами: червона й синя команди",url:A("8eX6dtRWWqBkB6TpeAtNyh"),who:"s",priv:true},
+   {kind:"Урок 2",label:"Практикум у Lakera Agent Breaker + свій захисний промпт",url:A("8fiZPo1XeiokEF1xwf3agV"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/n9et2gs1zpmfnpz",who:"t"}]},
+ {k:10,r:4,t:"Т4",title:"Детектив дипфейків",story:"ШІ-лабораторія, епізоди 7–8 · 2 уроки",res:[
+   {kind:"Урок 1",label:"Як розпізнати дипфейк: справи детектива, протокол чату",url:A("HQuMmmHD1xyLCr5RkErERQ"),who:"s",priv:true},
+   {kind:"Урок 2",label:"Практикум у Content Credentials Verify + зворотний пошук",url:A("FQQDqFc8Fn38NdY4MTu4Ur"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/7oay63qxcevt4ml",who:"t"}]},
+ {k:10,r:3,t:"Т3",title:"Навчи свою модель",story:"ШІ-лабораторія, епізоди 5–6 · 2 уроки",res:[
+   {kind:"Урок 1",label:"Дані й мітки: датасет сортера, точність, картки",url:A("4qkxtz6rB2i9XCLhCyhof3"),who:"s",priv:true},
+   {kind:"Урок 2",label:"Практикум у Teachable Machine (без акаунта)",url:A("4vjHpFQtQfaNFMESmdbfG1"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/k1fjuc1onxd60eg",who:"t"}]},
+ {k:10,r:2,t:"Т2",title:"Промпт-інженерія",story:"ШІ-лабораторія, епізоди 3–4 · 2 уроки",res:[
+   {kind:"Урок 1",label:"Як говорити з ШІ: конструктор промптів, вправи, картки",url:A("XEoJ75nyr9KdePpd2vsuRD"),who:"s",priv:true},
+   {kind:"Урок 2",label:"Тест-драйв зі справжнім чат-ботом: JSON, few-shot, галюцинації",url:A("8YwUCGEUsPDQuNPqHhQejG"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/yrgbjkjhiebm7o3",who:"t"}]},
+ {k:10,r:1,t:"Т1",title:"Нейромережа зсередини",story:"ШІ-лабораторія, епізоди 1–2 · 2 уроки",res:[
+   {kind:"Урок 1",label:"Як думає нейрон: вправи, нейрон у таблиці, картки",url:A("QTVdiBQeMhqoXe8x3bsbsE"),who:"s",priv:true},
+   {kind:"Урок 2",label:"Практикум у TensorFlow Playground (без акаунта)",url:A("J8Pzh21iXq2B7Lp3qzQzRB"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/t245r7bu2kijrbf",who:"t"}]},
+ {k:5,r:1,t:"Проєкт",sum:true,title:"Паспорт мого робочого місця",story:"Проєкт у справжньому Windows · окрема оцінка · 2 уроки",res:[{kind:"Проєкт",label:"5 кроків → «5 клас · Розділ 1»",url:A("F8CqbBk7kxnBzTjFpTHVuV"),who:"s",priv:true}]},
+ {k:5,r:2,t:"Проєкт",sum:true,title:"Довідник служби ЦифроДоп",story:"Проєкт у браузері й Блокноті · окрема оцінка · 2 уроки",res:[{kind:"Проєкт",label:"6 кроків → «5 клас · Розділ 2»",url:A("F8CqbBk7kxnBzTjFpTHVuV"),who:"s",priv:true}]},
+ {k:6,r:1,t:"Проєкт",sum:true,title:"Презентація мікроферми",story:"Проєкт у PowerPoint / Google Презентаціях · окрема оцінка · 2–3 уроки",res:[{kind:"Проєкт",label:"5 кроків → «6 клас · Розділ 1»",url:A("F8CqbBk7kxnBzTjFpTHVuV"),who:"s",priv:true}]},
+ {k:6,r:2,t:"Проєкт",sum:true,title:"Інформаційна система мікроферми",story:"Проєкт у Windows і браузері · окрема оцінка · 2 уроки",res:[{kind:"Проєкт",label:"5 кроків → «6 клас · Розділ 2»",url:A("F8CqbBk7kxnBzTjFpTHVuV"),who:"s",priv:true}]},
+ {k:6,r:3,t:"Проєкт",sum:true,title:"Блог мікроферми",story:"Проєкт: cmd, документи, Jitsi Meet · окрема оцінка · 2–3 уроки",res:[{kind:"Проєкт",label:"5 кроків → «6 клас · Розділ 3»",url:A("F8CqbBk7kxnBzTjFpTHVuV"),who:"s",priv:true}]},
+ {k:7,r:1,t:"Проєкт",sum:true,title:"Аудит мережі Кібербази",story:"Проєкт у справжньому Windows · окрема оцінка · 2–3 уроки",res:[{kind:"Проєкт",label:"5 кроків → «7 клас · Розділ 1»",url:A("F8CqbBk7kxnBzTjFpTHVuV"),who:"s",priv:true}]},
+ {k:7,r:2,t:"Проєкт",sum:true,title:"Сайт Кібербази власноруч",story:"Проєкт у Блокноті й браузері · окрема оцінка · 2–3 уроки",res:[{kind:"Проєкт",label:"4 кроки → «7 клас · Розділ 2»",url:A("F8CqbBk7kxnBzTjFpTHVuV"),who:"s",priv:true}]},
+ {k:9,r:1,t:"Проєкт",sum:true,title:"Розумна кавомашина у Wokwi",story:"Проєкт у симуляторі Arduino Wokwi · окрема оцінка · 2–3 уроки",res:[{kind:"Проєкт",label:"4 кроки → «9 клас · Розділ 1»",url:A("F8CqbBk7kxnBzTjFpTHVuV"),who:"s",priv:true}]},
+ {k:9,r:2,t:"Проєкт",sum:true,title:"Дані кав'ярні в таблиці",story:"Проєкт у Google Таблицях / Excel · окрема оцінка · 2–3 уроки",res:[{kind:"Проєкт",label:"5 кроків → «9 клас · Розділ 2»",url:A("F8CqbBk7kxnBzTjFpTHVuV"),who:"s",priv:true}]},
+ {k:5,r:3,t:"Проєкт",sum:true,title:"Газета служби ЦифроДоп",story:"Проєкт у справжньому Word / Google Документах · окрема оцінка · 2 уроки",res:[{kind:"Проєкт",label:"5 кроків → «5 клас · Розділ 3»",url:A("F8CqbBk7kxnBzTjFpTHVuV"),who:"s",priv:true}]},
+ {k:6,r:4,t:"Проєкт",sum:true,title:"Власна гра в Scratch",story:"Проєкт у справжньому Scratch · окрема оцінка · 2–3 уроки",res:[{kind:"Проєкт",label:"5 кроків → «6 клас · Розділ 4»",url:A("F8CqbBk7kxnBzTjFpTHVuV"),who:"s",priv:true}]},
+ {k:7,r:3,t:"Проєкт",sum:true,title:"Довідник Кібербази",story:"Проєкт у Word / Google Документах + PDF · окрема оцінка · 2 уроки",res:[{kind:"Проєкт",label:"5 кроків → «7 клас · Розділ 3»",url:A("F8CqbBk7kxnBzTjFpTHVuV"),who:"s",priv:true}]},
+ {k:8,r:3,t:"Проєкт",sum:true,title:"Програма-статистик ліги",story:"Проєкт у справжньому Python · окрема оцінка · 2–3 уроки",res:[{kind:"Проєкт",label:"5 кроків → «8 клас · Розділ 3»",url:A("F8CqbBk7kxnBzTjFpTHVuV"),who:"s",priv:true}]},
+ {k:9,r:4,t:"Проєкт",sum:true,title:"Застосунок замовлень «Байта»",story:"Проєкт у справжньому Python · окрема оцінка · 3 уроки",res:[{kind:"Проєкт",label:"5 кроків → «9 клас · Розділ 4»",url:A("F8CqbBk7kxnBzTjFpTHVuV"),who:"s",priv:true}]},
+ {k:9,r:3,t:"Проєкт",sum:true,title:"Власна база даних у «БазаЛаб»",story:"Середовище бази даних у браузері замість Access: таблиці, схема даних, запити, форми, звіти, імпорт/експорт Excel · 12 вимог з автоперевіркою · окрема оцінка · Т1–Т5 розділу",res:[{kind:"Проєкт",label:"БазаЛаб → «Порожня база» → «Мій проєкт»",url:A("4sK7DExZwdcjUFpVzJV2Bk"),who:"s",priv:true},{kind:"Тренування",label:"БазаЛаб → приклад «Школа» з підручника",url:A("4sK7DExZwdcjUFpVzJV2Bk"),who:"s",priv:true}]},
+ {k:5,r:3,t:"Підсумок",sum:true,title:"Картки-білети розділу",story:"20 карток · білети на 12 балів · журнал + CSV",res:[{kind:"Картки",label:"Білети з відповідями → «5 клас · Розділ 3»",url:A("9E6wKUD62cptUZMezVYLLH"),who:"t"}]},
+ {k:6,r:4,t:"Підсумок",sum:true,title:"Картки-білети розділу",story:"32 картки · білети на 12 балів · журнал + CSV",res:[{kind:"Картки",label:"Білети з відповідями → «6 клас · Розділ 4»",url:A("9E6wKUD62cptUZMezVYLLH"),who:"t"}]},
+ {k:7,r:3,t:"Підсумок",sum:true,title:"Картки-білети розділу",story:"20 карток · білети на 12 балів · журнал + CSV",res:[{kind:"Картки",label:"Білети з відповідями → «7 клас · Розділ 3»",url:A("9E6wKUD62cptUZMezVYLLH"),who:"t"}]},
+ {k:8,r:3,t:"Підсумок",sum:true,title:"Картки-білети розділу",story:"20 карток · білети на 12 балів · журнал + CSV",res:[{kind:"Картки",label:"Білети з відповідями → «8 клас · Розділ 3»",url:A("9E6wKUD62cptUZMezVYLLH"),who:"t"}]},
+ {k:9,r:4,t:"Підсумок",sum:true,title:"Картки-білети розділу",story:"28 карток · білети на 12 балів · журнал + CSV",res:[{kind:"Картки",label:"Білети з відповідями → «9 клас · Розділ 4»",url:A("9E6wKUD62cptUZMezVYLLH"),who:"t"}]},
+ {k:5,r:"g",t:"Ігротека",title:"Ігротека: 5 форматів ігор",story:"Блок-бласт, Кібер-ранер, Лудо-гонка, Чорна діра й Матч за питаннями кожного розділу",res:[
+   {kind:"Гра",label:"Відкрити Ігротеку → 5 клас → розділ",url:A("PQn3pcmqXVtVegiS7e1DX6"),who:"t"}]},
+ {k:6,r:"g",t:"Ігротека",title:"Ігротека: 5 форматів ігор",story:"Блок-бласт, Кібер-ранер, Лудо-гонка, Чорна діра й Матч за питаннями кожного розділу",res:[
+   {kind:"Гра",label:"Відкрити Ігротеку → 6 клас → розділ",url:A("PQn3pcmqXVtVegiS7e1DX6"),who:"t"}]},
+ {k:7,r:"g",t:"Ігротека",title:"Ігротека: 5 форматів ігор",story:"Блок-бласт, Кібер-ранер, Лудо-гонка, Чорна діра й Матч за питаннями кожного розділу",res:[
+   {kind:"Гра",label:"Відкрити Ігротеку → 7 клас → розділ",url:A("PQn3pcmqXVtVegiS7e1DX6"),who:"t"}]},
+ {k:8,r:"g",t:"Ігротека",title:"Ігротека: 5 форматів ігор",story:"Блок-бласт, Кібер-ранер, Лудо-гонка, Чорна діра й Матч за питаннями кожного розділу",res:[
+   {kind:"Гра",label:"Відкрити Ігротеку → 8 клас → розділ",url:A("PQn3pcmqXVtVegiS7e1DX6"),who:"t"}]},
+ {k:9,r:"g",t:"Ігротека",title:"Ігротека: 5 форматів ігор",story:"Блок-бласт, Кібер-ранер, Лудо-гонка, Чорна діра й Матч за питаннями кожного розділу",res:[
+   {kind:"Гра",label:"Відкрити Ігротеку → 9 клас → розділ",url:A("PQn3pcmqXVtVegiS7e1DX6"),who:"t"}]},
+ {k:2,r:"g",t:"Т1–Т16",title:"Карта року з Дослідиком",story:"Острови 1–16 (нові: 13 «Дії з об'єктами», 14 «Середовища об'єктів», 15 «Об'єкти комп'ютера», 16 «Якими бувають меню»): ігри для великого екрана з озвучкою, без оцінок",res:[
+   {kind:"Гра",label:"Карта року → острови 1–16 (нові варіанти щоразу)",url:A("N8nWk6s9qJxtMWec8NqHsV"),who:"s",priv:true},
+   {kind:"Слайди",label:"Острів 1 — Canva-презентація",url:"https://canva.link/ux0qtdk0fxm3c60",who:"t"},
+   {kind:"Слайди",label:"Острів 2 — Canva-презентація",url:"https://canva.link/s857qm59qlxzuw6",who:"t"},
+   {kind:"Слайди",label:"Острів 3 — Canva-презентація",url:"https://canva.link/n8vl52yz7m468zt",who:"t"},
+   {kind:"Слайди",label:"Острів 4 — Canva-презентація",url:"https://canva.link/vn8ya8o24tf5ilv",who:"t"},
+   {kind:"Слайди",label:"Острів 5 — Canva-презентація",url:"https://canva.link/8p1bl3mi7v9cy6s",who:"t"},
+   {kind:"Слайди",label:"Острів 6 — Canva-презентація",url:"https://canva.link/2x6cxd1i4cntj4n",who:"t"},
+   {kind:"Слайди",label:"Острів 7 — Canva-презентація",url:"https://canva.link/k5wf0ilfb68fl2i",who:"t"},
+   {kind:"Слайди",label:"Острів 8 — Canva-презентація",url:"https://canva.link/dhmu0rskcqdktx2",who:"t"},
+   {kind:"Слайди",label:"Острів 9 — Canva-презентація",url:"https://canva.link/nebbrpqsshabmqq",who:"t"},
+   {kind:"Слайди",label:"Острів 10 — Canva-презентація",url:"https://canva.link/gojgv5r06hc6n24",who:"t"},
+   {kind:"Слайди",label:"Острів 11 — Canva-презентація",url:"https://canva.link/32v6k0d71z97jsa",who:"t"},
+   {kind:"Слайди",label:"Острів 12 — Canva-презентація",url:"https://canva.link/btjlg752f26t812",who:"t"},
+   {kind:"Слайди",label:"Острів 13 — Canva-презентація",url:"https://canva.link/btr9sre51w5lct1",who:"t"},
+   {kind:"Слайди",label:"Острів 14 — Canva-презентація",url:"https://canva.link/h2j00rt33m13agg",who:"t"},
+   {kind:"Слайди",label:"Острів 15 — Canva-презентація",url:"https://canva.link/zo5lushpfeji7j4",who:"t"},
+   {kind:"Слайди",label:"Острів 16 — Canva-презентація",url:"https://canva.link/e0cfaay1geaz9hk",who:"t"},
+   {kind:"Папка",label:"Презентації для Canva, плани уроків, друковані комплекти",url:"https://drive.google.com/drive/folders/1sw0hiwOYv5JlppKtMQaFvBLzWTZyNNnK",who:"t"}]},
+ {k:3,r:"g",t:"Т1–Т12",title:"Щоденник відкриттів Тимка",story:"Сторінки 1–12 (нові: 11 «Віртуальна бібліотека», 12 «Текстовий редактор»; Морзе): ігри для великого екрана, режим «Команди», без оцінок",res:[
+   {kind:"Гра",label:"Карта року → сторінки 1–12 (нові варіанти щоразу)",url:A("Uwp87XtSAtqkAf14gCRYmR"),who:"s",priv:true},
+   {kind:"Слайди",label:"Т1 Canva: Інформація",url:"https://canva.link/pn8yvbtnjypikmv",who:"t"},
+   {kind:"Слайди",label:"Т2 Canva: Повідомлення",url:"https://canva.link/uyr6c1ksl8o5aok",who:"t"},
+   {kind:"Слайди",label:"Т3 Canva: Носії і коди",url:"https://canva.link/j24fa6l2i7f1umg",who:"t"},
+   {kind:"Слайди",label:"Т4 Canva: Історія комп'ютера",url:"https://canva.link/iwfdt1jrm7zkwpp",who:"t"},
+   {kind:"Слайди",label:"Т5 Canva: Пристрої",url:"https://canva.link/mjx9xv26yyibrzv",who:"t"},
+   {kind:"Слайди",label:"Т6 Canva: Файли і папки",url:"https://canva.link/o960837l3r5df0v",who:"t"},
+   {kind:"Слайди",label:"Т7 Canva: Мережа й інтернет",url:"https://canva.link/gn1da4gfzxfp840",who:"t"},
+   {kind:"Слайди",label:"Т8 Canva: Браузер",url:"https://canva.link/15zhhl5fbudlge7",who:"t"},
+   {kind:"Слайди",label:"Т9 Canva: Пошук і правда",url:"https://canva.link/qid2gmiomb61a2h",who:"t"},
+   {kind:"Слайди",label:"Т10 Canva: Текстові документи",url:"https://canva.link/ju48vpinlrv9t0o",who:"t"},
+   {kind:"Слайди",label:"Т11 Canva: Віртуальна бібліотека",url:"https://canva.link/r5itbdlzzj18k0f",who:"t"},
+   {kind:"Слайди",label:"Т12 Canva: Текстовий редактор",url:"https://canva.link/htt26trg2fus3b3",who:"t"},
+   {kind:"Папка",label:"Презентації для Canva (10 шт.) і плани уроків на 40 хв",url:"https://drive.google.com/drive/folders/11X-nZjktH4sw29hjKlap8Syc1czzEeDS",who:"t"}]},
+ {k:3,r:"a",t:"Т1",title:"Як я можу структурувати інформацію на комп'ютері?",story:"Порядок у папках Тимка",res:[
+   {kind:"Уроки",label:"Вправи, квест, тренажер «Провідник»",url:T("zapytiv31"),short:"zapytiv31",who:"s"},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/ufom88x8t85cd20",who:"t"}]},
+ {k:8,r:5,t:"Т1",title:"Створення вебсторінки",story:"Епізод 27 · Сайт ліги — майстерня першої сторінки (HTML, списки, таблиці)",res:[
+   {kind:"Урок",label:"Розминка, 10 вправ, майстерня-конструктор",url:A("Lfi6k5zvHdDJKcbsGKjovp"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/75f8lgcx1jpl819",who:"t"}]},
+ {k:8,r:5,t:"Т2",title:"HTML та CSS",story:"Епізод 28 · Стилі ліги — пісочниця CSS + «передбач, потім перевір»",res:[
+   {kind:"Урок",label:"Розминка, 10 вправ, пісочниця CSS",url:A("8CLvt2jQpHEatxwMNhAfWc"),who:"s",priv:true}]},
+ {k:8,r:5,t:"Т3",title:"Додаємо контент",story:"Епізод 29 · Сейф медіатеки — квест-кімната: посилання, nav, img, audio",res:[
+   {kind:"Урок",label:"Розминка, 10 вправ, квест-кімната",url:A("6r7BUtiZGWM3ZyCDBL3scT"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/472f6ty7g0xeb58",who:"t"}]},
+ {k:8,r:5,t:"Т4",title:"Вебформи",story:"Епізод 30 · Форма запису на матч — парна робота «водій-штурман»",res:[
+   {kind:"Урок",label:"Розминка, 10 вправ, водій-штурман",url:A("GJ9EGjLZhQ2sM6pypCh82T"),who:"s",priv:true}]},
+ {k:8,r:5,t:"Т5",title:"Хостинг та SEO",story:"Епізод 31 · Служба підтримки сайту: хостинг, SEO, цільова авдиторія",res:[
+   {kind:"Урок",label:"Розминка, 10 вправ, служба підтримки",url:A("1GJ9zT5aUph4F3sqp3FEkE"),who:"s",priv:true}]},
+ {k:8,r:5,t:"Т6",title:"Координація команди. Система контролю версій",story:"Епізод 32 · Реліз сайту ліги — спідран + повторення розділу (Git, Kanban)",res:[
+   {kind:"Урок",label:"Розминка, 10 вправ, спідран розділу",url:A("A3ufM1tpL6uhWQmQ3Jhakb"),who:"s",priv:true}]},
+ {k:5,r:5,t:"Т1",title:"Типи та формати зображень",story:"Епізод 25 · Біт і загадка пікселів — майстерня форматів",res:[
+   {kind:"Урок",label:"Розминка, 10 вправ, майстерня-конструктор",url:A("LtxAo5XY8QhYsTuRKtoox8"),who:"s",priv:true}]},
+ {k:5,r:5,t:"Т2",title:"Створюємо плакат",story:"Епізод 26 · Біт і плакат для свята — служба підтримки",res:[
+   {kind:"Урок",label:"Розминка, 10 вправ, заявки клієнтів",url:A("2YPspiwS7A9haMjirZyWQD"),who:"s",priv:true}]},
+ {k:5,r:5,t:"Т3",title:"Інфографіка",story:"Епізод 27 · Біт і сейф інфографіки — квест-кімната",res:[
+   {kind:"Урок",label:"Розминка, 10 вправ, квест-кімната",url:A("6aSxrctS6bPPNpFbgJepvK"),who:"s",priv:true}]},
+ {k:5,r:5,t:"Т4",title:"Фотоколаж",story:"Епізод 28 · Біт і фотоколаж — водій-штурман",res:[
+   {kind:"Урок",label:"Розминка, 10 вправ, парна робота",url:A("X9nbCdZs4iiVfY4Fz2EkJ2"),who:"s",priv:true}]},
+ {k:5,r:5,t:"Т5",title:"Поєднання тексту та графічних зображень",story:"Епізод 29 · Біт і фінальний спідран Canva + повторення розділу",res:[
+   {kind:"Урок",label:"Розминка, 10 вправ, спідран розділу",url:A("G85ns4SMoDTwyHAx524psk"),who:"s",priv:true}]},
+ {k:5,r:5,t:"Проєкт",sum:true,title:"Фірмовий стиль ЦифроДоп у Canva",story:"Проєкт у справжній Canva: аватарка, плакат, інфографіка, колаж, листівка · окрема оцінка · 2–3 уроки",res:[{kind:"Проєкт",label:"5 кроків → «5 клас · Розділ 5»",url:A("F8CqbBk7kxnBzTjFpTHVuV"),who:"s",priv:true}]},
+ {k:5,r:5,t:"🎮 Гра розділу",sum:true,title:"Ігротека: Розділ 5",story:"154 питання про формати, плакати, інфографіку, колажі й шрифти: Блок-бласт, Кібер-ранер, Лудо-гонка, Чорна діра",res:[{kind:"Гра",label:"Ігротека → 5 клас → Розділ 5",url:A("PQn3pcmqXVtVegiS7e1DX6"),who:"t"}]},
+ {k:8,r:5,sum:true,t:"🏀 Гра розділу",title:"Матч ліги: Розділ 5",story:"97 питань з HTML, CSS, форм, SEO і Git: кидки на 1/2/3 очки для двох команд. На старті оберіть «Р5 · Сайт і верстка»",res:[
+   {kind:"Гра",label:"Матч ліги · дві команди",url:A("QdD6scNmErgV7HjxSz7VCY"),who:"t"},
+   {kind:"Гра",label:"Ігротека → 8 клас → Розділ 5 (263 питання, 5 форматів)",url:A("PQn3pcmqXVtVegiS7e1DX6"),who:"t"}]},
+ {k:8,r:5,sum:true,t:"Проєкт",title:"Проєкт Р5: справжній сайт ліги",story:"Сайт у Блокноті чи VS Code: каркас, style.css, меню, форма, SEO і перевірка валідатором · окрема оцінка",res:[
+   {kind:"Проєкт",label:"Проєкти → 8 клас · Розділ 5",url:A("F8CqbBk7kxnBzTjFpTHVuV"),who:"s"}]},
+ {k:8,r:"x",t:"🕹 Прототип",title:"Арена героїв",story:"Учні збирають героя з блоків (рух, сила, автопілот) і грають до 12 на великому екрані: онлайн з телефонів, «Битва алгоритмів» за кодами героїв або з клавіатури",res:[
+   {kind:"Гра",label:"Майстерня героя · великий екран · пульт",url:A("GeqvcYxEHq62ZjZBHxosig"),who:"t",priv:true}]},
+ {k:3,r:"a",t:"Інтернет",title:"Що я знаю про Інтернет?",story:"Тимко в Інтернет-місті",res:[
+   {kind:"Квест",label:"Квест: 4 рівні, 16 завдань",url:T("zapytiv32"),short:"zapytiv32",who:"s"},
+   {kind:"Слайди",label:"Canva-презентація",url:T("zapytiv33"),short:"zapytiv33",who:"t"}]},
+ {k:3,r:"a",t:"Інтернет",title:"Для чого використовують браузер?",story:"Тимко і браузер",res:[
+   {kind:"Уроки",label:"Вправи, квест, тренажер браузера",url:T("zapytiv34"),short:"zapytiv34",who:"s"},
+   {kind:"Слайди",label:"Canva-презентація",url:T("zapytiv034"),short:"zapytiv034",who:"t"}]},
+ {k:1,r:"g",t:"🧭 Тест",title:"Яка сходинка моя?",story:"Не знаєш, з чого почати? 9 завдань (~3 хв) — і гра підкаже твою сходинку",res:[
+   {kind:"Тест",label:"Знайти свою сходинку",url:A("JJCbP3mKvqg2Ko29R4t7e2"),who:"s"}]},
+ {k:1,r:"g",t:"🌱 Сходинка 1",title:"Старт: Читанка з Тимком",story:"Букви, склади, перші слова й речення",res:[
+   {kind:"Читанка",label:"8 рівнів: букви → речення",url:T("chytanka"),short:"chytanka",who:"s"}]},
+ {k:1,r:"g",t:"🚀 Сходинка 2",title:"Розгін: Прокачай читання",story:"Довгі слова по складах, уважне читання, інструкції, короткі тексти",res:[
+   {kind:"Тренажер",label:"8 рівнів без таймера",url:T("chytanka8"),short:"chytanka8",who:"s"}]},
+ {k:1,r:"g",t:"🏆 Сходинка 3",title:"Ліга: Читацька ліга",story:"Читання як гра: ранги від Бронзи до Легенди, комбо, пошук слів, злиплі слова, бос-виклик; складність 🟢🟡🔴",res:[
+   {kind:"Гра",label:"10 рівнів, 3 складності",url:A("JJCbP3mKvqg2Ko29R4t7e2"),who:"s"}]},
+ {k:12,r:"g",t:"1–5 клас",title:"Острови чисел",story:"Бій з монстрами за правильні відповіді: 29 островів-тем, 3 складності, 🧭 перевірка рівня, ⭐ виклик тижня, підказки Сови, бліц 60 с, колекція, режим «Команди»",res:[
+   {kind:"Гра",label:"1–5 клас · 🟢 легко, 🟡 середньо, 🔴 складно",url:A("Tb7dHbEef3T3uL6YEEx9vX"),who:"s",priv:true}]},
+ {k:3,r:"x",t:"Усі теми",title:"Пригоди Тимка: велика гра",story:"Командна гра на великий екран",res:[
+   {kind:"Гра",label:"20 завдань за зірочки",url:T("timkogra3"),short:"timkogra3",who:"t"}]},
+ {k:4,r:"g",t:"Т1–Т21",title:"Цифровий музей Сортика",story:"Зали 1–21 (нові: 17 «Повторення», 18 «Мультфільми», 19 «Стратегії», 20 «Розгалуження», 21 «Скретч: якщо…, інакше…»): ігри для великого екрана з озвучкою, режим «Команди», без оцінок",res:[
+   {kind:"Гра",label:"План музею → зали 1–21 (нові варіанти щоразу)",url:A("6Y1an4szqVVtwZXv39sRtr"),who:"s",priv:true},
+   {kind:"Слайди",label:"Зала 1 «Якими бувають комп'ютери» — Canva-презентація",url:"https://canva.link/xt71zh0x8xpyxfb",who:"t"},
+   {kind:"Слайди",label:"Зала 2 «Як працює цифровий пристрій» — Canva-презентація",url:"https://canva.link/xvpwqt5014h1ack",who:"t"},
+   {kind:"Слайди",label:"Зала 3 «Чи має комп'ютер пам'ять» — Canva-презентація",url:"https://canva.link/s5k6btkxl8zfjw9",who:"t"},
+   {kind:"Слайди",label:"Зала 4 «Безпечний пошук в інтернеті» — Canva-презентація",url:"https://canva.link/6dl8he9as2dvzsy",who:"t"},
+   {kind:"Слайди",label:"Зала 5 «Як зберегти інформацію з інтернету» — Canva-презентація",url:"https://canva.link/kerizemtebcnpux",who:"t"},
+   {kind:"Слайди",label:"Зала 6 «Правда чи фейк» — Canva-презентація",url:"https://canva.link/toyc64fkd6b45ck",who:"t"},
+   {kind:"Слайди",label:"Зала 10 «Як створюють моделі» — Canva-презентація",url:"https://canva.link/qfp2vwxwf87bx27",who:"t"},
+   {kind:"Слайди",label:"Зала 12 «Моделі об'єктів, що рухаються» — Canva-презентація",url:"https://canva.link/gvdqqe6mklv5dtl",who:"t"},
+   {kind:"Слайди",label:"Зала 13 «Таблиці» — Canva-презентація",url:"https://canva.link/6fw66958y2s4jte",who:"t"},
+   {kind:"Слайди",label:"Зала 17 «Повторення» — Canva-презентація",url:"https://canva.link/952bjzt4gbon69f",who:"t"},
+   {kind:"Слайди",label:"Зала 18 «Мультфільми» — Canva-презентація",url:"https://canva.link/f6cy0g0nzene7q7",who:"t"},
+   {kind:"Слайди",label:"Зала 19 «Стратегії» — Canva-презентація",url:"https://canva.link/a49m5sbhqo0nhdh",who:"t"},
+   {kind:"Слайди",label:"Зала 20 «Розгалуження» — Canva-презентація",url:"https://canva.link/w42cbhgxpi88yfm",who:"t"},
+   {kind:"Слайди",label:"Зала 21 «Скретч: якщо…, інакше…» — Canva-презентація",url:"https://canva.link/x5802crsts4uctm",who:"t"},
+   {kind:"Папка",label:"Презентації для Canva, плани уроків на 40 хв, друковані комплекти",url:"https://drive.google.com/drive/folders/1jR98aoWgGF4S5kX0LOo0IuXQzP0OJen6",who:"t"}]},
+ {k:4,r:"a",t:"Спілкування",title:"Чат-патруль",story:"Безпечне й ввічливе спілкування в чатах",res:[
+   {kind:"Квест",label:"Квест: 5 рівнів, 21 завдання",url:T("zapytiv41"),short:"zapytiv41",who:"s"},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/lt3zihgtk16ohhw",who:"t"}]},
+ {k:4,r:"a",t:"Об'єкти",title:"Як створювати схеми класифікації об'єктів",story:"Сортик у Музеї Порядку",res:[
+   {kind:"Квест",label:"Квест: 5 рівнів, 21 завдання",url:T("zapytiv42"),short:"zapytiv42",who:"s"},
+   {kind:"Слайди",label:"Canva-презентація",url:T("zapytiv43"),short:"zapytiv43",who:"t"}]},
+ {k:4,r:"a",t:"Об'єкти",title:"Які дії можна виконувати над об'єктами",story:"Майстерня Дій",res:[
+   {kind:"Квест",label:"Квест зі Студією Малювання",url:T("zapytiv44"),short:"zapytiv44",who:"s"},
+   {kind:"Слайди",label:"Canva-презентація",url:T("zapytiv45"),short:"zapytiv45",who:"t"}]},
+ {k:4,r:"a",t:"Урок 2",title:"Дії з об'єктами. Моделі й діаграми",story:"Сортик у Залі Моделей",res:[
+   {kind:"Уроки",label:"Вправи, квест, «Студія діаграм»",url:T("zapytiv46"),short:"zapytiv46",who:"s"},
+   {kind:"Слайди",label:"Canva-презентація",url:T("zapytiv046"),short:"zapytiv046",who:"t"}]},
+ {k:4,r:"a",t:"Зала 11",title:"За якими етапами створюють інформаційну модель?",story:"Сортик у Майстерні моделей",res:[
+   {kind:"Уроки",label:"14 вправ (нові варіанти щоспроби), квест, «Майстерня моделей»",url:A("NsRZPR8owL7b6pVPRKAqYX"),who:"s",priv:true},
+   {kind:"Гра",label:"Цифровий музей: зала 11 (великий екран)",url:A("6Y1an4szqVVtwZXv39sRtr"),who:"t"},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/kpjesn51osyrnxa",who:"t"},
+   {kind:"Документ",label:"Конспект для вчителя",url:"https://docs.google.com/document/d/1bac2tSOuxYKSPstmguOCCK4uaigep_KzCQigHo8T8wc/edit",who:"t"}]},
+ {k:4,r:"a",t:"Зала 14",title:"Як побудувати математичну модель?",story:"Сортик у залі «Математичні моделі»",res:[
+   {kind:"Уроки",label:"14 вправ (нові варіанти щоспроби), квест, «Майстерня виразів»",url:A("B2cgWDxzFyCZ3d1kx2os6j"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/7hxdw1qjcieu77o",who:"t"},
+   {kind:"Гра",label:"Цифровий музей: зала 14 (великий екран)",url:A("6Y1an4szqVVtwZXv39sRtr"),who:"t"}]},
+ {k:4,r:"a",t:"Зала 15",title:"Як досліджувати об'єкти за допомогою створених моделей?",story:"Сортик у Лабораторії дослідників",res:[
+   {kind:"Уроки",label:"14 вправ (нові варіанти щоспроби), квест, «Лабораторія дослідника»",url:A("Qm8XCqpsYd2om6yJGGevnw"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/wpf9ldocit0lk9l",who:"t"},
+   {kind:"Гра",label:"Цифровий музей: зала 15 (великий екран)",url:A("6Y1an4szqVVtwZXv39sRtr"),who:"t"}]},
+ {k:4,r:"a",t:"Зала 16",title:"Як скласти алгоритм для виконавця?",story:"Сортик і робот Крок у Залі Роботів",res:[
+   {kind:"Уроки",label:"14 вправ (нові варіанти щоспроби), квест, лабораторія «Крок»",url:A("5Fpff3fBweRHA7FWGjvFdg"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/tuvgexg74l969n2",who:"t"},
+   {kind:"Слайди",label:"Gamma-презентація",url:"https://gamma.app/docs/1k6uub3huuzfmqx",who:"t"},
+   {kind:"Документ",label:"Конспект для вчителя",url:"https://docs.google.com/document/d/1urjRczusmKZCJnB91mgEM3dboDVj4fP-8G46v_Wtwo4/edit",who:"t"}]},
+ {k:4,r:"x",t:"Усі теми",title:"Сортик: велика гра",story:"Командна гра на великий екран",res:[
+   {kind:"Гра",label:"20 завдань за зірочки",url:T("sortykgra4"),short:"sortykgra4",who:"t"}]},
+ {k:5,r:1,t:"Т1",title:"Комп'ютери та пристрої",story:"Майстерня: збери комп'ютер для гуртка",res:[
+   {kind:"Урок",label:"Майстерня-конструктор: розминка, 10 вправ, місія, картки",url:A("TxvzcRe3CvzHG8BNdVc2M2"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/ovo2pfn881822gv",who:"t"}]},
+ {k:5,r:1,t:"Т2",title:"Операційна система",story:"Квест-кімната: випусти Біта",res:[
+   {kind:"Урок",label:"Квест-кімната: розминка, 10 вправ, місія, картки",url:A("L39rrBToq3ReSEwSr593La"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/mc5odwl7morvhoq",who:"t"}]},
+ {k:5,r:1,t:"Т3",title:"Файли та папки",story:"Пісочниця: лад у файлах газети",res:[
+   {kind:"Урок",label:"Пісочниця + «передбач»: розминка, 10 вправ, місія, картки",url:A("9qjcf86eP6ssmSreEP6vrw"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/1jfzxs4msb4ddde",who:"t"}]},
+ {k:5,r:1,t:"Т4",title:"Основні налаштування",story:"Служба підтримки: 7 тікетів",res:[
+   {kind:"Урок",label:"Рольова гра: розминка, 10 вправ, місія, картки",url:A("T5ykmtB7Cb1jrj612NPwMg"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/6gvlailb5h04ypb",who:"t"}]},
+ {k:5,r:1,t:"Т5",title:"Поради та рекомендації",story:"Спідран і повторення розділу 1",res:[
+   {kind:"Урок",label:"Спідран + повторення: розминка, 10 вправ, місія, картки",url:A("Wfs6EofehKzvuFArqwKDiK"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/kdphy898eqsobpe",who:"t"}]},
+ {k:5,r:2,t:"Т1",title:"Інтернет-серфінг",story:"Детектив: справа про падіння Місяця",res:[
+   {kind:"Урок",label:"Детектив джерел: розминка, 10 вправ, місія, картки",url:A("3i9XUJhUhbzsLLC9RH4Nu7"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/ow26cr164b0q0mp",who:"t"}]},
+ {k:5,r:2,t:"Т2",title:"Інтернет-ресурси",story:"Дослідницький проєкт «Океан»",res:[
+   {kind:"Урок",label:"Дослідницький проєкт: розминка, 10 вправ, місія, картки",url:A("VtSneBAg2cX1GxqWt694R5"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/fuhehki6drs0vt2",who:"t"}]},
+ {k:5,r:2,t:"Т3",title:"Надсилання та отримання ел. пошти",story:"Поштове відділення: 7 доручень",res:[
+   {kind:"Урок",label:"Симулятор пошти: розминка, 10 вправ, місія, картки",url:A("AS3Z6jyvsCSeo7wtNBDuJh"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/e67ltqqm3dath65",who:"t"}]},
+ {k:5,r:2,t:"Т4",title:"Упорядкування електронної скриньки",story:"Аркада Inbox Zero",res:[
+   {kind:"Урок",label:"Аркада на час: розминка, 10 вправ, місія, картки",url:A("MSG33miZVGLqpjYh2njw66"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/1mgfn3tz45cf3fd",who:"t"}]},
+ {k:5,r:2,t:"Т5",title:"Онлайн-безпека",story:"Кібервартові: захисти школу",res:[
+   {kind:"Урок",label:"Кіберсимулятор + дилеми: розминка, 10 вправ, місія, картки",url:A("UfEi7LeEHGCDGms2jR6Kik"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/ms7e6evigp9fwlc",who:"t"}]},
+ {k:6,r:1,t:"Т1",title:"Цікава презентація",story:"Мікроферма, епізод 1: Студія слайдів",res:[
+   {kind:"Урок",label:"Майстерня-конструктор: розминка, 10 вправ, місія, картки",url:A("4Mr3Y6HsAvQqmEue3qFSD8"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/ra9ag3vwao1lhsd",who:"t"},
+   {kind:"Архів",label:"Попередня версія: вправи всього розділу 1",url:A("5xDTp5cfXXHaYWLyRGU53z"),who:"t"}]},
+ {k:6,r:1,t:"Т2",title:"Переходи та анімація",story:"Мікроферма, епізод 2: Пісочниця анімацій",res:[
+   {kind:"Урок",label:"Пісочниця + «передбач»: розминка, 10 вправ, місія, картки",url:A("HJjmmQxFWAadPEARzkEjDq"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/cvsov9p63omiou6",who:"t"}]},
+ {k:6,r:1,t:"Т3",title:"Звук і відео",story:"Мікроферма, епізод 3: Медіаслужба",res:[
+   {kind:"Урок",label:"Рольова гра «тікети»: розминка, 10 вправ, місія, картки",url:A("Lj3WDcFtEkGRD3aCCK2dvd"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/l7b5an96reb33vo",who:"t"}]},
+ {k:6,r:1,t:"Т4",title:"Діаграми та графіки",story:"Мікроферма, епізод 4: Детективи діаграм",res:[
+   {kind:"Урок",label:"Парна робота «водій-штурман»: розминка, 10 вправ, місія, картки",url:A("Vv2NbYyXxxkyXboqAHJ9wh"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/mrbh6bvatonixwk",who:"t"}]},
+ {k:6,r:1,t:"Т5",title:"Поради та рекомендації",story:"Мікроферма, епізод 5: Спідран до ярмарку",res:[
+   {kind:"Урок",label:"Спідран + повторення розділу 1: розминка, 10 вправ, місія, картки",url:A("PVd5K2nispavnLRa8pLiSQ"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/pn60f2o5scpnhux",who:"t"}]},
+ {k:6,r:2,t:"Т1",title:"Апаратна і програмна складові ІС",story:"Мікроферма, епізод 6: Розумна поличка",res:[
+   {kind:"Урок",label:"Квест-кімната: розминка, 10 вправ, місія, картки",url:A("Rfq81HsqLiHCVyXK8RTuRc"),who:"s",priv:true},
+   {kind:"Пульт",label:"Гра наживо: пульт учня",url:T("zapytiv66gra"),short:"zapytiv66gra",who:"s"},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/6mc4zdlewf4uclo",who:"t"},
+   {kind:"Екран",label:"Гра наживо: екран вчителя",url:A("VjDGv7q5jjGhtFeWzPK32D"),who:"t"},
+   {kind:"Архів",label:"Попередня версія: вправи, квест, конструктор полички",url:T("zapytiv66"),short:"zapytiv66",who:"t"}]},
+ {k:6,r:2,t:"Т2",title:"Програмне забезпечення",story:"Мікроферма, епізод 7: Майстерня софту",res:[
+   {kind:"Урок",label:"Майстерня + симулятор встановлення: розминка, 10 вправ, місія, картки",url:A("BVZJJsJ8vhKkWvofqz316L"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:T("zapytiv68"),short:"zapytiv68",who:"t"},
+   {kind:"Архів",label:"Попередня версія: вправи, квест, лабораторія «Ноутбук»",url:T("zapytiv67"),short:"zapytiv67",who:"t"}]},
+ {k:6,r:2,t:"Т3",title:"Сервіси інтернет-мережі",story:"Мікроферма, епізод 8: Хмара мікроферми",res:[
+   {kind:"Урок",label:"Симулятор хмари: розминка, 10 вправ, місія, картки",url:A("Krx1AE6LRqV8jsPA821naR"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:T("zapytiv068"),short:"zapytiv068",who:"t"},
+   {kind:"Архів",label:"Попередня версія: вправи, квест, «Сервіс-центр»",url:T("zapytiv68u"),short:"zapytiv68u",who:"t"}]},
+ {k:6,r:2,t:"Т4",title:"Навчання в інтернет-мережі",story:"Мікроферма, епізод 9: Онлайн-академія",res:[
+   {kind:"Урок",label:"Дослідницький проєкт у парі: розминка, 10 вправ, місія, картки",url:A("1JakwCyrshnHN3PbRupDCT"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/20wdtekyraacljl",who:"t"}]},
+ {k:6,r:2,t:"Т5",title:"Інтернет речей",story:"Мікроферма, епізод 10: Розумна теплиця",res:[
+   {kind:"Урок",label:"Кіберсимулятор + дилеми + повторення розділу 2: розминка, 10 вправ, місія, картки",url:A("1QX7fY9rbfe6nwra1TXcKE"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/uuvjz1uxe9c1q34",who:"t"}]},
+ {k:6,r:3,t:"Т1",title:"Основи роботи в мережі",story:"Мікроферма, епізод 11: Мережевий кур'єр",res:[
+   {kind:"Урок",label:"Аркада на час: розминка, 10 вправ, місія, картки",url:A("U8QLR2r5Trj3zKfDi4v3Qt"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/yuqrdr3gphjnl6m",who:"t"}]},
+ {k:6,r:3,t:"Т2",title:"Блог",story:"Мікроферма, епізод 12: Редакція блогу",res:[
+   {kind:"Урок",label:"Редакція блогу: розминка, 10 вправ, місія, картки",url:A("3QUAB2hgnxEqMzE3Db4U36"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/3rgya1qws16yywl",who:"t"}]},
+ {k:6,r:3,t:"Т3",title:"Соціальні мережі",story:"Мікроферма, епізод 13: Детектив соцмереж",res:[
+   {kind:"Урок",label:"Детектив профілів: розминка, 10 вправ, місія, картки",url:A("Js44gHxiy3J7WuSQVJJnrT"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/o8pqh4o3v133w82",who:"t"}]},
+ {k:6,r:3,t:"Т4",title:"Інструменти спілкування",story:"Мікроферма, епізод 14: Месенджер ферми",res:[
+   {kind:"Урок",label:"«Водій-штурман» + симулятор месенджера: розминка, 10 вправ, місія, картки",url:A("SPZJBzkzhAQqGRheGJxYN8"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/10ccpumvi1xb0m7",who:"t"}]},
+ {k:6,r:3,t:"Т5",title:"Поводження в цифровому просторі",story:"Мікроферма, епізод 15: Кібервартові",res:[
+   {kind:"Урок",label:"Кіберсимулятор + дилеми + повторення розділу 3: розминка, 10 вправ, місія, картки",url:A("9LBkEPc8H5Ku4q5888KCEj"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/z0j7bhb2zfi18l8",who:"t"}]},
+ {k:6,r:4,t:"Т1",title:"Датчики",story:"Мікроферма, епізод 16: Робот-поливальник (Scratch)",res:[
+   {kind:"Урок",label:"Майстерня скриптів (міні-Scratch) + «передбач»: розминка, 10 вправ з варіантами, місія, картки",url:A("CRqWacxbguYmouWeepj2Vu"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/n6ki99nyyf1njhv",who:"t"}]},
+ {k:6,r:"g",t:"Р1–Р2",title:"Інфо-битва: 6 клас",story:"Командна вікторина на великий екран",res:[
+   {kind:"Гра",label:"30 питань, сюрпризи, фінал",url:T("infobytva6"),short:"infobytva6",who:"t"}]},
+ {k:6,r:"x",t:"Усі теми",title:"Стратегії за темами (Біос)",story:"Документ для вчителя",res:[
+   {kind:"Документ",label:"Відкрити документ",url:A("4hztnSBLAtbyTjqeL9xpwk"),who:"t"}]},
+ {k:7,r:1,t:"Т1",title:"Створення власної мережі",story:"Кібербаза, епізод 1",res:[
+   {kind:"Урок",label:"Інженерний проєкт мережі: розминка, 10 вправ, місія, картки",url:A("StakgYdFDukqyRr92hdEip"),who:"s"},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/ypacgrrppkw5t00",who:"t"}]},
+ {k:7,r:1,t:"Т2",title:"Сервери та файлові сховища",story:"Кібербаза, епізод 2",res:[
+   {kind:"Урок",label:"Квест-кімната «Сервер упав!»: розминка, 10 вправ, місія, картки",url:A("MMo94uhKC6mW3g6aHw2RK9"),who:"s"},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/8885y7j9ebe1lx2",who:"t"}]},
+ {k:7,r:1,t:"Т3",title:"Я – IT-адміністратор",story:"Кібербаза, епізод 3",res:[
+   {kind:"Урок",label:"Рольова гра «черговий адмін»: розминка, 10 вправ, місія, картки",url:A("PuCU88mVk9vHEzbzwNVRRB"),who:"s"},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/izcunk53bftfh8x",who:"t"}]},
+ {k:7,r:1,t:"Т4",title:"Цифрова безпека",story:"Кібербаза, епізод 4",res:[
+   {kind:"Урок",label:"Симулятор центру кібербезпеки: розминка, 10 вправ, місія, картки",url:A("3iyhWRiGcEuZH4Uk1WkhMj"),who:"s"},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/miqu0tbixa2qvgz",who:"t"}]},
+ {k:7,r:1,t:"Т5",title:"Працюємо онлайн",story:"Кібербаза, епізод 5",res:[
+   {kind:"Урок",label:"Симулятор онлайн-зустрічі: розминка, 10 вправ, місія, картки",url:A("YZXjRzjKEMWvVrq49qu4rM"),who:"s"},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/mufjdx7ni9cnjeq",who:"t"}]},
+ {k:7,r:2,t:"Т1",title:"Конструктор вебсайтів",story:"Кібербаза, епізод 6",res:[
+   {kind:"Урок",label:"Дизайн-студія сайту: розминка, 10 вправ, місія, картки",url:A("PbuuPevSDZaCGdz72RngUV"),who:"s"},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/emj8iptrau343cj",who:"t"}]},
+ {k:7,r:2,t:"Т2",title:"Публікація вебсайту",story:"Кібербаза, епізод 7",res:[
+   {kind:"Урок",label:"Реліз-чекліст + повторення Р1: розминка, 10 вправ, місія, картки",url:A("LcyXWhqQ2vGRSqowYChGQv"),who:"s"},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/h4thv7idrqwf776",who:"t"}]},
+ {k:7,r:2,t:"Т3",title:"Вебконтент",story:"Кібербаза, епізод 8",res:[
+   {kind:"Урок",label:"Детектив-фактчек: розминка, 10 вправ, місія, картки",url:A("ASWq9ocwmUvispX3645dZJ"),who:"s"},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/6vxltozym8y5n60",who:"t"}]},
+ {k:7,r:2,t:"Т4",title:"Як штучний інтелект може допомогти у створенні контенту",story:"Кібербаза, епізод 9",res:[
+   {kind:"Урок",label:"Промпт-лабораторія: розминка, 10 вправ, місія, картки",url:A("HguhqF9mDVf4r5AxKvmUmS"),who:"s"},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/8jrzt9txq8hmdxq",who:"t"}]},
+ {k:7,r:3,t:"Т1",title:"Вигляд документа",story:"Кібербаза, епізод 10",res:[
+   {kind:"Урок",label:"Верстальня: розминка, 10 вправ, місія, картки",url:A("YMB5r73g3wMnJdfmDgbbmm"),who:"s"},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/nc3vd2i8bkpxhba",who:"t"}]},
+ {k:8,r:1,t:"Т1",title:"Кодування даних",story:"Ліга класу, епізод 1: Шифрувальня ліги",res:[
+   {kind:"Урок",label:"Квест-кімната «Табло»: розминка, 10 вправ, місія, картки",url:A("AYg2d8XrhgQtK36pNUNE4q"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/m2pgeoljwm9slhq",who:"t"}]},
+ {k:8,r:1,t:"Т2",title:"Архітектура комп'ютера",story:"Ліга класу, епізод 2: Майстерня ІТ-штабу",res:[
+   {kind:"Урок",label:"Майстерня-конструктор: розминка, 10 вправ, місія, картки",url:A("QMiu51Zf6TzckaCZQaUPp4"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/wzc1s9gwiivufh9",who:"t"}]},
+ {k:8,r:1,t:"Т3",title:"Операційні системи",story:"Ліга класу, епізод 3: Диспетчер ліги",res:[
+   {kind:"Урок",label:"Симулятор диспетчера ОС: розминка, 10 вправ, місія, картки",url:A("K8MkKZpC69zWZXeJFxJm8C"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/lpcbkce6ejfl7m3",who:"t"}]},
+ {k:8,r:1,t:"Т4",title:"Збереження даних",story:"Ліга класу, епізод 4: Архів сезону",res:[
+   {kind:"Урок",label:"Рольова гра «тікети»: розминка, 10 вправ, місія, картки",url:A("5JDvyNwoqUUK5aH2h49V9F"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/8i91os62x108q1m",who:"t"},
+   {kind:"Архів",label:"Попередня версія: інтерактивні вправи",url:A("4Ki2tSAcTgvDv3ufyFCYEw"),who:"t"}]},
+ {k:8,r:1,t:"Т5",title:"Захист цифрових пристроїв та інформації",story:"Ліга класу, епізод 5: Кіберзахист ліги",res:[
+   {kind:"Урок",label:"Кіберсимулятор + дилеми: розминка, 10 вправ, місія, картки",url:A("VH8MnvDeVEXYMdkwg2GWU1"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/yn2wjkg77e3jwjz",who:"t"},
+   {kind:"Архів",label:"Попередня версія: інтерактивні вправи",url:A("8X8Hagk6RHcisLFqknQPSz"),who:"t"}]},
+ {k:8,r:1,t:"Т6",title:"Сучасні технології",story:"Ліга класу, епізод 6: Техноярмарок ліги",res:[
+   {kind:"Урок",label:"Дослідницький проєкт у парі: розминка, 10 вправ, місія, картки",url:A("12KHdEtH8MmaYzqGG2QhgG"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/00ey6egpogxsw6n",who:"t"},
+   {kind:"Архів",label:"Попередня версія: інтерактивні вправи",url:A("4E3ykybQCtGEjSjrkW98Ko"),who:"t"}]},
+ {k:8,r:1,t:"Т7",title:"Технології та навколишнє середовище",story:"Ліга класу, епізод 7: Еколіга",res:[
+   {kind:"Урок",label:"Спідран + повторення розділу 1: розминка, 10 вправ, місія, картки",url:A("UYwCxdfKGCMiz39XgDguku"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/90zytvid3hdiw96",who:"t"},
+   {kind:"Архів",label:"Попередня версія: інтерактивні вправи",url:A("EPampdQKtXysE1G3rqMvZC"),who:"t"}]},
+ {k:8,r:1,t:"Підсумок",sum:true,title:"Картки для оцінювання",story:"28 карток, білети на 12 балів",res:[
+   {kind:"Картки",label:"Картки з відповідями",url:T("zapytiv80"),short:"zapytiv80",who:"t"}]},
+ {k:8,r:1,t:"Проєкт",sum:true,title:"Технічний паспорт комп'ютера класу",story:"Проєкт у справжньому Windows · окрема оцінка · 2–3 уроки",res:[
+   {kind:"Проєкт",label:"7 етапів: Калькулятор, Блокнот, Диспетчер завдань, Параметри, Безпека Windows",url:A("BrDBvPuVhVUPUd6RmXFzxx"),who:"s",priv:true}]},
+ {k:8,r:2,t:"Т1",title:"Збір даних",story:"Ліга класу, епізод 8: Табло ліги",res:[
+   {kind:"Урок",label:"Симулятор статистика: розминка, 10 вправ, місія, картки",url:A("FgQS3N1XjpGh8W8CwMEZ37"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/t6m15jzax2a3ggw",who:"t"},
+   {kind:"Архів",label:"Попередня версія: вправи, квест, лабораторія",url:T("zapytiv88"),short:"zapytiv88",who:"t"}]},
+ {k:8,r:2,t:"Т2",title:"Додаткові параметри форматування",story:"Ліга класу, епізод 9: Розклад туру",res:[
+   {kind:"Урок",label:"Рольова гра «тікети»: розминка, 10 вправ, місія, картки",url:A("DfDF68RboP5h2vipfEzmJz"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/p9tvapcrlvwyywb",who:"t"},
+   {kind:"Архів",label:"Попередня версія: вправи, квест, лабораторія",url:T("zapytiv89"),short:"zapytiv89",who:"t"}]},
+ {k:8,r:2,t:"Т3",title:"Прості обчислення",story:"Ліга класу, епізод 10: Турнірна таблиця",res:[
+   {kind:"Урок",label:"Лабораторія-таблиця зі справжніми формулами: розминка, 10 вправ, місія, картки",url:A("JsRRqvqsjRUoyF2MzzzfF8"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/7biqb3svk61u64w",who:"t"},
+   {kind:"Архів",label:"Попередня версія: вправи, квест, лабораторія",url:T("zapytiv810"),short:"zapytiv810",who:"t"}]},
+ {k:8,r:2,t:"Т4",title:"Складні розрахунки",story:"Ліга класу, епізод 11: Статистика сезону",res:[
+   {kind:"Урок",label:"Лабораторія-таблиця + «передбач»: розминка, 10 вправ, місія, картки",url:A("Hb9VvjizJ88hKvEj6UwwQc"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/2dwmr7xf7wr1szz",who:"t"},
+   {kind:"Архів",label:"Попередня версія: вправи, квест, міні-Excel",url:T("zapytiv811"),short:"zapytiv811",who:"t"}]},
+ {k:8,r:2,t:"Т5",title:"Логічні функції",story:"Ліга класу, епізод 12: Суддівська комісія",res:[
+   {kind:"Урок",label:"Лабораторія-таблиця: IF, AND, COUNTIF: розминка, 10 вправ, місія, картки",url:A("4uE7ZtYNUAxGrdhSvALyk9"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/cedw1nmnjj4aiga",who:"t"}]},
+ {k:8,r:2,t:"Т6",title:"Посилання",story:"Ліга класу, епізод 13: Каса ліги",res:[
+   {kind:"Урок",label:"Детектив + лабораторія-таблиця ($): розминка, 10 вправ, місія, картки",url:A("3RekHC2EoTmE2uoAmSA5s8"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/0bxg4p9flhb0tdf",who:"t"}]},
+ {k:8,r:2,t:"Т7",title:"Діаграми і графіки",story:"Ліга класу, епізод 14: Інфографіка сезону",res:[
+   {kind:"Урок",label:"«Водій-штурман»: дизайнери даних: розминка, 10 вправ, місія, картки",url:A("UtyZQ2wf6ef5PBfDPyJrE2"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/280cif4mzqfjp74",who:"t"}]},
+ {k:8,r:2,t:"Т8",title:"Дослідження та гіпотези",story:"Ліга класу, епізод 15: Лабораторія гіпотез",res:[
+   {kind:"Урок",label:"Модель у таблиці + повторення розділу 2: розминка, 10 вправ, місія, картки",url:A("2NQVwmmYgo55gLHyn6CJM1"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/mp4yrjwf3zxwc7q",who:"t"}]},
+ {k:8,r:2,t:"Проєкт",sum:true,title:"Статистика ліги у справжній таблиці",story:"Проєкт у Google Таблицях / Excel · окрема оцінка · 3–4 уроки",res:[
+   {kind:"Проєкт",label:"8 етапів: виправ дані, формули, IF, $, діаграма, гіпотеза",url:A("TQzBoXVSGBVaXbfyJhQqih"),who:"s",priv:true},
+   {kind:"Шаблон",label:"Шаблон таблиці з навмисними помилками",url:"https://docs.google.com/spreadsheets/d/1QFQpXvEBMy5xOSqbfNwFkKYLpazbH1igbfFhm0PkO_M/edit",who:"t"}]},
+ {k:8,r:"g",t:"Р1–Р2",title:"Інфо-битва: 8 клас",story:"Три командні вікторини на великий екран",res:[
+   {kind:"Гра",label:"Вікторина, 30 питань",url:T("infobytva8"),short:"infobytva8",who:"t"},
+   {kind:"Гра",label:"Інфо-битва 2.0, нові питання",url:T("infobytva8v2"),short:"infobytva8v2",who:"t"},
+   {kind:"Гра",label:"Інфо-битва 3.0: теми 7 класу + 8 клас",url:A("Q3wj23Xa8MaLBTNgj2eb9V"),who:"t"}]},
+ {k:9,r:1,t:"Т1",title:"Моніторинг і керування",story:"Кав'ярня «Байт», епізод 1",res:[
+   {kind:"Урок",label:"Інженерний пульт: розминка, 10 вправ, місія, картки",url:A("7JTJtgT1ruP8xiUUiYXxrs"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/jjlm4tcezs71ylr",who:"t"}]},
+ {k:9,r:1,t:"Т2",title:"Мікроконтролери, взаємодія з ними",story:"Кав'ярня «Байт», епізод 2",res:[
+   {kind:"Урок",label:"Лабораторія прототипів: розминка, 10 вправ, місія, картки",url:A("QTTmUVSPjoDudp5GQEDEhg"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/iqgggyqrlxykpew",who:"t"}]},
+ {k:9,r:1,t:"Т3",title:"Штучний інтелект",story:"Кав'ярня «Байт», епізод 3",res:[
+   {kind:"Урок",label:"Розслідування діпфейку: розминка, 10 вправ, місія, картки",url:A("NDZGqUH1biWotdj344JKmh"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/gd45g9rrac96p1k",who:"t"}]},
+ {k:9,r:1,t:"Т4",title:"Цифрові пристрої та здоров'я",story:"Кав'ярня «Байт», епізод 4",res:[
+   {kind:"Урок",label:"Аудит робочих місць: розминка, 10 вправ, місія, картки",url:A("VRUCMeQTV2yrGEQtXwJ4Af"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/cbbtbw9d26zku3z",who:"t"}]},
+ {k:9,r:2,t:"Т1",title:"Дані, інформація, знання",story:"Кав'ярня «Байт», епізод 5",res:[
+   {kind:"Урок",label:"Квест-кімната «Сейф»: розминка, 10 вправ, місія, картки",url:A("5oXBkuW3ZQbKKGes6QK4Kw"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/hmym2ddab9qy7ya",who:"t"},
+   {kind:"Архів",label:"Попередня версія: Інтерактивні вправи",url:A("MZv9Q4sKrxLFD28TPttSff"),who:"t"}]},
+ {k:9,r:2,t:"Т2",title:"Збір даних",story:"Кав'ярня «Байт», епізод 6",res:[
+   {kind:"Урок",label:"Дослідницька агенція: розминка, 10 вправ, місія, картки",url:A("E6nowb5HLqJ8WQX1gDTUxA"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/62kvchmzoe90kjq",who:"t"},
+   {kind:"Архів",label:"Попередня версія: Інтерактивні вправи",url:A("MFzPZFKZxNAKiLXepsiEhy"),who:"t"}]},
+ {k:9,r:2,t:"Т3",title:"Типи даних і кодування",story:"Кав'ярня «Байт», епізод 7",res:[
+   {kind:"Урок",label:"Шифрувальна лабораторія: розминка, 10 вправ, місія, картки",url:A("Bat7b72YXQDpRHhffgCERk"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/9fvctarhuewueir",who:"t"},
+   {kind:"Архів",label:"Попередня версія: Вправи + «Побудуй сам»",url:A("VfqGPB66ybYVuCJhDpxCDc"),who:"t"}]},
+ {k:9,r:2,t:"Т4",title:"Великі дані",story:"Кав'ярня «Байт», епізод 8",res:[
+   {kind:"Урок",label:"Аналітичний центр: розминка, 10 вправ, місія, картки",url:A("QC7LawYBUMk43ULgXFsvmG"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/jr4zd322t6tnz98",who:"t"},
+   {kind:"Архів",label:"Попередня версія: Вправи, квест, лабораторія, тест",url:A("FNLEwNmRbSeUJm1royK4ND"),who:"t"}]},
+ {k:9,r:2,t:"Т5",title:"Сучасні технології",story:"Кав'ярня «Байт», епізод 9",res:[
+   {kind:"Урок",label:"Техноярмарок: розминка, 10 вправ, місія, картки",url:A("AXPPMecGemRq3knw2THz8C"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:T("zapytiv096"),short:"zapytiv096",who:"t"},
+   {kind:"Архів",label:"Попередня версія: Вправи, квест, «Пульт кав'ярні»",url:T("zapytiv96"),short:"zapytiv96",who:"t"}]},
+ {k:9,r:2,t:"Т6",title:"Навчання в цифрову епоху",story:"Кав'ярня «Байт», епізод 10",res:[
+   {kind:"Урок",label:"Онлайн-академія + повторення: розминка, 10 вправ, місія, картки",url:A("BjYrSsEZdy6azboJWkhm4e"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/z57px7ws4fvg3x1",who:"t"}]},
+ {k:9,r:3,t:"Т1",title:"Структурування інформації",story:"Кав'ярня «Байт», епізод 11",res:[
+   {kind:"Урок",label:"Архітектор бази даних: розминка, 10 вправ, місія, картки",url:A("LAZ58AvN2fwCgpUVaGGt9e"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/utooyj9029hzl1n",who:"t"}]},
+ {k:9,r:3,t:"Т2",title:"Форми для введення даних",story:"Кав'ярня «Байт», епізод 12",res:[
+   {kind:"Урок",label:"Студія форм: розминка, 10 вправ, місія, картки",url:A("3YFcFcaJYmkdauWNWtQoDc"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/aim5mmg7avnj59a",who:"t"}]},
+ {k:9,r:3,t:"Т3",title:"Запити",story:"Кав'ярня «Байт», епізод 13",res:[
+   {kind:"Урок",label:"Бюро запитів: розминка, 10 вправ, місія, картки",url:A("URm4HU649AWN2YCRrjEVdv"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/c0r6r68bscl8b18",who:"t"},
+   {kind:"Архів",label:"Попередня версія: Вправи, квест, конструктор запитів",url:T("zapytiv94"),short:"zapytiv94",who:"t"}]},
+ {k:9,r:3,t:"Т4",title:"Звіти",story:"Кав'ярня «Байт», епізод 14",res:[
+   {kind:"Урок",label:"Редакція звіту: розминка, 10 вправ, місія, картки",url:A("HiS4H7PB76aRmRa66apzHM"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/ycvglt6378waxpf",who:"t"},
+   {kind:"Архів",label:"Попередня версія: Вправи, квест, конструктор звітів",url:T("zapytiv95"),short:"zapytiv95",who:"t"}]},
+ {k:9,r:3,t:"Т5",title:"Імпорт та експорт даних",story:"Кав'ярня «Байт», епізод 15",res:[
+   {kind:"Урок",label:"Квест-кімната + повторення розділу: розминка, 10 вправ, місія, картки",url:A("JuGFtw9mNB64EAszGBmeRU"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/7p80z433n1xdjll",who:"t"}]},
+ {k:9,r:3,t:"Проєкт",sum:true,title:"База даних кав'ярні «Байт»",story:"Проєкт у справжньому Access / LibreOffice Base · окрема оцінка · 3–4 уроки",res:[
+   {kind:"Проєкт",label:"5 етапів: таблиці й зв'язки, форма, запити, звіт, імпорт і експорт",url:A("Y35Bt6ZpwoMGTnu8nkpF13"),who:"s",priv:true}]},
+ {k:9,r:"x",t:"Р2–Р3",title:"Цифрова служба класу",story:"Google Форми й Таблиці, 3 уроки",res:[
+   {kind:"Практична",label:"Завдання практичної",url:A("BByWMhqagviUqUrEajGxH6"),who:"s"}]},
+ {k:9,r:"g",t:"Р2–Р3",title:"Інфо-битва: 9 клас",story:"Командна вікторина на великий екран",res:[
+   {kind:"Гра",label:"6 тем × 5 питань",url:T("infobytva9"),short:"infobytva9",who:"t"}]},
+ {k:5,r:2,t:"Т6",title:"Інтелектуальна власність",story:"Служба ЦифроДоп: квест-кімната сейфів",res:[
+   {kind:"Урок",label:"Квест-кімната: розминка, 10 вправ (нові варіанти щоразу), місія, картки",url:A("G1gh1E2Wu3g4fZLrH46KUb"),who:"s"},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/iq2gbo03fbse2tm",who:"t"}]},
+ {k:5,r:3,t:"Т1",title:"Форматування тексту",story:"Служба ЦифроДоп: симулятор Word",res:[
+   {kind:"Урок",label:"Симулятор Word: розминка, 10 вправ (нові варіанти щоразу), місія, картки",url:A("2zDGx14F9Sv75rCNmNPgm1"),who:"s"},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/z6lekt9mgeu2ke7",who:"t"}]},
+ {k:5,r:3,t:"Т2",title:"Додаткові параметри форматування шрифту",story:"Служба ЦифроДоп, епізод 13: Тікети шкільної газети",res:[
+   {kind:"Урок",label:"Рольова гра «тікети»: розминка, 10 вправ, місія, картки",url:A("QLU7Anjn7ZWWYYmqJA1Zeg"),who:"s"},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/gkooll94tnw5ezn",who:"t"}]},
+ {k:5,r:3,t:"Т3",title:"Зображення та графіка",story:"Служба ЦифроДоп, епізод 14: Майстерня листівки",res:[
+   {kind:"Урок",label:"Майстерня-конструктор: розминка, 10 вправ, місія, картки",url:A("PHxMoUFxX4A2ZxN81dYpfV"),who:"s"},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/sixgexpq3p3itvr",who:"t"}]},
+ {k:5,r:3,t:"Т4",title:"Таблиці",story:"Служба ЦифроДоп, епізод 15: Сейф розкладу",res:[
+   {kind:"Урок",label:"Квест-кімната: розминка, 10 вправ, місія, картки",url:A("Lk8fG8iHCNTRuXmSNhsDmQ"),who:"s"},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/bgeimusacx8l6ay",who:"t"}]},
+ {k:5,r:3,t:"Т5",title:"Перевірка та друк",story:"Служба ЦифроДоп, епізод 16: Друкарня",res:[
+   {kind:"Урок",label:"Спідран + повторення розділу 3: розминка, 10 вправ, місія, картки",url:A("Vk2QhHtD9QH3YhGnfgGLwx"),who:"s"},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/t89uy9s7baljua7",who:"t"}]},
+ {k:5,r:4,t:"Т1",title:"Алгоритм. Пригадаймо Scratch",story:"Служба ЦифроДоп, епізод 17: Концерт Біта",res:[
+   {kind:"Урок",label:"Майстерня-конструктор + «передбач, потім перевір»: розминка, 10 вправ, місія, картки",url:A("A5F7QdrJfhdMaaFkBNdjRb"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/gzprwjenm94x10g",who:"t"}]},
+ {k:6,r:4,t:"Т2",title:"Цикли",story:"Мікроферма: конструктор блоків із повтореннями",res:[
+   {kind:"Урок",label:"Конструктор блоків (Scratch): розминка, 10 вправ (нові варіанти щоразу), місія, картки",url:A("BthrPx2m7pB7yw56xBuZKz"),who:"s"},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/0p5civjh74v1e80",who:"t"}]},
+ {k:6,r:4,t:"Т3",title:"Змінні",story:"Мікроферма: лічильники та змінні",res:[
+   {kind:"Урок",label:"Конструктор блоків зі змінними: розминка, 10 вправ (нові варіанти щоразу), місія, картки",url:A("XrKesVCC143XhihFVw5QEa"),who:"s"},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/vq0onk5qpstu9ml",who:"t"}]},
+ {k:6,r:4,t:"Т4",title:"Прийняття рішень",story:"Мікроферма, епізод 19: Сортувальник урожаю",res:[
+   {kind:"Урок",label:"Конструктор Scratch «якщо … інакше» + «передбач»: розминка, 10 вправ, місія, картки",url:A("Mf6ZQ7tPoTaeboQx2dh2Xd"),who:"s"},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/qlexz4m263kmcqd",who:"t"}]},
+ {k:6,r:4,t:"Т5",title:"Координати",story:"Мікроферма, епізод 20: Карта ферми",res:[
+   {kind:"Урок",label:"Симулятор «Диспетчер дрона»: розминка, 10 вправ, місія, картки",url:A("M6o3dMqfiHVwj1nYSnBRyB"),who:"s"},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/e11tpjiqaanis1b",who:"t"}]},
+ {k:6,r:4,t:"Т6",title:"Логічні оператори",story:"Мікроферма, епізод 21: Розумні ворота",res:[
+   {kind:"Урок",label:"Квест-кімната: і · або · не → кодове слово · розминка, 10 вправ, місія, картки",url:A("YGLRYDRoPCYySAeHfeBYD7"),who:"s"},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/67b2q9aecaeqjr9",who:"t"}]},
+ {k:6,r:4,t:"Т7",title:"Ігри",story:"Мікроферма, епізод 22: Морквяна гонка",res:[
+   {kind:"Урок",label:"Парна робота «водій-штурман»: збери гру · розминка, 10 вправ, місія, картки",url:A("TQkyo1zRnBeYkYTeB4hepn"),who:"s"},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/luo8joapqllznqv",who:"t"}]},
+ {k:6,r:4,t:"Т8",title:"Удосконалення гри",story:"Мікроферма, епізод 23: Ярмарок ігор",res:[
+   {kind:"Урок",label:"Спідран + повторення розділу 4: розминка, 10 вправ, місія, картки",url:A("839XBKmtDZD95gSGYmLYYC"),who:"s"},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/6cr6ium1g0pqn9c",who:"t"}]},
+ {k:6,r:5,t:"Т1",title:"Інформація, дані, повідомлення",story:"Мікроферма, епізод 24: Сигнали ферми",res:[
+   {kind:"Урок",label:"Квест-кімната: розминка, 10 вправ, місія, картки",url:A("2P6KH8dZH66RzTAPPyjDhy"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/jmlsou8bqb52j0n",who:"t"}]},
+ {k:7,r:3,t:"Т2",title:"Колонтитули та нумерація сторінок",story:"Кібербаза: майстерня оголошень",res:[
+   {kind:"Урок",label:"Майстерня оголошень: розминка, 10 вправ (нові варіанти щоразу), місія, картки",url:A("9Jt7qGReEZDJBU4Js57k2A"),who:"s"},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/bxsgbxguyf0425g",who:"t"}]},
+ {k:7,r:3,t:"Т3",title:"Експорт документа",story:"Кібербаза: детектив форматів",res:[
+   {kind:"Урок",label:"Детектив форматів: розминка, 10 вправ (нові варіанти щоразу), місія, картки",url:A("GC6JRPFFj4omqzZAh3v7oY"),who:"s"},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/h49rur660b00uoe",who:"t"}]},
+ {k:8,r:3,t:"Т1",title:"Що таке програма",story:"Ліга класу: тест-лабораторія",res:[
+   {kind:"Урок",label:"Тест-лабораторія: розминка, 10 вправ (нові варіанти щоразу), місія, картки",url:A("TzJSkiPYCuDSzfVtgLkJmu"),who:"s"},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/2txqxubxbhsibcf",who:"t"}]},
+ {k:8,r:3,t:"Т2",title:"Змінні та команди",story:"Ліга класу: пісочниця Python + «передбач»",res:[
+   {kind:"Урок",label:"Пісочниця коду: розминка, 10 вправ (нові варіанти щоразу), місія, картки",url:A("5XMj6zirRFbvNR2BptvUhi"),who:"s"},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/xnmwcnone7oqa5u",who:"t"}]},
+ {k:8,r:3,t:"Т3",title:"Введення та виведення даних",story:"Ліга класу, епізод 18: Пульт табло ліги",res:[
+   {kind:"Урок",label:"Служба підтримки: тікети суддів · розминка, 10 вправ, місія, картки",url:A("JZQz6ZXnt6qmZiHqtoZLAL"),who:"s"},{kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/v4dtnojibiikklo",who:"t"}]},
+ {k:8,r:3,t:"Т4",title:"Умови та розгалуження",story:"Ліга класу, епізод 19: Сейф медалей ліги",res:[
+   {kind:"Урок",label:"Квест-кімната: 4 замки → кодове слово · розминка, 10 вправ, місія, картки",url:A("Np4ecwgvB8Y8UhuvHeDwjB"),who:"s"},{kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/nuqb4v2xu0ummde",who:"t"}]},
+ {k:8,r:3,t:"Т5",title:"Функції",story:"Ліга класу, епізод 20: Фінальна сирена",res:[
+   {kind:"Урок",label:"Спідран + повторення розділу 3 · розминка, 10 вправ, місія, картки",url:A("QTbefdoRmJxUUb5fkpB7B1"),who:"s"},{kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/s0kssqrkqataqc6",who:"t"}]},
+ {k:8,r:4,t:"Т1",title:"Графічний інтерфейс продукту. UI/UX-дизайн",story:"Ліга класу, епізод 21: Застосунок ліги",res:[
+   {kind:"Урок",label:"Симулятор студії інтерфейсу: розминка, 10 вправ, місія, картки",url:A("DJhegJmyrPzp2cCJuhinmE"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/z3vbsmlzhne5wb2",who:"t"}]},
+ {k:9,r:4,t:"Т1",title:"Списки та кортежі",story:"Кав'ярня «Байт»: квитки замовлень",res:[
+   {kind:"Урок",label:"Квитки та код: розминка, 10 вправ (нові варіанти щоразу), місія, картки",url:A("BQCGFyghNZ4WKrrqaRfaok"),who:"s"},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/yjby5duydcpt3uk",who:"t"}]},
+ {k:9,r:4,t:"Т2",title:"Сортування",story:"Кав'ярня «Байт»: аркада сортування",res:[
+   {kind:"Урок",label:"Аркада на час: розминка, 10 вправ (нові варіанти щоразу), місія, картки",url:A("S4dg8SUBParR5HB6g8mP5B"),who:"s"},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/f87ou6ux8xbdg8s",who:"t"}]},
+ {k:9,r:4,t:"Т3",title:"Опрацювання текстових даних",story:"Кав'ярня «Байт», епізод 18: Детектив відгуків",res:[
+   {kind:"Урок",label:"Детектив: методи рядків проти спаму · розминка, 10 вправ, місія, картки",url:A("LbomQuGGCksuBPRfUocE9B"),who:"s"},{kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/ae5fetetwmuwcsq",who:"t"}]},
+ {k:9,r:4,t:"Т4",title:"Бібліотеки мови програмування",story:"Кав'ярня «Байт», епізод 19: Майстерня бібліотек",res:[
+   {kind:"Урок",label:"Майстерня: random, math, pip · розминка, 10 вправ, місія, картки",url:A("WbURtdmEfbx9JWdajiQs8N"),who:"s"},{kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/0723v6oy07s820r",who:"t"}]},
+ {k:9,r:4,t:"Т5",title:"Технологія створення програмних продуктів",story:"Кав'ярня «Байт», епізод 20: Застосунок «Байт»",res:[
+   {kind:"Урок",label:"Рольова гра «тімлід» · розминка, 10 вправ, місія, картки",url:A("SF9RFW5VFAH9NhizaRqxgE"),who:"s"},{kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/21vxqv6eu5d1lpa",who:"t"}]},
+ {k:9,r:4,t:"Т6",title:"Документація програмного проєкту",story:"Кав'ярня «Байт», епізод 21: Редакція документації",res:[
+   {kind:"Урок",label:"Редакція: README, докстрінги · розминка, 10 вправ, місія, картки",url:A("MDihV2rzXHGDyeTvGAUXnv"),who:"s"},{kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/0kievvkoe0uzkd8",who:"t"}]},
+ {k:9,r:4,t:"Т7",title:"Тестування та налагодження",story:"Кав'ярня «Байт», епізод 22: QA-лабораторія",res:[
+   {kind:"Урок",label:"Спідран + повторення розділу 4 · розминка, 10 вправ, місія, картки",url:A("Duk2eSk7hbwSKeTFADXCgF"),who:"s"},{kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/mxozmazu3jo31pj",who:"t"}]},
+ {k:9,r:5,t:"Т1",title:"Моделі",story:"Кав'ярня «Байт», епізод 23: 3D-студія",res:[
+   {kind:"Урок",label:"Рольова гра «3D-студія»: розминка, 10 вправ, місія, картки",url:A("831pWivzpGArL3M4JSNk7n"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/hoq1lrfojqtt4t2",who:"t"}]},
+ {k:7,r:3,t:"Т4",title:"Злиття",story:"Кібербаза, епізод 13: Розсилка запрошень",res:[
+   {kind:"Урок",label:"Симулятор Майстра злиття: розминка, 10 вправ, місія, картки",url:A("1j6fFCZeqeUcP6ZK5fuLVi"),who:"s"},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/9xlk03f25inai9w",who:"t"}]},
+ {k:7,r:3,t:"Т5",title:"Додаткові можливості",story:"Кібербаза, епізод 14: Довідник Кібербази",res:[
+   {kind:"Урок",label:"Спідран + повторення розділу 3: розминка, 10 вправ, місія, картки",url:A("Bjb63LwTEF45VdDRDYML1p"),who:"s"},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/y81m30pdnlook3k",who:"t"}]},
+ {k:7,r:4,t:"Т1",title:"Алгоритми та програми",story:"Кібербаза, епізод 15: Перший запуск",res:[
+   {kind:"Урок",label:"Пісочниця Python + «передбач, потім перевір»: розминка, 10 вправ, місія, картки",url:A("1ezp2MoThUgCGzbrSCNRPf"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/yrdiffm30ksqbzr",who:"t"}]},
+ {k:8,r:3,t:"Гра",sum:true,title:"Матч ліги: Python",story:"Гра розділу на великий екран · 200 питань, щоразу інші",res:[
+   {kind:"Гра",label:"Баскетбольний матч двох команд: кидки на 1, 2, 3 очки",url:A("HUtJvdvXUuV7HBcZj3pqth"),who:"t"}]},
+ {k:6,r:4,t:"Гра",sum:true,title:"Матч мікроферми: Scratch",story:"Гра розділу на великий екран · 219 питань, щоразу інші",res:[
+   {kind:"Гра",label:"Баскетбольний матч двох команд: кидки на 1, 2, 3 очки",url:A("FGSFsEKyxCixsojAGUNEkU"),who:"t"}]},
+ {k:6,r:3,t:"Гра",sum:true,title:"Матч мікроферми: спілкування онлайн",story:"Гра розділу на великий екран · 101 питання, щоразу інші",res:[
+   {kind:"Гра",label:"Баскетбольний матч двох команд: кидки на 1, 2, 3 очки",url:A("X6TXHBTSE26hDVmvCJr1RK"),who:"t"}]},
+ {k:9,r:4,t:"Гра",sum:true,title:"Матч «Байта»: програмні проєкти",story:"Гра розділу на великий екран · 205 питань, щоразу інші",res:[
+   {kind:"Гра",label:"Баскетбольний матч двох команд: кидки на 1, 2, 3 очки",url:A("GeFcSHCsguoczCWQyHk1VU"),who:"t"}]},
+ {k:9,r:1,t:"Гра",sum:true,title:"Матч «Байта»: розумні пристрої",story:"Гра розділу на великий екран · 84 питання, щоразу інші",res:[
+   {kind:"Гра",label:"Баскетбольний матч двох команд: кидки на 1, 2, 3 очки",url:A("RGq43SqeXrUQrDvQGR23UZ"),who:"t"}]},
+ {k:2,r:"g",t:"Грудень",sum:true,title:"Чарівна листівка",story:"Візуальна криптографія: наклади дві «крапкові» картки — і з'явиться малюнок · своя листівка",res:[
+   {kind:"Гра",label:"3 картки + своя листівка · великий екран, без оцінок",url:A("9NgiAzZ4swZ3D9u8UfdPd8")+"#k2",who:"s",priv:true}]},
+ {k:3,r:"g",t:"Грудень",sum:true,title:"Чарівна листівка",story:"Візуальна криптографія: наклади дві «крапкові» картки — і з'явиться малюнок · своя листівка",res:[
+   {kind:"Гра",label:"3 картки + своя листівка · великий екран, без оцінок",url:A("9NgiAzZ4swZ3D9u8UfdPd8")+"#k3",who:"s",priv:true}]},
+ {k:4,r:"g",t:"Грудень",sum:true,title:"Чарівна листівка",story:"Візуальна криптографія: наклади дві «крапкові» картки — і з'явиться малюнок · своя листівка",res:[
+   {kind:"Гра",label:"3 картки + своя листівка · великий екран, без оцінок",url:A("9NgiAzZ4swZ3D9u8UfdPd8")+"#k4",who:"s",priv:true}]},
+ {k:8,r:1,t:"Гра",sum:true,title:"Логічна майстерня",story:"Стадіон ліги: елементи І, АБО, НЕ, таблиці істинності й =І()/=АБО() у таблицях",res:[
+   {kind:"Гра",label:"6 схем: таблиця істинності, вибір елемента, схема-бос, формули",url:A("QYjj812CR6dnXKACHsWgMM"),who:"s",priv:true}]},
+ {k:8,r:1,t:"Гра",sum:true,title:"Маленький комп'ютер",story:"Табло ліги: процесор, лічильник команд, акумулятор, цикл вибірка → декодування → виконання",res:[
+   {kind:"Гра",label:"5 місій: цикл, передбач, регістри, налагодь, напиши програму",url:A("FG1PUVAtWpCQycVoZhEue6"),who:"s",priv:true}]},
+ {k:6,r:3,t:"Гра",sum:true,title:"Мережа мікроферми",story:"Топології зірка й шина, обрив кабелю, клієнт-сервер, двійкові картки, байти",res:[
+   {kind:"Гра",label:"6 місій до Теми 1 «Основи роботи в мережі»",url:A("JqYkkteLQUTkWXkrbuTToB"),who:"s",priv:true}]},
+ {k:5,r:4,t:"Гра",sum:true,title:"Майстерня блок-схем",story:"Атракціони Біта: фігури, розгалуження, цикл, трасування, пошук помилок",res:[
+   {kind:"Гра",label:"4 схеми: азбука, збери, виконай, налагодь",url:A("HmaTwnuhJTRWrvV7fWCK9H")+"#k5",who:"s",priv:true}]},
+ {k:7,r:4,t:"Гра",sum:true,title:"Майстерня блок-схем",story:"Фігури, розгалуження, цикл із трасуванням, пошук помилок",res:[
+   {kind:"Гра",label:"4 схеми: азбука, збери, виконай, налагодь",url:A("HmaTwnuhJTRWrvV7fWCK9H")+"#k7",who:"s",priv:true}]},
+ {k:7,r:4,t:"Гра",sum:true,title:"Python-лабораторія",story:"Справжній Python у браузері: трасування, функції з тестами, черепашка",res:[
+   {kind:"Гра",label:"5 завдань · автоперевірка тестами",url:A("RXqPevv7YiJLFjqkJG1yut")+"#k7",who:"s",priv:true}]},
+ {k:8,r:3,t:"Гра",sum:true,title:"Python-лабораторія",story:"Справжній Python у браузері: трасування, функції з тестами, черепашка",res:[
+   {kind:"Гра",label:"5 завдань · автоперевірка тестами",url:A("RXqPevv7YiJLFjqkJG1yut")+"#k8",who:"s",priv:true}]},
+ {k:10,r:9,t:"Python",sum:true,title:"Python-лабораторія",story:"Розминка перед ботом: трасування, функції з тестами, черепашка",res:[
+   {kind:"Гра",label:"5 завдань · автоперевірка тестами",url:A("RXqPevv7YiJLFjqkJG1yut")+"#k10",who:"s",priv:true}]},
+ {k:9,r:3,t:"Гра",sum:true,title:"Конструктор бази кав'ярні",story:"ER-діаграма перед роботою в СУБД: сутності, ключі, 1:N, нормалізація, типи",res:[
+   {kind:"Гра",label:"5 етапів проєктування бази",url:A("KZB2be21vpFrUoVyftqD3i"),who:"s",priv:true}]},
+ {k:9,r:1,t:"Гра",sum:true,title:"Розумна кавомашина",story:"Мікроконтролер: датчики й механізми, відкритий і замкнений контур, пороги нагріву",res:[
+   {kind:"Гра",label:"4 етапи · симуляція з графіком",url:A("Thaox6i9RNXphKj2GVHigz"),who:"s",priv:true}]},
+ {k:9,r:2,t:"Бонус",sum:true,title:"Енігма-міні",story:"Ротор, ключ-позиція, злам «як Тюрінг», історія Енігми",res:[
+   {kind:"Гра",label:"4 замки · після «Зламай шифр»",url:A("Prb9xLmqTaJArxXtTu51jU"),who:"s",priv:true}]},
+ {k:12,r:"g",t:"1–5 клас",sum:true,title:"Козацькі задачі",story:"Поділи дукати порівну (з остачею) і козацьке переливання · 3 складності",res:[
+   {kind:"Гра",label:"2 задачі з предметами, які можна рухати",url:A("UGPrt7tNfMpJ5HJSh9ybCR"),who:"s",priv:true}]},
+ {k:0,r:"g",t:"Тренажери",title:"Наші тренажери й інструменти",story:"Усе власне, без сторонніх сайтів: симулятори для різних класів і грамоти для вручення",res:[
+   {kind:"Інструмент",label:"Грамоти для вручення",url:A("MByfhAoSqSbTe41XDcLYnC"),who:"t",priv:true},
+   {kind:"Тренажер",label:"Логічна майстерня (8)",url:A("QYjj812CR6dnXKACHsWgMM"),who:"s",priv:true},
+   {kind:"Тренажер",label:"Маленький комп'ютер (8)",url:A("FG1PUVAtWpCQycVoZhEue6"),who:"s",priv:true},
+   {kind:"Тренажер",label:"Мережа мікроферми (6)",url:A("JqYkkteLQUTkWXkrbuTToB"),who:"s",priv:true},
+   {kind:"Тренажер",label:"Майстерня блок-схем (5, 7)",url:A("HmaTwnuhJTRWrvV7fWCK9H"),who:"s",priv:true},
+   {kind:"Тренажер",label:"Python-лабораторія (7, 8, 10–11)",url:A("RXqPevv7YiJLFjqkJG1yut"),who:"s",priv:true},
+   {kind:"Тренажер",label:"Конструктор бази (9)",url:A("KZB2be21vpFrUoVyftqD3i"),who:"s",priv:true},
+   {kind:"Тренажер",label:"Розумна кавомашина (9)",url:A("Thaox6i9RNXphKj2GVHigz"),who:"s",priv:true},
+   {kind:"Тренажер",label:"Енігма-міні (9)",url:A("Prb9xLmqTaJArxXtTu51jU"),who:"s",priv:true},
+   {kind:"Тренажер",label:"HTML/CSS-лабораторія (8)",url:A("HU3czTXrwVPYQDP1GJsHq4"),who:"s",priv:true},
+   {kind:"Тренажер",label:"Майстерня Micro:Bit (4)",url:A("Bf9FCmHQWE1J39Yzscu6Ag"),who:"s",priv:true}]},
+ {k:8,r:5,t:"Лабораторія",sum:true,title:"HTML/CSS-лабораторія ліги",story:"Справжній HTML і CSS з живим переглядом · 14 завдань з автоперевіркою + 4 кроки в Блокноті, F12 і валідаторі · оцінка за час і помилки",res:[
+   {kind:"Лабораторія",label:"Редактор із живим переглядом · «Надіслати вчителю»",url:A("HU3czTXrwVPYQDP1GJsHq4"),who:"s",priv:true}]},
+ {k:4,r:"p",t:"Розділ 4",title:"Майстерня Micro:Bit",story:"Плата-симулятор 5×5, кнопки A/B, датчики температури й світла, блоки-команди · 6 завдань + 4 кроки в справжньому MakeCode · без оцінок",res:[
+   {kind:"Тренажер",label:"Майстерня Micro:Bit у музеї Сортика",url:A("Bf9FCmHQWE1J39Yzscu6Ag"),who:"s",priv:true}]},
+ {k:5,r:4,t:"Гра",sum:true,title:"Біт-діджей",story:"Шкільна дискотека: послідовність, цикли й функції через музику · свій трек",res:[
+   {kind:"Гра",label:"5 треків: ритм, цикл, функція «Приспів», налагодження, своя студія · оцінка за час і помилки",url:A("KGcjg64Hz91E476JsKeSFL")+"#k5",who:"s",priv:true}]},
+ {k:6,r:4,t:"Гра",sum:true,title:"Біт-діджей",story:"Шкільна дискотека: послідовність, цикли й функції через музику · свій трек",res:[
+   {kind:"Гра",label:"5 треків: ритм, цикл, функція «Приспів», налагодження, своя студія · оцінка за час і помилки",url:A("KGcjg64Hz91E476JsKeSFL")+"#k6",who:"s",priv:true}]},
+ {k:2,r:"g",t:"До 6.12",title:"Таємна пошта Миколая",story:"Картинковий шифр: кожна картинка — перша літера слова · свій таємний лист",res:[
+   {kind:"Гра",label:"3 листи розгадати + написати свій · великий екран, без оцінок, з підказками",url:A("JrnfPGAdu7wi8U8LnkxRiJ")+"#k2",who:"s",priv:true}]},
+ {k:3,r:"g",t:"До 6.12",title:"Таємна пошта Миколая",story:"Картинковий шифр: кожна картинка — перша літера слова · свій таємний лист",res:[
+   {kind:"Гра",label:"3 листи розгадати + написати свій · великий екран, без оцінок, з підказками",url:A("JrnfPGAdu7wi8U8LnkxRiJ")+"#k3",who:"s",priv:true}]},
+ {k:4,r:"g",t:"До 6.12",title:"Таємна пошта Миколая",story:"Картинковий шифр: кожна картинка — перша літера слова · свій таємний лист",res:[
+   {kind:"Гра",label:"3 листи розгадати + написати свій · великий екран, без оцінок, з підказками",url:A("JrnfPGAdu7wi8U8LnkxRiJ")+"#k4",who:"s",priv:true}]},
+ {k:5,r:4,t:"Гра",sum:true,title:"Козацький острів скарбів",story:"10 островів: послідовність, цикли, умови · бос — Морський Змій · 🛠 майстерня островів · 🐍 вигляд Python",res:[
+   {kind:"Гра",label:"Програмуй чайку блоками, малюй свої острови й обмінюйся кодами з друзями · оцінка за час і помилки",url:A("XZ9PqyJQsi5kBzFTCrG62n"),who:"s"}]},
+ {k:5,r:"g",t:"Тиждень ШІ",title:"Навчи Біта",story:"7–13 грудня · розміть полуниці, навчи модель, знайди упередженість у даних",res:[
+   {kind:"Гра",label:"5 етапів інженера ШІ: дані → навчання → перевірка → упередженість → висновки",url:A("2iHKDvrRvPSquDAi9LJJPT")+"#k5",who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація до Тижня ШІ",url:"https://canva.link/f9q82v4o0ahlqjw",who:"t"}]},
+ {k:6,r:"g",t:"Тиждень ШІ",title:"Навчи Біта",story:"7–13 грудня · розміть полуниці, навчи модель, знайди упередженість у даних",res:[
+   {kind:"Гра",label:"5 етапів інженера ШІ: дані → навчання → перевірка → упередженість → висновки",url:A("2iHKDvrRvPSquDAi9LJJPT")+"#k6",who:"s",priv:true}]},
+ {k:7,r:"g",t:"Тиждень ШІ",title:"Навчи Біта",story:"7–13 грудня · розміть полуниці, навчи модель, знайди упередженість у даних",res:[
+   {kind:"Гра",label:"5 етапів інженера ШІ: дані → навчання → перевірка → упередженість → висновки",url:A("2iHKDvrRvPSquDAi9LJJPT")+"#k7",who:"s",priv:true}]},
+ {k:10,r:1,t:"Тиждень ШІ",sum:true,title:"Навчи Біта",story:"Розминка до Тижня ШІ: класифікатор «найближчі сусіди» й упередженість даних",res:[
+   {kind:"Гра",label:"5 етапів: дані → навчання → перевірка → упередженість → висновки",url:A("2iHKDvrRvPSquDAi9LJJPT")+"#k10",who:"s",priv:true}]},
+ {k:9,r:2,t:"Гра",sum:true,title:"Зламай шифр",story:"Кав'ярня «Байт»: 6 замків — скитала, Цезар, частотний аналіз, RLE, ключі, сейф",res:[
+   {kind:"Гра",label:"Квест-кімната до Теми 3 «Типи даних і кодування» · оцінка за час і помилки",url:A("AaZVCjzwXjByfVxYQE1Cr5"),who:"s",priv:true}]},
+ {k:5,r:3,t:"Гра",sum:true,title:"Матч ЦифроДоп: документи",story:"Гра розділу на великий екран · 164 питання, щоразу інші",res:[
+   {kind:"Гра",label:"Баскетбольний матч двох команд: кидки на 1, 2, 3 очки",url:A("WkmqavkVqu5z7Hxi2WE4FD"),who:"t"}]},
+ {k:5,r:1,t:"Гра",sum:true,title:"Матч ЦифроДоп: основи",story:"Гра розділу на великий екран · 60 питань, щоразу інші",res:[
+   {kind:"Гра",label:"Баскетбольний матч двох команд: кидки на 1, 2, 3 очки",url:A("Ko62pQS9TpifYfRbfursyX"),who:"t"}]},
+ {k:5,r:2,t:"Гра",sum:true,title:"Матч ЦифроДоп: інтернет",story:"Гра розділу на великий екран · 108 питань, щоразу інші",res:[
+   {kind:"Гра",label:"Баскетбольний матч двох команд: кидки на 1, 2, 3 очки",url:A("1qh9vRaQ4BxAoHaNYUedxf"),who:"t"}]},
+ {k:7,r:3,t:"Гра",sum:true,title:"Матч Кібербази: документи",story:"Гра розділу на великий екран · 147 питань, щоразу інші",res:[
+   {kind:"Гра",label:"Баскетбольний матч двох команд: кидки на 1, 2, 3 очки",url:A("ELHdh1oKbz6CxRxZub9w4r"),who:"t"}]},
+ {k:7,r:1,t:"Гра",sum:true,title:"Матч Кібербази: цифровий простір",story:"Гра розділу на великий екран · 112 питань, щоразу інші",res:[
+   {kind:"Гра",label:"Баскетбольний матч двох команд: кидки на 1, 2, 3 очки",url:A("KEjfZFBZiMdq7ZrsK45ycW"),who:"t"}]},
+ {k:7,r:2,t:"Гра",sum:true,title:"Матч Кібербази: візуальний контент",story:"Гра розділу на великий екран · 82 питання, щоразу інші",res:[
+   {kind:"Гра",label:"Баскетбольний матч двох команд: кидки на 1, 2, 3 очки",url:A("C5asg22DTxTY9jZXJfD3Ht"),who:"t"}]},
+ {k:0,r:"g",t:"Будь-який урок",title:"Рандомайзер чисел 1–15",story:"Хто відповідає наступним",res:[
+   {kind:"Інструмент",label:"Відкрити рандомайзер",url:A("YT657yqwkH1MBs1rqsDvm7"),who:"t"}]},
+ {k:8,r:2,t:"Гра",sum:true,title:"Матч ліги: гра розділу",story:"Тест · баскетбольний матч двох команд на великий екран · 117 питань, щоразу інші",res:[
+   {kind:"Гра",label:"Кидки на 1, 2 і 3 очки, підбирання, овертайм",url:A("QdD6scNmErgV7HjxSz7VCY"),who:"t"}]},
+ {k:6,r:4,t:"Лабораторія",sum:true,title:"Лабораторія Scratch",story:"Тест · 14 завдань з автоперевіркою і 6 завдань для справжнього Scratch",res:[
+   {kind:"Лабораторія",label:"Блоки, сцена з роботом, перевірка, «Надіслати вчителю»",url:A("W39zHkVCekGeyFkv2BDRNF")+"#k6",who:"t"}]},
+ {k:2,r:"p",t:"Р1–Р4",title:"Практичні роботи з Дослідиком",story:"По 5 завдань у кінці кожного розділу, з озвучкою й підказкою-рукою; QR-код на кожне завдання",res:[
+   {kind:"Практична",label:"Р1 Інформація: Я — дослідник інформації",url:A("UMukCvheYSdxz776hdsp4J"),who:"s",priv:true},
+   {kind:"Практична",label:"Р2 Пристрої: Пристрої-помічники",url:A("J7MEDWw2vta8gcvd455pk7"),who:"s",priv:true},
+   {kind:"Практична",label:"Р3 Об'єкти: Світ об'єктів",url:A("26zgfkGV839B3YFvjc7jc1"),who:"s",priv:true},
+   {kind:"Творчий",label:"Р1: Листівка мамі (Paint)",url:A("UySerT9KH5xBE4UTv4vnuu"),who:"s",priv:true},
+   {kind:"Творчий",label:"Р2: Магазин подарунків (Калькулятор)",url:A("AMdzJwZqmc8AiNV7RbdFCd"),who:"s",priv:true},
+   {kind:"Творчий",label:"Р3: Ялинкова іграшка-об'єкт (Paint)",url:A("2y8BxpfCX7n1F9LbvCnMAh"),who:"s",priv:true},
+   {kind:"Практична",label:"Р4 Малюнки й моделі: Художня студія",url:A("TKiXtai8QNxRAqDAPvrF3g"),who:"s",priv:true},
+   {kind:"Творчий",label:"Р4: Зимова серветка-орнамент (Paint)",url:A("CnphkBEQEYanHRcvHcxmrE"),who:"s",priv:true},
+   {kind:"QR",label:"QR-коди всіх завдань для друку",url:A("UuSN1i6fPHP8yYCbCqKSEG"),who:"t",priv:true}]},
+ {k:3,r:"p",t:"Р1–Р5",title:"Практичні роботи Тимка",story:"По 5 завдань у кінці розділу, з озвучкою; QR-код на кожне завдання",res:[
+   {kind:"Практична",label:"Р1 Інформація: Тимко-шифрувальник",url:A("9LMp8ajuQraEZCVN68U2Ne"),who:"s",priv:true},
+   {kind:"Практична",label:"Р2 Комп'ютер і файли: Порядок у комп'ютері",url:A("8jWbPrvyqYN4RHGDmHe4Yz"),who:"s",priv:true},
+   {kind:"Практична",label:"Р3 Інтернет: Тимко в Інтернет-місті",url:A("AxJ8X3rgCn7yg7hurMJZeX"),who:"s",priv:true},
+   {kind:"Практична",label:"Р4 Текст: Тимко пише книжку",url:A("RRJS4ETJXVhwemxVuFW67Z"),who:"s",priv:true},
+   {kind:"Творчий",label:"Р1: Шифрована листівка (Блокнот)",url:A("1S1rDBQuw7GRvJrK7K7A1L"),who:"s",priv:true},
+   {kind:"Творчий",label:"Р2: Моя цифрова скринька (папки)",url:A("8H8oBBuK11a8rocTqRE49w"),who:"s",priv:true},
+   {kind:"Творчий",label:"Р3: Міні-енциклопедія тварини (браузер)",url:A("EJmUQAY1jd3juDhemz6gXK"),who:"s",priv:true},
+   {kind:"Творчий",label:"Р4: Лист святому Миколаю (текстовий редактор)",url:A("VAPhyNu3FY4VNdVriseMAo"),who:"s",priv:true},
+   {kind:"Практична",label:"Р5 Алгоритми й Скретч: Тимко-програміст",url:A("JV16Gb1DGVQuGMUAmAwCrF"),who:"s",priv:true},
+   {kind:"Творчий",label:"Р5: Зимова листівка-мультик (Скретч)",url:A("UBVurzUEoYbSc6hZMXiuLd"),who:"s",priv:true},
+   {kind:"QR",label:"QR-коди всіх завдань для друку",url:A("UuSN1i6fPHP8yYCbCqKSEG"),who:"t",priv:true}]},
+ {k:4,r:"p",t:"Р1–Р3",title:"Практичні роботи Сортика",story:"По 5 завдань у кінці розділу; QR-код на кожне завдання",res:[
+   {kind:"Практична",label:"Р1 Інформація та пристрої: Цифрова майстерня",url:A("G19LV7t55Jme5YPqtJEdJu"),who:"s",priv:true},
+   {kind:"Практична",label:"Р2 Об'єкти та моделі: Зала моделей",url:A("ERJWHK36X5G1VDXo6FREne"),who:"s",priv:true},
+   {kind:"Творчий",label:"Р1: Цифрова колекція (браузер + Writer)",url:A("S5ZN8K5t5AK5HkMHAzqZef"),who:"s",priv:true},
+   {kind:"Творчий",label:"Р2: Опитування класу і діаграма (Calc)",url:A("5Ns2hyaLpsFFuFAEpuHDVs"),who:"s",priv:true},
+   {kind:"Практична",label:"Р3 Алгоритми: Алгоритмічна зала",url:A("UxKDeQtQjrkZBET1hkpDzi"),who:"s",priv:true},
+   {kind:"Творчий",label:"Р3: Гра «Злови сніжинку» (Скретч)",url:A("HrZauJJMQ3DGP13X4N86GU"),who:"s",priv:true},
+   {kind:"QR",label:"QR-коди всіх завдань для друку",url:A("UuSN1i6fPHP8yYCbCqKSEG"),who:"t",priv:true}]},
+ {k:6,r:5,t:"Т2",title:"Інформаційні процеси",story:"Мікроферма, епізод 25: Служба ферми",res:[
+   {kind:"Урок",label:"Рольова гра «служба підтримки»: тікети, звіт у таблиці (SUM, MAX) · розминка, 10 вправ, місія, картки",url:A("NhaP7vWPikBixtoGdSrB2P"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/wgoau8q63410uwf",who:"t"}]},
+ {k:6,r:5,t:"Т3",title:"Об'єкти, їх класифікація",story:"Мікроферма, епізод 26: Каталог ферми",res:[
+   {kind:"Урок",label:"Майстерня каталогу: картка об'єкта, класи, дерево класів · розминка, 10 вправ, місія, картки",url:A("3YTkr1hsyZt9heq97fod8o"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/zbdz74p4kq9qlq5",who:"t"}]},
+ {k:6,r:5,t:"Т4",title:"Модель як інструмент для дослідження",story:"Мікроферма, епізод 27: Ферма в таблиці",res:[
+   {kind:"Урок",label:"Пісочниця-модель у таблиці + «передбач, потім перевір» · розминка, 10 вправ, місія, картки",url:A("6LCsHUuqLQVkHmvedydD3S"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/y1q78y8e8gyje48",who:"t"}]},
+ {k:6,r:5,t:"Т5",title:"Інфографіка. Мультимедіа. Цифрова компетентність",story:"Мікроферма, епізод 28: Шкільний ярмарок",res:[
+   {kind:"Урок",label:"Спідран + повторення розділу 5: редактор інфографіки, мультимедіа, пам'ятка безпеки · розминка, 10 вправ, місія, картки",url:A("6WuWG8jshxUGcdhJnK13TJ"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/5eod2mpayeq72in",who:"t"}]},
+ {k:6,r:5,t:"Гра",sum:true,title:"Матч мікроферми: Інформаційна мозаїка",story:"Гра розділу на великий екран · 112 питань, щоразу інші",res:[
+   {kind:"Гра",label:"Баскетбольний матч двох команд: кидки на 1, 2, 3 очки",url:A("DjwnaevapKKCbtT8ootCkB"),who:"t"}]},
+ {k:6,r:5,t:"Проєкт",sum:true,title:"Інфографіка врожаю в справжній таблиці",story:"Проєкт у Google Таблицях / Excel · окрема оцінка · 2–3 уроки",res:[
+   {kind:"Проєкт",label:"5 кроків → «6 клас · Розділ 5»",url:A("F8CqbBk7kxnBzTjFpTHVuV"),who:"s",priv:true}]},
+ {k:6,r:5,t:"Підсумок",sum:true,title:"Картки-білети розділу",story:"20 карток · білети на 12 балів · журнал + CSV",res:[
+   {kind:"Картки",label:"Білети з відповідями → «6 клас · Розділ 5»",url:A("9E6wKUD62cptUZMezVYLLH"),who:"t"}]},
+ {k:8,r:4,t:"Т2",title:"Векторний графічний редактор",story:"Ліга класу, епізод 22: Розмитий логотип",res:[
+   {kind:"Урок",label:"Квест-кімната: 5 замків → кодове слово, тренажер векторних координат · розминка, 10 вправ, місія, картки",url:A("GVobD5Vjn4X7NYNXDVHb6h"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/xaxt6q1ftabgqjt",who:"t"}]},
+ {k:8,r:4,t:"Т3",title:"Графічні примітиви",story:"Ліга класу, епізод 23: Емблема з цеглинок",res:[
+   {kind:"Урок",label:"Майстерня емблем: міні-векторний редактор, шари, вирівнювання · розминка, 10 вправ, місія, картки",url:A("Vt3DqTgtzhoYKn2FnmRPh4"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/8dko10glbj0dgwx",who:"t"}]},
+ {k:8,r:4,t:"Т4",title:"Типографіка. Ефекти та фільтри",story:"Ліга класу, епізод 24: Афіша, яку ніхто не прочитав",res:[
+   {kind:"Урок",label:"Служба типографіки: заявки команд + збірка афіші в редакторі · розминка, 10 вправ, місія, картки",url:A("S7c5KWUGRbNEu9TrDdLVB1"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/ue0mluf5p9en6ae",who:"t"}]},
+ {k:8,r:4,t:"Т5",title:"Композиція та макет",story:"Ліга класу, епізод 25: Сайт, де все навпаки",res:[
+   {kind:"Урок",label:"Парна робота «водій-штурман»: макет сайту на сітці · розминка, 10 вправ, місія, картки",url:A("GqNfqNjg7yDqGPfhcUZuNM"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/9wb84vchlj3sgu1",who:"t"}]},
+ {k:8,r:4,t:"Т6",title:"Прототип. Документація інформаційного продукту",story:"Ліга класу, епізод 26: Прем'єра застосунку",res:[
+   {kind:"Урок",label:"Спідран + повторення розділу 4: прототип, документація, кнопка в редакторі · розминка, 10 вправ, місія, картки",url:A("2LWmpGo3y6N1VgbrVAeQVL"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/xnmfwq8s5roqejj",who:"t"}]},
+ {k:8,r:4,t:"Гра",sum:true,title:"Матч ліги: дизайн інтерфейсів",story:"Гра розділу на великий екран · 110 питань, щоразу інші",res:[
+   {kind:"Гра",label:"Баскетбольний матч двох команд: кидки на 1, 2, 3 очки",url:A("3zM3ssTgqF64UPSJpShn8B"),who:"t"}]},
+ {k:8,r:4,t:"Проєкт",sum:true,title:"Фірмовий застосунок ліги",story:"Проєкт в Inkscape / svgedit + PowerPoint · окрема оцінка · 3–4 уроки",res:[{kind:"Проєкт",label:"5 кроків → «8 клас · Розділ 4»",url:A("F8CqbBk7kxnBzTjFpTHVuV"),who:"s",priv:true}]},
+ {k:8,r:4,t:"Підсумок",sum:true,title:"Картки-білети розділу",story:"24 картки · білети на 12 балів · журнал + CSV",res:[{kind:"Картки",label:"Білети з відповідями → «8 клас · Розділ 4»",url:A("9E6wKUD62cptUZMezVYLLH"),who:"t"}]},
+ {k:9,r:5,t:"Т2",title:"Методи тривимірного моделювання",story:"Кав'ярня «Байт», епізод 24: Сейф 3D-студії",res:[
+   {kind:"Урок",label:"Квест-кімната: 5 замків → кодове слово: розминка, 10 вправ, місія, картки",url:A("Mrx3WYmw2vLw38htqTX4Ze"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/a2azv2ybytrbjw7",who:"t"}]},
+ {k:9,r:5,t:"Т3",title:"Етапи створення 3D-зображення",story:"Кав'ярня «Байт», епізод 25: Конвеєр 3D-студії",res:[
+   {kind:"Урок",label:"Майстерня-конструктор + «передбач, потім перевір»: розминка, 10 вправ, місія, картки",url:A("MCruqbqw4FVc9Gt9N7Rhs2"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/t2z61q6inuy6q3u",who:"t"}]},
+ {k:9,r:5,t:"Т4",title:"Графічний редактор Blender",story:"Кав'ярня «Байт», епізод 26: Перший день у Blender",res:[
+   {kind:"Урок",label:"Симулятор Blender (гарячі клавіші, режими): розминка, 10 вправ, місія, картки",url:A("L4d6wnBkk8AfxmPrhkyBHs"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/inw4vl4s5g8uiyo",who:"t"}]},
+ {k:9,r:5,t:"Т5",title:"Об'єктне моделювання у Blender",story:"Кав'ярня «Байт», епізод 27: Літня тераса",res:[
+   {kind:"Урок",label:"Парна робота «водій-штурман» у тренажері Blender: розминка, 10 вправ, місія, картки",url:A("LveCC42hWGmkeNfQdc3dPF"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/xzdk3lans28qjkq",who:"t"}]},
+ {k:9,r:5,t:"Т6",title:"Полігональне моделювання у Blender",story:"Кав'ярня «Байт», епізод 28: Служба підтримки 3D",res:[
+   {kind:"Урок",label:"Рольова гра: тікети 3D-студії: розминка, 10 вправ, місія, картки",url:A("KvBPgJ2W5kzLrYDAV5vK76"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/gpoyy1dxdwhbqrz",who:"t"}]},
+ {k:9,r:5,t:"Т7",title:"Основи візуалізації у Blender",story:"Кав'ярня «Байт», епізод 29: Постер до відкриття",res:[
+   {kind:"Урок",label:"Спідран + повторення розділу 5: розминка, 10 вправ, місія, картки",url:A("RugLMCVv9jPn15meTNqpSw"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/jhwgg50bdhggppg",who:"t"}]},
+ {k:9,r:5,t:"Гра",sum:true,title:"Матч «Байта»: 3D-студія",story:"Гра розділу на великий екран · 112 питань, щоразу інші",res:[{kind:"Гра",label:"Баскетбольний матч двох команд: кидки на 1, 2, 3 очки",url:A("3seCanrBzN8TMMkCwudviU"),who:"t"}]},
+ {k:9,r:5,t:"Проєкт",sum:true,title:"3D-вітрина «Байта» в Blender",story:"Проєкт у справжньому Blender · окрема оцінка · 3–4 уроки",res:[{kind:"Проєкт",label:"6 кроків → «9 клас · Розділ 5»",url:A("F8CqbBk7kxnBzTjFpTHVuV"),who:"s",priv:true}]},
+ {k:9,r:5,t:"Підсумок",sum:true,title:"Картки-білети розділу",story:"28 карток · білети на 12 балів · журнал + CSV",res:[{kind:"Картки",label:"Білети з відповідями → «9 клас · Розділ 5»",url:A("9E6wKUD62cptUZMezVYLLH"),who:"t"}]},
+ {k:5,r:4,t:"Т2",title:"Як створити програму",story:"Служба ЦифроДоп, епізод 18: Опитувальник Біта",res:[
+   {kind:"Урок",label:"Квест-кімната «Серверна»: розминка, 10 вправ, місія, картки",url:A("HqoG8E2wrAuDHucgKxwaWF"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/jeisxnj2i7wzc0w",who:"t"}]},
+ {k:5,r:4,t:"Т3",title:"Використання блоків",story:"Служба ЦифроДоп, епізод 19: Біт-диктор",res:[
+   {kind:"Урок",label:"Служба підтримки: тікети шкільного радіо · розминка, 10 вправ, місія, картки",url:A("QEvYKJzGX19rqEb33MoBnA"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/87sg2uzgatyk9ed",who:"t"}]},
+ {k:5,r:4,t:"Т4",title:"Цикли в Scratch",story:"Служба ЦифроДоп, епізод 20: Ранкова зарядка",res:[
+   {kind:"Урок",label:"Пісочниця циклів + «передбач, потім перевір»: розминка, 10 вправ, місія, картки",url:A("Lt545dW26fMfAtE77xn2Zw"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/kprg34uvx7q2d0a",who:"t"}]},
+ {k:5,r:4,t:"Т5",title:"Спрайти в Scratch",story:"Служба ЦифроДоп, епізод 21: Діно-вечірка",res:[
+   {kind:"Урок",label:"Парна робота «водій-штурман»: розминка, 10 вправ, місія, картки",url:A("MAmecBaMpaBPNYArvoLWAF"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/ti0m7sbn58sedn4",who:"t"}]},
+ {k:5,r:4,t:"Т6",title:"Малювання в Scratch",story:"Служба ЦифроДоп, епізод 22: Біт-художник",res:[
+   {kind:"Урок",label:"Симулятор Олівця: візерунки для афіш · розминка, 10 вправ, місія, картки",url:A("Q4xa4RqMFUMhHUbNqjg1z9"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/o0202xvpcid6pzg",who:"t"}]},
+ {k:5,r:4,t:"Т7",title:"Умови",story:"Служба ЦифроДоп, епізод 23: Годинник привітань",res:[
+   {kind:"Урок",label:"Детектив багів: справа глючного годинника · розминка, 10 вправ, місія, картки",url:A("TAkoby4CAnafLz8yeQy2fz"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/cnvorjk7loq1x0p",who:"t"}]},
+ {k:5,r:4,t:"Т8",title:"Рух у Scratch",story:"Служба ЦифроДоп, епізод 24: Миша-втікачка",res:[
+   {kind:"Урок",label:"Спідран + повторення розділу 4: розминка, 10 вправ, місія, картки",url:A("2tTDWdGwbjfBCNwN9CZeYr"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/mdiplh1yf3zzg4j",who:"t"}]},
+ {k:5,r:4,t:"Гра",sum:true,title:"Матч ЦифроДоп: Scratch",story:"Гра розділу на великий екран · 112 питань, щоразу інші",res:[
+   {kind:"Гра",label:"Баскетбольний матч двох команд: кидки на 1, 2, 3 очки",url:A("EFku8HZe8eW6cL6NpCNx9G"),who:"t"}]},
+ {k:5,r:4,t:"Проєкт",sum:true,title:"«Спіймай мишу» у справжньому Scratch",story:"Проєкт у справжньому Scratch · окрема оцінка · 2–3 уроки",res:[
+   {kind:"Проєкт",label:"5 кроків → «5 клас · Розділ 4»",url:A("F8CqbBk7kxnBzTjFpTHVuV"),who:"s",priv:true}]},
+ {k:5,r:4,t:"Підсумок",sum:true,title:"Картки-білети розділу",story:"32 картки · білети на 12 балів · журнал + CSV",res:[
+   {kind:"Картки",label:"Білети з відповідями → «5 клас · Розділ 4»",url:A("9E6wKUD62cptUZMezVYLLH"),who:"t"}]},
+ {k:7,r:4,t:"Т2",title:"Команди та змінні",story:"Кібербаза, епізод 16: Замкнений пульт",res:[
+   {kind:"Урок",label:"Квест-кімната: змінні, input, print → кодове слово · розминка, 10 вправ, місія, картки",url:A("Q61vRbrn3vfYgDFsQxLfiM"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/k5izlosms1vqjnz",who:"t"}]},
+ {k:7,r:4,t:"Т3",title:"Малюємо кодом",story:"Кібербаза, епізод 17: Емблема бази",res:[
+   {kind:"Урок",label:"Майстерня емблеми: справжній код pygame · розминка, 10 вправ, місія, картки",url:A("DR36AkuLTiPn18UNnDrivH"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/h2ueu1pfri5znqi",who:"t"}]},
+ {k:7,r:4,t:"Т4",title:"Поєднуємо графічні примітиви",story:"Кібербаза, епізод 18: Робот-охоронець",res:[
+   {kind:"Урок",label:"Служба підтримки: тікети-деталі робота, відносні координати · розминка, 10 вправ, місія, картки",url:A("XDLJVAUdmx2C3V4AccF2hs"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/ul162r9jfa6ewil",who:"t"}]},
+ {k:7,r:4,t:"Т5",title:"Складні фігури",story:"Кібербаза, епізод 19: Неонова аркада",res:[
+   {kind:"Урок",label:"Аркада на час: цикли for і range малюють радар · розминка, 10 вправ, місія, картки",url:A("NuZ2hVbdbeiEPa4gtRDnVd"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/63od7v1p1u3bgkk",who:"t"}]},
+ {k:7,r:4,t:"Т6",title:"Прийняття рішень і випадкові числа",story:"Кібербаза, епізод 20: Метеоритний дощ",res:[
+   {kind:"Урок",label:"Парна робота «водій-штурман»: if, randint, текст, Enter-щит · розминка, 10 вправ, місія, картки",url:A("Taf4zVZZxFKour5n51NhMg"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/b88kscauw4ae3r8",who:"t"}]},
+ {k:7,r:4,t:"Т7",title:"Тестування",story:"Кібербаза, епізод 21: Баг-детектив",res:[
+   {kind:"Урок",label:"Детектив багів: 3 типи помилок, тести й межові значення · розминка, 10 вправ, місія, картки",url:A("5FiJgwSpTNN1AKMvJx42eD"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/uq8gisflq1mvg8r",who:"t"}]},
+ {k:7,r:4,t:"Т8",title:"Анімація",story:"Кібербаза, епізод 22: Стрибок робота",res:[
+   {kind:"Урок",label:"Спідран + повторення розділу 4: кадри, спрайти, відбивання · розминка, 10 вправ, місія, картки",url:A("MBoBAMsDgZkj2r2GSX2TbB"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/qdk6054vhgex4p1",who:"t"}]},
+ {k:7,r:4,t:"Гра",sum:true,title:"Матч Кібербази: Python-графіка",story:"Гра розділу на великий екран · 109 питань, щоразу інші",res:[
+   {kind:"Гра",label:"Баскетбольний матч двох команд: кидки на 1, 2, 3 очки",url:A("DYXFDQDuU891Q36KWdqsLY"),who:"t"}]},
+ {k:7,r:4,t:"Проєкт",sum:true,title:"Жива емблема Кібербази",story:"Проєкт у справжньому Python + pygame (Thonny) · окрема оцінка · 3–4 уроки",res:[
+   {kind:"Проєкт",label:"8 кроків → «7 клас · Розділ 4»",url:A("F8CqbBk7kxnBzTjFpTHVuV"),who:"s",priv:true}]},
+ {k:7,r:4,t:"Підсумок",sum:true,title:"Картки-білети розділу",story:"32 картки · білети на 12 балів · журнал + CSV",res:[
+   {kind:"Картки",label:"Білети з відповідями → «7 клас · Розділ 4»",url:A("9E6wKUD62cptUZMezVYLLH"),who:"t"}]}
+];
+
+const $=s=>document.querySelector(s);
+const st={mode:"s",k:"all",q:""};
+try{const m=localStorage.getItem("hub-mode");if(m==="t"||m==="s")st.mode=m}catch(e){}
+// #k8 — клас, #arch — архів, #t12 / #k8-r2 / #toc8 — перехід до теми, розділу чи змісту
+const fromHash=()=>{const h=location.hash.replace("#","");st.sel=null;
+  if(h==="arch"||h==="gal"){st.k=h;return null}
+  if(/^k(12|10|[0-9])$/.test(h)){st.k=h.slice(1);return null}
+  let m=/^t(\d+)$/.exec(h);
+  if(m&&TOPICS[+m[1]]){const t=TOPICS[+m[1]];st.k=String(t.k);st.sel={k:st.k,r:String(t.r),t:h};return h}
+  m=/^k(10|\d)-r(\w+)$/.exec(h);
+  if(m){st.k=m[1];st.sel={k:m[1],r:m[2],t:null};return h}
+  st.k="all";return null};
+let jump=fromHash();
+
+function visibleRes(t){return t.res.filter(r=>(st.mode==="t"||r.who==="s")&&(st.k==="arch"?r.kind==="Архів":r.kind!=="Архів"))}
+function goTo(id){const el=document.getElementById(id);if(!el)return false;if(el.tagName==="DETAILS")el.open=true;el.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"});if(el.classList.contains("card")){el.classList.remove("flash");void el.offsetWidth;el.classList.add("flash")}return true}
+function esc(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+
+// Галерея: роботи учнів. Додає вчитель: клас, ім'я з першою літерою прізвища, назва, тип, посилання. demo — зразок картки.
+const GTYPE={scratch:["Scratch",`<rect class="t" x="30" y="30" width="120" height="30" rx="8"/><rect class="f" stroke="none" x="30" y="66" width="150" height="30" rx="8"/><rect class="t" x="52" y="102" width="110" height="30" rx="8"/><path d="M196 44l24 20-24 20"/>`],
+ site:["Сайт",`<rect class="s" x="24" y="20" width="192" height="110" rx="10"/><path d="M24 46h192"/><rect class="f" stroke="none" x="40" y="60" width="70" height="54" rx="6"/><path d="M124 66h76M124 84h76M124 102h48"/>`],
+ poster:["Плакат",`<rect class="s" x="70" y="12" width="100" height="126" rx="6"/><circle class="f" stroke="none" cx="120" cy="56" r="22"/><path d="M88 98h64M96 116h48"/>`],
+ table:["Таблиця",`<rect class="s" x="30" y="24" width="180" height="100" rx="8"/><path d="M30 56h180M30 90h180M90 24v100M150 24v100"/><rect class="f" stroke="none" x="30" y="24" width="180" height="32" rx="8"/>`],
+ code:["Програма",`<rect class="s" x="24" y="20" width="192" height="110" rx="10"/><path d="M70 56l-24 20 24 20M170 56l24 20-24 20M134 46l-28 60"/>`],
+ model:["3D-модель",`<path class="s" d="M120 14l76 34v52l-76 34-76-34V48z"/><path class="t" d="M120 82l76-34v52l-76 34z"/><path d="M120 82v52M120 82L44 48"/>`]};
+const GALLERY=[
+ {demo:true,k:6,type:"scratch",title:"Робот-поливальник обходить грядки",by:"Марко К., 6-А",sec:"Розділ 4 · Scratch"},
+ {demo:true,k:8,type:"table",title:"Статистика ліги: хто найкраще кидає",by:"Соломія Д., 8-Б",sec:"Розділ 2 · Працюємо із числами"},
+ {demo:true,k:5,type:"poster",title:"Плакат «Правила безпечного пароля»",by:"Назар Т., 5-А",sec:"Розділ 5 · Canva"}
+];
+function renderGallery(){
+  $("#lead").textContent="Галерея: найкращі роботи учнів з проєктів, лабораторій і Scratch. Поки що цю вкладку бачить лише вчитель.";
+  const real=GALLERY.filter(g=>!g.demo), list=real.length?real:GALLERY;
+  $("#count").textContent=real.length+" "+plural(real.length,"робота","роботи","робіт");
+  $("#list").innerHTML=`<section class="klass"><div class="gnote"><b>Як додати роботу</b><span>Напишіть у чаті проєкту: клас, ім’я учня з першою літерою прізвища, назву роботи, тип і посилання (якщо є). Повні прізвища й фото дітей у галерею не додаємо.</span>${real.length?"":`<span>Нижче — три зразки карток, щоб було видно, як виглядатиме галерея. Вони зникнуть, щойно з’явиться перша справжня робота.</span>`}</div>
+  <div class="gal">${list.map(g=>{const c=CLASSES[g.k]||CLASSES[0],t=GTYPE[g.type]||GTYPE.code;
+    return `<article class="gcard" style="--c:var(${c.c})"><div class="cover"><svg class="art" viewBox="0 0 240 150" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">${t[1]}</g></svg></div><div class="gb"><div class="tg">${g.demo?`<span class="demo">Зразок</span>`:""}<span>${t[0]}</span><span>${g.k} клас</span></div><h3>${esc(g.title)}</h3><div class="by">${esc(g.by)}${g.sec?" · "+esc(g.sec):""}</div>${g.url?`<a href="${g.url}" target="_blank" rel="noopener">Відкрити роботу →</a>`:""}</div></article>`}).join("")}</div></section>`;
+}
+
+function renderTabs(){
+  const keys=["all",2,3,4,5,6,7,8,9,10];
+  const extra=[12,1].concat(st.mode==="t"?["gal","arch"]:[]);
+  $("#tabs").innerHTML=keys.map(k=>{
+    if(k==="all") return `<button class="tab" role="tab" data-k="all" aria-selected="${st.k==="all"}" style="--c:var(--accent)"><span class="n">Усі</span><span class="s">класи</span></button>`;
+    const c=CLASSES[k];
+    const num=k===10?`<span class="n dbl">10–11<small>клас</small></span>`:`<span class="n">${k}<small>клас</small></span>`;
+    return `<button class="tab" role="tab" data-k="${k}" aria-selected="${st.k==k}" style="--c:var(${c.c})" title="${k===10?"10–11":k} клас · ${esc(c.story)}">${num}<span class="s">${k===10?"ШІ-лабораторія":c.story}</span></button>`;
+  }).join("");
+  const X={12:["Математика","1–5 клас · ігри","--c9"],1:["Читання та інше","тренажери","--accent"],gal:["Галерея","роботи учнів","--c6"],arch:["Архів","старі версії","--cx"]};
+  $("#tabs2").innerHTML=extra.map(k=>{const [b,s,c]=X[k];return `<button class="tab2" role="tab" data-k="${k}" aria-selected="${st.k==k}" style="--c:var(${c})"><b>${b}</b><small>${s}</small></button>`}).join("");
+  document.querySelectorAll("#tabs .tab,#tabs2 .tab2").forEach(b=>b.onclick=()=>{const k=b.dataset.k;st.sel=null;st.f="all";st.k=k;location.hash=k==="all"?"":k==="arch"||k==="gal"?k:"k"+k;render()});
+}
+
+function secName(k,r){ const s=(SECT[k]||[]).find(x=>x[0]===r); return s?s[1]:"Інше"; }
+function secTag(r){ return typeof r==="number" ? "Розділ "+r : r==="x" ? "На рік" : r==="g" ? "Ігри" : "Уроки"; }
+function tnum(t){ const m=/^Т(\d+)$/.exec(t.t); return t.sum?1000:m?+m[1]:500; }
+function plural(n,a,b,c){ return n%10===1&&n%100!==11?a:(n%10>=2&&n%10<=4&&(n%100<10||n%100>=20))?b:c; }
+// Тема-урок, до якої вчителю потрібна презентація (без ігор, проєктів, практичних і карт року)
+function needSl(t){ return !t.sum&&t.k>=3&&t.k<=10&&(typeof t.r==="number"||t.r==="a"); }
+function noSl(t){ return needSl(t)&&!t.res.some(x=>x.kind==="Слайди"); }
+function cardHTML(t,c){
+  const kindCls=r=>r.kind==="Архів"?" arch":r.who==="t"?" t":"";
+  const lbl=t.sum?"Підсумок розділу":"";
+  return `<article class="card${t.sum?" sum":""}" id="t${TOPICS.indexOf(t)}" style="--c:var(${c.c})"><div class="code"><span>${esc(t.t)}</span>${lbl?`<small>${lbl}</small>`:""}</div><h3>${esc(t.title)}</h3>${t.story?`<p class="story">${esc(t.story)}</p>`:""}${st.mode==="t"&&noSl(t)?`<span class="nosl">⚠ без слайдів</span>`:""}<div class="res">`+
+    visibleRes(t).map(r=>`<div class="r"><a class="go" href="${r.url}" target="_blank" rel="noopener"><span class="kind${kindCls(r)}">${r.kind}</span><span class="lbl">${esc(r.label)}${r.short?`<small>tinyurl.com/${r.short}</small>`:""}</span></a>${st.mode==="t"?`<button class="copy" data-u="${r.url}">Копіювати</button>`:""}</div>`).join("")+
+    `</div></article>`;
+}
+// Поточний розділ класу = останній розділ із темами (його відкрито, інші згорнуто)
+function curSec(k){ const rs=TOPICS.filter(t=>t.k===k&&!t.sum&&typeof t.r==="number"&&visibleRes(t).length).map(t=>t.r); return rs.length?Math.max(...rs):null; }
+const SUMORD=["Гра","Тренажер","Лабораторія","Проєкт","Підсумок"];
+function sumN(t){ const i=SUMORD.indexOf(t.t); return i<0?SUMORD.length:i; }
+const FILT=[["all","Усе"],["u","Уроки"],["g","Ігри й тренажери"],["p","Проєкти й підсумок"]];
+function passF(t){ if(!st.f||st.f==="all")return true; if(st.f==="u")return !t.sum; if(st.f==="g")return t.sum&&["Гра","Тренажер","Лабораторія"].includes(t.t); return t.sum&&!["Гра","Тренажер","Лабораторія"].includes(t.t); }
+st.open=st.open||{};
+function overview(){
+  const order=[2,3,4,5,6,7,8,9,10,12,1].concat(st.mode==="t"?[0]:[]);
+  let n=0;
+  const tiles=order.map(k=>{
+    const c=CLASSES[k], items=TOPICS.filter(t=>t.k===k&&visibleRes(t).length); if(!items.length) return "";
+    n+=items.length;
+    const cur=curSec(k), nTop=items.filter(t=>!t.sum).length;
+    const name=k===12?"<b>Математика</b>":k===1?"<b>Читання</b> та інше":k===0?"<b>Для вчителя</b>":`<b>${k===10?"10–11":k}</b> клас`;
+    const now=cur!=null?`<div class="now"><small>Зараз вивчаємо</small>Розділ ${cur} · ${esc(secName(k,cur))}</div>`:"";
+    const nNo=st.mode==="t"?items.filter(noSl).length:0;
+    return `<article class="ovc" style="--c:var(${c.c})"><h3>${name}</h3><span class="ks">${esc(c.story)} · ${nTop} ${plural(nTop,"тема","теми","тем")}</span>${nNo?`<span class="nosl">⚠ без слайдів: ${nNo}</span>`:""}${now}<div class="btns">${cur!=null?`<button class="pri" data-go="${k}|${cur}">Поточний розділ →</button>`:""}<button data-go="${k}|">${cur!=null?"Усі розділи":"Відкрити →"}</button></div></article>`;
+  }).join("");
+  $("#list").innerHTML=`<section class="klass"><div class="ov">${tiles}</div></section>`;
+  $("#count").textContent=n+" "+plural(n,"картка","картки","карток");
+  $("#list").querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{const [k,r]=b.dataset.go.split("|");st.k=k;st.f="all";st.sel=r?{k,r,t:null}:null;location.hash=r?`k${k}-r${r}`:"k"+k;});
+}
+function render(){
+  $("#m-s").setAttribute("aria-pressed",st.mode==="s");
+  $("#m-t").setAttribute("aria-pressed",st.mode==="t");
+  $("#liveBan").hidden = st.mode!=="t";
+  $("#lead").textContent=st.mode==="s"
+    ?"Усі уроки, квести й ігри з інформатики в одному місці. Обери клас → розділ → тему."
+    :"Режим вчителя: до кожної теми додано презентацію, конспекти, ігри на великий екран і попередні версії уроків.";
+  renderTabs();
+  if(st.k==="arch") $("#lead").textContent="Архів: попередні версії уроків для порівняння й повторного використання. Учні цієї вкладки не бачать.";
+  const q=st.q.trim().toLowerCase();
+  if(st.k==="gal") return renderGallery();
+  if(st.k==="all"&&!q) return overview();
+  const order=[2,3,4,5,6,7,8,9,10,12,1,0];
+  const single=st.k!=="all"&&st.k!=="arch";
+  let n=0, html="";
+  for(const k of order){
+    if(single&&String(st.k)!==String(k)) continue;
+    const c=CLASSES[k];
+    const all=TOPICS.filter(t=>t.k===k&&visibleRes(t).length);
+    const items=all.filter(t=>!q||(t.title+" "+t.story+" "+t.t+" "+secName(k,t.r)).toLowerCase().includes(q));
+    if(!items.length) continue;
+    const cur=curSec(k);
+    const secs=(SECT[k]||[]).map(s=>s[0]).filter(r=>items.some(t=>t.r===r));
+    const sorted=r=>items.filter(t=>t.r===r).sort((a,b)=>tnum(a)-tnum(b)||sumN(a)-sumN(b));
+    const nTop=items.filter(t=>!t.sum).length, nSec=secs.filter(r=>typeof r==="number").length;
+    const info=(nSec?`${nSec} ${plural(nSec,"розділ","розділи","розділів")} · `:"")+`${nTop} ${plural(nTop,"тема","теми","тем")}`;
+    html+=`<section class="klass" style="--c:var(${c.c})"><div class="khead"><div class="kt"><h2>${k===12?"<b>Математика</b>":k===1?"<b>Інше</b>":k?`<b>${k===10?"10–11":k}</b> клас`:"Для вчителя"}</h2><span class="ks">${c.story}</span><span class="kc">${info}</span></div>${art(k)}</div>`;
+    const S=st.sel&&st.sel.k===String(k)?st.sel:null;
+    // Липка панель: розділи + фільтр типу (лише коли відкрито один клас)
+    if(single&&!q&&secs.length>1){
+      html+=`<nav class="chips" aria-label="Розділи й тип матеріалів">`+secs.map(r=>`<button type="button" data-chip="${k}|${r}" aria-pressed="${S&&S.r===String(r)}">${typeof r==="number"?"Р"+r:secTag(r)}${r===cur?" ★":""}</button>`).join("")+
+        `<span class="sep"></span>`+FILT.map(([f,l])=>`<button type="button" data-f="${f}" aria-pressed="${(st.f||"all")===f}">${l}</button>`).join("")+`</nav>`;
+    }
+    html+=`<details class="toc" id="toc${k}"${q&&!S?" open":""}><summary>Зміст${k>1&&k<12?" "+k+" класу":""}<small>${info}</small></summary><div class="cols">`+secs.map(r=>
+      `<div><a class="sh" href="#k${k}-r${r}" data-sel="${k}|${r}|"${S&&S.r===String(r)&&!S.t?' aria-current="true"':""}>${secTag(r)} · ${esc(secName(k,r))}${r===cur?" ★":""}</a><ol>`+
+      sorted(r).map(t=>{const id="t"+TOPICS.indexOf(t);return `<li><a href="#${id}" data-sel="${k}|${r}|${id}"${S&&S.t===id?' aria-current="true"':""}><b>${esc(t.t)}</b><span>${esc(t.title)}</span><i aria-hidden="true">→</i></a></li>`}).join("")+`</ol></div>`
+    ).join("")+`</div></details>`;
+    const show=S?secs.filter(r=>String(r)===S.r):secs;
+    if(S) html+=`<div class="selbar" id="sel${k}"><button type="button" data-act="back">← Усі розділи${k>1?" "+k+" класу":""}</button></div>`;
+    for(const r of show){
+      const list=sorted(r).filter(passF);
+      if(!list.length) continue;
+      if(S&&S.t) list.sort((a,b)=>(("t"+TOPICS.indexOf(b))===S.t)-(("t"+TOPICS.indexOf(a))===S.t));
+      const tops=list.filter(t=>!t.sum), sums=list.filter(t=>t.sum);
+      let miss="";
+      if(st.mode==="t"){
+        const nNo=tops.filter(noSl).length;
+        miss=nNo?`<span class="miss">⚠ без слайдів: ${nNo}</span>`:"";
+      }
+      const key=k+"|"+r;
+      const numbered=typeof r==="number";
+      const open=!single||!!S||!!q||!numbered||r===cur||st.open[key]||nSec<=1||(st.f&&st.f!=="all");
+      html+=`<details class="secbox" data-key="${key}"${open?" open":""}><summary class="sech" id="k${k}-r${r}" style="--c:var(${c.c})"><span class="rn">${secTag(r)}</span><h3>${esc(secName(k,r))}</h3><em>${tops.length} ${numbered?plural(tops.length,"тема","теми","тем"):plural(tops.length,"картка","картки","карток")}${sums.length?" · ігри й підсумок: "+sums.length:""}</em>${r===cur?`<span class="curb">★ зараз вивчаємо</span>`:""}${miss}</summary>`;
+      if(tops.length){ html+=`<div class="grid">`; for(const t of tops){n++;html+=cardHTML(t,c);} html+=`</div>`; }
+      if(sums.length){ html+=`${tops.length?`<div class="subh">Ігри, тренажери, проєкти й підсумок розділу</div>`:""}<div class="grid">`; for(const t of sums){n++;html+=cardHTML(t,c);} html+=`</div>`; }
+      html+=`</details>`;
+    }
+    html+=`</section>`;
+  }
+  $("#list").innerHTML=html||`<p class="empty">Нічого не знайдено. Спробуйте інше слово або оберіть «Усі класи».</p>`;
+  $("#count").textContent=n+" "+plural(n,"картка","картки","карток");
+  $("#list").querySelectorAll("[data-sel]").forEach(a=>a.onclick=e=>{e.preventDefault();const [k,r,t]=a.dataset.sel.split("|");st.sel={k,r,t:t||null};st.k=k;st.q="";$("#q").value="";render();goTo(t||"sel"+k)});
+  $("#list").querySelectorAll("[data-chip]").forEach(b=>b.onclick=()=>{const [k,r]=b.dataset.chip.split("|");if(st.sel&&st.sel.r===r&&!st.sel.t){st.sel=null;render();goTo("toc"+k);return}st.sel={k,r,t:null};render();goTo("sel"+k)});
+  $("#list").querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{st.f=b.dataset.f;render()});
+  $("#list").querySelectorAll(".secbox").forEach(d=>d.addEventListener("toggle",()=>{st.open[d.dataset.key]=d.open}));
+  $("#list").querySelectorAll("[data-act=back]").forEach(b=>b.onclick=()=>{const k=st.sel&&st.sel.k;st.sel=null;render();if(k)goTo("toc"+k)});
+  $("#list").querySelectorAll(".copy").forEach(b=>b.onclick=()=>{
+    const done=()=>{b.textContent="Скопійовано";setTimeout(()=>b.textContent="Копіювати",1500)};
+    navigator.clipboard?.writeText(b.dataset.u).then(done,()=>{b.textContent=b.dataset.u.replace("https://","")});
+  });
+}
+(()=>{const b=document.getElementById("totop");if(!b)return;addEventListener("scroll",()=>{b.hidden=scrollY<700},{passive:true});b.onclick=()=>scrollTo({top:0,behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"})})();
+
+function setMode(m){st.mode=m;try{localStorage.setItem("hub-mode",m)}catch(e){}if(m==="s"&&(st.k==="0"||st.k==="arch"||st.k==="gal")){location.hash="";st.k="all"}render()}
+$("#glCopy").onclick=e=>{const b=e.currentTarget;navigator.clipboard?.writeText("https://tinyurl.com/it-zpt").then(()=>{b.textContent="Скопійовано";setTimeout(()=>b.textContent="Копіювати",1500)},()=>{})};
+$("#m-s").onclick=()=>setMode("s");
+$("#m-t").onclick=()=>setMode("t");
+$("#q").oninput=e=>{st.q=e.target.value;render()};
+addEventListener("hashchange",()=>{const j=fromHash();if(j){st.q="";$("#q").value=""}render();if(j)goTo(j)});
+if(st.mode==="s"&&(st.k==="arch"||st.k==="gal"))st.k="all";
+render();
+if(jump) setTimeout(()=>goTo(jump),80);
+try{const qr=qrcode(0,"M");qr.addData("https://tinyurl.com/it-zpt");qr.make();const box=$("#qr");box.innerHTML=qr.createSvgTag({cellSize:4,margin:1,scalable:true});box.hidden=false}catch(e){}
+</script>
+
+</body></html>

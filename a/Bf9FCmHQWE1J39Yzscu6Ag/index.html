@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Тренажер Micro:Bit · 4 клас</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>/* VOICE: дитяча майстерня роботів у Цифровому музеї Сортика, без оцінок
+IDEA: справжня плата Micro:Bit на столі й скринька з кольоровими блоками-командами
+PICTURE: велика плата 5×5 зі світлодіодами, кнопками A і B — головний образ ліворуч
+COLOUR/TYPE: фіолетовий колір 4 класу, Unbounded / Nunito, текст 19px
+LAYOUT: завдання зверху, плата й програма поруч, на телефоні стовпчиком */
+:root{color-scheme:light dark;--bg:light-dark(#f4f6fb,#11141b);--surface:light-dark(#fff,#1a1f2a);--surface-2:light-dark(#eee9fb,#262038);--ink:light-dark(#18202f,#e8ecf4);--muted:light-dark(#5b6578,#9aa4b6);--line:light-dark(#dfe4ee,#2b3242);--class:light-dark(#7a4fd8,#a98af0);--ok:light-dark(#2e7d32,#7fd283);--ok-bg:light-dark(#e3f3e4,#1f3522);--ev:#f59f00;--act:#1c7ed6;--loop:#2f9e44;--send:#ffb020}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+[hidden]{display:none!important}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:19px/1.5 Nunito,system-ui,sans-serif;overflow-x:clip}
+.wrap{max-width:1240px;margin:0 auto;padding:18px max(16px,3vw) 80px}
+.eyebrow{color:var(--muted);font-weight:700;font-size:15px}
+h1{font:800 clamp(26px,4vw,42px)/1.08 Unbounded,system-ui,sans-serif;color:var(--class);margin:4px 0 10px;text-wrap:balance}
+h2{font:700 20px/1.2 Unbounded,system-ui,sans-serif;margin:0 0 8px}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.tabs button{flex:none;font:800 17px Nunito,sans-serif;border:2px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:10px 18px;min-height:48px;cursor:pointer}
+.tabs button[aria-selected=true]{background:var(--class);border-color:var(--class);color:#fff}
+.mission{background:var(--surface);border:1px solid var(--line);border-top:6px solid var(--class);border-radius:18px;padding:14px 18px;display:flex;gap:14px;align-items:flex-start}
+.mission .hero{font-size:44px;line-height:1}
+.steps{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.steps button{width:44px;height:44px;border-radius:50%;border:2px solid var(--line);background:var(--surface);color:var(--ink);font:800 17px Nunito,sans-serif;cursor:pointer}
+.steps button.ok{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
+.steps button[aria-current=true]{border-color:var(--class);box-shadow:0 0 0 3px color-mix(in srgb,var(--class) 30%,transparent)}
+.grid{display:grid;grid-template-columns:minmax(0,420px) minmax(0,1fr);gap:18px;margin-top:12px}
+@media(max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}}
+.board{background:linear-gradient(160deg,#2b2d33,#111216);border-radius:28px;padding:22px 18px 26px;color:#fff;position:relative;box-shadow:0 14px 30px rgba(0,0,0,.25),inset 0 2px 0 rgba(255,255,255,.12)}
+.board .lbl{position:absolute;top:10px;left:50%;transform:translateX(-50%);font:800 13px Nunito;opacity:.7;letter-spacing:.04em}
+.bd{display:grid;grid-template-columns:70px minmax(0,1fr) 70px;align-items:center;gap:8px}
+.leds{display:grid;grid-template-columns:repeat(5,1fr);gap:clamp(6px,2vw,12px);padding:10px;aspect-ratio:1}
+.led{border-radius:6px;background:#3a1010;transition:background .12s,box-shadow .12s}
+.led.on{background:#ff3b30;box-shadow:0 0 14px #ff5a50}
+.pb{width:64px;height:64px;border-radius:50%;border:6px solid #444;background:#1c1c1c;color:#fff;font:800 22px Unbounded;cursor:pointer;box-shadow:0 4px 0 #000}
+.pb:active{transform:translateY(3px);box-shadow:0 1px 0 #000}
+.sens{display:grid;gap:8px;margin-top:14px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:16px;padding:12px}
+.sens label{display:grid;grid-template-columns:150px minmax(0,1fr) 60px;gap:8px;align-items:center;font-weight:700;font-size:16px}
+.sens input[type=range]{width:100%;accent-color:var(--class)}
+.sens output{font-weight:800;text-align:right;font-variant-numeric:tabular-nums}
+.btn{font:800 17px Nunito,sans-serif;border:2px solid var(--class);background:var(--surface);color:var(--ink);border-radius:999px;padding:10px 18px;min-height:48px;cursor:pointer}
+.btn.pri{background:var(--class);color:#fff}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px 16px}
+.pal{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.blk{font:800 16px Nunito,sans-serif;color:#fff;border:0;border-radius:10px;padding:9px 12px;min-height:44px;cursor:pointer;text-align:left}
+.blk.ev{background:var(--ev)}.blk.act{background:var(--act)}.blk.loop{background:var(--loop)}
+.prog{display:grid;gap:12px}
+.evb{border-radius:14px;border:3px solid var(--ev);background:color-mix(in srgb,var(--ev) 10%,var(--surface))}
+.evb>header{background:var(--ev);color:#fff;font-weight:800;padding:6px 12px;border-radius:10px 10px 0 0;display:flex;justify-content:space-between;align-items:center}
+.evb>header button,.ab button{background:rgba(0,0,0,.18);color:#fff;border:0;border-radius:8px;width:34px;height:34px;font-size:16px;cursor:pointer}
+.slot{padding:8px;display:grid;gap:6px;min-height:52px}
+.slot.sel{outline:3px dashed var(--class);outline-offset:-4px;border-radius:10px}
+.ab{display:flex;align-items:center;gap:8px;background:var(--act);color:#fff;border-radius:10px;padding:6px 8px 6px 12px;font-weight:800}
+.ab.loop{background:var(--loop);flex-wrap:wrap}
+.ab select,.ab input{font:700 16px Nunito;border-radius:8px;border:0;padding:4px 6px;max-width:120px}
+.ab .inner{flex-basis:100%;background:rgba(255,255,255,.15);border-radius:8px;padding:6px;display:grid;gap:6px;min-height:40px}
+.ab .inner.sel{outline:3px dashed #fff}
+.ab .sp{flex:1}
+.empty{color:var(--muted);font-weight:700;font-size:16px}
+.hand{display:inline-block;animation:bob 1s ease-in-out infinite}@keyframes bob{50%{transform:translateY(-5px)}}
+.fb{border-radius:12px;padding:10px 14px;font-weight:800;margin-top:10px}
+.fb.ok{background:var(--ok-bg);color:var(--ok)}.fb.no{background:var(--surface-2);color:var(--ink)}
+.real{display:grid;gap:12px}.real .card{border-left:7px solid var(--class)}
+.real label{display:flex;gap:10px;align-items:center;font-weight:800;margin-top:8px}.real input{width:26px;height:26px;accent-color:var(--class)}
+.stars{font-size:clamp(26px,7vw,44px);letter-spacing:2px;overflow-wrap:anywhere;word-break:break-all}
+code{background:var(--surface-2);padding:1px 6px;border-radius:6px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body>
+<div class="wrap">
+<div class="eyebrow">Інформатика · 4 клас · Розділ 4 «Програмування роботів» · Тренажер</div>
+<h1>Майстерня Micro:Bit у музеї Сортика</h1>
+<nav class="tabs" role="tablist"><button role="tab" data-t="lab" aria-selected="true">🔧 Майстерня</button><button role="tab" data-t="real" aria-selected="false">💻 Справжній MakeCode</button><button role="tab" data-t="res" aria-selected="false">⭐ Мої зірки</button></nav>
+<section id="t-lab">
+<div class="mission"><div class="hero" aria-hidden="true">🤖</div><div><b id="mT"></b><div id="mD"></div><div class="steps" id="steps" aria-label="Завдання"></div></div></div>
+<div class="grid">
+<div>
+<div class="board" aria-label="Плата Micro:Bit"><span class="lbl">MICRO:BIT</span>
+<div class="bd"><button class="pb" id="bA" aria-label="Кнопка A">A</button><div class="leds" id="leds"></div><button class="pb" id="bB" aria-label="Кнопка B">B</button></div></div>
+<div class="sens">
+<div class="row"><button class="btn pri" id="run">▶ Увімкнути плату</button><button class="btn" id="shake">🫨 Струснути</button></div>
+<label>🌡 Температура<input type="range" id="tmp" min="-10" max="40" value="21"><output id="tmpO">21</output></label>
+<label>💡 Світло<input type="range" id="lig" min="0" max="255" value="120"><output id="ligO">120</output></label>
+</div>
+</div>
+<div class="card">
+<h2>Програма</h2>
+<p class="empty" style="margin:0 0 8px"><span class="hand">👉</span> Спершу натисни помаранчевий блок-подію, потім сині блоки-дії — вони стануть у виділену подію.</p>
+<div class="pal" id="palE"></div><div class="pal" id="palA"></div>
+<div class="prog" id="prog"></div>
+<div class="row" style="margin-top:10px"><button class="btn pri" id="chk">✅ Перевірити завдання</button><button class="btn" id="clr">🗑 Очистити програму</button></div>
+<div id="fb" class="fb" hidden></div>
+</div>
+</div>
+</section>
+<section id="t-real" hidden><div class="real" id="real"></div></section>
+<section id="t-res" hidden><div class="card" id="res"></div></section>
+</div>
+<script>
+{
+const IC={"серце":["01010","11111","11111","01110","00100"],"смайлик":["00000","01010","00000","10001","01110"],"сумний":["00000","01010","00000","01110","10001"],"так":["00000","00001","00010","10100","01000"],"ні":["10001","01010","00100","01010","10001"],"стрілка вгору":["00100","01110","10101","00100","00100"],"будиночок":["00100","01110","11111","01110","01110"],"сніжинка":["10101","01110","11111","01110","10101"]};
+const DIG={0:["111","101","101","101","111"],1:["010","110","010","010","111"],2:["111","001","111","100","111"],3:["111","001","111","001","111"],4:["101","101","111","001","001"],5:["111","100","111","001","111"],6:["111","100","111","101","111"],7:["111","001","010","010","010"],8:["111","101","111","101","111"],9:["111","101","111","001","111"],"-":["000","000","111","000","000"]};
+const EV={start:"при старті",A:"при натисканні A",B:"при натисканні B",shake:"при струшуванні"};
+const ACT={icon:"показати піктограму",num:"показати число",dice:"показати випадкове 1–6",temp:"показати температуру",light:"показати рівень світла",pause:"пауза",clear:"очистити екран",loop:"повторити … разів"};
+const TASKS=[
+ {t:"Серце музею",d:"Коли плату вмикають, хай вона покаже <b>серце</b>. Блоки: <code>при старті</code> → <code>показати піктограму</code> (серце).",c:p=>has(p.start,a=>a.k==="icon"&&a.v==="серце")},
+ {t:"Настрій відвідувача",d:"Кнопка <b>A</b> показує <b>смайлик</b>, кнопка <b>B</b> — <b>сумний</b> смайлик.",c:p=>has(p.A,a=>a.k==="icon"&&a.v==="смайлик")&&has(p.B,a=>a.k==="icon"&&a.v==="сумний")},
+ {t:"Кубик Сортика",d:"Коли плату <b>струснути</b>, вона показує <b>випадкове число від 1 до 6</b>.",c:p=>has(p.shake,a=>a.k==="dice")},
+ {t:"Термометр зали",d:"Кнопка <b>A</b> показує <b>температуру</b>. Посунь повзунок температури й перевір!",c:p=>has(p.A,a=>a.k==="temp")},
+ {t:"Блимання (повторення)",d:"<code>При старті</code> → <code>повторити 3 рази</code>, а всередині: серце, пауза, очистити екран, пауза.",c:p=>has(p.start,a=>a.k==="loop"&&a.n==3&&a.in.some(b=>b.k==="icon")&&a.in.some(b=>b.k==="clear")&&a.in.some(b=>b.k==="pause"))},
+ {t:"Нічник-датчик",d:"Кнопка <b>B</b> показує <b>рівень світла</b>. Затемни повзунок світла й натисни B.",c:p=>has(p.B,a=>a.k==="light")}
+];
+function has(list,f){return (list||[]).some(a=>f(a)||(a.k==="loop"&&a.in.some(f)))}
+const REAL=[
+ {t:"Відкрий MakeCode",d:"У браузері відкрий <b>makecode.microbit.org</b> → <b>Новий проєкт</b>, назви його <b>Сортик</b>. Акаунт не потрібен."},
+ {t:"Серце при старті",d:"З розділу <b>Основне</b> перетягни <code>показати піктограму</code> в <code>при запуску</code>. Подивись на плату-симулятор зліва."},
+ {t:"Кнопка A",d:"З розділу <b>Введення</b> візьми <code>при натисканні кнопки A</code> і додай <code>показати число</code>. Натисни A на симуляторі."},
+ {t:"Повторення",d:"З розділу <b>Цикли</b> візьми <code>повторити 4 рази</code> і зроби, щоб серце блимало. Покажи вчителеві!"}
+];
+let S={cur:0,ok:{},prog:{start:[]},sel:"start",selLoop:null,real:{}};
+try{const s=JSON.parse(localStorage.getItem("mbit4")||"null");if(s&&s.prog)S=Object.assign(S,s)}catch(e){}
+const save=()=>{try{localStorage.setItem("mbit4",JSON.stringify(S))}catch(e){}};
+const $=s=>document.querySelector(s);
+const leds=$("#leds");leds.innerHTML=Array.from({length:25},()=>'<div class="led"></div>').join("");
+const L=[...leds.children];
+function draw(rows){rows.forEach((r,y)=>[...r].forEach((c,x)=>L[y*5+x].classList.toggle("on",c==="1")))}
+const blank=["00000","00000","00000","00000","00000"];
+function digitRows(ch){const d=DIG[ch]||DIG[0];return d.map(r=>"0"+r+"0")}
+let runId=0;const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function showNum(n,id){const s=String(n);for(const ch of s){if(id!==runId)return;draw(digitRows(ch));await sleep(s.length>1?650:500)}}
+async function exec(list,id){for(const a of list){if(id!==runId)return;
+ if(a.k==="icon")draw(IC[a.v]);else if(a.k==="clear")draw(blank);else if(a.k==="pause")await sleep(+a.n||500);
+ else if(a.k==="num")await showNum(a.n,id);else if(a.k==="dice")await showNum(1+Math.floor(Math.random()*6),id);
+ else if(a.k==="temp")await showNum($("#tmp").value,id);else if(a.k==="light")await showNum($("#lig").value,id);
+ else if(a.k==="loop"){for(let i=0;i<(+a.n||1);i++){await exec(a.in,id);if(id!==runId)return}}
+ await sleep(120)}}
+function fire(ev){const id=++runId;exec(S.prog[ev]||[],id)}
+$("#run").onclick=()=>{draw(blank);fire("start")};$("#bA").onclick=()=>fire("A");$("#bB").onclick=()=>fire("B");$("#shake").onclick=()=>fire("shake");
+["tmp","lig"].forEach(k=>$("#"+k).oninput=e=>$("#"+k+"O").textContent=e.target.value);
+function newAct(k){return k==="icon"?{k,v:"серце"}:k==="num"?{k,n:5}:k==="pause"?{k,n:500}:k==="loop"?{k,n:3,in:[]}:{k}}
+function pal(){
+ $("#palE").innerHTML=Object.entries(EV).map(([k,v])=>`<button class="blk ev" data-ev="${k}">${v}</button>`).join("");
+ $("#palA").innerHTML=Object.entries(ACT).map(([k,v])=>`<button class="blk ${k==="loop"?"loop":"act"}" data-a="${k}">${v}</button>`).join("");
+ document.querySelectorAll("[data-ev]").forEach(b=>b.onclick=()=>{const k=b.dataset.ev;if(!S.prog[k])S.prog[k]=[];S.sel=k;S.selLoop=null;save();prog()});
+ document.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{if(!S.sel||!S.prog[S.sel]){S.prog.start=S.prog.start||[];S.sel="start"}
+  const a=newAct(b.dataset.a);const list=S.selLoop!=null&&S.prog[S.sel][S.selLoop]&&S.prog[S.sel][S.selLoop].k==="loop"?S.prog[S.sel][S.selLoop].in:S.prog[S.sel];
+  if(a.k==="loop"&&list!==S.prog[S.sel]){return}list.push(a);if(a.k==="loop")S.selLoop=S.prog[S.sel].length-1;save();prog()});
+}
+function actHTML(a,path){const opt=Object.keys(IC).map(n=>`<option${n===a.v?" selected":""}>${n}</option>`).join("");
+ const ctl=a.k==="icon"?`<select data-p="${path}" data-f="v" aria-label="Піктограма">${opt}</select>`:a.k==="num"?`<input type="number" min="0" max="99" value="${a.n}" data-p="${path}" data-f="n" aria-label="Число" style="width:70px">`:a.k==="pause"?`<select data-p="${path}" data-f="n" aria-label="Пауза">${[250,500,1000].map(n=>`<option value="${n}"${n==a.n?" selected":""}>${n} мс</option>`).join("")}</select>`:a.k==="loop"?`<input type="number" min="1" max="9" value="${a.n}" data-p="${path}" data-f="n" aria-label="Скільки разів" style="width:60px">`:"";
+ const name=a.k==="loop"?"повторити":ACT[a.k];
+ return `<div class="ab${a.k==="loop"?" loop":""}"><span>${name}</span>${ctl}${a.k==="loop"?"<span>разів</span>":""}<span class="sp"></span><button data-del="${path}" aria-label="Видалити блок">✕</button>${a.k==="loop"?`<div class="inner${S.selLoop!=null&&path===S.sel+"."+S.selLoop?" sel":""}" data-loop="${path}">${a.in.length?a.in.map((b,j)=>actHTML(b,path+"."+j)).join(""):'<span style="opacity:.85;font-size:15px">натисни сюди, а потім блоки-дії</span>'}</div>`:""}</div>`}
+function get(path){const p=path.split(".");let list=S.prog[p[0]],o=null;for(let i=1;i<p.length;i++){o=list[+p[i]];if(i<p.length-1)list=o.in}return{o,list,idx:+p[p.length-1]}}
+function prog(){const keys=Object.keys(S.prog);
+ $("#prog").innerHTML=keys.length?keys.map(k=>`<div class="evb"><header><span>${EV[k]}</span><button data-dev="${k}" aria-label="Видалити подію">✕</button></header><div class="slot${S.sel===k&&S.selLoop==null?" sel":""}" data-slot="${k}">${S.prog[k].length?S.prog[k].map((a,i)=>actHTML(a,k+"."+i)).join(""):'<span class="empty">порожньо — додай блоки-дії</span>'}</div></div>`).join(""):'<p class="empty">Програма порожня.</p>';
+ document.querySelectorAll("[data-slot]").forEach(s=>s.onclick=e=>{if(e.target!==s&&!e.target.classList.contains("empty"))return;S.sel=s.dataset.slot;S.selLoop=null;save();prog()});
+ document.querySelectorAll("[data-loop]").forEach(s=>s.onclick=e=>{if(e.target.closest("button,select,input"))return;e.stopPropagation();const p=s.dataset.loop.split(".");S.sel=p[0];S.selLoop=+p[1];save();prog()});
+ document.querySelectorAll("[data-p]").forEach(c=>c.onchange=()=>{const{o}=get(c.dataset.p);o[c.dataset.f]=c.dataset.f==="v"?c.value:+c.value;save()});
+ document.querySelectorAll("[data-del]").forEach(b=>b.onclick=e=>{e.stopPropagation();const{list,idx}=get(b.dataset.del);list.splice(idx,1);S.selLoop=null;save();prog()});
+ document.querySelectorAll("[data-dev]").forEach(b=>b.onclick=()=>{delete S.prog[b.dataset.dev];if(S.sel===b.dataset.dev){S.sel=null;S.selLoop=null}save();prog()});
+}
+const JOKES=["Чому робот не застудився? Бо має антивірус! 😄","Сортик сказав: «Мої світлодіоди сяють від радості!»","Що їсть робот на сніданок? Мікросхемки з чипсами! 🤖"];
+function mission(){const t=TASKS[S.cur];$("#mT").textContent="Завдання "+(S.cur+1)+": "+t.t;$("#mD").innerHTML=t.d;
+ $("#steps").innerHTML=TASKS.map((x,i)=>`<button class="${S.ok[i]?"ok":""}" aria-current="${i===S.cur}" data-s="${i}" aria-label="Завдання ${i+1}">${S.ok[i]?"⭐":i+1}</button>`).join("");
+ document.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{S.cur=+b.dataset.s;save();mission();$("#fb").hidden=true})}
+$("#chk").onclick=()=>{const f=$("#fb");f.hidden=false;if(TASKS[S.cur].c(S.prog)){S.ok[S.cur]=true;f.className="fb ok";f.textContent="⭐ Чудово! Запусти плату й подивись, як працює. "+(Object.keys(S.ok).length===TASKS.length?JOKES[Math.floor(Math.random()*3)]:"");const nx=TASKS.findIndex((t,i)=>!S.ok[i]);save();mission();if(nx>=0&&nx!==S.cur)setTimeout(()=>{S.cur=nx;save();mission()},1600)}else{f.className="fb no";f.textContent="🤔 Ще не все. Прочитай завдання ще раз: потрібна правильна подія й правильний блок."}};
+$("#clr").onclick=()=>{S.prog={start:[]};S.sel="start";S.selLoop=null;save();prog();draw(blank)};
+function real(){$("#real").innerHTML=`<p style="margin:0">Тепер — справжнє середовище програмування Micro:Bit. Виконай кроки й постав галочку.</p>`+REAL.map((r,i)=>`<div class="card"><h2>Крок ${i+1}. ${r.t}</h2><p style="margin:0">${r.d}</p><label><input type="checkbox" data-r="${i}"${S.real[i]?" checked":""}> Зроблено!</label></div>`).join("");
+ document.querySelectorAll("[data-r]").forEach(c=>c.onchange=()=>{S.real[c.dataset.r]=c.checked;save()})}
+function res(){const a=Object.keys(S.ok).length,b=Object.values(S.real).filter(Boolean).length,stars=a+b,max=TASKS.length+REAL.length;
+ $("#res").innerHTML=`<h2>Мої зірки</h2><div class="stars">${"⭐".repeat(stars)}${"☆".repeat(max-stars)}</div><p>Майстерня: <b>${a} з ${TASKS.length}</b> · Справжній MakeCode: <b>${b} з ${REAL.length}</b></p><p>${stars===max?"🏆 Ти справжній майстер роботів! "+JOKES[stars%3]:"Повертайся до завдань — зірок ще можна зібрати!"}</p><button class="btn" id="again">↺ Почати з початку</button>`;
+ $("#again").onclick=()=>{S={cur:0,ok:{},prog:{start:[]},sel:"start",selLoop:null,real:{}};save();prog();mission();real();res();draw(blank)}}
+function tab(t){document.querySelectorAll(".tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.t===t));["lab","real","res"].forEach(x=>$("#t-"+x).hidden=x!==t);if(t==="res")res()}
+document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>tab(b.dataset.t));
+pal();prog();mission();real();draw(blank);
+window.__mb={S,TASKS,fire,L};
+}
+</script>
+</body></html>

@@ -1,0 +1,756 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Великі дані · 9 клас</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Manrope:wght@400;600;700;800&display=swap">
+<style>
+/* Layout: смуга «потоку даних» угорі, вкладки-режими, під ними одна робоча колонка ~760px */
+:root{
+  --bg:#eef3f5; --surface:#ffffff; --surface-2:#e4edf1; --line:#cbd8df;
+  --fg:#12222c; --dim:#546874; --accent:#0d7f86; --accent-ink:#ffffff; --amber:#b77900;
+  --ok:#1d8a4c; --ok-bg:#e1f4e8; --bad:#c43b3b; --bad-bg:#fbe6e6; --boss:#a3372f;
+  --t1:#1d8a4c; --t2:#b77900; --t3:#c43b3b;
+  --display:"Unbounded","Arial Black",system-ui,sans-serif;
+  --body:"Manrope","Segoe UI",system-ui,sans-serif;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0c151b; --surface:#13212a; --surface-2:#1a2d37; --line:#2b414d;
+  --fg:#e5eef2; --dim:#94a9b4; --accent:#3cc4c0; --accent-ink:#06191b; --amber:#f0b43a;
+  --ok:#4fcf89; --ok-bg:#163a29; --bad:#f07070; --bad-bg:#3d1d1f; --boss:#f07a6a;
+  --t1:#4fcf89; --t2:#f0b43a; --t3:#f07070; color-scheme:dark; } }
+:root[data-theme="dark"]{
+  --bg:#0c151b; --surface:#13212a; --surface-2:#1a2d37; --line:#2b414d;
+  --fg:#e5eef2; --dim:#94a9b4; --accent:#3cc4c0; --accent-ink:#06191b; --amber:#f0b43a;
+  --ok:#4fcf89; --ok-bg:#163a29; --bad:#f07070; --bad-bg:#3d1d1f; --boss:#f07a6a;
+  --t1:#4fcf89; --t2:#f0b43a; --t3:#f07070; color-scheme:dark; }
+*{box-sizing:border-box}
+body{background:var(--bg); color:var(--fg); font-family:var(--body); font-size:16px; line-height:1.55}
+.wrap{max-width:780px; margin:0 auto; padding:20px 16px 64px}
+h1,h2,h3{font-family:var(--display); text-wrap:balance; margin:0}
+.dim{color:var(--dim)}
+button{font-family:inherit; font-size:inherit}
+:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+
+/* шапка */
+.top{display:flex; flex-direction:column; gap:14px; padding-block:6px 18px}
+.kicker{font-size:.78rem; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); font-weight:800}
+h1{font-size:clamp(2.1rem,8vw,3.6rem); font-weight:800; letter-spacing:-.02em; line-height:1}
+.ladder{display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 10px; font-family:var(--display); font-weight:500; color:var(--dim)}
+.ladder span:nth-child(odd){color:var(--fg)}
+.ladder span:nth-child(1){font-size:.7rem}.ladder span:nth-child(3){font-size:.8rem}.ladder span:nth-child(5){font-size:.95rem}
+.ladder span:nth-child(7){font-size:1.1rem}.ladder span:nth-child(9){font-size:1.3rem; color:var(--accent)}.ladder span:nth-child(11){font-size:1.55rem; color:var(--accent)}
+.who{display:flex; flex-wrap:wrap; gap:10px}
+.who input{flex:1 1 200px; min-width:0; background:var(--surface); border:1px solid var(--line); color:var(--fg); border-radius:10px; padding:10px 12px; font:inherit}
+.who input#cls{flex:0 1 120px}
+.meter{display:flex; align-items:center; gap:10px; font-size:.85rem; color:var(--dim)}
+.meter .bar{flex:1; height:8px; background:var(--surface-2); border-radius:8px; overflow:hidden}
+.meter .bar i{display:block; height:100%; width:0; background:var(--accent); transition:width .4s}
+
+/* вкладки */
+.tabs{display:flex; gap:6px; overflow-x:auto; padding-bottom:4px; margin-bottom:18px; scrollbar-width:thin}
+.tab{flex:0 0 auto; background:transparent; border:1px solid var(--line); color:var(--dim); border-radius:999px; padding:8px 15px; cursor:pointer; font-weight:700; font-size:.9rem}
+.tab[aria-selected="true"]{background:var(--fg); color:var(--bg); border-color:var(--fg)}
+.tab .n{font-variant-numeric:tabular-nums; opacity:.7; margin-left:4px; font-weight:600}
+.intro{margin:0 0 16px; color:var(--dim); max-width:62ch}
+
+/* картки завдань */
+.list{display:flex; flex-direction:column; gap:14px}
+.card{background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:18px}
+.card.done{border-color:var(--ok)}
+.card-h{display:flex; flex-wrap:wrap; gap:8px 12px; align-items:center; font-size:.78rem; text-transform:uppercase; letter-spacing:.08em; color:var(--dim); font-weight:800; margin-bottom:6px}
+.tier{border-radius:999px; padding:2px 9px; border:1px solid currentColor}
+.tier.t1{color:var(--t1)}.tier.t2{color:var(--t2)}.tier.t3{color:var(--t3)}
+.score-chip{margin-left:auto; color:var(--ok)}
+.q{font-weight:700; font-size:1.04rem; margin:2px 0 14px}
+.opts{display:flex; flex-direction:column; gap:9px}
+.opts.row2{flex-direction:row}.opts.row2 .opt{flex:1; text-align:center}
+.opt{text-align:left; background:var(--surface-2); border:1px solid var(--line); color:var(--fg); padding:12px 14px; border-radius:11px; cursor:pointer; transition:border-color .12s}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt.sel{border-color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent)}
+.opt.ok{background:var(--ok-bg); border-color:var(--ok)}
+.opt.bad{background:var(--bad-bg); border-color:var(--bad); animation:shake .35s}
+.opt:disabled{cursor:default}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.fb{margin-top:12px; padding:11px 13px; border-radius:11px; font-size:.93rem; border:1px solid}
+.fb.ok{background:var(--ok-bg); border-color:var(--ok)} .fb.bad{background:var(--bad-bg); border-color:var(--bad)}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:12px}
+.btn{background:var(--accent); color:var(--accent-ink); border:none; padding:10px 18px; border-radius:999px; cursor:pointer; font-weight:800}
+.btn:hover{filter:brightness(1.08)} .btn:disabled{opacity:.4; cursor:default; filter:none}
+.btn.ghost{background:transparent; color:var(--fg); border:1px solid var(--line)}
+.in{background:var(--bg); border:1px solid var(--accent); color:var(--fg); border-radius:9px; padding:9px 12px; font:inherit; width:220px; max-width:100%; font-variant-numeric:tabular-nums}
+.in.ok{border-color:var(--ok)} .in.bad{border-color:var(--bad); animation:shake .35s}
+.chips{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px}
+.chip{background:var(--surface-2); border:1px solid var(--accent); color:var(--fg); padding:8px 13px; border-radius:999px; cursor:pointer; font-size:.9rem}
+.chip.sel{box-shadow:0 0 0 2px var(--accent)} .chip.bad{border-color:var(--bad); animation:shake .35s}
+.buckets{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px}
+.bucket{min-height:96px; border:2px dashed var(--line); border-radius:12px; padding:10px; cursor:pointer; background:var(--surface-2); text-align:left; color:var(--fg)}
+.bucket:hover{border-color:var(--accent)}
+.bucket h4{margin:0 0 8px; font-size:.82rem; color:var(--accent); text-transform:uppercase; letter-spacing:.06em}
+.bucket .chip{cursor:default; border-color:var(--ok); display:inline-block; margin:0 6px 6px 0; font-size:.82rem}
+.target{display:flex; flex-direction:column; gap:7px; min-height:48px; border:2px dashed var(--line); border-radius:12px; padding:10px; margin-bottom:12px}
+.target:empty::before{content:"Натискайте картки нижче — вони стануть тут у вашому порядку"; color:var(--dim); font-size:.85rem}
+.step{display:flex; align-items:center; gap:10px; background:var(--surface-2); border:1px solid var(--line); border-radius:10px; padding:8px 11px; font-size:.92rem}
+.step.good{border-color:var(--ok)} .step.wrongpos{border-color:var(--bad)}
+.step .n{color:var(--amber); font-weight:800; width:20px; font-variant-numeric:tabular-nums}
+.step button{margin-left:auto; background:var(--surface); border:1px solid var(--line); color:var(--dim); border-radius:8px; width:28px; height:28px; cursor:pointer}
+.mcols{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+@media(max-width:560px){.mcols{grid-template-columns:1fr}}
+.mi{display:block; width:100%; text-align:left; background:var(--surface-2); border:1px solid var(--line); color:var(--fg); border-radius:10px; padding:10px 12px; margin-bottom:8px; cursor:pointer; font-size:.92rem}
+.mi.sel{border-color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent)}
+.mi.done{border-color:var(--ok); background:var(--ok-bg); cursor:default}
+.mi.bad{border-color:var(--bad); animation:shake .35s}
+
+/* квест */
+.hud{display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:12px}
+.pill{background:var(--surface); border:1px solid var(--line); padding:5px 13px; border-radius:999px; font-size:.88rem; font-variant-numeric:tabular-nums}
+.pill b{color:var(--amber)}
+.map{display:flex; flex-direction:column; gap:10px}
+.node{display:flex; align-items:center; gap:14px; background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:13px 15px; cursor:pointer; text-align:left; color:var(--fg); width:100%}
+.node:hover:not(:disabled){border-color:var(--accent)}
+.node:disabled{opacity:.5; cursor:not-allowed}
+.node .ico{font-size:1.7rem; width:50px; height:50px; display:grid; place-items:center; background:var(--surface-2); border-radius:50%; border:2px solid var(--line); flex:0 0 auto}
+.node.cur .ico{border-color:var(--amber)} .node.done .ico{border-color:var(--ok)} .node.boss{border-color:var(--boss)}
+.node .nm{font-weight:800} .node .ds{font-size:.85rem; color:var(--dim)}
+.node .st{margin-left:auto; color:var(--amber); letter-spacing:2px; white-space:nowrap}
+.dots{display:flex; gap:5px; margin:6px 0 12px}.dots i{flex:1; height:6px; border-radius:6px; background:var(--surface-2)}
+.dots i.on{background:var(--accent)} .dots i.cur{background:var(--amber)}
+.boss-bar{height:12px; background:var(--surface-2); border-radius:99px; overflow:hidden}
+.boss-bar i{display:block; height:100%; background:var(--boss); transition:width .5s}
+.center{text-align:center}
+.big{font-family:var(--display); font-size:2.4rem; color:var(--amber); letter-spacing:4px}
+.stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px; margin:14px 0}
+.stat{background:var(--surface-2); border-radius:12px; padding:11px; text-align:center}
+.stat b{display:block; font-family:var(--display); font-size:1.3rem; font-variant-numeric:tabular-nums}
+
+/* картки-терміни */
+.flip{width:100%; min-height:210px; perspective:1000px; background:none; border:none; padding:0; cursor:pointer; color:var(--fg)}
+.flip-in{position:relative; width:100%; min-height:210px; transition:transform .45s; transform-style:preserve-3d}
+.flip.on .flip-in{transform:rotateY(180deg)}
+.face{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:22px; border-radius:var(--r); border:1px solid var(--line); backface-visibility:hidden; background:var(--surface)}
+.face.back{transform:rotateY(180deg); background:var(--surface-2)}
+.face .term{font-family:var(--display); font-size:clamp(1.3rem,5vw,1.9rem); font-weight:700; text-align:center}
+.face .def{font-size:1.08rem; text-align:center; max-width:46ch}
+.face small{color:var(--dim); font-size:.8rem}
+@media (prefers-reduced-motion: reduce){ .flip-in{transition:none} .opt.bad,.chip.bad,.in.bad,.mi.bad{animation:none} }
+
+/* лабораторія */
+.datatable{width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums}
+.datatable th,.datatable td{padding:8px 6px; border-bottom:1px solid var(--line); text-align:left; font-size:.93rem}
+.datatable td.num{text-align:right; font-weight:700}
+.bars{display:flex; flex-direction:column; gap:7px; margin-top:14px}
+.brow{display:grid; grid-template-columns:110px 1fr; gap:10px; align-items:center; font-size:.85rem}
+.btrack{height:18px; background:var(--surface-2); border-radius:5px; overflow:hidden}
+.btrack i{display:block; height:100%; background:var(--accent); border-radius:5px}
+.axis{display:grid; grid-template-columns:110px 1fr; gap:10px; font-size:.72rem; color:var(--dim)}
+.axis div{display:flex; justify-content:space-between; font-variant-numeric:tabular-nums}
+
+/* результат */
+table.res{width:100%; border-collapse:collapse; font-size:.95rem}
+table.res td{padding:9px 6px; border-bottom:1px solid var(--line)}
+table.res td:last-child{text-align:right; font-weight:800; font-variant-numeric:tabular-nums}
+.grade{font-family:var(--display); font-size:4rem; font-weight:800; color:var(--accent); line-height:1}
+textarea.copy{width:100%; height:110px; margin-top:10px; background:var(--surface-2); color:var(--fg); border:1px solid var(--line); border-radius:10px; font:13px/1.4 monospace}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="kicker">Інформатика · 9 клас · Розділ 2 · Тема 4</div>
+    <h1>Великі дані</h1>
+    <div class="ladder" aria-label="Одиниці вимірювання від кілобайта до ексабайта"><span>КБ</span><span>→</span><span>МБ</span><span>→</span><span>ГБ</span><span>→</span><span>ТБ</span><span>→</span><span>ПБ</span><span>→</span><span>ЕБ</span></div>
+    <div class="who">
+      <input id="name" placeholder="Ім'я та прізвище" autocomplete="off" aria-label="Ім'я та прізвище">
+      <input id="cls" placeholder="Клас" autocomplete="off" aria-label="Клас">
+    </div>
+    <div class="meter"><span>Виконано</span><div class="bar"><i id="meter"></i></div><span id="meterTxt">0%</span></div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" data-t="ex" aria-selected="true">Вправи<span class="n" id="nEx"></span></button>
+    <button class="tab" role="tab" data-t="quest" aria-selected="false">Квест<span class="n" id="nQuest"></span></button>
+    <button class="tab" role="tab" data-t="cards" aria-selected="false">Картки<span class="n" id="nCards"></span></button>
+    <button class="tab" role="tab" data-t="lab" aria-selected="false">Лабораторія<span class="n" id="nLab"></span></button>
+    <button class="tab" role="tab" data-t="test" aria-selected="false">Тест<span class="n" id="nTest"></span></button>
+    <button class="tab" role="tab" data-t="res" aria-selected="false">Результат</button>
+  </nav>
+
+  <section id="p-ex">
+    <p class="intro">14 вправ від базових до складних. Правильна відповідь з першої спроби — 1 бал, з повторної — 0,5.</p>
+    <div class="list" id="exList"></div>
+  </section>
+  <section id="p-quest" hidden>
+    <p class="intro">Пройдіть чотири локації й переможіть Хаос-Алгоритм. Помилка коштує серце. Що менше помилок, то більше зірок.</p>
+    <div id="questApp"></div>
+  </section>
+  <section id="p-cards" hidden>
+    <p class="intro">Натисніть картку, щоб перевернути. «Знаю» прибирає її з колоди, «Ще раз» відкладає в кінець.</p>
+    <div id="cardsApp"></div>
+  </section>
+  <section id="p-lab" hidden>
+    <p class="intro">Міська рада Даниграда зібрала дані валідаторів громадського транспорту за один будній день. Проаналізуйте їх.</p>
+    <div class="card" id="labData"></div>
+    <div class="list" id="labList" style="margin-top:14px"></div>
+  </section>
+  <section id="p-test" hidden>
+    <p class="intro">12 питань, одна спроба на кожне. Порядок питань і варіантів перемішується.</p>
+    <div id="testApp"></div>
+  </section>
+  <section id="p-res" hidden>
+    <div id="resApp"></div>
+  </section>
+</div>
+
+<script>
+/* ===================== ВПРАВИ ===================== */
+const EX = [
+  {tier:1, type:"single", q:"Що називають великими даними?",
+    opts:["Дані, які важко опрацювати звичайними засобами","Будь-які файли, розмір яких більший за гігабайт","Дані, що зберігаються лише в паперових архівах","Таблиці, у яких є кілька сотень рядків даних"], c:0,
+    e:"Великі дані настільки об'ємні, різноманітні й швидкі, що один комп'ютер і звичайні програми з ними не впораються."},
+  {tier:1, type:"match", q:"З'єднайте ознаку великих даних з її змістом: натисніть ліву картку, потім праву.",
+    pairs:[["Обсяг","Скільки даних накопичено"],["Швидкість","Як швидко надходять нові дані"],["Різноманітність","Які різні типи й формати даних"],["Достовірність","Наскільки дані точні й надійні"],["Цінність","Яку користь дають висновки"]],
+    e:"Це п'ять «V»: Volume, Velocity, Variety, Veracity, Value."},
+  {tier:1, type:"order", q:"Розставте одиниці вимірювання від меншої до більшої.",
+    items:["Мегабайт","Гігабайт","Терабайт","Петабайт","Ексабайт"],
+    e:"Кожна наступна одиниця в 1024 рази більша: МБ → ГБ → ТБ → ПБ → ЕБ."},
+  {tier:1, type:"tf", q:"Фото, відео й голосові повідомлення теж можуть бути частиною великих даних.", c:true,
+    e:"Так. Великі дані бувають не лише таблицями, а й зображеннями, звуком, відео та текстами."},
+  {tier:2, type:"sort", q:"Розподіліть дані: структуровані чи неструктуровані? Натисніть картку, потім скриню.",
+    buckets:["Структуровані","Неструктуровані"],
+    items:[["Таблиця оцінок",0],["Розклад потягів",0],["Показники лічильника",0],["Список замовлень у базі",0],["Відео з камери",1],["Пост у соцмережі",1],["Голосове повідомлення",1],["Фото з телефону",1]],
+    e:"Структуровані дані мають чіткі поля й рядки, як у таблиці. Неструктуровані не мають сталої форми: фото, відео, тексти, звук."},
+  {tier:2, type:"multi", q:"Оберіть усі джерела, з яких надходять великі дані.",
+    opts:["Датчики розумних пристроїв","Покупки в інтернет-магазинах","Записи GPS-навігаторів","Паперовий щоденник у шухляді"], c:[0,1,2],
+    e:"Датчики, онлайн-покупки й навігатори постійно створюють цифрові записи. Паперовий щоденник не потрапляє в цифрові системи."},
+  {tier:2, type:"numeric", q:"Камера відеоспостереження записує 2 ГБ за годину. Скільки гігабайтів запишуть 15 камер за добу?",
+    a:720, hint:"Помножте 2 ГБ на 15 камер і на 24 години.", e:"2 × 15 × 24 = 720 ГБ за добу. І це лише 15 камер."},
+  {tier:2, type:"single", q:"Що таке розподілені обчислення?",
+    opts:["Робота багатьох комп'ютерів над однією задачею","Опрацювання всіх даних на одному шкільному ноутбуці","Надсилання великих файлів друзям через месенджер","Розподіл учнів класу на невеликі навчальні групи"], c:0,
+    e:"Велику задачу ділять на частини, і сотні чи тисячі комп'ютерів виконують їх одночасно."},
+  {tier:2, type:"fill", q:"Великі дані зберігають і опрацьовують у будівлях із тисячами серверів, які називають ______-центрами.",
+    ok:/^дата/i, show:"дата-центри", e:"Дата-центри забезпечують живлення, охолодження та зв'язок для тисяч серверів."},
+  {tier:3, type:"order", q:"Збудуйте етапи роботи з великими даними — від джерела до рішення.",
+    items:["Збирання даних із джерел","Зберігання в дата-центрі чи хмарі","Очищення від помилок і повторів","Аналіз і пошук закономірностей","Ухвалення рішення на основі висновків"],
+    e:"Без очищення аналіз дасть хибні висновки, а без аналізу дані не принесуть користі."},
+  {tier:3, type:"single", q:"Аналітик помітив: коли продають більше морозива, частішають сонячні опіки. Який висновок правильний?",
+    opts:["Обидва явища спричиняє спекотна погода","Морозиво спричиняє сонячні опіки шкіри","Опіки змушують людей купувати морозиво","Між цими явищами немає жодного зв'язку"], c:0,
+    e:"Якщо показники змінюються разом, це ще не означає, що один спричиняє інший. Тут спільна причина — спека."},
+  {tier:3, type:"numeric", q:"Метеостанція щохвилини надсилає один запис. Скільки записів вона надішле за тиждень?",
+    a:10080, hint:"60 хвилин × 24 години × 7 днів.", e:"60 × 24 × 7 = 10 080 записів від однієї станції."},
+  {tier:3, type:"sort", q:"Користь чи ризик великих даних? Натисніть картку, потім скриню.",
+    buckets:["Користь","Ризик"],
+    items:[["Прогноз заторів у місті",0],["Виявлення шахрайства з картками",0],["Раннє виявлення хвороб",0],["Витік особистих даних",1],["Стеження без згоди людини",1],["Хибні висновки з неповних даних",1]],
+    e:"Великі дані допомагають ухвалювати кращі рішення, але потребують захисту приватності та перевірки висновків."},
+  {tier:3, type:"single", q:"Що допоможе зменшити ваш цифровий слід?",
+    opts:["Перевіряти дозволи застосунків","Давати всі дозволи без читання","Щодня публікувати геолокацію","Мати один пароль для всього"], c:0,
+    e:"Застосунки збирають лише те, що ви дозволили. Перегляд дозволів — простий спосіб захистити свої дані."}
+];
+
+/* ===================== КВЕСТ ===================== */
+const LEVELS = [
+  { name:"Океан Даних", icon:"🌊", desc:"Що таке великі дані", ch:[
+    {type:"tf", q:"Великі дані неможливо ефективно опрацювати на одному звичайному комп'ютері.", c:true,
+      e:"Так, для них потрібні дата-центри, хмари й розподілені обчислення."},
+    {type:"single", q:"Яка ознака великих даних описує, як швидко вони надходять?",
+      opts:["Швидкість","Обсяг","Цінність","Достовірність"], c:0, e:"Швидкість (Velocity): нові дані надходять щосекунди."},
+    {type:"numeric", q:"1 ТБ = 1024 ГБ. Скільки гігабайтів у 4 ТБ?", a:4096, hint:"Помножте 1024 на 4.", e:"1024 × 4 = 4096 ГБ."}
+  ]},
+  { name:"Фабрика Сенсорів", icon:"📡", desc:"Звідки беруться дані", ch:[
+    {type:"match", q:"З'єднайте джерело з даними, які воно створює.",
+      pairs:[["Фітнес-браслет","Пульс і кроки"],["Навігатор","Координати руху"],["Інтернет-магазин","Історія покупок"],["Метеостанція","Температура й тиск"]],
+      e:"Кожен пристрій чи сервіс постійно створює свій потік даних."},
+    {type:"order", q:"Розставте одиниці від меншої до більшої.",
+      items:["Кілобайт","Мегабайт","Гігабайт","Терабайт"], e:"КБ → МБ → ГБ → ТБ, кожна в 1024 рази більша."},
+    {type:"fill", q:"Будівля з тисячами серверів для зберігання даних — це дата-______.",
+      ok:/^центр/i, show:"центр", e:"Дата-центр — серце роботи з великими даними."}
+  ]},
+  { name:"Лабіринт Аналітика", icon:"🧭", desc:"Як дані стають рішеннями", ch:[
+    {type:"single", q:"Чому стрімінговий сервіс радить вам схожі фільми?",
+      opts:["Аналізує історію ваших переглядів","Випадково обирає будь-які нові фільми","Показує лише найновіші фільми","Отримує поради від ваших сусідів"], c:0,
+      e:"Рекомендації будують на аналізі ваших переглядів і переглядів людей зі схожими вподобаннями."},
+    {type:"multi", q:"Де великі дані допомагають людям?",
+      opts:["Прогноз погоди","Пошук заторів на дорогах","Виявлення хвороб на знімках","Ремонт старого велосипеда"], c:[0,1,2],
+      e:"Погода, транспорт і медицина активно використовують аналіз великих даних."},
+    {type:"order", q:"Як служба доставки обирає найкоротший маршрут? Збудуйте послідовність.",
+      items:["Збирає GPS-дані автомобілів","Зберігає їх на серверах","Аналізує затори й відстані","Будує оптимальний маршрут"],
+      e:"Збирання → зберігання → аналіз → рішення."}
+  ]},
+  { name:"Вежа Приватності", icon:"🔐", desc:"Цифровий слід і захист даних", ch:[
+    {type:"tf", q:"Цифровий слід зникає, щойно ви закриваєте браузер.", c:false,
+      e:"Ні. Дані про ваші дії зберігаються на серверах сервісів значно довше."},
+    {type:"single", q:"Що варто зробити перед встановленням нового застосунку?",
+      opts:["Перевірити, які дозволи він просить","Вимкнути антивірус на своєму комп'ютері","Надіслати друзям свій пароль","Дозволити доступ до всіх файлів"], c:0,
+      e:"Дозволи показують, які ваші дані збиратиме застосунок."},
+    {type:"sort", q:"Безпечно чи небезпечно? Натисніть картку, потім скриню.",
+      buckets:["Безпечно","Небезпечно"],
+      items:[["Вимкнути геолокацію у фото",0],["Читати політику конфіденційності",0],["Двофакторна автентифікація",0],["Публікувати адресу школи",1],["Один пароль для всіх сервісів",1],["Приймати всі cookie не читаючи",1]],
+      e:"Що менше зайвих даних ви віддаєте, то менший ваш цифровий слід."}
+  ]},
+  { name:"Логово Хаос-Алгоритму", icon:"👾", desc:"Фінальна битва з босом", boss:true, ch:[
+    {type:"single", oneShot:true, q:"Яка ознака описує кількість накопичених даних?",
+      opts:["Обсяг","Швидкість","Цінність","Достовірність"], c:0, e:"Обсяг (Volume) — скільки даних накопичено."},
+    {type:"tf", oneShot:true, q:"Відео й фото належать до неструктурованих даних.", c:true, e:"Так, вони не мають чітких полів і рядків."},
+    {type:"single", oneShot:true, q:"Яка з цих одиниць найбільша?",
+      opts:["Петабайт","Терабайт","Гігабайт","Мегабайт"], c:0, e:"Петабайт = 1024 терабайти."},
+    {type:"single", oneShot:true, q:"Де зазвичай зберігають великі дані?",
+      opts:["У дата-центрах","На дискетах у шафі","У паперовому журналі","На одній флешці"], c:0, e:"У дата-центрах і хмарних сховищах."},
+    {type:"single", oneShot:true, q:"Два показники зростають разом. Що це доводить?",
+      opts:["Лише те, що є зв'язок","Що один спричиняє інший","Що дані точно хибні","Що дані треба видалити"], c:0,
+      e:"Зв'язок (кореляція) не доводить причину."}
+  ]}
+];
+
+/* ===================== КАРТКИ ===================== */
+const CARDS = [
+  ["Великі дані","Дані такого обсягу, швидкості й різноманітності, що їх не опрацювати звичайними засобами"],
+  ["Обсяг (Volume)","Кількість накопичених даних: терабайти, петабайти й більше"],
+  ["Швидкість (Velocity)","Як швидко надходять і мають опрацьовуватися нові дані"],
+  ["Різноманітність (Variety)","Різні типи даних: таблиці, тексти, фото, відео, звук"],
+  ["Достовірність (Veracity)","Наскільки дані точні, повні й надійні"],
+  ["Цінність (Value)","Користь, яку дають висновки з аналізу даних"],
+  ["Структуровані дані","Дані з чіткими полями й рядками, як у таблиці чи базі даних"],
+  ["Неструктуровані дані","Дані без сталої форми: фото, відео, тексти, голосові повідомлення"],
+  ["Дата-центр","Будівля з тисячами серверів, живленням, охолодженням і зв'язком"],
+  ["Хмарні обчислення","Зберігання й опрацювання даних на віддалених серверах через інтернет"],
+  ["Розподілені обчислення","Багато комп'ютерів одночасно виконують частини однієї задачі"],
+  ["Цифровий слід","Усі дані, які залишаються після ваших дій в інтернеті"],
+  ["Петабайт","1024 терабайти, або понад мільйон гігабайтів"]
+];
+
+/* ===================== ЛАБОРАТОРІЯ ===================== */
+const LAB_TABLE = [["Центральний",12400],["Північний",9800],["Річковий",4200],["Садовий",3600],["Промисловий",6000]];
+const LAB = [
+  {type:"numeric", q:"Скільки поїздок за день зробили мешканці всіх п'яти районів разом?",
+    a:36000, hint:"Додайте всі п'ять чисел із таблиці.", e:"12 400 + 9 800 + 4 200 + 3 600 + 6 000 = 36 000 поїздок."},
+  {type:"single", q:"У якому районі найбільше потрібні додаткові автобуси?",
+    opts:["Центральний","Північний","Промисловий","Річковий"], c:0, e:"У Центральному найбільше поїздок — 12 400 за день."},
+  {type:"numeric", q:"На скільки поїздок у Центральному районі більше, ніж у Садовому?",
+    a:8800, hint:"12 400 − 3 600.", e:"12 400 − 3 600 = 8 800 поїздок."},
+  {type:"numeric", q:"Кожна поїздка — це запис розміром 2 КБ. Скільки кілобайтів даних збирає місто за день?",
+    a:72000, hint:"Помножте загальну кількість поїздок на 2.", e:"36 000 × 2 = 72 000 КБ за день."},
+  {type:"numeric", q:"Скільки записів про поїздки накопичиться за 30 днів?",
+    a:1080000, hint:"36 000 × 30.", e:"36 000 × 30 = 1 080 000 записів. Ось так дані стають великими."},
+  {type:"order", q:"Збудуйте план аналітичного проєкту для міської ради.",
+    items:["Зібрати дані з валідаторів у транспорті","Очистити дані від помилкових записів","Порахувати поїздки за районами","Порівняти райони й знайти перевантаження","Запропонувати зміни в розкладі"],
+    e:"Аналітичний проєкт іде від даних до рішення."},
+  {type:"single", q:"Валідатори надсилають дані щосекунди. Яка ознака великих даних тут найважливіша?",
+    opts:["Швидкість","Цінність","Різноманітність","Обсяг"], c:0, e:"Дані надходять безперервно й швидко — це Velocity."}
+];
+
+/* ===================== ТЕСТ ===================== */
+const TEST = [
+  {type:"single", q:"Що з переліченого найточніше описує великі дані?",
+    opts:["Дані, яких забагато для звичайних засобів","Будь-які документи, що є на шкільному диску","Дані, записані лише в паперових книгах","Окремий файл розміром кілька мегабайтів"], c:0},
+  {type:"single", q:"Як англійською називають ознаку «різні формати даних: тексти, фото, відео»?",
+    opts:["Variety","Velocity","Veracity","Volume"], c:0},
+  {type:"tf", q:"1 петабайт більший за 1 терабайт.", c:true},
+  {type:"single", q:"Що з цього — структуровані дані?",
+    opts:["Таблиця з розкладом уроків","Відео з телефону учня","Голосове повідомлення друга","Фото шкільного подвір'я"], c:0},
+  {type:"single", q:"Навіщо дані очищують перед аналізом?",
+    opts:["Щоб прибрати помилки та повтори","Щоб зменшити кількість серверів","Щоб дані займали менше екрана","Щоб їх могли бачити всі охочі"], c:0},
+  {type:"tf", q:"Для опрацювання великих даних завжди достатньо одного ноутбука.", c:false},
+  {type:"single", q:"Як називають зберігання й опрацювання даних на віддалених серверах через інтернет?",
+    opts:["Хмарні обчислення","Локальні обчислення","Ручні обчислення","Паперові обчислення"], c:0},
+  {type:"single", q:"Де великі дані допомагають у сільському господарстві?",
+    opts:["Прогнозують урожай за датчиками","Замінюють ґрунт штучним покриттям","Вирощують рослини без жодної води","Вимикають усю техніку на фермі"], c:0},
+  {type:"single", q:"Що таке цифровий слід?",
+    opts:["Дані, що лишаються після дій онлайн","Відбиток вашого пальця на екрані телефона","Список програм на комп'ютері","Історія ремонту вашого ноутбука"], c:0},
+  {type:"tf", q:"Якщо два показники зростають разом, один обов'язково спричиняє інший.", c:false},
+  {type:"single", q:"Яка ознака описує, наскільки дані точні й надійні?",
+    opts:["Достовірність","Різноманітність","Швидкість","Обсяг"], c:0},
+  {type:"single", q:"Що з цього — ризик використання великих даних?",
+    opts:["Витік особистих даних","Точніший прогноз погоди","Швидший пошук заторів","Раннє виявлення хвороб"], c:0}
+];
+
+</script>
+<script>
+const $=(s,el=document)=>el.querySelector(s);
+function h(tag,cls,txt){const e=document.createElement(tag); if(cls) e.className=cls; if(txt!=null) e.textContent=txt; return e;}
+function shuf(a){a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a;}
+const TIER=["","Базовий","Середній","Складний"], TIERDOT=["","🟢","🟡","🔴"];
+function fmt(n){return n.toLocaleString("uk-UA");}
+
+/* ---------- типи завдань (спільні для всіх режимів) ---------- */
+const RENDER={
+  single(st,c,x){
+    const box=h("div","opts"); st.appendChild(box); let fin=false;
+    shuf(c.opts.map((_,i)=>i)).forEach(oi=>{
+      const b=h("button","opt",c.opts[oi]); b.type="button";
+      b.addEventListener("click",()=>{
+        if(fin) return;
+        if(oi===c.c){ fin=true; b.classList.add("ok"); box.querySelectorAll(".opt").forEach(z=>z.disabled=true); x.ok(c.e); return; }
+        b.classList.add("bad"); b.disabled=true; const alive=x.bad();
+        if(c.oneShot||x.oneShot){ fin=true; box.querySelectorAll(".opt").forEach(z=>{z.disabled=true; if(z.textContent===c.opts[c.c]) z.classList.add("ok");});
+          x.fb(false,"Не вдалося. "+(c.e||"Правильно: «"+c.opts[c.c]+"».")); if(alive) x.fail(); }
+        else if(alive) x.fb(false,x.retry);
+      });
+      box.appendChild(b);
+    });
+  },
+  tf(st,c,x){
+    const box=h("div","opts row2"); st.appendChild(box); let fin=false;
+    [["Так",true],["Ні",false]].forEach(([t,v])=>{
+      const b=h("button","opt",t); b.type="button";
+      b.addEventListener("click",()=>{
+        if(fin) return;
+        if(v===c.c){ fin=true; b.classList.add("ok"); box.querySelectorAll(".opt").forEach(z=>z.disabled=true); x.ok(c.e); return; }
+        b.classList.add("bad"); b.disabled=true; const alive=x.bad();
+        if(c.oneShot||x.oneShot){ fin=true; box.querySelectorAll(".opt").forEach(z=>{z.disabled=true; if((z.textContent==="Так")===c.c) z.classList.add("ok");});
+          x.fb(false,"Не вдалося. "+(c.e||"Правильно: «"+(c.c?"Так":"Ні")+"».")); if(alive) x.fail(); }
+        else if(alive) x.fb(false,x.retry);
+      });
+      box.appendChild(b);
+    });
+  },
+  multi(st,c,x){
+    const box=h("div","opts"); st.appendChild(box);
+    const btns=shuf(c.opts.map((_,i)=>i)).map(oi=>{ const b=h("button","opt",c.opts[oi]); b.type="button"; b.dataset.oi=oi;
+      b.addEventListener("click",()=>b.classList.toggle("sel")); box.appendChild(b); return b; });
+    const row=h("div","row"); st.appendChild(row); const chk=h("button","btn","Перевірити"); chk.type="button"; row.appendChild(chk);
+    chk.addEventListener("click",()=>{
+      const picked=btns.filter(b=>b.classList.contains("sel")).map(b=>+b.dataset.oi).sort().join(",");
+      if(picked===c.c.slice().sort().join(",")){ btns.forEach(b=>{b.disabled=true; if(c.c.includes(+b.dataset.oi)) b.classList.add("ok");}); chk.disabled=true; x.ok(c.e); }
+      else { btns.forEach(b=>{ if(b.classList.contains("sel")){ b.classList.add("bad"); setTimeout(()=>b.classList.remove("bad","sel"),500);} });
+        if(x.bad()) x.fb(false,"Не зовсім: перевірте кожне твердження окремо."); }
+    });
+  },
+  fill(st,c,x){ RENDER._input(st,c,x,"text","Ваша відповідь", v=>c.ok.test(v.trim()), c.e+" Відповідь: «"+c.show+"».", "Не те слово. Подумайте ще."); },
+  numeric(st,c,x){ RENDER._input(st,c,x,"number","Впишіть число", v=>parseFloat(String(v).replace(/\s/g,"").replace(",","."))===c.a, c.e, "Не збігається. Підказка: "+c.hint); },
+  _input(st,c,x,type,ph,test,okMsg,badMsg){
+    const row=h("div","row"); row.style.marginTop="0"; st.appendChild(row);
+    const inp=h("input","in"); inp.type=type==="number"?"text":"text"; if(type==="number") inp.inputMode="numeric"; inp.placeholder=ph; inp.setAttribute("aria-label",ph); row.appendChild(inp);
+    const chk=h("button","btn","Перевірити"); chk.type="button"; row.appendChild(chk);
+    const go=()=>{ if(chk.disabled||!inp.value.trim()) return;
+      if(test(inp.value)){ inp.classList.add("ok"); inp.disabled=true; chk.disabled=true; x.ok(okMsg); }
+      else { inp.classList.add("bad"); setTimeout(()=>inp.classList.remove("bad"),450); if(x.bad()) x.fb(false,badMsg); } };
+    chk.addEventListener("click",go); inp.addEventListener("keydown",e=>{ if(e.key==="Enter") go(); });
+  },
+  order(st,c,x){
+    const items=shuf(c.items.map((t,i)=>({t,i}))); let built=[], locked=false;
+    const target=h("div","target"), bank=h("div","chips"), row=h("div","row");
+    const chk=h("button","btn","Перевірити порядок"); chk.type="button"; row.appendChild(chk);
+    st.append(target,bank,row);
+    function draw(){
+      bank.innerHTML=""; target.innerHTML="";
+      items.filter(z=>!built.includes(z)).forEach(z=>{ const b=h("button","chip",z.t); b.type="button";
+        b.addEventListener("click",()=>{ if(locked) return; built.push(z); draw(); }); bank.appendChild(b); });
+      built.forEach((z,p)=>{ const d=h("div","step"); d.append(h("span","n",(p+1)+"."),h("span",null,z.t));
+        if(!locked){ const r=h("button",null,"✕"); r.type="button"; r.setAttribute("aria-label","Повернути картку"); r.addEventListener("click",()=>{ built.splice(p,1); draw(); }); d.appendChild(r); }
+        target.appendChild(d); });
+    }
+    draw();
+    chk.addEventListener("click",()=>{
+      if(built.length<items.length){ x.fb(false,`Спершу додайте всі ${items.length} картки (зараз ${built.length}).`); return; }
+      const rows=[...target.querySelectorAll(".step")]; let good=0;
+      built.forEach((z,p)=>{ const ok=z.i===p; if(ok) good++; rows[p].classList.add(ok?"good":"wrongpos"); });
+      if(good===items.length){ locked=true; draw(); target.querySelectorAll(".step").forEach(r=>r.classList.add("good")); chk.disabled=true; x.ok(c.e); }
+      else if(x.bad()) x.fb(false,`На своєму місці ${good} з ${items.length}. Натисніть ✕, щоб повернути картку.`);
+    });
+  },
+  match(st,c,x){
+    const cols=h("div","mcols"); st.appendChild(cols); const lc=h("div"), rc=h("div"); cols.append(lc,rc);
+    let sel=null, done=0;
+    const mk=(z,col,side)=>{ const d=h("button","mi",z.t); d.type="button"; d.dataset.i=z.i; col.appendChild(d);
+      d.addEventListener("click",()=>{
+        if(d.classList.contains("done")) return;
+        if(side==="L"){ lc.querySelectorAll(".mi").forEach(e=>e.classList.remove("sel")); d.classList.add("sel"); sel=d; return; }
+        if(!sel){ x.fb(false,"Спершу оберіть картку ліворуч."); return; }
+        if(sel.dataset.i===d.dataset.i){ sel.classList.remove("sel"); sel.classList.add("done"); d.classList.add("done"); sel=null; done++; if(done===c.pairs.length) x.ok(c.e); }
+        else { const s=sel; sel=null; d.classList.add("bad"); s.classList.add("bad"); setTimeout(()=>{d.classList.remove("bad"); s.classList.remove("bad","sel");},450);
+          if(x.bad()) x.fb(false,"Ця пара не підходить."); }
+      }); };
+    shuf(c.pairs.map((p,i)=>({t:p[0],i}))).forEach(z=>mk(z,lc,"L"));
+    shuf(c.pairs.map((p,i)=>({t:p[1],i}))).forEach(z=>mk(z,rc,"R"));
+  },
+  sort(st,c,x){
+    const items=shuf(c.items.map((z,i)=>({t:z[0],cat:z[1],i})));
+    const chips=h("div","chips"), bk=h("div","buckets"); st.append(chips,bk);
+    let sel=null, placed=0;
+    c.buckets.forEach((name,bi)=>{ const b=h("button","bucket"); b.type="button"; b.appendChild(h("h4",null,name)); bk.appendChild(b);
+      b.addEventListener("click",()=>{
+        if(!sel){ x.fb(false,"Спершу натисніть картку, потім скриню."); return; }
+        if(sel.it.cat===bi){ const cl=h("span","chip",sel.it.t); b.appendChild(cl); sel.el.remove(); sel=null; placed++; if(placed===items.length) x.ok(c.e); }
+        else { const el=sel.el; el.classList.add("bad"); setTimeout(()=>el.classList.remove("bad"),450); if(x.bad()) x.fb(false,"Не та скриня."); }
+      }); });
+    items.forEach(it=>{ const ch=h("button","chip",it.t); ch.type="button";
+      ch.addEventListener("click",()=>{ chips.querySelectorAll(".chip").forEach(z=>z.classList.remove("sel")); ch.classList.add("sel"); sel={el:ch,it}; });
+      chips.appendChild(ch); });
+  }
+};
+
+/* картка завдання з балами (вправи й лабораторія) */
+function scoredCard(list, c, label, scores, idx, after){
+  const card=h("div","card"); const head=h("div","card-h"); head.appendChild(h("span",null,label));
+  if(c.tier){ head.appendChild(h("span","tier t"+c.tier,TIERDOT[c.tier]+" "+TIER[c.tier])); }
+  const chip=h("span","score-chip"); head.appendChild(chip);
+  card.append(head,h("div","q",c.q)); const st=h("div"); card.appendChild(st);
+  const fbEl=h("div","fb"); fbEl.hidden=true; card.appendChild(fbEl);
+  let tries=0;
+  const x={ retry:"Не зовсім — спробуйте ще раз (за повторну спробу 0,5 бала).",
+    fb(ok,msg){ fbEl.hidden=false; fbEl.className="fb "+(ok?"ok":"bad"); fbEl.textContent=msg; },
+    ok(msg){ scores[idx]=tries===0?1:0.5; chip.textContent=(scores[idx]===1?"+1 бал":"+0,5 бала"); card.classList.add("done"); x.fb(true,msg); after(); },
+    bad(){ tries++; return true; }, fail(){} };
+  RENDER[c.type](st,c,x); list.appendChild(card);
+}
+
+/* ---------- ВПРАВИ ---------- */
+const exScore=new Array(EX.length).fill(null);
+EX.forEach((c,i)=>scoredCard($("#exList"),c,"Вправа "+(i+1),exScore,i,update));
+
+/* ---------- ЛАБОРАТОРІЯ ---------- */
+const labScore=new Array(LAB.length).fill(null);
+(function(){
+  const max=Math.max(...LAB_TABLE.map(r=>r[1])), scaleMax=14000;
+  const d=$("#labData");
+  d.innerHTML=`<div class="card-h"><span>Дані: поїздки за день</span></div>`;
+  const wrap=h("div"); wrap.style.overflowX="auto";
+  const t=h("table","datatable"); t.innerHTML="<thead><tr><th>Район</th><th style='text-align:right'>Поїздок за день</th></tr></thead>";
+  const tb=h("tbody"); LAB_TABLE.forEach(([n,v])=>{ const tr=h("tr"); tr.append(h("td",null,n)); const td=h("td","num",fmt(v)); tr.appendChild(td); tb.appendChild(tr); });
+  t.appendChild(tb); wrap.appendChild(t); d.appendChild(wrap);
+  const bars=h("div","bars"); bars.setAttribute("aria-hidden","true");
+  LAB_TABLE.forEach(([n,v])=>{ const r=h("div","brow"); r.appendChild(h("span",null,n)); const tr=h("div","btrack"); const i=h("i"); i.style.width=(v/scaleMax*100)+"%"; tr.appendChild(i); r.appendChild(tr); bars.appendChild(r); });
+  const ax=h("div","axis"); ax.appendChild(h("span")); const ticks=h("div"); [0,3500,7000,10500,14000].forEach(v=>ticks.appendChild(h("span",null,fmt(v)))); ax.appendChild(ticks); bars.appendChild(ax);
+  d.appendChild(bars);
+  LAB.forEach((c,i)=>scoredCard($("#labList"),c,"Завдання "+(i+1),labScore,i,update));
+})();
+
+/* ---------- КАРТКИ ---------- */
+const CS={queue:shuf(CARDS.map((_,i)=>i)), known:new Set(), flipped:false};
+function drawCards(){
+  const app=$("#cardsApp"); app.innerHTML="";
+  const hud=h("div","hud"); hud.append(h("span","pill",`Вивчено: ${CS.known.size} / ${CARDS.length}`), h("span","pill",`У колоді: ${CS.queue.length}`)); app.appendChild(hud);
+  if(!CS.queue.length){
+    const c=h("div","card center"); c.append(h("h3",null,"Колоду вивчено!"), h("p","dim","Перевірте себе в тесті або пройдіть квест."));
+    const r=h("div","row"); r.style.justifyContent="center"; const b=h("button","btn","Почати знову"); b.type="button";
+    b.addEventListener("click",()=>{ CS.queue=shuf(CARDS.map((_,i)=>i)); CS.known.clear(); drawCards(); update(); }); r.appendChild(b); c.appendChild(r); app.appendChild(c); return;
+  }
+  const [term,def]=CARDS[CS.queue[0]];
+  const f=h("button","flip"+(CS.flipped?" on":"")); f.type="button"; f.setAttribute("aria-label","Перевернути картку");
+  const inn=h("div","flip-in"); const fr=h("div","face"); fr.append(h("div","term",term),h("small",null,"натисніть, щоб побачити пояснення"));
+  const bk=h("div","face back"); bk.append(h("small",null,term),h("div","def",def));
+  inn.append(fr,bk); f.appendChild(inn); f.addEventListener("click",()=>{ CS.flipped=!CS.flipped; f.classList.toggle("on"); }); app.appendChild(f);
+  const r=h("div","row"); r.style.justifyContent="center";
+  const no=h("button","btn ghost","Ще раз"), yes=h("button","btn","Знаю"); no.type=yes.type="button";
+  no.addEventListener("click",()=>{ CS.queue.push(CS.queue.shift()); CS.flipped=false; drawCards(); });
+  yes.addEventListener("click",()=>{ CS.known.add(CS.queue.shift()); CS.flipped=false; drawCards(); update(); });
+  r.append(no,yes); app.appendChild(r);
+}
+drawCards();
+
+/* ---------- ТЕСТ ---------- */
+const T={order:[], i:0, score:0, done:false, started:false, answers:[]};
+function startTest(){ T.order=shuf(TEST.map((_,i)=>i)); T.i=0; T.score=0; T.done=false; T.started=true; T.answers=[]; drawTest(); update(); }
+function drawTest(){
+  const app=$("#testApp"); app.innerHTML="";
+  if(!T.started){ const c=h("div","card center"); c.append(h("h3",null,"Підсумковий тест"),h("p","dim","Перед тестом радимо пройти вправи й картки."));
+    const r=h("div","row"); r.style.justifyContent="center"; const b=h("button","btn","Почати тест"); b.type="button"; b.addEventListener("click",startTest); r.appendChild(b); c.appendChild(r); app.appendChild(c); return; }
+  if(T.done){ const c=h("div","card center"); c.append(h("h3",null,"Тест завершено"), h("div","big",`${T.score} / ${TEST.length}`));
+    const r=h("div","row"); r.style.justifyContent="center"; const b=h("button","btn ghost","Пройти ще раз"), g=h("button","btn","До результату"); b.type=g.type="button";
+    b.addEventListener("click",startTest); g.addEventListener("click",()=>showTab("res")); r.append(b,g); c.appendChild(r); app.appendChild(c); return; }
+  const c=TEST[T.order[T.i]], card=h("div","card");
+  const dots=h("div","dots"); T.order.forEach((_,k)=>{ const i=h("i"); if(k<T.i) i.className="on"; if(k===T.i) i.className="cur"; dots.appendChild(i); });
+  card.append(h("div","card-h",`Питання ${T.i+1} з ${TEST.length}`),dots,h("div","q",c.q));
+  const st=h("div"); card.appendChild(st); const fbEl=h("div","fb"); fbEl.hidden=true; card.appendChild(fbEl); const nx=h("div","row"); card.appendChild(nx);
+  const next=()=>{ const b=h("button","btn",T.i===TEST.length-1?"Завершити тест":"Далі →"); b.type="button";
+    b.addEventListener("click",()=>{ T.i++; if(T.i>=TEST.length) T.done=true; drawTest(); update(); }); nx.appendChild(b); };
+  const x={oneShot:true, fb(ok,msg){fbEl.hidden=false; fbEl.className="fb "+(ok?"ok":"bad"); fbEl.textContent=msg;},
+    ok(){ T.score++; x.fb(true,"Правильно!"); next(); }, bad(){ return true; }, fail(){ next(); }};
+  RENDER[c.type](st,c,x); app.appendChild(card);
+}
+drawTest();
+
+/* ---------- КВЕСТ ---------- */
+const MAX_HEARTS=5, XP_OK=10, XP_RETRY=5, XP_BOSS=20;
+const Q={unlocked:0, stars:[], xp:0, lvl:0, ch:0, hearts:MAX_HEARTS, mist:0, lvlXp:0, total:0, restarts:0, bossHP:100, tries:0};
+const qa=()=>$("#questApp");
+const maxXP=()=>LEVELS.reduce((s,L)=>s+L.ch.length*(L.boss?XP_BOSS:XP_OK),0);
+const starStr=n=>"★".repeat(n)+"☆".repeat(3-n);
+const heartsStr=()=>"❤️".repeat(Q.hearts)+"🖤".repeat(MAX_HEARTS-Q.hearts);
+function qHud(extra){ const d=h("div","hud"); d.innerHTML=`<span class="pill">XP: <b>${Q.xp}</b> / ${maxXP()}</span><span class="pill">Зірок: <b>${Q.stars.reduce((a,b)=>a+(b||0),0)}</b> / ${LEVELS.length*3}</span>`+(extra||""); return d; }
+function qMap(){
+  const app=qa(); app.innerHTML=""; app.appendChild(qHud());
+  const map=h("div","map");
+  LEVELS.forEach((L,i)=>{ const locked=i>Q.unlocked, done=Q.stars[i]>0;
+    const b=h("button","node"+(done?" done":"")+(i===Q.unlocked&&!done?" cur":"")+(L.boss?" boss":"")); b.type="button"; b.disabled=locked;
+    b.innerHTML=`<span class="ico">${locked?"🔒":L.icon}</span><span><span class="nm">Рівень ${i+1}: ${L.name}</span><br><span class="ds">${L.desc}</span></span><span class="st">${done?starStr(Q.stars[i]):""}</span>`;
+    b.addEventListener("click",()=>qStart(i)); map.appendChild(b); });
+  app.appendChild(map);
+}
+function qStart(i,restart){ Q.lvl=i; Q.ch=0; Q.hearts=MAX_HEARTS; Q.mist=0; Q.bossHP=100; if(!restart) Q.lvlXp=0; qChallenge(); }
+function qChallenge(){
+  const L=LEVELS[Q.lvl]; if(Q.ch>=L.ch.length) return qFinish();
+  const c=L.ch[Q.ch]; Q.tries=0; const app=qa(); app.innerHTML="";
+  const hp=h("span","pill"); hp.id="hearts"; hp.textContent=heartsStr(); const hud=qHud(); hud.appendChild(hp); app.appendChild(hud);
+  const card=h("div","card"); card.appendChild(h("div","card-h",`${L.icon} ${L.name} · завдання ${Q.ch+1} з ${L.ch.length}`));
+  const dots=h("div","dots"); L.ch.forEach((_,k)=>{ const i=h("i"); if(k<Q.ch) i.className="on"; if(k===Q.ch) i.className="cur"; dots.appendChild(i); }); card.appendChild(dots);
+  if(L.boss){ const bb=h("div","boss-bar"); const i=h("i"); i.id="bossHP"; i.style.width=Q.bossHP+"%"; bb.appendChild(i); card.append(bb,h("p","dim","👾 Хаос-Алгоритм · одна спроба на питання")); }
+  card.appendChild(h("div","q",c.q)); const st=h("div"); card.appendChild(st);
+  const fbEl=h("div","fb"); fbEl.hidden=true; card.appendChild(fbEl); const nx=h("div","row"); card.appendChild(nx);
+  const back=h("div","row"); const mb=h("button","btn ghost","← На карту"); mb.type="button"; mb.addEventListener("click",()=>{ Q.xp-=Q.lvlXp; Q.lvlXp=0; qMap(); }); back.appendChild(mb);
+  app.append(card,back);
+  const next=()=>{ const last=Q.ch>=L.ch.length-1; const b=h("button","btn",last?"Завершити рівень":"Далі →"); b.type="button"; b.addEventListener("click",()=>{ Q.ch++; qChallenge(); }); nx.appendChild(b); };
+  const x={ retry:"Не зовсім — спробуйте інший варіант (−1 ❤️).",
+    fb(ok,msg){ fbEl.hidden=false; fbEl.className="fb "+(ok?"ok":"bad"); fbEl.textContent=msg; },
+    ok(msg){ const gain=c.oneShot?(Q.tries===0?XP_BOSS:0):(Q.tries===0?XP_OK:XP_RETRY); Q.xp+=gain; Q.lvlXp+=gain;
+      if(L.boss&&gain>0){ Q.bossHP=Math.max(0,Q.bossHP-100/L.ch.length); const b=$("#bossHP"); if(b) b.style.width=Q.bossHP+"%"; }
+      x.fb(true,msg+(gain?` (+${gain} XP)`:"")); next(); },
+    bad(){ Q.hearts--; Q.mist++; Q.total++; Q.tries++; const hh=$("#hearts"); if(hh) hh.textContent=heartsStr();
+      if(Q.hearts<=0){ setTimeout(qOver,700); return false; } return true; },
+    fail(){ next(); } };
+  RENDER[c.type](st,c,x);
+}
+function qOver(){
+  Q.xp-=Q.lvlXp; Q.lvlXp=0; Q.restarts++; const app=qa(); app.innerHTML="";
+  const c=h("div","card center"); c.append(h("h3",null,"Сервер перезавантажується…"),h("p","dim","Усі серця втрачено. Спробуйте рівень ще раз — тепер ви знаєте більше."));
+  const r=h("div","row"); r.style.justifyContent="center"; const a=h("button","btn","Спробувати знову"), m=h("button","btn ghost","На карту"); a.type=m.type="button";
+  a.addEventListener("click",()=>qStart(Q.lvl,true)); m.addEventListener("click",qMap); r.append(a,m); c.appendChild(r); app.appendChild(c);
+}
+function qFinish(){
+  const stars=Q.mist===0?3:(Q.mist<=2?2:1); Q.stars[Q.lvl]=Math.max(Q.stars[Q.lvl]||0,stars);
+  if(Q.lvl===Q.unlocked&&Q.unlocked<LEVELS.length-1) Q.unlocked++;
+  const L=LEVELS[Q.lvl], app=qa(); app.innerHTML="";
+  const c=h("div","card center"); c.append(h("h3",null,L.boss?"Хаос-Алгоритм переможено!":"Рівень пройдено!"),h("div","big",starStr(stars)));
+  const s=h("div","stats"); s.innerHTML=`<div class="stat"><b>${Q.mist}</b>помилок</div><div class="stat"><b>+${Q.lvlXp}</b>XP за рівень</div><div class="stat"><b>${Q.xp}</b>XP загалом</div>`; c.appendChild(s);
+  const r=h("div","row"); r.style.justifyContent="center"; const m=h("button","btn",L.boss?"До результату":"На карту"), a=h("button","btn ghost","Ще раз заради зірок"); m.type=a.type="button";
+  m.addEventListener("click",()=>{ if(L.boss){ qMap(); showTab("res"); } else qMap(); }); a.addEventListener("click",()=>{ Q.xp-=Q.lvlXp; qStart(Q.lvl); });
+  r.append(m,a); c.appendChild(r); app.appendChild(c); update();
+}
+qMap();
+
+/* ---------- РЕЗУЛЬТАТ ---------- */
+const sum=a=>a.reduce((s,v)=>s+(v||0),0), answered=a=>a.filter(v=>v!==null).length;
+function calc(){
+  const exP=sum(exScore)/EX.length, labP=sum(labScore)/LAB.length, testP=T.done?T.score/TEST.length:0;
+  const complete=answered(exScore)===EX.length && answered(labScore)===LAB.length && T.done;
+  const grade=complete?Math.max(1,Math.round((exP+labP+testP)/3*12)):null;
+  const qStars=Q.stars.reduce((a,b)=>a+(b||0),0);
+  return {exP,labP,testP,complete,grade,qStars};
+}
+const pct=v=>Math.round(v*100)+"%";
+function drawRes(){
+  const r=calc(), app=$("#resApp"); app.innerHTML="";
+  const c=h("div","card");
+  const top=h("div","row"); top.style.marginTop="0"; top.style.alignItems="flex-end"; top.style.justifyContent="space-between";
+  const g=h("div"); g.append(h("div","card-h","Оцінка за 12-бальною шкалою"), h("div","grade",r.grade??"—")); top.appendChild(g);
+  top.appendChild(h("p","dim",r.complete?"Оцінка — середнє вправ, лабораторії й тесту.":"Оцінка з'явиться, коли ви виконаєте всі вправи, лабораторію й тест."));
+  c.appendChild(top);
+  const t=h("table","res");
+  [["Вправи",`${answered(exScore)}/${EX.length} · ${pct(r.exP)}`],["Лабораторія",`${answered(labScore)}/${LAB.length} · ${pct(r.labP)}`],
+   ["Тест",T.done?`${T.score}/${TEST.length} · ${pct(r.testP)}`:"не пройдено"],["Квест (бонус)",`${r.qStars}/${LEVELS.length*3} ★ · ${Q.xp} XP`],["Картки",`${CS.known.size}/${CARDS.length} вивчено`]]
+   .forEach(([a,b])=>{ const tr=h("tr"); tr.append(h("td",null,a),h("td",null,b)); t.appendChild(tr); });
+  c.appendChild(t);
+  const row=h("div","row"); const dl=h("button","btn","Завантажити результат (.csv)"), cp=h("button","btn ghost","Скопіювати"); dl.type=cp.type="button";
+  dl.addEventListener("click",downloadCSV); cp.addEventListener("click",()=>copyRes(cp,c)); row.append(dl,cp); c.appendChild(row);
+  c.appendChild(h("p","dim","Надішліть файл або скопійований рядок учителю."));
+  app.appendChild(c);
+}
+function resRow(){
+  const r=calc(), name=$("#name").value.trim()||"Учень (без імені)", cls=$("#cls").value.trim();
+  const header=["ПІБ учня","Клас","Дата","Тема","Вправи %","Лабораторія %","Тест (бали)","Квест зірки","Квест XP","Картки вивчено","Оцінка (12)"];
+  const row=[name,cls,new Date().toLocaleString("uk-UA"),"Великі дані",Math.round(r.exP*100),Math.round(r.labP*100),T.done?`${T.score}/${TEST.length}`:"—",r.qStars,Q.xp,CS.known.size,r.grade??"—"];
+  return {header,row,name};
+}
+async function downloadCSV(){
+  const {header,row,name}=resRow(); const csv="﻿"+header.join(";")+"\n"+row.join(";");
+  const filename="big_data_"+name.replace(/[^\wа-яіїєґА-ЯІЇЄҐ]+/g,"_")+".csv";
+  try{ if(window.claude&&typeof window.claude.use==="function"){ const d=await window.claude.use("downloads"); if(d){ await d.save({filename,data:csv}); return; } } }catch(e){}
+  copyRes($("#resApp .btn.ghost"),$("#resApp .card"));
+}
+function copyRes(btn,host){
+  const {header,row}=resRow(); const t=header.join("\t")+"\n"+row.join("\t");
+  const fallback=()=>{ let ta=host.querySelector("textarea"); if(!ta){ ta=h("textarea","copy"); ta.readOnly=true; host.appendChild(ta);} ta.value=t; ta.select(); };
+  try{ navigator.clipboard.writeText(t).then(()=>{ btn.textContent="Скопійовано ✓"; }).catch(fallback); }catch(e){ fallback(); }
+}
+
+/* ---------- вкладки й прогрес ---------- */
+function showTab(id){
+  document.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-selected",String(b.dataset.t===id)));
+  ["ex","quest","cards","lab","test","res"].forEach(k=>{ $("#p-"+k).hidden=k!==id; });
+  if(id==="res") drawRes();
+  window.scrollTo({top:0});
+}
+document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>showTab(b.dataset.t)));
+function update(){
+  $("#nEx").textContent=`${answered(exScore)}/${EX.length}`;
+  $("#nLab").textContent=`${answered(labScore)}/${LAB.length}`;
+  $("#nCards").textContent=`${CS.known.size}/${CARDS.length}`;
+  $("#nQuest").textContent=`${Q.stars.filter(s=>s>0).length}/${LEVELS.length}`;
+  $("#nTest").textContent=T.done?`${T.score}/${TEST.length}`:"";
+  const parts=answered(exScore)/EX.length+answered(labScore)/LAB.length+(T.done?1:T.started?T.i/TEST.length:0);
+  const p=Math.round(parts/3*100); $("#meter").style.width=p+"%"; $("#meterTxt").textContent=p+"%";
+  if(!$("#p-res").hidden) drawRes();
+}
+update();
+</script>
+
+<script>
+/* ===== «Надіслати вчителю» (Google Форма журналу) — універсальна кнопка ===== */
+(function(){
+const FORM_PREFILL="https://docs.google.com/forms/d/e/1FAIpQLSeaDGNzqpEMjZyDt4WUwg3k3FAhGGW4pG1E8IcOk8b4LQsBVw/viewform?usp=pp_url&entry.1997531456=test";
+const GRADE=9, TOPIC="Великі дані";
+const clean=v=>String(v==null?"":v).replace(/[|\n\r]/g," ").trim()||"—";
+const hm=t=>{t=Math.max(0,Math.round(t));return Math.floor(t/60)+" хв "+String(t%60).padStart(2,"0")+" с"};
+function getRow(){
+  try{ if(typeof buildResultRow==="function") return buildResultRow(); }catch(e){}
+  try{ if(typeof resRow==="function") return resRow(); }catch(e){}
+  try{ if(typeof csvLine==="function"){ const p=csvLine().split("\n"); const sp=s=>s.split(";").map(x=>x.replace(/^"|"$/g,"").replace(/""/g,'"'));
+    return {header:sp(p[0]),row:sp(p[1]||"")}; } }catch(e){}
+  return {header:[],row:[]};
+}
+function extra(){
+  try{ if(typeof window.G6compute==="function"){ return (window.G6&&window.G6.frozen)||window.G6compute(); } }catch(e){}
+  return null;
+}
+function getGrade(o,x){
+  if(x&&x.grade!=null) return x.grade;
+  try{ if(typeof computeGrade12==="function"){ const g=computeGrade12(); if(g) return g; } }catch(e){}
+  try{ if(typeof grade==="function"){ const g=grade(); if(g) return g; } }catch(e){}
+  const i=o.header.findIndex(h=>/Оцінка/i.test(h)); return i>=0&&o.row[i]!==""?o.row[i]:"—";
+}
+function line(name,cls){
+  const o=getRow(), x=extra(), g=getGrade(o,x);
+  let ok=0,tot=0; const det=[];
+  o.header.forEach((h,i)=>{ if(i<3&&/ПІБ|Ім'я|Клас|Дата/i.test(h)) return;
+    const v=String(o.row[i]==null?"—":o.row[i]); det.push(clean(h).replace(/[,:]/g," ")+":"+clean(v).replace(/[,]/g,";"));
+    const m=v.match(/^(\d+)\s*\/\s*(\d+)$/); if(m){ok+=+m[1];tot+=+m[2];} });
+  const done=x?!!(window.G6&&window.G6.frozen):(/^\d+$/.test(String(g))&&+g>0);
+  return ["v1",GRADE,TOPIC,clean(cls),clean(name),1,"—",clean(g),tot?ok+" з "+tot:"—","—",
+    x&&x.errors!=null?x.errors:"—", x&&x.T?hm(x.T):"—","—",x&&x.tooFast?"занадто швидко":"",done?"завершено":"не завершено",det.join(",")].join("|");
+}
+const st=document.createElement("style");
+st.textContent=`
+#jFab{position:fixed;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:9998;
+  background:#ffb020;color:#2a1a00;border:0;border-radius:999px;padding:13px 20px;font:800 16px system-ui,"Segoe UI",sans-serif;
+  box-shadow:0 8px 24px rgba(0,0,0,.35);cursor:pointer}
+#jFab:hover{filter:brightness(1.06)} #jFab:focus-visible{outline:3px solid #2f5bea;outline-offset:3px}
+#jPanel{position:fixed;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:9999;
+  width:min(360px,calc(100vw - 32px));background:#fff;color:#1d2433;border-radius:16px;padding:16px;
+  box-shadow:0 16px 40px rgba(0,0,0,.4);font:15px/1.45 system-ui,"Segoe UI",sans-serif;display:flex;flex-direction:column;gap:10px}
+#jPanel b.h{font-size:17px}
+#jPanel input{width:100%;box-sizing:border-box;border:1px solid #c8cfdc;border-radius:10px;padding:10px 12px;font:inherit;color:#1d2433;background:#f7f9fc}
+#jPanel .jrow{display:flex;gap:8px} #jPanel .jrow input:last-child{flex:0 0 110px}
+#jPanel a.jgo{display:block;text-align:center;background:#2f7d4f;color:#fff;text-decoration:none;font-weight:800;border-radius:10px;padding:11px}
+#jPanel .jm{font-size:13px;color:#5b6578} #jPanel .jx{position:absolute;top:8px;right:10px;border:0;background:none;font-size:20px;cursor:pointer;color:#5b6578}`;
+document.head.appendChild(st);
+const fab=document.createElement("button"); fab.id="jFab"; fab.type="button"; fab.textContent="📤 Надіслати вчителю";
+const pn=document.createElement("div"); pn.id="jPanel"; pn.hidden=true;
+pn.innerHTML=`<button class="jx" type="button" aria-label="Закрити">×</button><b class="h">📤 Надіслати результат учителю</b>
+<div class="jm">Надсилай, коли пройдеш усі вправи й тест. Вхід в акаунт не потрібен.</div>
+<div class="jrow"><input id="jName" placeholder="Прізвище та ім'я" autocomplete="off"><input id="jCls" placeholder="Клас, 8-А" maxlength="6" autocomplete="off"></div>
+<a class="jgo" id="jSend" href="#" target="_blank" rel="noopener">Відкрити форму з результатом</a>
+<div class="jm" id="jMsg">Відкриється Google Форма з уже записаним результатом — натисни в ній «Надіслати».</div>`;
+document.body.appendChild(fab); document.body.appendChild(pn);
+const nm=pn.querySelector("#jName"), cl=pn.querySelector("#jCls"), a=pn.querySelector("#jSend"), msg=pn.querySelector("#jMsg");
+fab.addEventListener("click",()=>{ pn.hidden=!pn.hidden; if(pn.hidden) return;
+  const o=getRow(); const n=String(o.row[0]||""), c=String(o.row[1]||"");
+  if(!nm.value&&n&&!/без імені|^—$/.test(n)) nm.value=n; if(!cl.value&&c&&c!=="—"&&!/^\d$/.test(c)) cl.value=c;
+  (nm.value?cl:nm).focus(); });
+pn.querySelector(".jx").addEventListener("click",()=>pn.hidden=true);
+a.addEventListener("click",e=>{
+  if(!nm.value.trim()||!cl.value.trim()){ e.preventDefault(); msg.textContent="Спершу впиши прізвище, ім'я та клас ☝️"; (nm.value.trim()?cl:nm).focus(); return; }
+  a.href=FORM_PREFILL.replace(/(entry\.\d+=)[^&]*/,(m,p)=>p+encodeURIComponent(line(nm.value.trim(),cl.value.trim())));
+  msg.textContent="Форму відкрито в новій вкладці — натисни там «Надіслати» ✔";
+});
+})();
+</script>
+
+</body></html>

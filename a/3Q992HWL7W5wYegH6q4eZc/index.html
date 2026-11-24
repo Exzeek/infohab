@@ -1,0 +1,672 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Тимко і браузер</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;800&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: дизайн-система «Інфо-хаб», 3 клас — одна колонка до 860px, шапка-історія, липкі вкладки, картки з верхньою смугою кольору класу */
+:root{
+  --bg:#f4f6fb; --surface:#ffffff; --surface-2:#e9edf5; --ink:#18202f; --muted:#5b6578; --line:#dfe4ee; --accent:#2f5bea;
+  --class:#1e8fd6; --ok:#2e7d32; --ok-bg:#e3f3e4; --bad:#b3261e; --bad-bg:#fbe7e5; --warn:#b45309;
+  --send:#ffb020; --send-ink:#2a1a00;
+  --f-display:"Unbounded","Arial Black",system-ui,sans-serif;
+  --f-body:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+  --r-sm:6px; --r-md:12px; --r-lg:16px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#11141b; --surface:#1a1f2a; --surface-2:#232a38; --ink:#e8ecf4; --muted:#9aa4b6; --line:#2b3242; --accent:#7d9bff;
+  --class:#5ab6f0; --ok:#7fd283; --ok-bg:#1f3522; --bad:#ff8a80; --bad-bg:#3a1f1d; --warn:#f2b46b; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11141b; --surface:#1a1f2a; --surface-2:#232a38; --ink:#e8ecf4; --muted:#9aa4b6; --line:#2b3242; --accent:#7d9bff;
+  --class:#5ab6f0; --ok:#7fd283; --ok-bg:#1f3522; --bad:#ff8a80; --bad-bg:#3a1f1d; --warn:#f2b46b; color-scheme:dark}
+[hidden]{display:none!important}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:19px;line-height:1.45;margin:0}
+.wrap{max-width:860px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 96px}
+h1,h2,h3{text-wrap:balance;margin:0}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(1.5rem,5vw,2.3rem);line-height:1.15;color:var(--class)}
+h2{font-family:var(--f-display);font-weight:700;font-size:1.2rem}
+h3{font-size:1.05rem;font-weight:800}
+.eyebrow{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+header{display:grid;gap:10px;margin-bottom:14px}
+.story{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:14px 16px;display:flex;gap:14px;align-items:flex-start}
+.story .hero{font-size:44px;line-height:1;flex:0 0 auto}
+.story p{margin:0;min-width:0}
+.hud{display:flex;flex-wrap:wrap;gap:8px;font-weight:700;font-size:15px}
+.hud span{background:var(--surface-2);border-radius:999px;padding:4px 12px;font-variant-numeric:tabular-nums}
+.hud .over{color:var(--bad)}
+nav.tabs{display:flex;gap:6px;overflow-x:auto;padding:8px 0 6px;position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
+nav.tabs button{flex:0 0 auto;font-family:var(--f-body);font-weight:800;font-size:17px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:9px 16px;border-radius:12px 12px 4px 4px;cursor:pointer}
+nav.tabs button[aria-selected="true"]{background:var(--class);border-color:var(--class);color:#fff}
+button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+section.panel{display:grid;gap:14px;margin-top:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-top:5px solid var(--class);border-radius:var(--r-lg);padding:16px;display:grid;gap:12px;min-width:0}
+.card.done{border-color:var(--ok);border-top-color:var(--ok)}
+.qhead{display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap}
+.lvl{font-size:14px;font-weight:700;padding:2px 10px;border-radius:999px;background:var(--surface-2);white-space:nowrap}
+.q{font-weight:800;margin:0;font-size:19px}
+.how{display:flex;gap:8px;align-items:center;color:var(--muted);font-size:16px;font-weight:600}
+.hand{display:inline-block;font-size:24px;animation:bob 1.2s ease-in-out infinite}
+.how.nudge .hand{animation:nudge .5s ease-in-out 3}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes nudge{0%,100%{transform:scale(1)}50%{transform:scale(1.4)}}
+.hints{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.hintbtn{font:inherit;font-size:15px;font-weight:700;border:1px dashed var(--line);background:transparent;color:var(--muted);border-radius:999px;padding:4px 12px;cursor:pointer}
+.hw{font-size:15px;font-weight:700;background:var(--surface-2);border-radius:999px;padding:3px 10px}
+.opts{display:grid;gap:8px}
+.opt{text-align:left;font:inherit;font-weight:600;background:var(--surface-2);border:2px solid transparent;color:var(--ink);border-radius:var(--r-md);padding:12px 14px;cursor:pointer}
+.opt[aria-pressed="true"]{border-color:var(--class)}
+.row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;align-items:center;padding:8px 0;border-bottom:1px dashed var(--line)}
+.row:last-child{border-bottom:0}
+@media (max-width:560px){.row{grid-template-columns:1fr}}
+input[type=text],input[type=number]{font:inherit;color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-md);padding:10px 12px;width:100%;max-width:320px;min-width:0}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-size:17px;font-weight:700;background:var(--surface-2);color:var(--ink);border:2px solid transparent;border-radius:999px;padding:6px 14px;cursor:pointer}
+.chip[aria-pressed="true"]{border-color:var(--class)}
+.match{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:10px}
+.match .col{display:grid;gap:8px;align-content:start}
+.mi{font:inherit;font-weight:700;text-align:left;background:var(--surface-2);border:2px solid transparent;color:var(--ink);border-radius:var(--r-md);padding:10px 12px;cursor:pointer}
+.mi.big{font-size:24px;text-align:center}
+.mi.sel{border-color:var(--class)}
+.mi.paired{border-color:var(--ok);background:var(--ok-bg);cursor:default}
+.mi.wrong{animation:shake .35s}
+.seq{display:grid;gap:6px;min-height:52px;border:2px dashed var(--line);border-radius:var(--r-md);padding:8px}
+.seq:empty::before{content:"Натискай кроки нижче по черзі — вони з'являться тут";color:var(--muted);font-size:15px}
+.step{display:flex;gap:8px;align-items:center;background:var(--surface-2);border-radius:10px;padding:8px 10px;font-weight:700}
+.step b{color:var(--class);min-width:1.4em}
+.step span{flex:1;min-width:0}
+.step button{font:inherit;border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:8px;width:34px;height:34px;cursor:pointer}
+.tblwrap{overflow-x:auto}
+table.err{border-collapse:collapse;width:100%}
+table.err th,table.err td{border:1px solid var(--line);padding:8px 10px;text-align:left}
+table.err th{background:var(--surface-2)}
+table.err tbody tr{cursor:pointer}
+table.err tr.pick td{background:var(--bad-bg)}
+.tabstrip{display:flex;gap:4px;font-size:16px;font-weight:700;overflow-x:auto}
+.tabstrip span{background:var(--surface-2);border-radius:10px 10px 0 0;padding:6px 12px;white-space:nowrap}
+.actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{font-family:var(--f-body);font-weight:800;font-size:17px;border:0;border-radius:var(--r-md);padding:11px 18px;cursor:pointer;background:var(--class);color:#fff}
+.btn.ghost{background:var(--surface-2);color:var(--ink)}
+.btn:disabled{opacity:.5;cursor:default}
+.fb{border-radius:10px;padding:8px 12px;font-size:17px;font-weight:600}
+.fb.ok{background:var(--ok-bg);color:var(--ok)} .fb.bad{background:var(--bad-bg);color:var(--bad)}
+.muted{color:var(--muted);font-size:16px}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.card.hurt{animation:shake .35s}
+/* квест */
+.qmap{position:relative;height:120px;margin:4px 0}
+.qmap svg{position:absolute;inset:0;width:100%;height:100%}
+.qmap .path{fill:none;stroke:var(--line);stroke-width:6;stroke-linecap:round;stroke-dasharray:2 12}
+.qmap .done-path{fill:none;stroke:var(--class);stroke-width:6;stroke-linecap:round;transition:stroke-dashoffset 1s ease}
+.loc{position:absolute;transform:translate(-50%,-50%);display:grid;justify-items:center;gap:2px;font-size:12px;font-weight:800;text-align:center;width:84px}
+.loc .ic{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;font-size:24px;background:var(--surface);border:3px solid var(--line)}
+.loc.cur .ic{border-color:var(--class);animation:pulse 1.6s infinite}
+.loc.won .ic{border-color:var(--ok);background:var(--ok-bg)}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--class) 50%,transparent)}50%{box-shadow:0 0 0 10px transparent}}
+.rover{position:absolute;font-size:30px;transform:translate(-50%,-110%);transition:left 1s ease,top 1s ease;pointer-events:none}
+.hearts{font-size:22px;letter-spacing:2px}
+.bossbar{height:14px;border-radius:999px;background:var(--surface-2);overflow:hidden}
+.bossbar i{display:block;height:100%;background:var(--bad);transition:width .6s ease}
+.float{position:fixed;z-index:50;pointer-events:none;font-weight:800;font-size:22px;color:var(--ok);animation:up 1.1s ease-out forwards}
+@keyframes up{0%{opacity:0;transform:translate(-50%,0) scale(.6)}20%{opacity:1;transform:translate(-50%,-8px) scale(1.15)}100%{opacity:0;transform:translate(-50%,-70px)}}
+.broken{position:fixed;z-index:50;pointer-events:none;font-size:28px;animation:fall .9s ease-in forwards}
+@keyframes fall{to{opacity:0;transform:translate(-50%,60px) rotate(25deg)}}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:40;width:100%;height:100%}
+.stars{font-size:34px;letter-spacing:4px;color:var(--warn)}
+.stars span{display:inline-block;opacity:0;animation:pop .45s cubic-bezier(.3,1.6,.5,1) forwards}
+@keyframes pop{from{opacity:0;transform:scale(0) rotate(-90deg)}to{opacity:1;transform:none}}
+/* картки */
+.flash{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px}
+.fc{font:inherit;color:var(--ink);min-height:120px;background:var(--surface);border:1px solid var(--line);border-top:5px solid var(--class);border-radius:var(--r-lg);padding:14px;cursor:pointer;text-align:left;display:grid;align-content:center;gap:6px}
+.fc .t{font-weight:800;font-size:19px;color:var(--class)}
+.fc .d{font-size:16px}
+.fc.open{background:var(--surface-2)}
+/* міні-браузер */
+.br{border:2px solid var(--line);border-radius:var(--r-md);overflow:hidden;background:var(--surface)}
+.br-tabs{display:flex;gap:4px;align-items:flex-end;background:var(--surface-2);padding:6px 6px 0;overflow-x:auto}
+.br-tab{display:flex;align-items:center;gap:6px;background:var(--bg);border-radius:10px 10px 0 0;padding:6px 8px 6px 12px;font-size:15px;font-weight:700;white-space:nowrap;cursor:pointer;border:0;color:var(--ink);font-family:var(--f-body)}
+.br-tab.on{background:var(--surface)}
+.br-tab .x{border:0;background:transparent;color:var(--muted);font-size:16px;cursor:pointer;border-radius:6px;padding:0 4px;font-family:inherit}
+.br-new{border:0;background:transparent;font-size:22px;font-weight:800;color:var(--ink);cursor:pointer;padding:2px 10px;font-family:var(--f-body)}
+.br-bar{display:flex;gap:4px;align-items:center;padding:6px;border-bottom:1px solid var(--line)}
+.br-bar button{border:0;background:var(--surface-2);color:var(--ink);width:38px;height:38px;border-radius:10px;font-size:18px;cursor:pointer;flex:0 0 auto;font-family:var(--f-body)}
+.br-bar button:disabled{opacity:.35;cursor:default}
+.br-addr{flex:1;min-width:0;display:flex;align-items:center;gap:6px;background:var(--surface-2);border-radius:999px;padding:0 12px;height:38px}
+.br-addr input{border:0;background:transparent;padding:0;height:100%;max-width:none;font-family:var(--f-mono);font-size:15px}
+.br-addr input:focus-visible{outline:none}
+.br-addr:focus-within{outline:3px solid var(--accent)}
+.br-marks{display:flex;gap:6px;padding:4px 8px;font-size:14px;font-weight:700;min-height:30px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.br-marks button{border:0;background:transparent;color:var(--ink);font:inherit;cursor:pointer;padding:2px 6px;border-radius:6px}
+.br-page{min-height:230px;padding:16px;display:grid;gap:10px;align-content:start}
+.br-page .site{font-family:var(--f-display);font-size:1.1rem;font-weight:700}
+.br-page a.lnk{color:var(--accent);font-weight:800;cursor:pointer;text-decoration:underline}
+.scam{background:var(--bad-bg);color:var(--bad);border-radius:var(--r-md);padding:14px;font-weight:800;text-align:center}
+.pointed{position:relative;box-shadow:0 0 0 3px var(--warn)!important}
+.pointed::after{content:"👆";position:absolute;left:50%;top:100%;transform:translateX(-50%);font-size:24px;animation:bob 1.2s ease-in-out infinite;pointer-events:none;z-index:3}
+.checklist{list-style:none;padding:0;margin:0;display:grid;gap:6px}
+.checklist li{display:flex;gap:10px;align-items:flex-start;font-size:17px}
+.checklist li .b{flex:0 0 auto;width:26px;height:26px;border-radius:8px;border:2px solid var(--line);display:grid;place-items:center;font-size:16px}
+.checklist li.ok .b{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
+/* результат */
+.big{font-family:var(--f-display);font-size:48px;font-weight:800;color:var(--class);line-height:1}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.stat{background:var(--surface-2);border-radius:var(--r-md);padding:10px 12px;font-variant-numeric:tabular-nums}
+.stat small{display:block;color:var(--muted);font-size:14px}
+.stat b{font-size:20px}
+table.rank{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:17px}
+table.rank td,table.rank th{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left}
+.sendbox{border:2px dashed var(--send);border-radius:var(--r-lg);padding:14px;display:grid;gap:10px}
+.sendbox .f{display:flex;flex-wrap:wrap;gap:8px}
+.sendbox .f input{flex:1 1 200px}
+.sendbox .f input#jCls{flex:0 1 120px}
+a.sendgo{display:inline-block;text-align:center;background:var(--send);color:var(--send-ink);text-decoration:none;font-weight:800;border-radius:999px;padding:12px 22px}
+#jFab{position:fixed;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:30;background:var(--send);color:var(--send-ink);border:0;border-radius:999px;padding:13px 20px;font:800 17px var(--f-body);box-shadow:0 8px 24px rgba(0,0,0,.35);cursor:pointer}
+.warnline{color:var(--warn);font-weight:800}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.stars span{opacity:1}}
+</style>
+
+<canvas id="confetti" hidden></canvas>
+<div class="wrap">
+<header>
+  <div class="eyebrow">Інформатика · 3 клас · Інтернет · Тема 4</div>
+  <h1>Для чого використовують браузер?</h1>
+  <div class="story">
+    <div class="hero" aria-hidden="true">🧒</div>
+    <p><b>Тимко знову в Інтернет-місті!</b> Щоб подорожувати його вулицями, потрібен особливий транспорт — <b>браузер</b>. Це програма, яка відкриває сайти: казки, мультики, погоду й шкільні новини. Допоможи Тимкові навчитися керувати браузером!</p>
+  </div>
+  <div class="hud" aria-live="polite"><span id="hudEx">Вправи: 0/14</span><span id="hudStar">⭐ 0</span><span id="hudXp">XP 0</span><span id="hudT">⏱ 0:00</span></div>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="Розділи уроку">
+  <button role="tab" data-t="ex" aria-selected="true">Вправи</button>
+  <button role="tab" data-t="quest" aria-selected="false">Квест</button>
+  <button role="tab" data-t="cards" aria-selected="false">Картки</button>
+  <button role="tab" data-t="lab" aria-selected="false">Лабораторія</button>
+  <button role="tab" data-t="res" aria-selected="false">Результат</button>
+</nav>
+
+<section class="panel" id="p-ex">
+  <p class="muted" style="margin:0">🟢 легко · 🟡 трохи складніше · 🔴 для сміливих. Правильно з першого разу — 1 бал, з другого — 0,5. Застряг? Натисни «💡 Слова-підказки».</p>
+  <div id="exList" class="panel" style="margin-top:0"></div>
+</section>
+
+<section class="panel" id="p-quest" hidden>
+  <div class="card" id="qcard">
+    <div class="qhead"><h2>Квест «Подорож браузером»</h2><span class="hearts" id="hearts">❤️❤️❤️</span></div>
+    <div class="qmap" id="qmap"></div>
+    <div id="qbox" style="display:grid;gap:12px"></div>
+  </div>
+</section>
+
+<section class="panel" id="p-cards" hidden>
+  <p class="muted" style="margin:0">Натисни на картку — побачиш пояснення. Спершу спробуй пригадати сам!</p>
+  <div class="flash" id="flash"></div>
+</section>
+
+<section class="panel" id="p-lab" hidden>
+  <div class="card">
+    <h2>Лабораторія: браузер Тимка</h2>
+    <p class="muted" style="margin:0">Це справжній тренажер браузера. Виконай завдання зі списку. Жовта рамка і рука 👆 підкажуть, куди натиснути.</p>
+    <ul class="checklist" id="labList"></ul>
+    <div class="br" id="br">
+      <div class="br-tabs" id="brTabs"></div>
+      <div class="br-bar">
+        <button id="brBack" aria-label="Назад" title="Назад">←</button>
+        <button id="brFwd" aria-label="Вперед" title="Вперед">→</button>
+        <button id="brReload" aria-label="Оновити" title="Оновити">⟳</button>
+        <button id="brHome" aria-label="Домашня сторінка" title="Домашня сторінка">⌂</button>
+        <label class="br-addr" id="brAddrBox"><span id="brLock" aria-hidden="true">🔒</span><input type="text" id="brAddr" aria-label="Адресний рядок" autocomplete="off" spellcheck="false"></label>
+        <button id="brStar" aria-label="Додати в закладки" title="Додати в закладки">☆</button>
+      </div>
+      <div class="br-marks" id="brMarks"></div>
+      <div class="br-page" id="brPage" aria-live="polite"></div>
+    </div>
+    <div class="actions"><button class="btn" id="labSubmit">Здати лабораторію</button><span class="muted" id="labScore"></span></div>
+    <div id="labFb"></div>
+  </div>
+</section>
+
+<section class="panel" id="p-res" hidden>
+  <div class="card">
+    <h2>Мій результат</h2>
+    <div class="stats">
+      <div class="stat"><small>Оцінка</small><span class="big" id="rGrade">—</span><small id="rLvl">з 12</small></div>
+      <div class="stat"><small>Вправи</small><b id="rEx">0 з 14</b></div>
+      <div class="stat"><small>Лабораторія</small><b id="rLab">не здано</b></div>
+      <div class="stat"><small>Помилок</small><b id="rErr">0</b></div>
+      <div class="stat"><small>Час</small><b id="rT">0:00</b><small id="rNorm"></small></div>
+      <div class="stat"><small>Квест</small><b id="rQ">⭐ 0 · XP 0</b></div>
+    </div>
+    <div class="muted" id="rPen"></div>
+    <div class="actions"><button class="btn" id="finish">Завершити й отримати оцінку</button><button class="btn ghost" id="again" hidden>Пройти знову</button></div>
+    <div class="sendbox" id="sendbox">
+      <b>📤 Надіслати результат учителю</b>
+      <div class="f"><input type="text" id="jName" placeholder="Прізвище та ім'я" autocomplete="off" aria-label="Прізвище та ім'я"><input type="text" id="jCls" placeholder="Клас, 3-А" maxlength="6" autocomplete="off" aria-label="Клас"></div>
+      <div><a class="sendgo" id="jSend" href="#" target="_blank" rel="noopener">Надіслати вчителю</a></div>
+      <div class="muted" id="jMsg">Спершу натисни «Завершити й отримати оцінку». Потім відкриється Google Форма з твоїм результатом — натисни в ній «Надіслати». Вхід в акаунт не потрібен.</div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Рейтинг класу</h2>
+    <p class="muted" style="margin:0">Введи нікнейм або код від учителя (не прізвище) і збережи свої зірки.</p>
+    <div class="actions"><input type="text" id="nick" maxlength="16" placeholder="Напр. Браузерик7" style="max-width:220px" aria-label="Нікнейм"><button class="btn" id="saveRank">Зберегти</button><span id="rankMsg" class="muted"></span></div>
+    <div class="tblwrap"><table class="rank"><thead><tr><th>#</th><th>Нікнейм</th><th>⭐</th><th>XP</th></tr></thead><tbody id="rankBody"><tr><td colspan="4" class="muted">Рейтинг завантажується…</td></tr></tbody></table></div>
+  </div>
+</section>
+</div>
+<button id="jFab" type="button">📤 Надіслати вчителю</button>
+
+<script>
+/* ===== НАЛАШТУВАННЯ ДЛЯ ВЧИТЕЛЯ ===== */
+const NORM_EX = 12 * 60, NORM_LAB = 8 * 60, NORM = NORM_EX + NORM_LAB; // норма часу, секунди
+const GRADE_YEAR = 3, TOPIC = "Для чого використовують браузер?";
+const FORM = "https://docs.google.com/forms/d/e/1FAIpQLSeaDGNzqpEMjZyDt4WUwg3k3FAhGGW4pG1E8IcOk8b4LQsBVw/viewform?usp=pp_url&entry.1997531456=";
+
+/* ===== ДАНІ ===== */
+const LV = {1:"🟢 легко", 2:"🟡 трохи складніше", 3:"🔴 для сміливих"};
+const EX = [
+ {id:1,lv:1,type:"choice",q:"Що таке браузер?",how:"Натисни на правильну відповідь, потім «Перевірити».",hw:["програма","сайти","Інтернет"],
+  o:["Програма, що відкриває сайти","Пристрій, що друкує малюнки","Гра про пригоди в космосі","Кабель для заряджання телефону"],a:0},
+ {id:2,lv:1,type:"chips",q:"Це браузер чи ні?",how:"Для кожної програми натисни «Браузер» або «Не браузер».",hw:["Chrome","Edge","Firefox","Safari"],
+  cats:["Браузер","Не браузер"],rows:[["Google Chrome",0],["Paint",1],["Microsoft Edge",0],["Калькулятор",1],["Mozilla Firefox",0],["Safari",0],["Блокнот",1]]},
+ {id:3,lv:1,type:"match",q:"З'єднай кнопку браузера з тим, що вона робить.",how:"Натисни кнопку ліворуч, а потім її дію праворуч.",hw:["стрілка вліво — назад","коло — оновити","зірочка — закладка"],
+  pairs:[["←","Повернутися назад"],["→","Піти вперед"],["⟳","Оновити сторінку"],["⌂","Домашня сторінка"],["☆","Додати в закладки"]]},
+ {id:4,lv:1,type:"input",q:"Рядок угорі браузера, куди пишемо адресу сайту, називається адресний …",how:"Впиши одне слово в поле і натисни «Перевірити».",hw:["ряд…","угорі","адреса"],a:["рядок"]},
+ {id:5,lv:2,type:"order",q:"Як відкрити сайт? Розстав кроки по порядку.",how:"Натискай кроки по черзі, з першого до останнього.",hw:["спершу — браузер","наприкінці — Enter"],
+  items:["Відкрити браузер","Клацнути в адресний рядок","Надрукувати адресу сайту","Натиснути Enter"]},
+ {id:6,lv:1,type:"choice",q:"Що таке вкладка в браузері?",how:"Натисни на правильну відповідь.",hw:["кілька сайтів","одне вікно"],
+  o:["Окрема сторінка у вікні","Кнопка вимкнення комп'ютера","Папка з фото на столі","Клавіша великих літер"],a:0},
+ {id:7,lv:2,type:"chips",q:"Що можна зробити в браузері, а що — без нього?",how:"Для кожного рядка обери «У браузері» або «Без браузера».",hw:["сайт","онлайн","руками вдома"],
+  cats:["У браузері","Без браузера"],rows:[["Подивитися прогноз погоди",0],["Полити квіти на підвіконні",1],["Прочитати казку на сайті",0],["Знайти відповідь на питання",0],["Зав'язати шнурки на кросівках",1],["Подивитися мультик онлайн",0]]},
+ {id:8,lv:2,type:"number",q:"Скільки вкладок відкрив Тимко?",how:"Порахуй вкладки й впиши число.",hw:["рахуй назви","«+» не рахуй"],
+  strip:["🧸 Іграшки ✕","🌦 Погода ✕","📚 Казки ✕","+"],a:3},
+ {id:9,lv:2,type:"choice",q:"Що означає замок 🔒 біля адреси сайту?",how:"Натисни на правильну відповідь.",hw:["захист","безпечно"],
+  o:["Зв'язок із сайтом захищено","Сайт зачинили на замок","Сторінку не можна гортати","Комп'ютер треба замкнути на ключ"],a:0},
+ {id:10,lv:3,type:"errors",q:"Тимко записав, що робить кожна кнопка, і зробив 3 помилки. Знайди їх!",how:"Натисни на рядки з помилками (вони стануть червоними).",hw:["⟳ — оновити","⌂ — домівка","+ — нова вкладка"],
+  head:["Кнопка","Що робить"],rows:[["←","Повертає на попередню сторінку",0],["⟳","Закриває браузер",1],["☆","Додає сторінку в закладки",0],["⌂","Друкує сторінку на принтері",1],["✕ на вкладці","Закриває цю вкладку",0],["+","Видаляє всі сайти",1],["→","Іде вперед, якщо ти повертався",0]]},
+ {id:11,lv:3,type:"input",q:"Сайт, який зберегли в браузері, щоб швидко відкривати знову, — це …",how:"Впиши одне слово.",hw:["☆","зірочка","заклад…"],a:["закладка","закладки","заклад"]},
+ {id:12,lv:2,type:"choice",trend:true,q:"🔥 У тренді: у браузери Chrome і Edge додали помічника зі штучним інтелектом. Що він уміє?",how:"Натисни на правильну відповідь.",hw:["коротко","переказати"],
+  o:["Коротко переказати сторінку","Самостійно лагодити мишку","Замінити вчителя на уроці","Вмикати комп'ютер без кнопки"],a:0},
+ {id:13,lv:3,type:"order",q:"Як додати сайт у закладки й потім його відкрити?",how:"Натискай кроки по черзі.",hw:["спершу відкрий сайт","потім зірочка"],
+  items:["Відкрити потрібний сайт","Натиснути зірочку ☆","Натиснути «Готово»","Знайти сайт на панелі закладок"]},
+ {id:14,lv:3,type:"chips",trend:true,q:"🔥 У тренді: правда чи неправда про помічника ШІ в браузері?",how:"Для кожного речення обери «Правда» або «Неправда».",hw:["ШІ теж помиляється","пароль — секрет"],
+  cats:["Правда","Неправда"],rows:[["Помічник ШІ іноді помиляється",0],["Йому можна казати свій пароль",1],["Важливе краще перевірити з дорослими",0],["Він завжди знає все правильно",1]]}
+];
+const QUEST = [
+ {n:"Вокзал Браузерів",i:"🚉",qs:[
+  {type:"choice",q:"Тимко хоче поїхати в Інтернет-місто. На чому він поїде?",o:["На браузері","На принтері","На калькуляторі","На колонках"],a:0},
+  {type:"input",q:"Назви один браузер. Наприклад, той, що є на шкільному комп'ютері.",re:/chrome|хром|edge|едж|firefox|файрфокс|фаєрфокс|safari|сафарі|opera|опера/i}]},
+ {n:"Вулиця Вкладок",i:"🗂️",qs:[
+  {type:"input",q:"Тимко відкрив 2 вкладки, потім ще 2, а одну закрив. Скільки вкладок відкрито зараз? Впиши число.",re:/^\s*(3|три)\s*$/i},
+  {type:"choice",q:"Як відкрити нову вкладку?",o:["Натиснути «+»","Натиснути «✕»","Натиснути «⟳»","Натиснути «☆»"],a:0}]},
+ {n:"Площа Кнопок",i:"🔘",qs:[
+  {type:"choice",q:"Сторінка «зависла» й не показує картинки. Яку кнопку натиснути?",o:["⟳ Оновити","← Назад","☆ Закладка","⌂ Домівка"],a:0},
+  {type:"choice",q:"Тимко випадково відкрив не той сайт. Як повернутися?",o:["← Назад","→ Вперед","+ Вкладка","☆ Зірка"],a:0}]},
+ {n:"Бібліотека Закладок",i:"⭐",qs:[
+  {type:"input",q:"Зірочка ☆ додає сайт у … (впиши одне слово)",re:/^\s*заклад/i},
+  {type:"choice",q:"Тимко не знає адреси сайту з казками. Що робити?",o:["Написати запит у пошуку","Вимкнути комп'ютер зовсім","Натиснути ⟳ десять разів","Закрити всі вкладки браузера"],a:0}]},
+ {n:"Бос: Вірус-Спамер",i:"👾",boss:true,qs:[
+  {type:"choice",q:"Сайт пише: «Ти виграв телефон! Введи пароль». Що ти зробиш?",o:["Закрию й скажу дорослим","Введу пароль, щоб забрати приз","Надішлю пароль своєму другу","Натисну всі кнопки підряд"],a:0},
+  {type:"choice",q:"Де пишемо адресу сайту?",o:["В адресному рядку","На панелі задач","У кошику","На робочому столі"],a:0},
+  {type:"choice",q:"Що з цього — браузер?",o:["Firefox","Paint","Word","Scratch"],a:0}]}
+];
+const CARDS = [
+ ["Браузер","Програма для перегляду сайтів: Chrome, Edge, Firefox, Safari."],
+ ["Сайт","Місце в Інтернеті з адресою, на якому є сторінки: казки, ігри, новини."],
+ ["Вебсторінка","Одна сторінка сайту з текстом, картинками й посиланнями."],
+ ["Адресний рядок","Поле вгорі браузера, куди пишемо адресу сайту."],
+ ["Адреса сайту","Ім'я сайту, наприклад kazky.ua. Кожен сайт має свою адресу."],
+ ["Вкладка","Окрема сторінка у вікні браузера. Можна відкрити кілька вкладок."],
+ ["← Назад","Повертає на сторінку, де ти був перед цим."],
+ ["⟳ Оновити","Завантажує сторінку ще раз, якщо вона «зависла»."],
+ ["⌂ Домашня сторінка","Сторінка, яку браузер відкриває першою."],
+ ["☆ Закладка","Збережений сайт, щоб швидко відкрити його знову."],
+ ["Пошук","Сайт, де пишеш питання, а він знаходить потрібні сторінки."],
+ ["🔒 Замок","Показує, що зв'язок із сайтом захищено."],
+ ["Посилання","Слово чи картинка, натиснувши яку, перейдеш на іншу сторінку."]
+];
+const SITES = {
+  "shukaiko.ua":{t:"🔎 Шукайко",lock:true,home:true},
+  "kazky.ua":{t:"📚 Казки",lock:true},
+  "pogoda.ua":{t:"🌦 Погода",lock:true},
+  "multyky.ua":{t:"🎬 Мультики",lock:true},
+  "shkola3.ua":{t:"🏫 Наша школа",lock:true},
+  "vygrash-free.xyz":{t:"🎁 Ти виграв!",lock:false,scam:true}
+};
+const LAB = [
+ {id:1,t:"Відкрий нову вкладку кнопкою «+».",el:"new"},
+ {id:2,t:"У новій вкладці надрукуй в адресному рядку kazky.ua і натисни Enter.",el:"addr"},
+ {id:3,t:"Додай сайт із казками в закладки зірочкою ☆.",el:"star"},
+ {id:4,t:"На домашній сторінці ⌂ знайди через Шукайко слово «погода» і відкрий сайт погоди.",el:"home"},
+ {id:5,t:"Натисни «Назад» ←, щоб повернутися до результатів пошуку.",el:"back"},
+ {id:6,t:"Онови сторінку кнопкою ⟳.",el:"reload"},
+ {id:7,t:"Закрий вкладку з підозрілим сайтом «Ти виграв!» хрестиком ✕.",el:"scam"}
+];
+window.EX = EX; window.QUEST = QUEST;
+
+/* ===== СТАН ===== */
+const S = {ex:{}, xp:0, stars:0, t0:null, tEnd:null, exT:0, labT:0, lastTick:null, tab:"ex", attempt:1, frozen:null,
+  lab:{done:{}, submits:0, score:null, errs:0}, q:{loc:0, step:0, hearts:3, won:[], err:{}, stars:[], t0:null, bossHP:100}, hints:0};
+try{ const k="brauzer3-attempt"; S.attempt=(parseInt(localStorage.getItem(k))||0)+1; localStorage.setItem(k,S.attempt); }catch(e){}
+const $ = s => document.querySelector(s);
+const RM = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+function el(tag, attrs={}, ...kids){ const e=document.createElement(tag); for(const k in attrs){ if(k==="class") e.className=attrs[k]; else if(k.startsWith("on")) e.addEventListener(k.slice(2),attrs[k]); else e.setAttribute(k,attrs[k]); } for(const c of kids){ if(c==null) continue; e.append(c.nodeType?c:document.createTextNode(c)); } return e; }
+function shuffle(a,seed){ let x=seed*9301+49297; const r=()=>{x=(x*9301+49297)%233280;return x/233280}; a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+const norm = s => String(s).toLowerCase().replace(/[’ʼ`]/g,"'").replace(/[«»"“”.!]/g,"").replace(/\s+/g," ").trim();
+const fmt = s => { s=Math.max(0,Math.round(s)); return Math.floor(s/60)+":"+String(s%60).padStart(2,"0"); };
+const hm = s => { s=Math.max(0,Math.round(s)); return Math.floor(s/60)+" хв "+String(s%60).padStart(2,"0")+" с"; };
+
+/* ===== ТАЙМЕР ===== */
+function tick(){
+  const now=Date.now();
+  if(S.t0 && !S.tEnd && S.lastTick){ const d=(now-S.lastTick)/1000; if(S.tab==="ex") S.exT+=d; if(S.tab==="lab") S.labT+=d; }
+  S.lastTick=now;
+  const T=elapsed(); const h=$("#hudT"); h.textContent="⏱ "+fmt(T)+(S.tEnd?" ✓":""); h.classList.toggle("over", T>NORM && !S.tEnd);
+}
+function elapsed(){ return S.t0 ? ((S.tEnd||Date.now())-S.t0)/1000 : 0; }
+function start(){ if(!S.t0 && !S.frozen){ S.t0=Date.now(); S.lastTick=S.t0; } }
+setInterval(tick,1000);
+document.querySelector(".wrap").addEventListener("pointerdown",e=>{ if(e.target.closest("#p-ex,#p-lab,#p-quest")) start(); },true);
+document.querySelector(".wrap").addEventListener("keydown",e=>{ if(e.target.closest("#p-ex,#p-lab,#p-quest")) start(); },true);
+
+/* ===== ВКЛАДКИ ===== */
+function showTab(t){
+  tick(); S.tab=t;
+  document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-selected", b.dataset.t===t));
+  document.querySelectorAll("section.panel[id^=p-]").forEach(p=>p.hidden = p.id!=="p-"+t);
+  if(t==="res") renderRes();
+  if(t==="quest") renderMap();
+}
+document.querySelectorAll("nav.tabs button").forEach(b=>b.addEventListener("click",()=>showTab(b.dataset.t)));
+
+/* ===== ЕФЕКТИ ===== */
+function floatAt(node,text,cls){ if(RM||!node) return; const r=node.getBoundingClientRect(); const d=el("div",{class:cls||"float"},text); d.style.left=(r.left+r.width/2)+"px"; d.style.top=(r.top)+"px"; document.body.appendChild(d); setTimeout(()=>d.remove(),1200); }
+function confetti(){
+  if(RM) return; const c=$("#confetti"); c.hidden=false; const ctx=c.getContext("2d"); c.width=innerWidth; c.height=innerHeight;
+  const cols=[getComputedStyle(document.documentElement).getPropertyValue("--class").trim()||"#1e8fd6","#ffb020","#2e7d32","#7a4fd8","#e0661b"];
+  const P=Array.from({length:120},()=>({x:Math.random()*c.width,y:-20-Math.random()*c.height*.5,v:2+Math.random()*3,r:Math.random()*6.28,s:4+Math.random()*5,c:cols[Math.floor(Math.random()*cols.length)]}));
+  let f=0; (function fr(){ ctx.clearRect(0,0,c.width,c.height); P.forEach(p=>{p.y+=p.v;p.x+=Math.sin((p.y+p.r*40)/30);p.r+=.1;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.r);ctx.fillStyle=p.c;ctx.fillRect(-p.s/2,-p.s/2,p.s,p.s*1.6);ctx.restore();}); if(++f<150) requestAnimationFrame(fr); else { ctx.clearRect(0,0,c.width,c.height); c.hidden=true; } })();
+}
+
+/* ===== ВПРАВИ ===== */
+function hintBlock(ex,card){
+  const box=el("div",{class:"hints"});
+  const b=el("button",{class:"hintbtn",type:"button"},"💡 Слова-підказки");
+  b.addEventListener("click",()=>{ b.remove(); S.hints++; ex.hw.forEach(w=>box.append(el("span",{class:"hw"},w))); });
+  box.append(b); return box;
+}
+function renderEx(){
+  const list=$("#exList"); list.innerHTML="";
+  EX.forEach(ex=>{
+    const st=S.ex[ex.id]||(S.ex[ex.id]={tries:0,done:false,pts:0});
+    const card=el("div",{class:"card"+(st.done?" done":""),id:"ex"+ex.id});
+    const how=el("div",{class:"how"},el("span",{class:"hand","aria-hidden":"true"},"👆"),ex.how);
+    card.append(el("div",{class:"qhead"},el("h3",{},"Вправа "+ex.id),el("span",{class:"lvl"},LV[ex.lv])), el("p",{class:"q"},ex.q), how);
+    const body=el("div",{style:"display:grid;gap:8px"}); let get;
+    if(ex.type==="choice"){ let sel=null; const box=el("div",{class:"opts"});
+      shuffle(ex.o.map((t,i)=>i),ex.id*7).forEach(i=>box.append(el("button",{class:"opt",type:"button","aria-pressed":"false",onclick:()=>{sel=i;box.querySelectorAll(".opt").forEach(x=>x.setAttribute("aria-pressed",x.dataset.i==i));},"data-i":i},ex.o[i])));
+      body.append(box); get=()=>sel===ex.a; }
+    else if(ex.type==="input"||ex.type==="number"){
+      if(ex.strip) body.append(el("div",{class:"tabstrip","aria-label":"Вкладки Тимка"},...ex.strip.map(s=>el("span",{},s))));
+      const inp=el("input",{type:ex.type==="number"?"number":"text",id:"in"+ex.id,autocomplete:"off","aria-label":"Відповідь"}); body.append(inp);
+      inp.addEventListener("keydown",e=>{ if(e.key==="Enter") btn.click(); });
+      get=()=> ex.type==="number" ? parseFloat(inp.value)===ex.a : ex.a.includes(norm(inp.value)); }
+    else if(ex.type==="chips"){ const pick={};
+      ex.rows.forEach((r,ri)=>{ const ch=el("div",{class:"chips"}); ex.cats.forEach((c,ci)=>ch.append(el("button",{class:"chip",type:"button","aria-pressed":"false",onclick:()=>{pick[ri]=ci;ch.querySelectorAll(".chip").forEach((x,j)=>x.setAttribute("aria-pressed",j===ci));}},c))); body.append(el("div",{class:"row"},el("span",{},r[0]),ch)); });
+      get=()=>ex.rows.every((r,ri)=>pick[ri]===r[1]); }
+    else if(ex.type==="match"){ const L=el("div",{class:"col"}), R=el("div",{class:"col"}); let sel=null, ok=0;
+      ex.pairs.forEach((p,i)=>L.append(el("button",{class:"mi big",type:"button","data-i":i,"aria-label":"Кнопка "+p[0]},p[0])));
+      shuffle(ex.pairs.map((p,i)=>i),ex.id*11).forEach(i=>R.append(el("button",{class:"mi",type:"button","data-i":i},ex.pairs[i][1])));
+      L.addEventListener("click",e=>{ const b=e.target.closest(".mi"); if(!b||b.classList.contains("paired")) return; L.querySelectorAll(".mi").forEach(x=>x.classList.remove("sel")); b.classList.add("sel"); sel=b; });
+      R.addEventListener("click",e=>{ const b=e.target.closest(".mi"); if(!b||b.classList.contains("paired")) return; if(!sel){ nudge(how); return; }
+        if(b.dataset.i===sel.dataset.i){ b.classList.add("paired"); sel.classList.remove("sel"); sel.classList.add("paired"); sel=null; ok++; }
+        else { b.classList.add("wrong"); sel.classList.add("wrong"); const s=sel; setTimeout(()=>{b.classList.remove("wrong");s.classList.remove("wrong");},400); st.tries++; fail(card,how,fb,ex,"Ця пара не підходить. Спробуй іншу!"); } });
+      body.append(el("div",{class:"match"},L,R)); get=()=>ok===ex.pairs.length; }
+    else if(ex.type==="order"){ let built=[]; const seq=el("div",{class:"seq"}), bank=el("div",{class:"chips"});
+      const draw=()=>{ seq.innerHTML=""; bank.innerHTML="";
+        built.forEach((i,p)=>seq.append(el("div",{class:"step"},el("b",{},(p+1)+"."),el("span",{},ex.items[i]),el("button",{type:"button","aria-label":"Прибрати крок",onclick:()=>{built.splice(p,1);draw();}},"✕"))));
+        shuffle(ex.items.map((t,i)=>i),ex.id*13).filter(i=>!built.includes(i)).forEach(i=>bank.append(el("button",{class:"chip",type:"button",onclick:()=>{built.push(i);draw();}},ex.items[i]))); };
+      draw(); body.append(seq,bank); get=()=>built.length===ex.items.length && built.every((v,i)=>v===i); }
+    else if(ex.type==="errors"){ const picked=new Set(); const tb=el("tbody");
+      ex.rows.forEach((r,ri)=>{ const tr=el("tr",{tabindex:"0"},el("td",{},r[0]),el("td",{},r[1])); const tg=()=>{picked.has(ri)?picked.delete(ri):picked.add(ri);tr.classList.toggle("pick");}; tr.addEventListener("click",tg); tr.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();tg();}}); tb.append(tr); });
+      body.append(el("div",{class:"tblwrap"},el("table",{class:"err"},el("thead",{},el("tr",{},...ex.head.map(h=>el("th",{},h)))),tb)));
+      get=()=>ex.rows.every((r,ri)=>picked.has(ri)===!!r[2]); }
+    card.append(body, hintBlock(ex,card));
+    const fb=el("div",{"aria-live":"polite"});
+    const btn=el("button",{class:"btn",type:"button"},"Перевірити");
+    btn.addEventListener("click",()=>{
+      if(st.done||S.frozen) return; start();
+      if(get()){ st.done=true; st.pts=st.tries===0?1:(st.tries===1?0.5:0); const gain=st.tries===0?10:5; S.xp+=gain;
+        fb.className="fb ok"; fb.textContent="Молодець! "+(st.pts===1?"+1 бал":st.pts?"+0,5 бала":"Тепер правильно (0 балів)"); card.classList.add("done"); btn.disabled=true; floatAt(btn,"+"+gain+" XP"); hud(); }
+      else { st.tries++; fail(card,how,fb,ex,"Ще не так. Спробуй ще раз!"+(st.tries>=2?" Натисни «💡 Слова-підказки».":"")); }
+    });
+    if(st.done){ btn.disabled=true; fb.className="fb ok"; fb.textContent="Виконано ✓"; }
+    card.append(el("div",{class:"actions"},btn),fb); list.append(card);
+  });
+}
+function nudge(how){ how.classList.remove("nudge"); void how.offsetWidth; how.classList.add("nudge"); }
+function fail(card,how,fb,ex,msg){ fb.className="fb bad"; fb.textContent=msg; card.classList.remove("hurt"); void card.offsetWidth; card.classList.add("hurt"); nudge(how); }
+
+/* ===== КВЕСТ ===== */
+const QPOS=[[8,65],[29,35],[50,65],[71,35],[92,60]];
+function renderMap(){
+  const m=$("#qmap"); m.innerHTML="";
+  const W=m.clientWidth||600, H=120;
+  const pts=QPOS.map(p=>[p[0]/100*W,p[1]/100*H]);
+  const d="M"+pts.map(p=>p.join(",")).join(" L");
+  const svg=document.createElementNS("http://www.w3.org/2000/svg","svg"); svg.setAttribute("viewBox",`0 0 ${W} ${H}`); svg.setAttribute("aria-hidden","true");
+  const p1=document.createElementNS(svg.namespaceURI,"path"); p1.setAttribute("d",d); p1.setAttribute("class","path"); svg.append(p1);
+  const p2=document.createElementNS(svg.namespaceURI,"path"); p2.setAttribute("d",d); p2.setAttribute("class","done-path"); svg.append(p2); m.append(svg);
+  const len=p2.getTotalLength(); let doneLen=0; for(let i=1;i<=Math.min(S.q.won.length,QPOS.length-1);i++){ doneLen+=Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]); }
+  p2.style.strokeDasharray=len; p2.style.strokeDashoffset=len; requestAnimationFrame(()=>requestAnimationFrame(()=>{ p2.style.strokeDashoffset=len-doneLen; }));
+  QUEST.forEach((L,i)=>{ const won=S.q.won.includes(i), cur=i===S.q.loc&&!won;
+    const n=el("div",{class:"loc"+(won?" won":"")+(cur?" cur":"")},el("span",{class:"ic"},L.i),el("span",{},L.n)); n.style.left=QPOS[i][0]+"%"; n.style.top=QPOS[i][1]+"%"; m.append(n); });
+  const ri=Math.min(S.q.loc,QPOS.length-1); const rover=el("div",{class:"rover","aria-hidden":"true"},"🧒"); rover.style.left=QPOS[ri][0]+"%"; rover.style.top=QPOS[ri][1]+"%"; m.append(rover);
+  $("#hearts").textContent="❤️".repeat(S.q.hearts)+"🤍".repeat(3-S.q.hearts);
+}
+function renderQuest(){
+  renderMap(); const box=$("#qbox"); box.innerHTML="";
+  if(S.q.won.length===QUEST.length){ box.append(el("div",{class:"fb ok"},"🏆 Вірус-Спамер переможений! Тимко вільно подорожує браузером. Зірок: "+S.stars+", XP: "+S.xp+".")); return; }
+  const L=QUEST[S.q.loc], Q=L.qs[S.q.step]; if(S.q.step===0 && !S.q.t0) S.q.t0=Date.now();
+  box.append(el("h3",{},L.i+" "+L.n+" · питання "+(S.q.step+1)+" з "+L.qs.length));
+  if(L.boss){ const bar=el("div",{class:"bossbar","aria-label":"Сила боса"},el("i",{})); bar.firstChild.style.width=S.q.bossHP+"%"; box.append(el("div",{class:"muted"},"👾 Вірус-Спамер · одна спроба на питання!"),bar); }
+  box.append(el("p",{class:"q"},Q.q));
+  let get; if(Q.type==="choice"){ let sel=null; const o=el("div",{class:"opts"}); shuffle(Q.o.map((t,i)=>i),S.q.loc*5+S.q.step+3).forEach(i=>o.append(el("button",{class:"opt",type:"button","aria-pressed":"false","data-i":i,onclick:()=>{sel=i;o.querySelectorAll(".opt").forEach(x=>x.setAttribute("aria-pressed",x.dataset.i==i));}},Q.o[i]))); box.append(o); get=()=>sel===Q.a; }
+  else { const inp=el("input",{type:"text",id:"qin",autocomplete:"off","aria-label":"Відповідь"}); box.append(inp); inp.addEventListener("keydown",e=>{if(e.key==="Enter") go.click();}); get=()=>Q.re.test(inp.value); }
+  const fb=el("div",{"aria-live":"polite"});
+  const go=el("button",{class:"btn",type:"button"},"Відповісти");
+  const key="К"+(S.q.loc+1)+"."+(S.q.step+1);
+  go.addEventListener("click",()=>{ start();
+    if(get()){ const gain=L.boss?20:10; S.xp+=gain; floatAt(go,"+"+gain+" XP");
+      if(L.boss){ S.q.bossHP=Math.max(0,S.q.bossHP-100/L.qs.length); const i=box.querySelector(".bossbar i"); if(i) i.style.width=S.q.bossHP+"%"; }
+      S.q.err[key]=S.q.err[key]||0; S.q.step++;
+      if(S.q.step>=L.qs.length) finishLoc(); else setTimeout(renderQuest, RM?0:500);
+      hud(); }
+    else { S.q.err[key]=(S.q.err[key]||0)+1; floatAt($("#hearts"),"💔","broken"); const c=$("#qcard"); c.classList.remove("hurt"); void c.offsetWidth; c.classList.add("hurt");
+      if(L.boss){ fb.className="fb bad"; fb.textContent="Вірус ухилився! Правильна відповідь: «"+Q.o[Q.a]+"»."; S.q.step++; setTimeout(()=>{ if(S.q.step>=L.qs.length) finishLoc(); else renderQuest(); },1600); return; }
+      S.q.hearts--;
+      if(S.q.hearts<=0){ S.q.hearts=3; S.q.step=0; fb.className="fb bad"; fb.textContent="Серця скінчилися! Локацію почато заново."; setTimeout(renderQuest,1400); renderMap(); }
+      else { fb.className="fb bad"; fb.textContent="Не зовсім, −1 ❤️. Подумай ще!"; renderMap(); } }
+  });
+  box.append(el("div",{class:"actions"},go),fb);
+}
+function finishLoc(){
+  const L=QUEST[S.q.loc]; const keys=L.qs.map((q,j)=>"К"+(S.q.loc+1)+"."+(j+1)); const errs=keys.reduce((s,k)=>s+(S.q.err[k]||0),0);
+  const t=(Date.now()-(S.q.t0||Date.now()))/1000, normT=L.qs.length*45;
+  const stars = errs===0 && t<=normT ? 3 : (errs<=1 ? 2 : 1);
+  S.q.stars[S.q.loc]=stars; S.stars+=stars; S.q.won.push(S.q.loc); S.q.loc++; S.q.step=0; S.q.hearts=3; S.q.t0=null; hud();
+  const box=$("#qbox"); box.innerHTML="";
+  box.append(el("h3",{},L.boss?"🏆 Перемога над Вірусом-Спамером!":"🎉 Локацію пройдено!"), el("div",{class:"stars"},...Array.from({length:3},(_,i)=>{ const s=el("span",{},i<stars?"★":"☆"); s.style.animationDelay=(i*.25)+"s"; return s; })), el("div",{class:"muted"},"Помилок: "+errs+" · час: "+fmt(t)));
+  box.append(el("div",{class:"actions"},el("button",{class:"btn",type:"button",onclick:renderQuest},S.q.won.length===QUEST.length?"Підсумок квесту":"Далі по мапі →")));
+  confetti(); renderMap();
+}
+
+/* ===== КАРТКИ ===== */
+function renderCards(){ const f=$("#flash"); CARDS.forEach(([t,d])=>{ const c=el("button",{class:"fc",type:"button","aria-expanded":"false"},el("span",{class:"t"},t),el("span",{class:"d",hidden:""},d)); c.addEventListener("click",()=>{ const o=c.classList.toggle("open"); c.querySelector(".d").hidden=!o; c.setAttribute("aria-expanded",o); }); f.append(c); }); }
+
+/* ===== ЛАБОРАТОРІЯ: міні-браузер ===== */
+let tabSeq=0;
+const B = { tabs:[], cur:0, marks:[], search:"" };
+function newTab(url){ const t={id:++tabSeq, hist:[url], pos:0}; B.tabs.push(t); return t; }
+newTab("shukaiko.ua"); newTab("vygrash-free.xyz"); B.cur=0;
+const tabUrl = t => t.hist[t.pos];
+function labDone(id){ if(S.lab.done[id]||S.frozen) return; S.lab.done[id]=true; drawLabList(); floatAt(document.getElementById("lab-"+id),"✓"); }
+function go(url, push=true){
+  const t=B.tabs[B.cur]; if(!t) return;
+  if(push){ t.hist=t.hist.slice(0,t.pos+1); t.hist.push(url); t.pos=t.hist.length-1; }
+  drawBrowser();
+}
+function parseAddr(v){ v=String(v).toLowerCase().trim().replace(/\s+/g,"").replace(/^https?:\/\//,"").replace(/^www\./,"").replace(/\/$/,""); return v; }
+function drawBrowser(){
+  const tabsBox=$("#brTabs"); tabsBox.innerHTML="";
+  B.tabs.forEach((t,i)=>{ const u=tabUrl(t); const s=SITES[u.split("?")[0]]; const title=u==="new"?"Нова вкладка":(s?s.t:"Сторінку не знайдено");
+    const b=el("div",{class:"br-tab"+(i===B.cur?" on":""),role:"button",tabindex:"0","data-tab":t.id},title,el("button",{class:"x",type:"button","aria-label":"Закрити вкладку "+title,"data-close":t.id},"✕"));
+    b.addEventListener("click",e=>{ if(e.target.closest("[data-close]")) return; B.cur=i; drawBrowser(); }); tabsBox.append(b); });
+  tabsBox.append(el("button",{class:"br-new",type:"button",id:"brNew","aria-label":"Нова вкладка"},"+"));
+  const t=B.tabs[B.cur], page=$("#brPage"); page.innerHTML="";
+  if(!t){ $("#brAddr").value=""; page.append(el("p",{class:"muted"},"Усі вкладки закриті. Натисни «+», щоб відкрити нову.")); setBar(); return; }
+  const u=tabUrl(t), key=u.split("?")[0], s=SITES[key];
+  $("#brAddr").value = u==="new" ? "" : u.replace("?q=","/пошук?q=");
+  $("#brLock").textContent = s && s.lock ? "🔒" : (u==="new"?"🔎":"⚠️");
+  $("#brStar").textContent = B.marks.includes(key) ? "★" : "☆";
+  if(u==="new"){ page.append(el("div",{class:"site"},"Нова вкладка"),el("p",{class:"muted"},"Надрукуй адресу сайту в адресному рядку вгорі й натисни Enter.")); }
+  else if(!s){ page.append(el("div",{class:"site"},"😕 Сайт не знайдено"),el("p",{},"Перевір, чи правильно надруковано адресу.")); }
+  else if(key==="shukaiko.ua"){
+    const q=(u.split("?q=")[1]||"");
+    const inp=el("input",{type:"text",id:"brSearch","aria-label":"Пошук у Шукайку",placeholder:"Що шукаємо?",value:decodeURIComponent(q)});
+    const sb=el("button",{class:"btn",type:"button",id:"brSearchGo"},"Шукати");
+    page.append(el("div",{class:"site"},"🔎 Шукайко"),el("div",{class:"actions"},inp,sb));
+    const doS=()=>{ const v=norm(inp.value); if(v) go("shukaiko.ua?q="+encodeURIComponent(v)); };
+    sb.addEventListener("click",doS); inp.addEventListener("keydown",e=>{ if(e.key==="Enter") doS(); });
+    if(q){ const qq=decodeURIComponent(q); const res=Object.entries(SITES).filter(([k,v])=>!v.home&&!v.scam&&(norm(v.t).includes(qq.slice(0,4))||k.includes(translit(qq).slice(0,4))));
+      page.append(el("p",{class:"muted"},"Результати пошуку «"+qq+"»:"));
+      if(!res.length) page.append(el("p",{},"Нічого не знайдено. Спробуй інше слово."));
+      res.forEach(([k,v])=>{ const a=el("a",{class:"lnk",tabindex:"0",role:"link"},v.t+" — "+k); a.addEventListener("click",()=>{ go(k); if(k==="pogoda.ua") labDone(4); }); a.addEventListener("keydown",e=>{if(e.key==="Enter")a.click();}); page.append(a); }); }
+    else page.append(el("p",{class:"muted"},"Популярне: казки, погода, мультики, школа."));
+  }
+  else if(s.scam){ page.append(el("div",{class:"scam"},"🎁 ТИ ВИГРАВ ТЕЛЕФОН! 🎁",el("br"),"Введи пароль від пошти, щоб забрати приз!"),el("p",{class:"muted"},"Біля адреси немає замка 🔒. Це підозрілий сайт. Що треба зробити з цією вкладкою?")); }
+  else {
+    const txt={ "kazky.ua":"Казки для малечі: «Колобок», «Рукавичка», «Котик і Півник».", "pogoda.ua":"Сьогодні у Львові: +6 °C, хмарно, без дощу. ☁️", "multyky.ua":"Нові серії мультиків щосуботи.", "shkola3.ua":"Новини школи: у п'ятницю — свято осені 🍂" }[key];
+    page.append(el("div",{class:"site"},s.t),el("p",{},txt));
+  }
+  setBar();
+}
+function translit(s){ const m={а:"a",б:"b",в:"v",г:"h",ґ:"g",д:"d",е:"e",є:"ie",ж:"zh",з:"z",и:"y",і:"i",ї:"i",й:"i",к:"k",л:"l",м:"m",н:"n",о:"o",п:"p",р:"r",с:"s",т:"t",у:"u",ф:"f",х:"kh",ц:"ts",ч:"ch",ш:"sh",щ:"shch",ь:"",ю:"iu",я:"ia","'":""}; return s.split("").map(c=>m[c]??c).join(""); }
+function setBar(){ const t=B.tabs[B.cur]; $("#brBack").disabled=!t||t.pos<=0; $("#brFwd").disabled=!t||t.pos>=t.hist.length-1; drawMarks(); point(); }
+function drawMarks(){ const m=$("#brMarks"); m.innerHTML=""; if(!B.marks.length){ m.append(el("span",{class:"muted"},"Закладки: поки порожньо")); return; }
+  B.marks.forEach(k=>{ const b=el("button",{type:"button"},"★ "+(SITES[k]?SITES[k].t:k)); b.addEventListener("click",()=>go(k)); m.append(b); }); }
+document.getElementById("brTabs").addEventListener("click",e=>{
+  const c=e.target.closest("[data-close]"); if(c){ const id=+c.dataset.close; const i=B.tabs.findIndex(t=>t.id===id); const wasScam=SITES[tabUrl(B.tabs[i]).split("?")[0]]?.scam; B.tabs.splice(i,1); if(B.cur>=B.tabs.length) B.cur=B.tabs.length-1; if(B.cur<0) B.cur=0; if(wasScam) labDone(7); drawBrowser(); return; }
+  if(e.target.closest("#brNew")){ newTab("new"); B.cur=B.tabs.length-1; labDone(1); drawBrowser(); $("#brAddr").focus(); }
+});
+$("#brAddr").addEventListener("keydown",e=>{ if(e.key!=="Enter") return; if(!B.tabs.length){ newTab("new"); B.cur=0; }
+  const v=parseAddr($("#brAddr").value); const t=B.tabs[B.cur]; const wasNew=tabUrl(t)==="new";
+  go(v||"new"); if(v==="kazky.ua" && wasNew && S.lab.done[1]) labDone(2); });
+$("#brBack").addEventListener("click",()=>{ const t=B.tabs[B.cur]; if(!t||t.pos<=0) return; const from=tabUrl(t); t.pos--; if(from==="pogoda.ua" && tabUrl(t).startsWith("shukaiko.ua?q=")) labDone(5); drawBrowser(); });
+$("#brFwd").addEventListener("click",()=>{ const t=B.tabs[B.cur]; if(!t||t.pos>=t.hist.length-1) return; t.pos++; drawBrowser(); });
+$("#brReload").addEventListener("click",()=>{ const p=$("#brPage"); p.style.opacity=.2; setTimeout(()=>{ p.style.opacity=""; },300); if(B.tabs[B.cur]) labDone(6); });
+$("#brHome").addEventListener("click",()=>{ if(!B.tabs.length){ newTab("shukaiko.ua"); B.cur=0; drawBrowser(); } else go("shukaiko.ua"); });
+$("#brStar").addEventListener("click",()=>{ const t=B.tabs[B.cur]; if(!t) return; const k=tabUrl(t).split("?")[0]; if(!SITES[k]||SITES[k].scam) return;
+  if(B.marks.includes(k)) B.marks=B.marks.filter(x=>x!==k); else { B.marks.push(k); if(k==="kazky.ua") labDone(3); } drawBrowser(); });
+function drawLabList(){ const ul=$("#labList"); ul.innerHTML=""; LAB.forEach(r=>ul.append(el("li",{class:S.lab.done[r.id]?"ok":"",id:"lab-"+r.id},el("span",{class:"b"},S.lab.done[r.id]?"✓":String(r.id)),el("span",{},r.t)))); point(); }
+function point(){
+  document.querySelectorAll(".pointed").forEach(x=>x.classList.remove("pointed"));
+  if(S.frozen) return;
+  const next=LAB.find(r=>!S.lab.done[r.id]); if(!next) return;
+  let target=null;
+  if(next.el==="new") target=$("#brNew");
+  else if(next.el==="addr") target=$("#brAddrBox");
+  else if(next.el==="star") target=$("#brStar");
+  else if(next.el==="home"){ const t=B.tabs[B.cur]; target = t && tabUrl(t).startsWith("shukaiko.ua") ? ($("#brSearch")||$("#brHome")) : $("#brHome"); }
+  else if(next.el==="back") target=$("#brBack");
+  else if(next.el==="reload") target=$("#brReload");
+  else if(next.el==="scam"){ const t=B.tabs.find(t=>SITES[tabUrl(t).split("?")[0]]?.scam); target = t ? document.querySelector('[data-close="'+t.id+'"]') : null; }
+  if(target) target.classList.add("pointed");
+}
+$("#labSubmit").addEventListener("click",()=>{
+  if(S.frozen) return; start();
+  if(S.lab.submits>=2){ $("#labFb").className="fb bad"; $("#labFb").textContent="Лабораторію вже здано двічі."; return; }
+  S.lab.submits++; const ok=LAB.filter(r=>S.lab.done[r.id]).length, miss=LAB.length-ok;
+  S.lab.score = ok/LAB.length * (S.lab.submits===2?0.8:1); S.lab.errs += miss;
+  $("#labScore").textContent="Виконано "+ok+" з "+LAB.length+(S.lab.submits===2?" (повторна здача × 0,8)":"");
+  const fb=$("#labFb");
+  if(miss===0){ fb.className="fb ok"; fb.textContent="Чудово! Тимко вміє керувати браузером 🎉"; S.xp+=30; hud(); confetti(); }
+  else { fb.className="fb bad"; fb.textContent="Не виконано: "+miss+". "+(S.lab.submits===1?"Можна доробити й здати ще раз (бал × 0,8).":"Це була остання здача."); }
+  if(S.lab.submits>=2 || miss===0) $("#labSubmit").disabled=true;
+});
+
+/* ===== ОЦІНКА ===== */
+function compute(){
+  const exPts=EX.reduce((s,e)=>s+((S.ex[e.id]&&S.ex[e.id].pts)||0),0);
+  const exErr=EX.reduce((s,e)=>s+((S.ex[e.id]&&S.ex[e.id].tries)||0),0);
+  const E=exPts/EX.length, L=S.lab.score||0, P=0.6*E+0.4*L;
+  const errors=exErr+S.lab.errs, T=elapsed();
+  const errPen=Math.min(3,Math.max(0,errors-2)*0.25);
+  const timePen=T<=NORM?0:(T<=NORM*1.5?1:2);
+  let grade=Math.max(1,Math.min(12,Math.round(12*P-errPen-timePen)));
+  if(grade===12 && !(P>=0.95 && errors<=2 && T<=NORM)) grade=11;
+  const any = exPts>0 || S.lab.score!=null;
+  return {grade:any?grade:null, exPts, E, L, P, errors, errPen, timePen, T, tooFast: any && T>0 && T<NORM*0.3};
+}
+window.computeGrade = compute;
+function lvlWord(g){ return g==null?"з 12":g>=10?"високий рівень":g>=7?"достатній рівень":g>=4?"середній рівень":"початковий рівень"; }
+const dec = x => String(Math.round(x*10)/10).replace(".",",");
+function renderRes(){
+  tick(); const r=S.frozen||compute();
+  $("#rGrade").textContent=r.grade==null?"—":r.grade; $("#rLvl").textContent=lvlWord(r.grade);
+  $("#rEx").textContent=dec(r.exPts)+" з 14"; $("#rLab").textContent=S.lab.score==null?"не здано":Math.round(r.L*100)+"%";
+  $("#rErr").textContent=r.errors; $("#rT").textContent=fmt(r.T); $("#rNorm").textContent="норма "+fmt(NORM)+" · вправи "+fmt(S.exT)+" · лаб. "+fmt(S.labT);
+  $("#rQ").textContent="⭐ "+S.stars+" · XP "+S.xp;
+  const pen=[]; if(r.errPen) pen.push("штраф за помилки −"+dec(r.errPen)); if(r.timePen) pen.push("штраф за час −"+r.timePen);
+  $("#rPen").innerHTML=""; $("#rPen").append((pen.length?pen.join(" · "):"Штрафів немає")+" · спроба №"+S.attempt);
+  if(r.tooFast) $("#rPen").append(el("div",{class:"warnline"},"⚠ занадто швидко"));
+  $("#finish").hidden=!!S.frozen; $("#again").hidden=!S.frozen;
+}
+$("#finish").addEventListener("click",()=>{ tick(); S.tEnd=Date.now(); if(!S.t0) S.t0=S.tEnd; S.frozen=compute(); renderRes(); hud(); point(); $("#jMsg").textContent="Оцінку зафіксовано. Впиши прізвище, ім'я та клас і натисни «Надіслати вчителю»."; $("#jName").focus(); });
+$("#again").addEventListener("click",()=>{ try{ localStorage.setItem("brauzer3-attempt",S.attempt+1); }catch(e){} location.reload(); });
+
+/* ===== НАДІСЛАТИ ВЧИТЕЛЮ ===== */
+const clean = v => String(v==null?"":v).replace(/[|\n\r]/g," ").trim() || "—";
+function taskStr(){
+  const a=[];
+  EX.forEach(e=>{ const s=S.ex[e.id]||{tries:0,done:false}; a.push("В"+e.id+":"+(s.done?s.tries:(s.tries?s.tries+"н":"н"))); });
+  QUEST.forEach((L,i)=>L.qs.forEach((q,j)=>{ const k="К"+(i+1)+"."+(j+1); const passed = S.q.won.includes(i) || (i===S.q.loc && j<S.q.step); a.push(k+":"+(k in S.q.err ? (passed?S.q.err[k]:S.q.err[k]+"н") : (passed?0:"н"))); }));
+  LAB.forEach(r=>a.push("Л"+r.id+":"+(S.lab.done[r.id]?0:"1н")));
+  return a.join(",");
+}
+function sendLine(name,cls){ const r=S.frozen||compute();
+  return ["v1",GRADE_YEAR,TOPIC,clean(cls),clean(name),S.attempt,"—",r.grade==null?"—":r.grade,dec(r.exPts)+" з 14",S.lab.score==null?"—":Math.round(r.L*100),r.errors,hm(r.T),hm(NORM),r.tooFast?"занадто швидко":"",S.frozen?"завершено":"не завершено",taskStr()].join("|"); }
+window.G6Jline = sendLine;
+$("#jSend").addEventListener("click",e=>{
+  const n=$("#jName").value.trim(), c=$("#jCls").value.trim(), m=$("#jMsg");
+  if(!S.frozen){ e.preventDefault(); m.textContent="Спершу натисни «Завершити й отримати оцінку» ☝️"; $("#finish").focus(); return; }
+  if(!n||!c){ e.preventDefault(); m.textContent="Впиши прізвище, ім'я та клас ☝️"; (n?$("#jCls"):$("#jName")).focus(); return; }
+  e.currentTarget.href = FORM + encodeURIComponent(sendLine(n,c));
+  m.textContent="Форму відкрито в новій вкладці — натисни там «Надіслати» ✔";
+});
+$("#jFab").addEventListener("click",()=>{ showTab("res"); $("#sendbox").scrollIntoView({behavior:RM?"auto":"smooth",block:"center"}); (S.frozen?$("#jName"):$("#finish")).focus({preventScroll:true}); });
+
+/* ===== HUD ===== */
+function hud(){ const d=Object.values(S.ex).filter(x=>x.done).length; $("#hudEx").textContent="Вправи: "+d+"/14"; $("#hudStar").textContent="⭐ "+S.stars; $("#hudXp").textContent="XP "+S.xp; }
+
+/* ===== РЕЙТИНГ ===== */
+let DB=null, ME=null;
+function drawRank(docs){ const tb=$("#rankBody"); tb.innerHTML="";
+  const rows=docs.map(d=>d.data()).filter(Boolean).sort((a,b)=>(b.stars-a.stars)||(b.xp-a.xp)).slice(0,40);
+  if(!rows.length){ tb.append(el("tr",{},el("td",{colspan:"4",class:"muted"},"Поки порожньо. Будь першим!"))); return; }
+  rows.forEach((r,i)=>tb.append(el("tr",{},el("td",{},String(i+1)),el("td",{},String(r.nick||"?")),el("td",{},String(r.stars|0)),el("td",{},String(r.xp|0))))); }
+(async()=>{ try{ if(!window.claude||!claude.use) throw 0; const [db,user]=await Promise.all([claude.use("db"),claude.use("user")]); if(!db||!user) throw 0; DB=db; ME=await user.id();
+  db.collection("board").onSnapshot(s=>drawRank(s.docs),()=>{ $("#rankBody").innerHTML='<tr><td colspan="4" class="muted">Рейтинг зараз недоступний.</td></tr>'; }); }
+  catch(e){ $("#rankBody").innerHTML='<tr><td colspan="4" class="muted">Рейтинг працює, коли сторінку відкрито з увійденим акаунтом.</td></tr>'; $("#saveRank").disabled=true; } })();
+$("#saveRank").addEventListener("click",async()=>{ const nick=$("#nick").value.trim().slice(0,16); if(!nick){ $("#rankMsg").textContent="Введи нікнейм."; return; }
+  if(!DB||!ME){ $("#rankMsg").textContent="Рейтинг недоступний."; return; }
+  try{ await DB.collection("board").doc(ME).set({nick,stars:S.stars,xp:S.xp,at:new Date().toISOString()}); $("#rankMsg").textContent="Збережено! ⭐"; }catch(e){ $("#rankMsg").textContent="Не вдалося зберегти. Спробуй пізніше."; } });
+
+/* ===== СТАРТ ===== */
+renderEx(); renderQuest(); renderCards(); drawLabList(); drawBrowser(); hud();
+addEventListener("resize",()=>{ if(!$("#p-quest").hidden) renderMap(); });
+</script>
+
+</body></html>

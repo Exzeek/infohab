@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Білети · 9 клас · Розділ 5. 3D-моделювання</title>
+<style>
+:root{--cl:#0c8599;--bg:#f5f6fa;--card:#fff;--ink:#1f2433;--muted:#5b6275;--line:#e3e6ee;--ok:#2b8a3e;--r:16px}
+@media (prefers-color-scheme:dark){:root{--cl:#3bc9db;--bg:#151821;--card:#1f2330;--ink:#eef0f6;--muted:#a3aabb;--line:#2e3344}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Nunito","Segoe UI",system-ui,sans-serif;font-size:16px;line-height:1.45}
+header{background:var(--cl);color:#fff;padding:14px 18px}
+header small{opacity:.85;display:block}header h1{margin:2px 0 0;font-size:1.35rem}
+main{max-width:1100px;margin:0 auto;padding:14px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 14px;position:sticky;top:0;background:var(--bg);padding:6px 0;z-index:5}
+.tabs button,.btn{border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 14px;font:inherit;font-weight:800;cursor:pointer}
+.tabs button[aria-selected=true],.btn.main{background:var(--cl);border-color:var(--cl);color:#fff}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:8px 0}
+input,select{font:inherit;padding:7px 10px;border:2px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
+.lead{color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
+.tk{background:var(--card);border-radius:var(--r);border:2px solid var(--line);padding:12px 14px;break-inside:avoid}
+.tk h3{margin:0 0 6px;color:var(--cl);display:flex;justify-content:space-between}
+.cd{border-top:1px dashed var(--line);padding:8px 0}
+.cd .lv{font-weight:900;font-size:.85rem}
+.cd .q{font-weight:700;white-space:pre-wrap}
+.cd ul{margin:4px 0 0;padding-left:18px}.cd li{white-space:pre-wrap}
+.cd .src{font-size:.75rem;color:var(--muted)}
+.ans{display:none;background:#e6f4ea;color:#1b5e20;border-radius:8px;padding:4px 8px;margin-top:4px;font-size:.92rem}
+@media (prefers-color-scheme:dark){.ans{background:#1d3a26;color:#b7f0c3}}
+body.show .ans{display:block}
+table{border-collapse:collapse;width:100%;background:var(--card);border-radius:var(--r);overflow:hidden}
+th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left}
+td input{width:100%}td select{width:100%}
+.tot{font-weight:900;color:var(--cl);font-size:1.1rem}
+.topic h2{color:var(--cl);margin:18px 0 6px}
+[hidden]{display:none!important}
+@media print{header,.tabs,.noprint{display:none!important}body{background:#fff;color:#000}.tk{border:1px solid #999;page-break-inside:avoid}.grid{display:block}.tk{margin-bottom:10px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header><small id="eb"></small><h1 id="ht"></h1></header>
+<main>
+<div class="tabs" role="tablist">
+ <button role="tab" aria-selected="true" data-t="t1">🎫 Білети</button>
+ <button role="tab" aria-selected="false" data-t="t2">📚 Усі картки</button>
+ <button role="tab" aria-selected="false" data-t="t3">📝 Журнал</button>
+</div>
+<section id="t1">
+ <p class="lead">Кожен білет = 🟢 базова (3 б) + 🟡 середня (4 б) + 🔴 складна (5 б) з трьох різних тем = <b>12 балів</b>. Номер серії дає ті самі білети знову (зручно для паралельних класів).</p>
+ <div class="row noprint"><label>Білетів: <input id="n" type="number" min="1" max="40" value="20" style="width:80px"></label>
+  <label>Серія: <input id="seed" type="number" value="1" style="width:90px"></label>
+  <button class="btn main" id="gen">🎲 Скласти білети</button>
+  <label><input type="checkbox" id="sa"> Показати відповіді</label>
+  <button class="btn" id="pr">🖨️ Друк</button></div>
+ <div class="grid" id="tickets"></div>
+</section>
+<section id="t2" hidden><p class="lead">По 4 картки на тему. Можна давати усно або на дошці. Відповіді — зеленим (увімкни «Показати відповіді» на вкладці «Білети» або тут).</p>
+ <div class="row noprint"><label><input type="checkbox" id="sa2"> Показати відповіді</label></div><div id="all"></div></section>
+<section id="t3" hidden>
+ <p class="lead">Впиши учнів і бали за кожну картку білета. Підсумок рахується сам. Дані зберігаються лише на цьому комп'ютері.</p>
+ <table><thead><tr><th>Учень</th><th>Білет №</th><th>🟢 /3</th><th>🟡 /4</th><th>🔴 /5</th><th>Разом</th></tr></thead><tbody id="jb"></tbody></table>
+ <div class="row noprint"><button class="btn" id="add">+ Рядок</button><button class="btn main" id="csv">⬇️ CSV для журналу</button><button class="btn" id="copy">📋 Скопіювати таблицю</button><span id="msg" class="lead"></span></div>
+</section>
+</main>
+<script>
+const D={"grade": 9, "sec": 5, "secName": "3D-моделювання", "saga": "Кав'ярня «Байт»", "topics": [{"n": 1, "title": "Моделі", "cards": [{"q": "Модель — це…", "body": ["А) Точна копія з усіма деталями", "Б) Спрощене подання об’єкта", "В) Лише фотографія предмета", "Г) Будь-яка іграшка"], "ans": "Б) Спрощене подання об’єкта", "lv": 1, "pts": 3}, {"q": "З'єднай модель з видом.", "body": ["1) Глобус", "2) Формула площі", "3) 3D-персонаж гри", "4) Креслення деталі", "—", "А) Математична", "Б) Інформаційна (цифрова)", "В) Фізична (натурна)", "Г) Графічна"], "ans": "1–В, 2–А, 3–Б, 4–Г", "lv": 1, "pts": 3}, {"q": "Назви 2 причини, чому інженери випробовують модель авто, а не справжнє авто.", "body": [], "ans": "Будь-які 2: дешевше; безпечніше; швидше; можна повторити багато разів; справжнього ще немає", "lv": 2, "pts": 4}, {"q": "Учень записав пам'ятку про моделі. Знайди 3 помилки.", "body": ["1) Модель має всі дрібниці оригіналу  ⟶  так", "2) Модель залежить від мети  ⟶  так", "3) Макет будинку  ⟶  інформаційна модель", "4) 3D-модель чашки  ⟶  цифрова модель", "5) Одна модель підходить для будь-якої мети  ⟶  так", "6) Карта міста  ⟶  модель"], "ans": "Рядки 1, 3, 5. Модель спрощує; макет — фізична модель; модель будують під конкретну мету", "lv": 3, "pts": 5}]}, {"n": 2, "title": "Методи тривимірного моделювання", "cards": [{"q": "Ліплення моделі цифровими пензлями, як із глини, — це…", "body": ["А) Полігональне моделювання", "Б) Сплайнове моделювання", "В) Скульптинг", "Г) Процедурне моделювання"], "ans": "В) Скульптинг", "lv": 1, "pts": 3}, {"q": "З'єднай метод з описом.", "body": ["1) Полігональний", "2) Сплайновий (NURBS)", "3) Скульптинг", "4) Процедурний", "—", "А) Форму задають криві й формули", "Б) Модель генерують правила й параметри", "В) Сітка з вершин, ребер, граней", "Г) Ліплення пензлями"], "ans": "1–В, 2–А, 3–Г, 4–Б", "lv": 1, "pts": 3}, {"q": "Чашка мала 320 полігонів, кожен поділили на 4. Скільки стало? Покажи обчислення.", "body": [], "ans": "1280 (320 · 4)", "lv": 2, "pts": 4}, {"q": "Хто якою програмою робить модель? Знайди 3 помилки.", "body": ["1) Ігровий персонаж  ⟶  Blender, полігони", "2) Креслення деталі двигуна  ⟶  ZBrush, скульптинг", "3) Ескіз будинку  ⟶  SketchUp", "4) Обличчя монстра  ⟶  SolidWorks", "5) Корпус авто з ідеальними кривими  ⟶  NURBS-моделювання", "6) Ліс з тисяч дерев  ⟶  намалювати кожне вручну"], "ans": "Рядки 2, 4, 6. Деталь — SolidWorks/CAD; обличчя — ZBrush/скульптинг; ліс — процедурно", "lv": 3, "pts": 5}]}, {"n": 3, "title": "Етапи створення 3D-зображення", "cards": [{"q": "Фото й креслення-зразки для майбутньої моделі — це…", "body": ["А) Готові рендери", "Б) Полігони", "В) Референси", "Г) Вузли"], "ans": "В) Референси", "lv": 1, "pts": 3}, {"q": "З'єднай етап з дією.", "body": ["1) Моделювання", "2) Текстурування", "3) Освітлення", "4) Рендеринг", "—", "А) Розставити джерела світла", "Б) Створити форму об’єкта", "В) Обчислити кінцеве зображення", "Г) Накласти колір і візерунки"], "ans": "1–Б, 2–Г, 3–А, 4–В", "lv": 1, "pts": 3}, {"q": "Розстав етапи: рендер, моделювання, референси, текстури, світло й камера.", "body": [], "ans": "Референси → моделювання → текстури → світло й камера → рендер", "lv": 2, "pts": 4}, {"q": "План 3D-постера кав'ярні має 3 помилки.", "body": ["1) 1-й етап  ⟶  рендер", "2) Референси  ⟶  фото справжніх чашок", "3) UV-розгортка  ⟶  потрібна для текстури", "4) Світло  ⟶  ставимо до моделювання", "5) Камера  ⟶  обираємо ракурс", "6) Карта нормалей  ⟶  додає справжні полігони"], "ans": "Рядки 1, 4, 6. Рендер — останній; світло — після моделювання; нормалі імітують деталі без нових полігонів", "lv": 3, "pts": 5}]}, {"n": 4, "title": "Графічний редактор Blender", "cards": [{"q": "Яка клавіша перемикає Object Mode і Edit Mode?", "body": ["А) Tab", "Б) Shift + A", "В) F12", "Г) Ctrl + Z"], "ans": "А) Tab", "lv": 1, "pts": 3}, {"q": "З'єднай клавішу з дією.", "body": ["1) G", "2) R", "3) S", "4) Shift + A", "—", "А) Обертання", "Б) Меню «Додати»", "В) Переміщення", "Г) Масштаб"], "ans": "1–В, 2–А, 3–Г, 4–Б", "lv": 1, "pts": 3}, {"q": "Скільки об'єктів у стартовій сцені Blender і які?", "body": [], "ans": "3: куб, камера, світло (лампа)", "lv": 2, "pts": 4}, {"q": "Учень описав інтерфейс Blender. Знайди 3 помилки.", "body": ["1) Структуратор  ⟶  список об’єктів сцени", "2) Num 7  ⟶  вигляд з камери", "3) Колесо миші  ⟶  наближення", "4) F12  ⟶  зберегти файл", "5) Shift + колесо  ⟶  панорамування", "6) Ctrl + S  ⟶  запустити рендер"], "ans": "Рядки 2, 4, 6. Num 7 — вигляд згори (з камери — Num 0); F12 — рендер; Ctrl+S — зберегти", "lv": 3, "pts": 5}]}, {"n": 5, "title": "Об'єктне моделювання у Blender", "cards": [{"q": "Яка клавіша дублює об'єкт?", "body": ["А) Shift + D", "Б) Ctrl + Shift + A", "В) Alt + G", "Г) Tab"], "ans": "А) Shift + D", "lv": 1, "pts": 3}, {"q": "З'єднай примітив із предметом кав'ярні.", "body": ["1) Циліндр", "2) Куб", "3) UV-сфера", "4) Тор", "—", "А) Печиво-кулька", "Б) Ніжка столика", "В) Стільниця", "Г) Бублик"], "ans": "1–Б, 2–В, 3–А, 4–Г", "lv": 1, "pts": 3}, {"q": "Скільки вершин має циліндр Blender за замовчуванням (32 сегменти)? Поясни.", "body": [], "ans": "64: по 32 вершини на верхній і нижній основі", "lv": 2, "pts": 4}, {"q": "Учень збирав столик. Знайди 3 помилки.", "body": ["1) Сплюснути куб по висоті  ⟶  S, потім Z", "2) Копія ніжки  ⟶  Ctrl + C", "3) Повернути на 90°  ⟶  R 90", "4) Опорна точка  ⟶  не впливає на обертання", "5) Зсунути по осі X  ⟶  G, потім X", "6) Скасувати дію  ⟶  Ctrl + Y"], "ans": "Рядки 2, 4, 6. Копія — Shift+D; опорна точка — центр обертання; скасувати — Ctrl+Z", "lv": 3, "pts": 5}]}, {"n": 6, "title": "Полігональне моделювання у Blender", "cards": [{"q": "Одиночна точка полігональної сітки — це…", "body": ["А) Ребро", "Б) Вершина", "В) Грань", "Г) Петля ребер"], "ans": "Б) Вершина", "lv": 1, "pts": 3}, {"q": "З'єднай інструмент з дією.", "body": ["1) E", "2) I", "3) Ctrl + R", "4) Alt + клік", "—", "А) Розрізати петлею", "Б) Видавити", "В) Виділити петлю", "Г) Вставити грань усередину"], "ans": "1–Б, 2–Г, 3–А, 4–В", "lv": 1, "pts": 3}, {"q": "Скільки вершин, ребер і граней має куб?", "body": [], "ans": "8 вершин, 12 ребер, 6 граней", "lv": 2, "pts": 4}, {"q": "Учень моделював чашку. Знайди 3 помилки.", "body": ["1) Прибрати верх циліндра  ⟶  X → Faces", "2) Товщина стінок  ⟶  модифікатор Subdivision", "3) Згладити чашку  ⟶  Subdivision Surface", "4) Ручка  ⟶  видавити 2 грані (E)", "5) Найкраща сітка  ⟶  лише трикутники", "6) Петля навколо чашки  ⟶  Alt + Z"], "ans": "Рядки 2, 5, 6. Товщина — Solidify; найкраща сітка — чотирикутники; петля — Ctrl+R", "lv": 3, "pts": 5}]}, {"n": 7, "title": "Основи візуалізації у Blender", "cards": [{"q": "Яка клавіша запускає рендер кадру?", "body": ["А) F12", "Б) Num 0", "В) Tab", "Г) Shift + A"], "ans": "А) F12", "lv": 1, "pts": 3}, {"q": "З'єднай налаштування з результатом.", "body": ["1) Roughness 0", "2) Area Light", "3) Cycles", "4) HDRI", "—", "А) Фізично точний рендер", "Б) Освітлення від фото-оточення", "В) Дзеркальний блиск", "Г) М’яке світло від площини"], "ans": "1–В, 2–Г, 3–А, 4–Б", "lv": 1, "pts": 3}, {"q": "Рендер 1920×1080 на 50 %. Яким буде розмір зображення?", "body": [], "ans": "960×540 px", "lv": 2, "pts": 4}, {"q": "Учень налаштував рендер постера. Знайди 3 помилки.", "body": ["1) Камера до виду  ⟶  Ctrl + Alt + Num 0", "2) Зберегти рендер  ⟶  Ctrl + S", "3) Рушій для швидкого перегляду  ⟶  Eevee", "4) Формат постера  ⟶  PNG", "5) Матеріал скла  ⟶  Roughness 1", "6) Рендер кадру  ⟶  F9"], "ans": "Рядки 2, 5, 6. Зберегти рендер — Image → Save As; скло — низька шорсткість + Transmission; рендер — F12", "lv": 3, "pts": 5}]}]};
+</script>
+<script>
+"use strict";
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+$("#eb").textContent="Інформатика · "+D.grade+" клас · Розділ "+D.sec+" · для вчителя";
+$("#ht").textContent="Картки-білети: "+D.secName;
+document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{document.querySelectorAll(".tabs button").forEach(x=>x.setAttribute("aria-selected",x===b));["t1","t2","t3"].forEach(id=>$("#"+id).hidden=id!==b.dataset.t)});
+const LV={1:"🟢 Базовий · 3 б",2:"🟡 Середній · 4 б",3:"🔴 Складний · 5 б"};
+const cardHTML=(c,t)=>`<div class="cd"><div class="lv">${LV[c.lv]}</div><div class="q">${esc(c.q)}</div>${c.body&&c.body.length?"<ul>"+c.body.map(x=>"<li>"+esc(x)+"</li>").join("")+"</ul>":"<p style=\"margin:4px 0\">Відповідь: ____________</p>"}<div class="ans">✓ ${esc(c.ans)}</div><div class="src">Тема ${t.n}. ${esc(t.title)}</div></div>`;
+$("#all").innerHTML=D.topics.map(t=>`<div class="topic"><h2>Тема ${t.n}. ${esc(t.title)}</h2><div class="grid">${t.cards.map(c=>`<div class="tk">${cardHTML(c,t)}</div>`).join("")}</div></div>`).join("");
+function rng(seed){let a=seed>>>0||1;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function gen(){const n=Math.max(1,Math.min(40,+$("#n").value||20)),R=rng(+$("#seed").value||1);
+ const pool=lv=>D.topics.flatMap(t=>t.cards.filter(c=>c.lv===lv).map(c=>({c,t})));
+ const P={1:pool(1),2:pool(2),3:pool(3)};const used={1:[],2:[],3:[]};
+ const take=(lv,avoid)=>{let cand=P[lv].filter(x=>!avoid.includes(x.t.n)&&!used[lv].includes(x));if(!cand.length){used[lv]=[];cand=P[lv].filter(x=>!avoid.includes(x.t.n));}if(!cand.length)cand=P[lv];const x=cand[Math.floor(R()*cand.length)];used[lv].push(x);return x};
+ let h="";for(let i=1;i<=n;i++){const a=take(1,[]),b=take(2,[a.t.n]),c=take(3,[a.t.n,b.t.n]);
+  h+=`<div class="tk"><h3><span>Білет № ${i}</span><span>12 б</span></h3>${cardHTML(a.c,a.t)}${cardHTML(b.c,b.t)}${cardHTML(c.c,c.t)}</div>`;}
+ $("#tickets").innerHTML=h;}
+$("#gen").onclick=gen;gen();
+const sync=v=>{document.body.classList.toggle("show",v);$("#sa").checked=v;$("#sa2").checked=v};
+$("#sa").onchange=e=>sync(e.target.checked);$("#sa2").onchange=e=>sync(e.target.checked);
+$("#pr").onclick=()=>window.print();
+// журнал
+const KEY="tickets-"+D.grade+"-"+D.sec;let J=[];try{J=JSON.parse(localStorage.getItem(KEY)||"[]")}catch(e){}
+if(!J.length)J=Array.from({length:5},()=>({n:"",t:"",a:0,b:0,c:0}));
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(J))}catch(e){}};
+const opts=m=>Array.from({length:m+1},(_,i)=>`<option>${i}</option>`).join("");
+function draw(){$("#jb").innerHTML=J.map((r,i)=>`<tr><td><input data-i="${i}" data-k="n" value="${esc(r.n)}" aria-label="Учень"></td><td><input data-i="${i}" data-k="t" value="${esc(r.t)}" style="width:70px" aria-label="Білет"></td>
+ <td><select data-i="${i}" data-k="a">${opts(3)}</select></td><td><select data-i="${i}" data-k="b">${opts(4)}</select></td><td><select data-i="${i}" data-k="c">${opts(5)}</select></td><td class="tot">${(+r.a)+(+r.b)+(+r.c)}</td></tr>`).join("");
+ $("#jb").querySelectorAll("select").forEach(s=>s.value=J[s.dataset.i][s.dataset.k]);
+ $("#jb").querySelectorAll("input,select").forEach(el=>el.oninput=el.onchange=()=>{J[el.dataset.i][el.dataset.k]=el.value;save();if(el.tagName==="SELECT")draw()});}
+draw();$("#add").onclick=()=>{J.push({n:"",t:"",a:0,b:0,c:0});save();draw()};
+const csv=()=>"Учень;Білет;Базова;Середня;Складна;Разом\n"+J.filter(r=>r.n).map(r=>[r.n,r.t,r.a,r.b,r.c,(+r.a)+(+r.b)+(+r.c)].join(";")).join("\n");
+$("#csv").onclick=()=>{try{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["﻿"+csv()],{type:"text/csv"}));a.download="bilety-"+D.grade+"-"+D.sec+".csv";a.click();$("#msg").textContent="Файл збережено."}catch(e){$("#msg").textContent="Не вдалося — скористайся «Скопіювати таблицю»."}};
+$("#copy").onclick=async()=>{try{await navigator.clipboard.writeText(csv().replace(/;/g,"\t"));$("#msg").textContent="Скопійовано — встав у Google Таблицю."}catch(e){$("#msg").textContent="Браузер не дав скопіювати."}};
+</script>
+</body>
+</html>

@@ -1,0 +1,810 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Ліга 8 класу · Обчислення</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Golos+Text:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: табло-шапка (стадіонне табло = тема й рахунок учня), вкладки, одна робоча колонка ~800px; лабораторія — справжня сітка-таблиця */
+:root{
+  --bg:#eef2ea; --surface:#ffffff; --surface-2:#e3eadd; --line:#c6d2bf;
+  --fg:#15241a; --dim:#56685b; --accent:#1c7a43; --accent-ink:#ffffff;
+  --amber:#b97300; --ok:#1c7a43; --ok-bg:#dff1e4; --bad:#c03a32; --bad-bg:#fbe5e2; --boss:#a3342b;
+  --t1:#1c7a43; --t2:#b97300; --t3:#c03a32;
+  --board:#0f2a1b; --board-ink:#ffc23d; --board-dim:#8fb39b;
+  --gridline:#d3dccd; --gridhead:#e9eee5; --selfill:rgba(28,122,67,.13); --fill-g:#cdebd5; --fill-y:#fdeeb8; --fill-b:#cfe6f7;
+  --display:"Russo One","Arial Black",system-ui,sans-serif;
+  --body:"Golos Text","Segoe UI",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0d1611; --surface:#14211a; --surface-2:#1b2c22; --line:#2c4234;
+  --fg:#e4efe6; --dim:#97ad9d; --accent:#4cc47c; --accent-ink:#06170d;
+  --amber:#f2b53c; --ok:#4cc47c; --ok-bg:#15381f; --bad:#f07a70; --bad-bg:#3b1c1a; --boss:#f08070;
+  --t1:#4cc47c; --t2:#f2b53c; --t3:#f07a70;
+  --board:#081a10; --board-ink:#ffc23d; --board-dim:#7fa58b;
+  --gridline:#2b3e31; --gridhead:#1a2a20; --selfill:rgba(76,196,124,.18); --fill-g:#1f4a2c; --fill-y:#4d4114; --fill-b:#173a52; color-scheme:dark; } }
+:root[data-theme="dark"]{
+  --bg:#0d1611; --surface:#14211a; --surface-2:#1b2c22; --line:#2c4234;
+  --fg:#e4efe6; --dim:#97ad9d; --accent:#4cc47c; --accent-ink:#06170d;
+  --amber:#f2b53c; --ok:#4cc47c; --ok-bg:#15381f; --bad:#f07a70; --bad-bg:#3b1c1a; --boss:#f08070;
+  --t1:#4cc47c; --t2:#f2b53c; --t3:#f07a70;
+  --board:#081a10; --board-ink:#ffc23d; --board-dim:#7fa58b;
+  --gridline:#2b3e31; --gridhead:#1a2a20; --selfill:rgba(76,196,124,.18); --fill-g:#1f4a2c; --fill-y:#4d4114; --fill-b:#173a52; color-scheme:dark; }
+*{box-sizing:border-box}
+body{background:var(--bg); color:var(--fg); font-family:var(--body); font-size:16px; line-height:1.55}
+.wrap{max-width:820px; margin:0 auto; padding-inline:16px; padding-block:18px 64px}
+h1,h2,h3{font-family:var(--display); font-weight:400; text-wrap:balance; margin:0}
+button{font-family:inherit; font-size:inherit}
+:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+.dim{color:var(--dim)}
+
+/* табло */
+.board{background:var(--board); color:var(--board-ink); border-radius:18px; padding:18px 20px 16px; display:flex; flex-direction:column; gap:12px; margin-bottom:16px}
+.board .k{font-family:var(--mono); font-size:.74rem; letter-spacing:.14em; text-transform:uppercase; color:var(--board-dim)}
+.board h1{font-size:clamp(1.9rem,7.5vw,3.1rem); line-height:1.02; color:var(--board-ink); letter-spacing:.01em}
+.board p{margin:0; color:#d7e6da; max-width:60ch; font-size:.95rem}
+.score{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px}
+.score div{background:rgba(255,255,255,.05); border:1px solid rgba(255,194,61,.25); border-radius:10px; padding:7px 8px; text-align:center; min-width:0}
+.score b{display:block; font-family:var(--mono); font-size:1.35rem; font-variant-numeric:tabular-nums; color:var(--board-ink)}
+.score span{font-size:.68rem; letter-spacing:.08em; text-transform:uppercase; color:var(--board-dim)}
+
+/* вкладки */
+.tabs{display:flex; gap:6px; overflow-x:auto; padding-bottom:4px; margin-bottom:16px; scrollbar-width:thin}
+.tab{flex:0 0 auto; background:transparent; border:1px solid var(--line); color:var(--dim); border-radius:999px; padding:8px 15px; cursor:pointer; font-weight:700; font-size:.9rem}
+.tab[aria-selected="true"]{background:var(--fg); color:var(--bg); border-color:var(--fg)}
+.intro{margin:0 0 14px; color:var(--dim); max-width:64ch}
+
+/* вправи */
+.list{display:flex; flex-direction:column; gap:14px}
+.card{background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:18px; min-width:0}
+.card.done{border-color:var(--ok)}
+.card-h{display:flex; flex-wrap:wrap; gap:8px 12px; align-items:center; font-size:.76rem; text-transform:uppercase; letter-spacing:.08em; color:var(--dim); font-weight:800; margin-bottom:6px}
+.tier{border-radius:999px; padding:2px 9px; border:1px solid currentColor}
+.tier.t1{color:var(--t1)}.tier.t2{color:var(--t2)}.tier.t3{color:var(--t3)}
+.score-chip{margin-left:auto; color:var(--ok)}
+.q{font-weight:700; font-size:1.03rem; margin:2px 0 14px}
+.opts{display:flex; flex-direction:column; gap:9px}
+.opt{text-align:left; background:var(--surface-2); border:1px solid var(--line); color:var(--fg); padding:12px 14px; border-radius:11px; cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt.ok{background:var(--ok-bg); border-color:var(--ok)}
+.opt.bad{background:var(--bad-bg); border-color:var(--bad); animation:shake .35s}
+.opt:disabled{cursor:default}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.fb{margin-top:12px; padding:11px 13px; border-radius:11px; font-size:.93rem; border:1px solid}
+.fb.ok{background:var(--ok-bg); border-color:var(--ok)} .fb.bad{background:var(--bad-bg); border-color:var(--bad)}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:12px}
+.btn{background:var(--accent); color:var(--accent-ink); border:none; padding:10px 18px; border-radius:999px; cursor:pointer; font-weight:800}
+.btn:hover{filter:brightness(1.08)} .btn:disabled{opacity:.4; cursor:default; filter:none}
+.btn.ghost{background:transparent; color:var(--fg); border:1px solid var(--line)}
+.in{background:var(--bg); border:1px solid var(--accent); color:var(--fg); border-radius:9px; padding:9px 12px; font:inherit; font-family:var(--mono); width:220px; max-width:100%}
+.in.ok{border-color:var(--ok)} .in.bad{border-color:var(--bad); animation:shake .35s}
+.chips{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px}
+.chip{background:var(--surface-2); border:1px solid var(--accent); color:var(--fg); padding:7px 12px; border-radius:999px; cursor:pointer; font-size:.9rem; font-family:var(--mono)}
+.chip.sel{box-shadow:0 0 0 2px var(--accent)} .chip.bad{border-color:var(--bad); animation:shake .35s}
+.buckets{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px}
+.bucket{min-height:84px; border:2px dashed var(--line); border-radius:12px; padding:10px; cursor:pointer; background:var(--surface-2); text-align:left; color:var(--fg)}
+.bucket:hover{border-color:var(--accent)}
+.bucket h4{margin:0 0 8px; font-size:.78rem; color:var(--accent); text-transform:uppercase; letter-spacing:.06em}
+.bucket .chip{cursor:default; border-color:var(--ok); display:inline-block; margin:0 6px 6px 0; font-size:.8rem}
+.target{display:flex; flex-direction:column; gap:7px; min-height:48px; border:2px dashed var(--line); border-radius:12px; padding:10px; margin-bottom:12px}
+.target:empty::before{content:"Натискайте кроки нижче — вони стануть тут у вашому порядку"; color:var(--dim); font-size:.85rem}
+.step{display:flex; align-items:center; gap:10px; background:var(--surface-2); border:1px solid var(--line); border-radius:10px; padding:8px 11px; font-size:.92rem}
+.step.good{border-color:var(--ok)} .step.wrongpos{border-color:var(--bad)}
+.step .n{color:var(--amber); font-weight:800; width:20px; font-family:var(--mono)}
+.step button{margin-left:auto; background:var(--surface); border:1px solid var(--line); color:var(--dim); border-radius:8px; width:28px; height:28px; cursor:pointer}
+.mcols{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+@media(max-width:560px){.mcols{grid-template-columns:1fr}}
+.mi{display:block; width:100%; text-align:left; background:var(--surface-2); border:1px solid var(--line); color:var(--fg); border-radius:10px; padding:10px 12px; margin-bottom:8px; cursor:pointer; font-size:.92rem}
+.mi.sel{border-color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent)}
+.mi.done{border-color:var(--ok); background:var(--ok-bg); cursor:default}
+.mi.bad{border-color:var(--bad); animation:shake .35s}
+.tw{overflow-x:auto; max-width:100%}
+table.mini{border-collapse:collapse; font-family:var(--mono); font-size:.86rem}
+table.mini th{background:var(--gridhead); color:var(--dim); font-weight:500; border:1px solid var(--gridline); padding:4px 8px; min-width:28px}
+table.mini td{border:1px solid var(--gridline); padding:0}
+table.mini td button{display:block; width:100%; min-width:64px; min-height:34px; background:var(--surface); border:0; color:var(--fg); cursor:pointer; font:inherit; padding:6px 8px; text-align:left}
+table.mini td button.n{text-align:right}
+table.mini td button.in-rect{background:var(--selfill)}
+table.mini td button.anchor{box-shadow:inset 0 0 0 2px var(--accent)}
+table.mini td button.mark{background:var(--bad-bg); box-shadow:inset 0 0 0 2px var(--bad)}
+table.mini td button.found{background:var(--ok-bg); box-shadow:inset 0 0 0 2px var(--ok)}
+table.mini td.fixed{padding:6px 8px; color:var(--dim)}
+
+/* квест */
+.hud{display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:12px}
+.pill{background:var(--surface); border:1px solid var(--line); padding:5px 13px; border-radius:999px; font-size:.88rem; font-variant-numeric:tabular-nums}
+.pill b{color:var(--amber)}
+.map{display:flex; flex-direction:column; gap:10px}
+.node{display:flex; align-items:center; gap:14px; background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:13px 15px; cursor:pointer; text-align:left; color:var(--fg); width:100%}
+.node:hover:not(:disabled){border-color:var(--accent)}
+.node:disabled{opacity:.5; cursor:not-allowed}
+.node .ico{font-family:var(--display); font-size:1.1rem; width:46px; height:46px; display:grid; place-items:center; background:var(--surface-2); border-radius:50%; border:2px solid var(--line); flex:0 0 auto; color:var(--amber)}
+.node.done .ico{border-color:var(--ok); color:var(--ok)} .node.boss{border-color:var(--boss)}
+.node .nm{font-weight:800} .node .ds{font-size:.85rem; color:var(--dim)}
+.node .st{margin-left:auto; color:var(--amber); letter-spacing:2px; white-space:nowrap}
+.node > div{min-width:0}
+.dots{display:flex; gap:5px; margin:6px 0 12px}.dots i{flex:1; height:6px; border-radius:6px; background:var(--surface-2)}
+.dots i.on{background:var(--accent)} .dots i.cur{background:var(--amber)}
+.boss-bar{height:12px; background:var(--surface-2); border-radius:99px; overflow:hidden; margin-bottom:12px}
+.boss-bar i{display:block; height:100%; background:var(--boss); transition:width .5s}
+.center{text-align:center}
+.big{font-family:var(--display); font-size:2.2rem; color:var(--amber); letter-spacing:4px}
+
+/* картки */
+.flip{width:100%; min-height:210px; perspective:1000px; background:none; border:none; padding:0; cursor:pointer; color:var(--fg)}
+.flip-in{position:relative; width:100%; min-height:210px; transition:transform .45s; transform-style:preserve-3d}
+.flip.on .flip-in{transform:rotateY(180deg)}
+.face{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:22px; border-radius:var(--r); border:1px solid var(--line); backface-visibility:hidden; background:var(--surface)}
+.face.back{transform:rotateY(180deg); background:var(--surface-2)}
+.face .term{font-family:var(--display); font-size:clamp(1.3rem,5vw,1.8rem); text-align:center}
+.face .def{font-size:1.04rem; text-align:center; max-width:46ch}
+.face small{color:var(--dim); font-size:.8rem}
+@media (prefers-reduced-motion: reduce){ .flip-in{transition:none} .opt.bad,.chip.bad,.in.bad,.mi.bad{animation:none} }
+
+/* лабораторія — міні-Excel */
+.proto{font-family:var(--mono); font-size:.84rem; background:var(--surface-2); border-radius:10px; padding:10px 12px; white-space:pre-wrap; margin:8px 0 0}
+.xl{border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--surface)}
+.ribbon{display:flex; flex-wrap:wrap; gap:6px; padding:8px; background:var(--gridhead); border-bottom:1px solid var(--line)}
+.rb{background:var(--surface); border:1px solid var(--line); color:var(--fg); border-radius:8px; padding:6px 10px; cursor:pointer; font-size:.84rem; font-weight:600}
+.rb:hover{border-color:var(--accent)} .rb.on{border-color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent); color:var(--accent)}
+.rb select{font:inherit}
+select.rb{padding:6px 8px}
+.fxbar{display:grid; grid-template-columns:92px auto minmax(0,1fr); gap:6px; align-items:center; padding:6px 8px; border-bottom:1px solid var(--line)}
+.fxbar input{background:var(--surface); border:1px solid var(--line); color:var(--fg); border-radius:6px; padding:6px 8px; font-family:var(--mono); font-size:.88rem; min-width:0; width:100%}
+.fxbar .fx{font-family:var(--mono); font-style:italic; color:var(--dim)}
+.gridwrap{overflow-x:auto; outline:none}
+table.sheet{border-collapse:collapse; font-family:var(--mono); font-size:.85rem; table-layout:fixed}
+table.sheet th{background:var(--gridhead); color:var(--dim); font-weight:500; border:1px solid var(--gridline); padding:3px 4px; height:26px}
+table.sheet th.rh{width:34px}
+table.sheet col.c{width:118px}
+table.sheet td{border:1px solid var(--gridline); padding:4px 6px; height:30px; vertical-align:bottom; overflow:hidden; white-space:nowrap; text-overflow:clip; cursor:cell; user-select:none; touch-action:none; max-width:118px}
+table.sheet td.wrapT{white-space:normal; word-break:break-word}
+table.sheet td.n{text-align:right}
+table.sheet td.al-l{text-align:left} table.sheet td.al-c{text-align:center} table.sheet td.al-r{text-align:right}
+table.sheet td.in-rect{background:var(--selfill)}
+table.sheet td.active{box-shadow:inset 0 0 0 2px var(--accent)}
+table.sheet th.hl{color:var(--accent); background:var(--selfill)}
+.checks{display:flex; flex-direction:column; gap:8px; margin:0; padding:0; list-style:none}
+.checks li{display:grid; grid-template-columns:26px minmax(0,1fr); gap:8px; align-items:start; font-size:.94rem}
+.checks li i{font-style:normal; width:22px; height:22px; border-radius:50%; display:grid; place-items:center; border:2px solid var(--line); font-size:.75rem; margin-top:2px}
+.checks li.ok i{border-color:var(--ok); background:var(--ok); color:var(--accent-ink)}
+.checks small{display:block; color:var(--dim)}
+
+
+.rgrp{font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);font-weight:800;align-self:center;padding:0 4px}
+table.sheet col.cA{width:150px}
+table.sheet td.bt{border-top:2px solid var(--fg)} table.sheet td.bb{border-bottom:2px solid var(--fg)}
+table.sheet td.bl{border-left:2px solid var(--fg)} table.sheet td.br{border-right:2px solid var(--fg)}
+table.sheet td.f-g{background:var(--fill-g)} table.sheet td.f-y{background:var(--fill-y)} table.sheet td.f-b{background:var(--fill-b)}
+table.sheet td.hasv{background-image:linear-gradient(135deg,transparent 0 calc(100% - 7px),var(--amber) calc(100% - 7px))}
+table.sheet td{max-width:150px}
+.dlg{border-bottom:1px solid var(--line);padding:12px;background:var(--surface-2);display:flex;flex-direction:column;gap:10px}
+.dlg-h{font-weight:800}
+.dlg-row{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center}
+.dlg-row label{font-size:.88rem;color:var(--dim)}
+.dlg-row input:not([type=checkbox]),.dlg-row select{background:var(--surface);border:1px solid var(--line);color:var(--fg);border-radius:8px;padding:7px 9px;font:inherit;font-size:.9rem;min-width:0;max-width:100%}
+.dlg-row input#dvMsg,.dlg-row input#dvList{flex:1 1 220px}
+.dlg-row input#dvMin,.dlg-row input#dvMax{width:120px}
+.msgbox{border-top:1px solid var(--line);padding:12px;background:var(--bad-bg);display:flex;flex-direction:column;gap:10px}
+.msg-t{font-weight:700}
+/* результат */
+table.res{width:100%; border-collapse:collapse; font-size:.95rem}
+table.res td{padding:9px 6px; border-bottom:1px solid var(--line)}
+table.res td:last-child{text-align:right; font-weight:800; font-variant-numeric:tabular-nums}
+.grade{font-family:var(--display); font-size:4rem; color:var(--accent); line-height:1}
+textarea.copy{width:100%; height:90px; margin-top:10px; background:var(--surface-2); color:var(--fg); border:1px solid var(--line); border-radius:10px; font:13px/1.4 var(--mono)}
+.lb{width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums}
+.lb th{font-size:.75rem; text-transform:uppercase; letter-spacing:.08em; color:var(--dim); text-align:left; padding:6px; border-bottom:1px solid var(--line)}
+.lb td{padding:8px 6px; border-bottom:1px solid var(--line)}
+.lb tr.me td{background:var(--selfill); font-weight:700}
+.lb td.r{text-align:right; font-family:var(--mono)}
+.fieldrow{display:flex; flex-wrap:wrap; gap:10px}
+.fieldrow input{flex:1 1 180px; min-width:0; background:var(--surface); border:1px solid var(--line); color:var(--fg); border-radius:10px; padding:10px 12px; font:inherit}
+.fieldrow input.short{flex:0 1 110px}
+</style>
+
+<div class="wrap">
+  <header class="board">
+    <div class="k">Інформатика · 8 клас · Розділ 2 · Тема 3 · Епізод 3</div>
+    <h1>Ліга 8 класу: рахуємо очки</h1>
+    <p>Два тури позаду, і настав час турнірної таблиці. Перемога — 3 очки, нічия — 1. Секретар рахував очки вручну й помилився. Навчимося рахувати формулами, копіювати їх маркером заповнення й користуватися функціями SUM, AVERAGE, MAX і MIN.</p>
+    <div class="score" aria-label="Ваш рахунок">
+      <div><b id="sEx">0</b><span>вправи</span></div>
+      <div><b id="sStars">0</b><span>зірки</span></div>
+      <div><b id="sXp">0</b><span>XP</span></div>
+      <div><b id="sLab">0/7</b><span>таблиця</span></div>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" data-t="ex" aria-selected="true">Вправи</button>
+    <button class="tab" role="tab" data-t="quest" aria-selected="false">Квест</button>
+    <button class="tab" role="tab" data-t="cards" aria-selected="false">Картки</button>
+    <button class="tab" role="tab" data-t="lab" aria-selected="false">Лабораторія</button>
+    <button class="tab" role="tab" data-t="res" aria-selected="false">Результат</button>
+  </nav>
+
+  <section id="p-ex">
+    <p class="intro">14 вправ: 🟢 базові, 🟡 середні, 🔴 складні. Правильно з першої спроби — 1 бал, з повторної — 0,5. Деякі завдання треба виконати самостійно: вписати, виділити, розставити.</p>
+    <div class="list" id="exList"></div>
+  </section>
+  <section id="p-quest" hidden>
+    <p class="intro">Чотири етапи підрахунку очок і фінал проти Хаос-Таблиці, яка переплутала всі формули. На кожному етапі 3 серця. Менше помилок — більше зірок.</p>
+    <div id="questApp"></div>
+  </section>
+  <section id="p-cards" hidden>
+    <p class="intro">Натисніть картку, щоб перевернути. «Знаю» прибирає її з колоди, «Ще раз» відкладає в кінець.</p>
+    <div id="cardsApp"></div>
+  </section>
+  <section id="p-lab" hidden>
+    <p class="intro">Секретар ліги рахував очки вручну й помилився. Перебудуйте табло формулами: ігри та очки рахуються з комірок, а підсумки — функціями. Клацніть комірку й вводьте формулу в рядок формул (починайте зі знака =), Enter — зберегти. Щоб скопіювати формулу вниз, виділіть діапазон від комірки з формулою донизу й натисніть «Автозаповнення ↓» — так працює маркер заповнення.</p>
+    <div class="xl">
+      <div class="ribbon" id="ribbon">
+        <span class="rgrp">Основне</span>
+        <select class="rb" id="autoSum" aria-label="Автосума">
+          <option value="">Σ Автосума…</option>
+          <option value="SUM">Сума</option>
+          <option value="AVERAGE">Середнє</option>
+          <option value="MAX">Максимум</option>
+          <option value="MIN">Мінімум</option>
+        </select>
+        <button class="rb" data-a="fill" title="Скопіювати формулу з першої комірки виділення в решту (маркер заповнення)">↓ Автозаповнення</button>
+        <select class="rb" id="fmt" aria-label="Числовий формат">
+          <option value="general">Загальний</option>
+          <option value="number">Числовий</option>
+        </select>
+        <button class="rb" data-a="dec+" title="Збільшити розрядність">,0→,00</button>
+        <button class="rb" data-a="dec-" title="Зменшити розрядність">,00→,0</button>
+      </div>
+      <div class="fxbar">
+        <input id="nameBox" aria-label="Поле Ім'я" value="A1" autocomplete="off">
+        <span class="fx">fx</span>
+        <input id="fxInput" aria-label="Рядок формул" autocomplete="off" placeholder="Вміст активної комірки">
+      </div>
+      <div class="gridwrap" id="gridWrap" tabindex="0" aria-label="Аркуш1"><table class="sheet" id="sheet"></table></div>
+    </div>
+    <div class="row"><button class="btn ghost" id="labReset">Почати табло спочатку</button><span class="dim">Порада: у рядку формул видно саму формулу, а в комірці — результат.</span></div>
+    <div class="card" style="margin-top:14px">
+      <div class="card-h">Вимоги до табло <span class="score-chip" id="labScore">0 з 7</span></div>
+      <ul class="checks" id="labChecks"></ul>
+    </div>
+  </section>
+  <section id="p-res" hidden>
+    <div class="list">
+      <div class="card">
+        <div class="card-h">Ваш результат</div>
+        <div class="row" style="margin-top:0; align-items:flex-end; gap:18px">
+          <div class="grade" id="grade">—</div>
+          <div class="dim" id="gradeNote">балів з 12. Оцінка = середнє вправ і лабораторії.</div>
+        </div>
+        <table class="res" id="resTable" style="margin-top:12px"></table>
+      </div>
+      <div class="card">
+        <div class="card-h">Для вчителя</div>
+        <div class="fieldrow">
+          <input id="pName" placeholder="Ім'я та прізвище" autocomplete="off" aria-label="Ім'я та прізвище">
+          <input id="pClass" class="short" placeholder="Клас" autocomplete="off" aria-label="Клас">
+        </div>
+        <textarea class="copy" id="csv" readonly aria-label="Рядок результату"></textarea>
+        <div class="row"><button class="btn" id="copyBtn">Скопіювати рядок</button><span class="dim" id="copyMsg"></span></div>
+      </div>
+      <div class="card">
+        <div class="card-h">Рейтинг ліги класу</div>
+        <p class="dim" style="margin:0 0 10px">У спільний рейтинг потрапляє лише нікнейм або код, без прізвища.</p>
+        <div class="fieldrow">
+          <input id="nick" placeholder="Нікнейм або код (напр. Барс-07)" maxlength="20" autocomplete="off" aria-label="Нікнейм">
+          <button class="btn" id="pubBtn">Записати в рейтинг</button>
+        </div>
+        <p class="dim" id="lbMsg" style="margin:10px 0 0">Рейтинг завантажується…</p>
+        <div class="tw" style="margin-top:10px"><table class="lb" id="lbTable"></table></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+/*DATA*/
+const EX = [
+ {id:"e1", tier:1, type:"mc", q:"З якого знака починається будь-яка формула в Microsoft Excel?",
+  opts:["=","+","#","*"], ans:0,
+  why:"Будь-яка формула починається зі знака =. Без нього Excel сприйме запис як текст."},
+ {id:"e2", tier:1, type:"match", q:"З'єднайте дію і символ, яким її записують у формулі.",
+  pairs:[["Додавання","+"],["Віднімання","-"],["Множення","*"],["Ділення","/"]],
+  why:"У формулах множення — зірочка *, ділення — скісна риска /."},
+ {id:"e3", tier:1, type:"input", q:"У B4 записано 5, у C4 — 3. Що покаже комірка з формулою =B4*C4?",
+  accept:["15"], ph:"Число", why:"=B4*C4 множить значення комірок: 5 × 3 = 15."},
+ {id:"e4", tier:1, type:"mc", q:"Як називається маленький квадрат у правому нижньому куті виділеної комірки?",
+  opts:["Маркер заповнення","Поле Ім'я комірки","Рядок формул аркуша","Кнопка Автосума"], ans:0,
+  why:"Маркер заповнення тягнуть мишею, щоб скопіювати формулу в сусідні комірки (Автозаповнення)."},
+ {id:"e5", tier:1, type:"match", q:"З'єднайте функцію і те, що вона обчислює.",
+  pairs:[["SUM","Суму вибраних чисел"],["AVERAGE","Середнє арифметичне"],["MAX","Найбільше значення"],["MIN","Найменше значення"]],
+  why:"Функції — готові формули: SUM (Сума), AVERAGE (Середнє), MAX (Максимум), MIN (Мінімум)."},
+ {id:"e6", tier:2, type:"input", q:"Що покаже формула =2+3*4?",
+  accept:["14"], ph:"Число", why:"Спершу множення: 3*4 = 12, потім додавання: 2 + 12 = 14."},
+ {id:"e7", tier:2, type:"input", q:"А що покаже формула =(2+3)*4?",
+  accept:["20"], ph:"Число", why:"Дужки змінюють порядок дій: (2+3) = 5, 5*4 = 20."},
+ {id:"e8", tier:2, type:"grid", q:"Формула =SUM(B2:D4) додає всі комірки діапазону. Виділіть цей діапазон на сітці: клацніть першу комірку, потім останню.",
+  target:"B2:D4", why:"B2:D4 — прямокутник від B2 до D4: 3 стовпці × 3 рядки = 9 комірок."},
+ {id:"e9", tier:2, type:"order", q:"Розставте кроки, щоб обчислити суму через Автосуму.",
+  steps:["Клацнути комірку, де буде сума","На вкладці Основне в розділі Редагування натиснути стрілку біля Σ","Обрати Сума","Виділити комірки, які треба додати","Натиснути Enter"],
+  why:"Спершу комірка для результату, потім Σ → Сума, діапазон і Enter."},
+ {id:"e10", tier:2, type:"input", q:"У F3 формула =B3*3+C3. Її протягнули маркером заповнення в F4. Яка формула буде в F4?",
+  accept:["=B4*3+C4","B4*3+C4"], ph:"=…", why:"Автозаповнення зсуває адреси: рядок 3 стає рядком 4, а число 3 не змінюється."},
+ {id:"e11", tier:3, type:"spot", q:"Секретар ліги написав формули. Позначте три формули з помилками.",
+  head:["Що рахуємо","Формула"],
+  rows:[["Ігри Барсів","=B3+C3+D3"],["Ігри Тигрів","=В4+С4+D4"],["Очки Барсів","=B3*3+C3"],["Очки Тигрів","=B4x3+C4"],["Середні очки","=AVERAGE(F3:F6)"],["Разом перемог","SUM(B3:B6)"]],
+  bad:["2-1","4-1","6-1"], miss:"Шукайте три речі: українські літери в адресах, «x» замість * і формулу без знака =.",
+  why:"=В4+С4 набрано українськими В і С (адреси пишуть латиницею), у =B4x3 замість * стоїть x, а SUM(B3:B6) без знака = — це просто текст."},
+ {id:"e12", tier:3, type:"input", q:"Очки команд у F3:F6: 10, 7, 5, 0. Що покаже =AVERAGE(F3:F6)?",
+  accept:["5,5","5.5"], ph:"Число", why:"(10 + 7 + 5 + 0) : 4 = 22 : 4 = 5,5."},
+ {id:"e13", tier:3, type:"sort", q:"Яка функція потрібна? Оберіть завдання, потім натисніть функцію.",
+  buckets:["SUM","AVERAGE","MAX","MIN"],
+  items:[["Скільки голів забила вся ліга",0],["Загальна сума внесків гравців",0],["Середня кількість очок команди",1],["Середній зріст гравців",1],["Рекорд голів за один матч",2],["Найвища температура тижня",2],["Найнижча температура тижня",3],["Найменше пропущених голів",3]],
+  why:"Разом — SUM, середнє — AVERAGE, найбільше — MAX, найменше — MIN."},
+ {id:"e14", tier:3, type:"mc", q:"У B4 змінили 2 на 3. Що станеться з результатом у F4, де формула =B4*3+C4?",
+  opts:["Результат перерахується сам","Формулу треба ввести заново","Комірка покаже помилку #ЗНАЧ!","Excel видалить стару формулу"], ans:0,
+  why:"Коли змінюються дані в комірках, на які посилається формула, результат оновлюється автоматично."}
+];
+
+const QUEST = [
+ {nm:"Розминка", ds:"Порядок дій у формулах", ico:"1", qs:[
+   {type:"input", q:"Що покаже =10-2*3?", accept:["4"]},
+   {type:"mc", q:"Що Excel виконає першим у формулі =A1+B1*C1?", opts:["Множення B1*C1","Додавання A1+B1","Усе зліва направо","Те, що в комірці A1"], ans:0},
+   {type:"input", q:"Що покаже =(10-2)*3?", accept:["24"]}]},
+ {nm:"Табло очок", ds:"Формули з адресами комірок", ico:"2", qs:[
+   {type:"mc", q:"Перемога — 3 очки, нічия — 1. Перемоги в B3, нічиї в C3. Яка формула очок?", opts:["=B3*3+C3","=B3+C3*3","=B3+C3+3","=3*C3+B3"], ans:0},
+   {type:"input", q:"Барси: 3 перемоги й 1 нічия. Скільки в них очок?", accept:["10"]},
+   {type:"mc", q:"Що станеться з результатом формули, якщо змінити число в B3?", opts:["Перерахується сам","Залишиться таким самим","Стане текстом у комірці","Зникне разом з формулою"], ans:0}]},
+ {nm:"Автозаповнення", ds:"Маркер заповнення", ico:"3", qs:[
+   {type:"mc", q:"Що копіює Автозаповнення, крім формули?", opts:["Формат комірки","Назву всього аркуша","Пароль файлу","Ширину екрана"], ans:0},
+   {type:"input", q:"Формулу =B3+C3 протягнули з E3 до E5. Яка формула в E5?", accept:["=B5+C5","B5+C5"]},
+   {type:"mc", q:"Як виглядає вказівник миші над маркером заповнення?", opts:["Тонкий хрестик +","Стрілка з пальцем","Курсор у вигляді I","Пісочний годинник"], ans:0}]},
+ {nm:"Функції", ds:"SUM, AVERAGE, MAX, MIN", ico:"4", qs:[
+   {type:"input", q:"Яка функція знаходить найбільше значення? Напишіть англійською.", accept:["max"]},
+   {type:"mc", q:"Що покаже =MIN(4;9;2;7)?", opts:["4","2","7","9"], ans:1},
+   {type:"input", q:"Що покаже =SUM(2;3;5)?", accept:["10"]}]},
+ {nm:"Фінал: Хаос-Таблиця", ds:"Бос переплутав усі формули", ico:"!", boss:true, qs:[
+   {type:"input", q:"Що покаже =AVERAGE(4;6;8)?", accept:["6"]},
+   {type:"mc", q:"Чому формула =В3+С3, набрана українськими В і С, не працює?", opts:["Адреси пишуть латиницею","Забули поставити дужки","Не можна додавати комірки","Бракує функції SUM"], ans:0},
+   {type:"input", q:"Що покаже =MAX(3;8;5)-MIN(3;8;5)?", accept:["5"]},
+   {type:"mc", q:"Де розташована кнопка Σ Автосума?", opts:["Вставлення → Ілюстрації","Основне → Редагування","Дані → Знаряддя даних","Вигляд → Масштаб"], ans:1},
+   {type:"input", q:"Скільки комірок у діапазоні D4:D9?", accept:["6"]}]}
+];
+
+const CARDS = [
+ ["Формула","Запис, за яким Excel обчислює результат. Завжди починається зі знака =."],
+ ["Арифметичні знаки","+ додавання, - віднімання, * множення, / ділення."],
+ ["Порядок дій","Спершу множення й ділення, потім додавання й віднімання. Дужки змінюють порядок: =(2+3)*4."],
+ ["Посилання на комірку","Адреса у формулі, наприклад =B4*C4. Excel бере значення з цих комірок."],
+ ["Автоматичний перерахунок","Змінили число в комірці — усі формули, що на неї посилаються, оновилися самі."],
+ ["Маркер заповнення","Маленький квадрат у правому нижньому куті комірки. Над ним вказівник стає хрестиком +."],
+ ["Автозаповнення","Протягування маркера: формула копіюється в сусідні комірки, адреси зсуваються. Копіюється й формат."],
+ ["Функція","Готова формула, яка виконує обчислення замість вас: SUM, AVERAGE, MAX, MIN."],
+ ["SUM (Сума)","Додає значення діапазону: =SUM(D4:D9). Кнопка Σ на вкладці Основне → Редагування."],
+ ["AVERAGE (Середнє)","Середнє арифметичне вибраних комірок: =AVERAGE(D4:D9)."],
+ ["MAX і MIN","Найбільше й найменше значення серед вибраних чисел: =MAX(F3:F6), =MIN(F3:F6)."],
+ ["Діапазон","Прямокутник комірок, записаний через двокрапку: B2:D4 — від B2 до D4."],
+ ["Латиниця у формулах","Адреси й назви функцій пишуть латинськими літерами. Українські В, С, А Excel не розпізнає."]
+];
+/*END*/
+
+/* ---------- утиліти ---------- */
+const $=(s,el=document)=>el.querySelector(s);
+function h(tag,attrs,...kids){const e=document.createElement(tag);if(attrs)for(const k in attrs){const v=attrs[k];if(v==null||v===false)continue;if(k==="class")e.className=v;else if(k.startsWith("on"))e.addEventListener(k.slice(2),v);else if(k==="text")e.textContent=v;else e.setAttribute(k,v===true?"":v);}for(const k of kids.flat()){if(k==null||k===false)continue;e.append(k.nodeType?k:document.createTextNode(k));}return e;}
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const LAT={"а":"a","в":"b","с":"c","е":"e","к":"k","м":"m","н":"h","о":"o","р":"p","т":"t","х":"x","і":"i"};
+function norm(s){return String(s).toLowerCase().replace(/[\s  ]+/g,"").replace(/[’ʼ`]/g,"'");}
+function normAddr(s){return norm(s).replace(/[авсекмнортхі]/g,ch=>LAT[ch]||ch).replace(/,/g,";");}
+const fmtN=n=>String(Math.round(n*100)/100).replace(".",",");
+
+/* ---------- стан ---------- */
+const KEY="liga8-t3-v1";
+let S={ex:{},quest:{best:[0,0,0,0,0],xp:0},lab:null,cards:0,name:"",cls:"",nick:""};
+/* Прогрес не зберігається між відкриттями: на спільних комп'ютерах кожен учень починає з нуля. Старі збережені дані стираються. */
+try{localStorage.removeItem(KEY);}catch(e){}
+function save(){}
+function exState(id){return S.ex[id]||(S.ex[id]={tries:0,done:false,pts:0});}
+function award(id){const st=exState(id);if(st.done)return;st.done=true;st.pts=st.tries===0?1:0.5;save();updateScore();}
+function miss(id){exState(id).tries++;save();}
+const exPts=()=>EX.reduce((s,e)=>s+(S.ex[e.id]?.pts||0),0);
+const stars=()=>S.quest.best.reduce((a,b)=>a+b,0);
+
+/* ---------- вкладки ---------- */
+document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.setAttribute("aria-selected",x===b?"true":"false"));
+  ["ex","quest","cards","lab","res"].forEach(t=>$("#p-"+t).hidden=(t!==b.dataset.t));
+  if(b.dataset.t==="res")renderRes();
+  if(b.dataset.t==="lab")renderSheet();
+}));
+
+/* ---------- вправи ---------- */
+const TIER={1:["t1","🟢 базовий"],2:["t2","🟡 середній"],3:["t3","🔴 складний"]};
+function fb(card,ok,text){let f=card.querySelector(".fb");if(!f){f=h("div",{class:"fb"});card.append(f);}f.className="fb "+(ok?"ok":"bad");f.textContent=text;}
+function finish(card,ex){award(ex.id);card.classList.add("done");const st=exState(ex.id);card.querySelector(".score-chip").textContent="+"+fmtN(st.pts)+" бал.";fb(card,true,"Правильно! "+ex.why);}
+function renderEx(){
+  const list=$("#exList");list.innerHTML="";
+  EX.forEach((ex,i)=>{
+    const st=exState(ex.id);
+    const card=h("div",{class:"card"+(st.done?" done":"")},
+      h("div",{class:"card-h"},h("span",null,"Вправа "+(i+1)),h("span",{class:"tier "+TIER[ex.tier][0]},TIER[ex.tier][1]),h("span",{class:"score-chip"},st.done?"+"+fmtN(st.pts)+" бал.":"")),
+      h("div",{class:"q"},ex.q));
+    list.append(card);
+    if(st.done){fb(card,true,"Виконано. "+ex.why);return;}
+    BUILD[ex.type](card,ex);
+  });
+}
+const BUILD={
+ mc(card,ex){
+  const box=h("div",{class:"opts"});card.append(box);
+  shuffle(ex.opts.map((t,i)=>({t,i}))).forEach(o=>{
+   const b=h("button",{class:"opt",onclick:()=>{
+     if(o.i===ex.ans){b.classList.add("ok");box.querySelectorAll(".opt").forEach(x=>x.disabled=true);finish(card,ex);}
+     else{b.classList.add("bad");b.disabled=true;miss(ex.id);fb(card,false,"Ні, подумайте ще. Наступна правильна відповідь дасть 0,5 бала.");}
+   }},o.t);box.append(b);});
+ },
+ input(card,ex){
+  const inp=h("input",{class:"in",placeholder:ex.ph||"Відповідь",autocomplete:"off","aria-label":"Відповідь",id:"in-"+ex.id});
+  const go=()=>{const v=normAddr(inp.value);if(!v)return;
+    if(ex.accept.some(a=>normAddr(a)===v)){inp.classList.remove("bad");inp.classList.add("ok");inp.disabled=true;btn.disabled=true;finish(card,ex);}
+    else{inp.classList.remove("bad");void inp.offsetWidth;inp.classList.add("bad");miss(ex.id);fb(card,false,"Не так. Перевірте запис і спробуйте ще раз.");}};
+  const btn=h("button",{class:"btn",onclick:go},"Перевірити");
+  inp.addEventListener("keydown",e=>{if(e.key==="Enter")go();});
+  card.append(h("div",{class:"row",style:"margin-top:0"},inp,btn));
+ },
+ match(card,ex){
+  let selL=null;const done=new Set();
+  const L=h("div",null),R=h("div",null);card.append(h("div",{class:"mcols"},L,R));
+  const lb=ex.pairs.map((p,i)=>{const b=h("button",{class:"mi",onclick:()=>{if(done.has(i))return;lb.forEach(x=>x.classList.remove("sel"));b.classList.add("sel");selL=i;}},p[0]);L.append(b);return b;});
+  shuffle(ex.pairs.map((p,i)=>({t:p[1],i}))).forEach(o=>{
+   const b=h("button",{class:"mi",onclick:()=>{
+    if(selL==null||b.classList.contains("done"))return;
+    if(o.i===selL){b.classList.add("done");lb[selL].classList.remove("sel");lb[selL].classList.add("done");done.add(selL);selL=null;
+      if(done.size===ex.pairs.length)finish(card,ex);}
+    else{b.classList.remove("bad");void b.offsetWidth;b.classList.add("bad");miss(ex.id);fb(card,false,"Ця пара не підходить. Спробуйте іншу.");}
+   }},o.t);R.append(b);});
+ },
+ sort(card,ex){
+  let sel=null;const pool=h("div",{class:"chips"});const bk=h("div",{class:"buckets"});card.append(pool,bk);
+  let left=ex.items.length;
+  const chips=shuffle(ex.items.map((it,i)=>({t:it[0],b:it[1],i}))).map(o=>{const c=h("button",{class:"chip",onclick:()=>{chips.forEach(x=>x.el.classList.remove("sel"));c.classList.add("sel");sel=o;}},o.t);o.el=c;pool.append(c);return o;});
+  ex.buckets.forEach((name,bi)=>{const zone=h("div",null);const b=h("button",{class:"bucket",onclick:()=>{
+    if(!sel)return;
+    if(sel.b===bi){sel.el.remove();zone.append(h("span",{class:"chip"},sel.t));sel=null;left--;if(left===0)finish(card,ex);}
+    else{const el=sel.el;el.classList.remove("bad");void el.offsetWidth;el.classList.add("bad");miss(ex.id);fb(card,false,"Цей запис належить до іншого типу.");}
+  }},h("h4",null,name),zone);bk.append(b);});
+ },
+ order(card,ex){
+  const target=h("div",{class:"target"});const pool=h("div",{class:"chips"});card.append(target,pool);
+  let picked=[];
+  const draw=()=>{target.innerHTML="";picked.forEach((s,k)=>target.append(h("div",{class:"step"},h("span",{class:"n"},k+1),h("span",null,s),h("button",{"aria-label":"Прибрати",onclick:()=>{picked.splice(k,1);draw();}},"✕"))));
+    pool.innerHTML="";ord.filter(s=>!picked.includes(s)).forEach(s=>pool.append(h("button",{class:"chip",style:"font-family:var(--body)",onclick:()=>{picked.push(s);draw();}},s)));
+    chk.disabled=picked.length!==ex.steps.length;};
+  const ord=shuffle(ex.steps);
+  const chk=h("button",{class:"btn",onclick:()=>{
+    const rows=target.querySelectorAll(".step");let ok=true;
+    picked.forEach((s,k)=>{const good=s===ex.steps[k];rows[k].classList.toggle("good",good);rows[k].classList.toggle("wrongpos",!good);if(!good)ok=false;});
+    if(ok){chk.disabled=true;target.querySelectorAll(".step button").forEach(b=>b.remove());finish(card,ex);}
+    else{miss(ex.id);fb(card,false,"Червоні кроки стоять не на своєму місці. Приберіть їх і спробуйте ще.");}
+  }},"Перевірити");
+  card.append(h("div",{class:"row"},chk));draw();
+ },
+ grid(card,ex){
+  const cols=["A","B","C","D","E"];let a=null,b=null;
+  const t=h("table",{class:"mini"});const tw=h("div",{class:"tw"},t);
+  const info=h("span",{class:"dim"},"Виділено: —");
+  const btns={};
+  t.append(h("tr",null,h("th",null,""),cols.map(c=>h("th",null,c))));
+  for(let r=1;r<=5;r++){t.append(h("tr",null,h("th",null,r),cols.map((c,ci)=>{const bt=h("button",{"aria-label":c+r,onclick:()=>{
+      if(a&&b){a=null;b=null;}
+      if(!a)a=[r,ci];else b=[r,ci];paint();}}," ");btns[c+r]=bt;return h("td",null,bt);})));}
+  function rect(){if(!a)return null;const e=b||a;return{r1:Math.min(a[0],e[0]),r2:Math.max(a[0],e[0]),c1:Math.min(a[1],e[1]),c2:Math.max(a[1],e[1])};}
+  function name(){const q=rect();if(!q)return"—";const s=cols[q.c1]+q.r1,e=cols[q.c2]+q.r2;return s===e?s:s+":"+e;}
+  function paint(){const q=rect();for(const k in btns){const c=cols.indexOf(k[0]),r=+k.slice(1);const inr=q&&r>=q.r1&&r<=q.r2&&c>=q.c1&&c<=q.c2;btns[k].classList.toggle("in-rect",!!inr);btns[k].classList.toggle("anchor",!!(a&&a[0]===r&&a[1]===c));}info.textContent="Виділено: "+name();chk.disabled=!b;}
+  const chk=h("button",{class:"btn",disabled:true,onclick:()=>{
+    if(name()===ex.target){chk.disabled=true;Object.values(btns).forEach(x=>x.disabled=true);finish(card,ex);}
+    else{miss(ex.id);fb(card,false,"Ви виділили "+name()+". Потрібно "+ex.target+". Клацніть знову, щоб почати заново.");}
+  }},"Перевірити");
+  card.append(tw,h("div",{class:"row"},info,chk));
+ },
+ spot(card,ex){
+  const marks=new Set();const t=h("table",{class:"mini"});const btns={};
+  t.append(h("tr",null,ex.head.map(x=>h("th",null,x))));
+  ex.rows.forEach((row,ri)=>t.append(h("tr",null,row.map((v,ci)=>{
+    if(ex.rowpick?ci!==0:ci===0)return h("td",{class:"fixed"},v);
+    const k=(ri+1)+"-"+ci;const bt=h("button",{class:/^\d+$/.test(v)?"n":"","aria-label":"Рядок "+(ri+1)+": "+v,onclick:()=>{if(marks.has(k))marks.delete(k);else marks.add(k);bt.classList.toggle("mark",marks.has(k));}},v);btns[k]=bt;return h("td",null,bt);}))));
+  const chk=h("button",{class:"btn",onclick:()=>{
+    const bad=new Set(ex.bad);const wrong=[...marks].filter(k=>!bad.has(k)).length;const found=[...marks].filter(k=>bad.has(k)).length;
+    if(wrong===0&&found===bad.size){for(const k of bad){btns[k].classList.remove("mark");btns[k].classList.add("found");}Object.values(btns).forEach(b=>b.disabled=true);chk.disabled=true;finish(card,ex);}
+    else{miss(ex.id);fb(card,false,"Знайдено "+found+" з "+bad.size+(wrong?", ще "+wrong+" позначено зайве":"")+". "+(ex.miss||""));}
+  }},"Перевірити");
+  card.append(h("div",{class:"tw"},t),h("div",{class:"row"},chk));
+ }
+};
+
+/* ---------- квест ---------- */
+let Q=null;
+function renderQuest(){
+  const app=$("#questApp");app.innerHTML="";
+  if(Q)return playQuest();
+  app.append(h("div",{class:"hud"},h("span",{class:"pill"},"Зірки: ",h("b",null,stars()+" / 15")),h("span",{class:"pill"},"XP: ",h("b",null,S.quest.xp))));
+  const map=h("div",{class:"map"});app.append(map);
+  QUEST.forEach((L,i)=>{
+    const open=i===0||S.quest.best[i-1]>0;const best=S.quest.best[i];
+    map.append(h("button",{class:"node"+(best?" done":"")+(L.boss?" boss":""),disabled:!open,onclick:()=>{Q={i,qi:0,hearts:3,err:0};renderQuest();}},
+      h("span",{class:"ico"},best?"✓":L.ico),h("div",null,h("div",{class:"nm"},L.nm),h("div",{class:"ds"},open?L.ds:"Спершу пройдіть попередній етап")),
+      h("span",{class:"st","aria-label":best+" зірки"},"★".repeat(best)+"☆".repeat(3-best))));
+  });
+}
+function playQuest(){
+  const app=$("#questApp");app.innerHTML="";const L=QUEST[Q.i];const item=L.qs[Q.qi];
+  app.append(h("div",{class:"hud"},h("span",{class:"pill"},L.nm),h("span",{class:"pill"},"Серця: ",h("b",null,"♥".repeat(Q.hearts)+"♡".repeat(3-Q.hearts))),h("span",{class:"pill"},"XP: ",h("b",null,S.quest.xp)),
+    h("button",{class:"btn ghost",style:"margin-left:auto;padding:5px 13px",onclick:()=>{Q=null;renderQuest();}},"До мапи")));
+  if(L.boss){const left=(L.qs.length-Q.qi)/L.qs.length*100;app.append(h("div",{class:"dim",style:"font-size:.85rem"},"Сила Хаос-Таблиці"),h("div",{class:"boss-bar"},h("i",{style:"width:"+left+"%"})));}
+  else app.append(h("div",{class:"dots"},L.qs.map((_,k)=>h("i",{class:k<Q.qi?"on":k===Q.qi?"cur":""}))));
+  const card=h("div",{class:"card"},h("div",{class:"q"},item.q));app.append(card);
+  const right=()=>{S.quest.xp+=L.boss?20:10;save();updateScore();Q.qi++;
+    if(Q.qi>=L.qs.length){const st=Q.err===0?3:Q.err===1?2:1;S.quest.best[Q.i]=Math.max(S.quest.best[Q.i],st);save();updateScore();
+      app.innerHTML="";app.append(h("div",{class:"card center"},h("h2",null,L.boss?"Хаос-Таблицю переможено!":"Етап пройдено"),h("div",{class:"big"},"★".repeat(st)+"☆".repeat(3-st)),
+        h("p",{class:"dim"},"Помилок: "+Q.err+". XP: "+S.quest.xp),h("div",{class:"row",style:"justify-content:center"},h("button",{class:"btn",onclick:()=>{Q=null;renderQuest();}},"До мапи"))));Q=null;}
+    else setTimeout(playQuest,450);};
+  const wrong=()=>{Q.hearts--;Q.err++;
+    if(Q.hearts<=0){app.innerHTML="";app.append(h("div",{class:"card center"},h("h2",null,"Серця закінчились"),h("p",{class:"dim"},"Перегляньте картки й спробуйте етап ще раз."),
+      h("div",{class:"row",style:"justify-content:center"},h("button",{class:"btn",onclick:()=>{Q={i:Q.i,qi:0,hearts:3,err:0};playQuest();}},"Ще раз"),h("button",{class:"btn ghost",onclick:()=>{Q=null;renderQuest();}},"До мапи"))));return false;}
+    app.querySelector(".hud .pill:nth-child(2) b").textContent="♥".repeat(Q.hearts)+"♡".repeat(3-Q.hearts);return true;};
+  if(item.type==="mc"){const box=h("div",{class:"opts"});card.append(box);
+    shuffle(item.opts.map((t,i)=>({t,i}))).forEach(o=>{const b=h("button",{class:"opt",onclick:()=>{
+      if(o.i===item.ans){b.classList.add("ok");box.querySelectorAll(".opt").forEach(x=>x.disabled=true);right();}
+      else{b.classList.add("bad");b.disabled=true;wrong();}}},o.t);box.append(b);});}
+  else{const inp=h("input",{class:"in",placeholder:"Відповідь",autocomplete:"off","aria-label":"Відповідь",id:"qin"});
+    const go=()=>{const v=normAddr(inp.value);if(!v)return;if(item.accept.some(a=>normAddr(a)===v)){inp.classList.add("ok");inp.disabled=true;right();}else{inp.classList.remove("bad");void inp.offsetWidth;inp.classList.add("bad");wrong();}};
+    inp.addEventListener("keydown",e=>{if(e.key==="Enter")go();});
+    card.append(h("div",{class:"row",style:"margin-top:0"},inp,h("button",{class:"btn",onclick:go},"Відповісти")));setTimeout(()=>inp.focus(),50);}
+}
+
+/* ---------- картки ---------- */
+let deck=shuffle(CARDS.map((_,i)=>i)),known=0;
+function renderCards(){
+  const app=$("#cardsApp");app.innerHTML="";
+  app.append(h("div",{class:"hud"},h("span",{class:"pill"},"Знаю: ",h("b",null,known+" / "+CARDS.length))));
+  if(!deck.length){app.append(h("div",{class:"card center"},h("h2",null,"Колоду пройдено"),h("p",{class:"dim"},"Усі 13 карток ви знаєте. Час на квест або лабораторію."),h("button",{class:"btn",onclick:()=>{deck=shuffle(CARDS.map((_,i)=>i));known=0;renderCards();}},"Перемішати знову")));return;}
+  const [t,d]=CARDS[deck[0]];
+  const f=h("button",{class:"flip","aria-label":"Перевернути картку",onclick:()=>f.classList.toggle("on")},h("div",{class:"flip-in"},h("div",{class:"face"},h("div",{class:"term"},t),h("small",null,"натисніть, щоб побачити пояснення")),h("div",{class:"face back"},h("div",{class:"def"},d),h("small",null,t))));
+  app.append(f,h("div",{class:"row",style:"justify-content:center"},
+    h("button",{class:"btn ghost",onclick:()=>{deck.push(deck.shift());renderCards();}},"Ще раз"),
+    h("button",{class:"btn",onclick:()=>{deck.shift();known++;S.cards=Math.max(S.cards,known);save();renderCards();}},"Знаю")));
+}
+
+/* ---------- лабораторія: міні-Excel з формулами ---------- */
+const COLS=["A","B","C","D","E","F"],NR=10,LABN=7;
+const K=(r,c)=>COLS[c]+(r+1);
+function seedCell(raw,extra){return Object.assign({raw:raw,fmt:"general",dec:null},extra||{});}
+function freshLab(){
+  const c={};const put=(k,raw)=>{c[k]=seedCell(raw);};
+  put("A1","Турнірна таблиця ліги");
+  ["Команда","Перемоги","Нічиї","Поразки","Ігри","Очки"].forEach((t,i)=>put(COLS[i]+"2",t));
+  [["Барси","3","1","0","","10"],["Тигри","2","1","1","","8"],["Ракети","1","2","1","","5"],["Леви","0","0","4","","1"]]
+    .forEach((row,ri)=>row.forEach((v,ci)=>{if(v!=="")put(COLS[ci]+(ri+3),v);}));
+  put("A7","Разом");put("A8","Середні очки");put("A9","Найбільше очок");put("A10","Найменше очок");
+  return {cells:c};
+}
+if(!S.lab||!S.lab.cells||!S.lab.cells.F2)S.lab=freshLab();
+let act={r:2,c:4},foc={r:2,c:4},drag=false,editPrev=null;
+const getC=k=>S.lab.cells[k]||seedCell("");
+const ensure=k=>S.lab.cells[k]||(S.lab.cells[k]=seedCell(""));
+
+/* обчислення */
+class XErr{constructor(c){this.code=c;}}
+const FN={SUM:a=>a.reduce((s,x)=>s+x,0),AVERAGE:a=>{if(!a.length)throw new XErr("#ДІЛ/0!");return a.reduce((s,x)=>s+x,0)/a.length;},MAX:a=>a.length?Math.max(...a):0,MIN:a=>a.length?Math.min(...a):0};
+function addr(t){const m=t.toUpperCase().match(/^([A-Z]+)(\d+)$/);if(!m)return null;const c=COLS.indexOf(m[1]),r=+m[2]-1;if(c<0||r<0||r>=NR)throw new XErr("#ПОСИЛ!");return{r,c};}
+function cellVal(k,d){
+  if(d>40)throw new XErr("#ЦИКЛ!");
+  const raw=String(getC(k).raw).trim();if(raw==="")return{empty:true,v:0};
+  if(raw[0]==="=")return{v:evalF(raw.slice(1),d+1)};
+  const t=raw.replace(/[\s  ]/g,"").replace(",",".");if(/^-?\d+(\.\d+)?$/.test(t))return{v:parseFloat(t)};
+  return{text:true};
+}
+function tokenize(s){const out=[];const re=/\s*(\d+(?:[.,]\d+)?|[A-Za-z]+\d+(?::[A-Za-z]+\d+)?|[A-Za-z]+|[^\s\x00-\x7F]+\d*|[-+*/();:])/y;let m;re.lastIndex=0;
+  while(re.lastIndex<s.length){const st=re.lastIndex;m=re.exec(s);if(!m){if(/^\s*$/.test(s.slice(st)))break;throw new XErr("#ІМ'Я?");}out.push(m[1]);}return out;}
+function evalF(src,d){
+  const T=tokenize(src);let i=0;
+  const peek=()=>T[i],next=()=>T[i++];
+  function num(x){if(x.text)throw new XErr("#ЗНАЧ!");return x.v;}
+  function factor(){const t=next();if(t==null)throw new XErr("#ЗНАЧ!");
+    if(t==="-")return -factor();if(t==="+")return factor();
+    if(t==="("){const v=expr();if(next()!==")")throw new XErr("#ЗНАЧ!");return v;}
+    if(/^\d/.test(t))return parseFloat(t.replace(",","."));
+    if(/[^\x00-\x7F]/.test(t))throw new XErr("#ІМ'Я?");
+    if(/^[A-Za-z]+$/.test(t)){const f=FN[t.toUpperCase()];if(!f||next()!=="(")throw new XErr("#ІМ'Я?");
+      const vals=[];if(peek()!==")"){for(;;){const a=peek();if(/^[A-Za-z]+\d+:[A-Za-z]+\d+$/.test(a)){next();rangeVals(a,vals);}
+        else if(/^[A-Za-z]+\d+$/.test(a)&&(T[i+1]===";"||T[i+1]===")")){next();const p=addr(a);const x=cellVal(K(p.r,p.c),d);if(!x.empty&&!x.text)vals.push(x.v);}
+        else vals.push(expr());
+        const s=next();if(s===")")break;if(s!==";")throw new XErr("#ЗНАЧ!");}}else next();
+      return f(vals);}
+    if(/^[A-Za-z]+\d+$/.test(t)){const p=addr(t);return num(cellVal(K(p.r,p.c),d));}
+    throw new XErr("#ЗНАЧ!");}
+  function rangeVals(a,vals){const [x,y]=a.split(":").map(addr);for(let r=Math.min(x.r,y.r);r<=Math.max(x.r,y.r);r++)for(let c=Math.min(x.c,y.c);c<=Math.max(x.c,y.c);c++){const v=cellVal(K(r,c),d);if(!v.empty&&!v.text)vals.push(v.v);}}
+  function term(){let v=factor();while(peek()==="*"||peek()==="/"){const op=next(),b=factor();if(op==="/"&&b===0)throw new XErr("#ДІЛ/0!");v=op==="*"?v*b:v/b;}return v;}
+  function expr(){let v=term();while(peek()==="+"||peek()==="-"){const op=next(),b=term();v=op==="+"?v+b:v-b;}return v;}
+  const v=expr();if(i<T.length)throw new XErr(/[^\x00-\x7F]/.test(T[i])?"#ІМ'Я?":"#ЗНАЧ!");return v;
+}
+function valueOf(k){try{const x=cellVal(k,0);return x.text||x.empty?null:x.v;}catch(e){return null;}}
+function isFormula(k){return String(getC(k).raw).trim().startsWith("=");}
+function show(c){
+  const raw=String(c.raw).trim();if(raw==="")return"";
+  let v;if(raw[0]==="="){try{v=evalF(raw.slice(1),1);}catch(e){return e instanceof XErr?e.code:"#ЗНАЧ!";}}
+  else{const t=raw.replace(/[\s  ]/g,"").replace(",",".");if(!/^-?\d+(\.\d+)?$/.test(t))return raw;v=parseFloat(t);}
+  const d=c.dec!=null?c.dec:(c.fmt==="number"?2:null);
+  if(d!=null)return v.toFixed(d).replace(".",",");
+  return String(Math.round(v*1e6)/1e6).replace(".",",");
+}
+function isNumCell(c){const s=show(c);return s!==""&&(/^-?\d/.test(s)||s.startsWith("#"));}
+
+function selRect(){return{r1:Math.min(act.r,foc.r),r2:Math.max(act.r,foc.r),c1:Math.min(act.c,foc.c),c2:Math.max(act.c,foc.c)};}
+function rectName(q){const s=K(q.r1,q.c1),e=K(q.r2,q.c2);return s===e?s:s+":"+e;}
+function eachSel(fn){const q=selRect();for(let r=q.r1;r<=q.r2;r++)for(let c=q.c1;c<=q.c2;c++)fn(ensure(K(r,c)),r,c);}
+function renderSheet(){
+  const t=$("#sheet");t.innerHTML="";
+  t.append(h("colgroup",null,h("col",{style:"width:34px"}),COLS.map((_,i)=>h("col",{class:i===0?"cA":"c"}))));
+  const q=selRect();
+  t.append(h("tr",null,h("th",{class:"rh"},""),COLS.map((L,c)=>h("th",{class:c>=q.c1&&c<=q.c2?"hl":""},L))));
+  for(let r=0;r<NR;r++){const tr=h("tr",null,h("th",{class:"rh"+(r>=q.r1&&r<=q.r2?" hl":"")},r+1));
+    for(let c=0;c<COLS.length;c++){const cell=getC(K(r,c));
+      const cls=[isNumCell(cell)?"n":"",r===1?"f-g":"",(r>=q.r1&&r<=q.r2&&c>=q.c1&&c<=q.c2)?"in-rect":"",(r===act.r&&c===act.c)?"active":""].filter(Boolean).join(" ");
+      tr.append(h("td",{class:cls,"data-r":r,"data-c":c,title:isFormula(K(r,c))?cell.raw:null},show(cell)));}
+    t.append(tr);}
+  $("#nameBox").value=rectName(q);
+  const ac=getC(K(act.r,act.c));
+  if(document.activeElement!==$("#fxInput"))$("#fxInput").value=ac.raw;
+  $("#fmt").value=ac.fmt==="number"?"number":"general";
+  checkLab();
+}
+function cellFrom(el){const td=el&&el.closest&&el.closest("td[data-r]");return td?{r:+td.dataset.r,c:+td.dataset.c}:null;}
+$("#sheet").addEventListener("pointerdown",e=>{const p=cellFrom(e.target);if(!p)return;commitFx();act=p;foc=p;drag=true;renderSheet();$("#gridWrap").focus({preventScroll:true});e.preventDefault();});
+document.addEventListener("pointermove",e=>{if(!drag)return;const p=cellFrom(document.elementFromPoint(e.clientX,e.clientY));if(p&&(p.r!==foc.r||p.c!==foc.c)){foc=p;renderSheet();}});
+document.addEventListener("pointerup",()=>{drag=false;});
+$("#sheet").addEventListener("dblclick",()=>{$("#fxInput").focus();});
+function move(dr,dc){act={r:Math.min(NR-1,Math.max(0,act.r+dr)),c:Math.min(COLS.length-1,Math.max(0,act.c+dc))};foc={...act};renderSheet();}
+$("#gridWrap").addEventListener("keydown",e=>{
+  const map={ArrowUp:[-1,0],ArrowDown:[1,0],ArrowLeft:[0,-1],ArrowRight:[0,1]};
+  if(map[e.key]){e.preventDefault();if(e.shiftKey){foc={r:Math.min(NR-1,Math.max(0,foc.r+map[e.key][0])),c:Math.min(COLS.length-1,Math.max(0,foc.c+map[e.key][1]))};renderSheet();}else move(...map[e.key]);return;}
+  if(e.key==="Enter"){e.preventDefault();move(1,0);return;}
+  if(e.key==="Tab"){e.preventDefault();move(0,1);return;}
+  if(e.key==="Delete"||e.key==="Backspace"){e.preventDefault();eachSel(c=>{c.raw="";});save();renderSheet();return;}
+  if(e.key.length===1&&!e.ctrlKey&&!e.metaKey&&!e.altKey){e.preventDefault();const fx=$("#fxInput");editPrev=getC(K(act.r,act.c)).raw;fx.value=e.key;fx.focus();ensure(K(act.r,act.c)).raw=e.key;liveCell();}
+});
+function liveCell(){const td=$('#sheet td[data-r="'+act.r+'"][data-c="'+act.c+'"]');if(td)td.textContent=show(getC(K(act.r,act.c)));}
+$("#fxInput").addEventListener("focus",()=>{if(editPrev===null)editPrev=getC(K(act.r,act.c)).raw;});
+$("#fxInput").addEventListener("input",e=>{ensure(K(act.r,act.c)).raw=e.target.value;liveCell();});
+function commitFx(){editPrev=null;save();return true;}
+$("#fxInput").addEventListener("keydown",e=>{
+  if(e.key==="Enter"||e.key==="Tab"){e.preventDefault();commitFx();e.target.blur();e.key==="Enter"?move(1,0):move(0,1);$("#gridWrap").focus({preventScroll:true});}
+  else if(e.key==="Escape"){if(editPrev!==null)ensure(K(act.r,act.c)).raw=editPrev;editPrev=null;e.target.blur();renderSheet();}
+});
+$("#fxInput").addEventListener("blur",()=>{setTimeout(()=>{if(document.activeElement!==$("#fxInput")){commitFx();renderSheet();}},0);});
+$("#nameBox").addEventListener("keydown",e=>{if(e.key!=="Enter")return;e.preventDefault();
+  const v=normAddr(e.target.value).toUpperCase();const mm=v.match(/^([A-F])(10|[1-9])(?::([A-F])(10|[1-9]))?$/);
+  if(!mm){e.target.value=rectName(selRect());return;}
+  act={r:+mm[2]-1,c:COLS.indexOf(mm[1])};foc=mm[3]?{r:+mm[4]-1,c:COLS.indexOf(mm[3])}:{...act};renderSheet();$("#gridWrap").focus({preventScroll:true});});
+$("#nameBox").addEventListener("focus",e=>e.target.select());
+
+/* Автосума: вставляє функцію з діапазоном чисел над коміркою (або ліворуч) */
+function guessRange(r,c){
+  const isN=(rr,cc)=>valueOf(K(rr,cc))!=null&&String(getC(K(rr,cc)).raw).trim()!=="";
+  let rr=r-1;while(rr>=0&&String(getC(K(rr,c)).raw).trim()==="")rr--;
+  if(rr>=0&&isN(rr,c)){let top=rr;while(top-1>=0&&isN(top-1,c))top--;return K(top,c)+":"+K(rr,c);}
+  let cc=c-1;if(cc>=0&&isN(r,cc)){let left=cc;while(left-1>=0&&isN(r,left-1))left--;return K(r,left)+":"+K(r,cc);}
+  return "";
+}
+$("#autoSum").addEventListener("change",e=>{const f=e.target.value;e.target.value="";if(!f)return;commitFx();
+  const k=K(act.r,act.c);const rg=guessRange(act.r,act.c);ensure(k).raw="="+f+"("+rg+")";foc={...act};renderSheet();
+  const fx=$("#fxInput");editPrev=null;fx.value=ensure(k).raw;fx.focus();const pos=fx.value.length-1;fx.setSelectionRange(pos-rg.length,pos);});
+
+/* Автозаповнення: перша комірка кожного стовпця виділення копіюється вниз зі зсувом відносних посилань */
+function shiftRefs(raw,dr,dc){return raw.replace(/(^|[^A-Za-z])([A-Fa-f])(\d+)/g,(m,pre,col,row)=>{const c=COLS.indexOf(col.toUpperCase())+dc,r=+row+dr;return pre+(c>=0&&c<COLS.length?COLS[c]:col)+r;});}
+$("#ribbon").addEventListener("click",e=>{const b=e.target.closest("button[data-a]");if(!b)return;commitFx();const a=b.dataset.a;
+  if(a==="fill"){const q=selRect();
+    if(q.r1===q.r2){$("#labChecks").scrollIntoView({block:"nearest"});alertLab("Виділіть діапазон від комірки з формулою донизу, наприклад F3:F6, і натисніть «Автозаповнення ↓».");return;}
+    labMsg="";for(let c=q.c1;c<=q.c2;c++){const src=getC(K(q.r1,c));for(let r=q.r1+1;r<=q.r2;r++){const raw=String(src.raw).trim();ensure(K(r,c)).raw=raw.startsWith("=")?shiftRefs(raw,r-q.r1,0):raw;ensure(K(r,c)).fmt=src.fmt;ensure(K(r,c)).dec=src.dec;}}}
+  else if(a==="dec+"||a==="dec-"){eachSel(c=>{if(!isNumCell(c))return;const s=show(c);const cur=c.dec!=null?c.dec:((s.split(",")[1]||"").length);c.dec=Math.max(0,Math.min(6,cur+(a==="dec+"?1:-1)));});}
+  save();renderSheet();});
+$("#fmt").addEventListener("change",e=>{commitFx();const f=e.target.value;eachSel(c=>{c.fmt=f;c.dec=null;});save();renderSheet();});
+let labMsg="";function alertLab(t){labMsg=t;checkLab();}
+$("#labReset").addEventListener("click",()=>{S.lab=freshLab();act={r:2,c:4};foc={...act};labMsg="";save();renderSheet();});
+
+/* вимоги */
+let labOk=0;
+function checkLab(){
+  const v=(r,c)=>valueOf(K(r,c)),f=(r,c)=>isFormula(K(r,c)),raw=(r,c)=>String(getC(K(r,c)).raw).toUpperCase().replace(/\s/g,"");
+  const near=(a,b)=>a!=null&&b!=null&&Math.abs(a-b)<1e-9;
+  const rows=[2,3,4,5];const res=[];
+  const hasRef=(r,c)=>/[A-F]\d/.test(raw(r,c));
+  const ok1=rows.every(r=>f(r,4)&&hasRef(r,4)&&near(v(r,4),(v(r,1)||0)+(v(r,2)||0)+(v(r,3)||0)));
+  res.push([ok1,"Стовпець «Ігри» E3:E6 рахується формулою з адресами комірок","У E3 введіть =B3+C3+D3, потім виділіть E3:E6 і натисніть «Автозаповнення ↓»."]);
+  const ok2=rows.every(r=>f(r,5)&&hasRef(r,5)&&near(v(r,5),(v(r,1)||0)*3+(v(r,2)||0)));
+  res.push([ok2,"Очки F3:F6 рахуються формулою: перемога — 3, нічия — 1","Замініть ручні числа: у F3 введіть =B3*3+C3 і протягніть до F6. Ручні 8 і 1 були помилкові."]);
+  const sumOk=c=>f(6,c)&&/SUM\(/.test(raw(6,c))&&near(v(6,c),rows.reduce((s,r)=>s+(v(r,c)||0),0));
+  res.push([[1,2,3].every(sumOk),"Рядок «Разом»: B7:D7 рахує функція SUM","Клацніть B7 → «Σ Автосума… → Сума» → Enter. Так само для C7 і D7."]);
+  const pts=rows.map(r=>v(r,5));const allN=pts.every(x=>x!=null);
+  res.push([allN&&f(7,5)&&/AVERAGE\(/.test(raw(7,5))&&near(v(7,5),pts.reduce((s,x)=>s+x,0)/4),"Середні очки у F8 — функція AVERAGE по F3:F6","У F8: =AVERAGE(F3:F6)."]);
+  res.push([allN&&f(8,5)&&/MAX\(/.test(raw(8,5))&&near(v(8,5),Math.max(...pts)),"Найбільше очок у F9 — функція MAX","У F9: =MAX(F3:F6). Перевірте діапазон, який підставила Автосума."]);
+  res.push([allN&&f(9,5)&&/MIN\(/.test(raw(9,5))&&near(v(9,5),Math.min(...pts)),"Найменше очок у F10 — функція MIN","У F10: =MIN(F3:F6)."]);
+  res.push([v(3,1)===3&&ok1&&ok2,"Тигри виграли перенесений матч: у B4 стоїть 3, а ігри й очки перерахувалися самі","Змініть B4 з 2 на 3. Якщо в E4 і F4 формули, результат зміниться автоматично."]);
+  labOk=res.filter(x=>x[0]).length;S.labRes=res.map(x=>!!x[0]);
+  const ul=$("#labChecks");ul.innerHTML="";
+  if(labMsg)ul.append(h("li",null,h("i",null,"!"),h("div",null,labMsg)));
+  res.forEach(([ok,t,hint])=>ul.append(h("li",{class:ok?"ok":""},h("i",null,ok?"✓":""),h("div",null,t,ok?null:h("small",null,hint)))));
+  $("#labScore").textContent=labOk+" з "+LABN;S.labOk=labOk;save();updateScore();
+}
+window.__lab={evalF,show,getC,ensure,checkLab:()=>labOk,valueOf};
+
+/* ---------- результат ---------- */
+function grade(){const e=exPts()/EX.length,l=(S.labOk||0)/LABN;if(!exPts()&&!S.labOk)return 0;return Math.max(1,Math.round((e+l)/2*12));}
+function updateScore(){$("#sEx").textContent=fmtN(exPts());$("#sStars").textContent=stars();$("#sXp").textContent=S.quest.xp;$("#sLab").textContent=(S.labOk||0)+"/"+LABN;}
+function csvLine(){const d=new Date();return[S.name||"—",S.cls||"—","Прості обчислення (8 кл, Р2 Т3)",fmtN(exPts())+"/14",(S.labOk||0)+"/"+LABN,stars()+"/15",S.quest.xp,grade()+"/12",d.toLocaleDateString("uk-UA")].join(";");}
+function renderRes(){
+  const g=grade();$("#grade").textContent=g||"—";
+  const t=$("#resTable");t.innerHTML="";
+  [["Вправи",fmtN(exPts())+" з 14"],["Лабораторія «Турнірна таблиця»",(S.labOk||0)+" з "+LABN],["Квест: зірки",stars()+" з 15"],["Квест: XP",S.quest.xp],["Картки: знаю",S.cards+" з "+CARDS.length]].forEach(([a,b])=>t.append(h("tr",null,h("td",null,a),h("td",null,b))));
+  $("#pName").value=S.name;$("#pClass").value=S.cls;$("#nick").value=S.nick;$("#csv").value="Ім'я;Клас;Тема;Вправи;Лабораторія;Зірки;XP;Оцінка;Дата\n"+csvLine();
+}
+$("#pName").addEventListener("input",e=>{S.name=e.target.value;save();renderRes();});
+$("#pClass").addEventListener("input",e=>{S.cls=e.target.value;save();renderRes();});
+$("#nick").addEventListener("input",e=>{S.nick=e.target.value;save();});
+$("#copyBtn").addEventListener("click",()=>{const ta=$("#csv");const done=()=>{$("#copyMsg").textContent="Скопійовано. Надішліть учителю.";};
+  try{navigator.clipboard.writeText(csvLine()).then(done,()=>{ta.select();$("#copyMsg").textContent="Текст виділено — натисніть Ctrl+C.";});}catch(e){ta.select();$("#copyMsg").textContent="Текст виділено — натисніть Ctrl+C.";}});
+
+/* ---------- спільний рейтинг ---------- */
+let DB=null,USER=null,MY=null,BOARD=[],dbPending=true;
+function renderBoard(){
+  const t=$("#lbTable");t.innerHTML="";
+  if(!DB&&dbPending){$("#lbMsg").textContent="Рейтинг завантажується…";$("#pubBtn").disabled=true;return;}
+  if(!DB){$("#lbMsg").textContent="Спільний рейтинг працює, коли ви ввійшли в Claude і вчитель дав доступ «Учасник». Без цього скопіюйте рядок результату й надішліть учителю.";$("#pubBtn").disabled=true;return;}
+  $("#pubBtn").disabled=false;
+  if(!BOARD.length){$("#lbMsg").textContent="У рейтингу ще нікого немає. Пройдіть квест і запишіть свій нікнейм першим.";return;}
+  $("#lbMsg").textContent="Сортування: зірки, потім XP.";
+  t.append(h("tr",null,h("th",null,"#"),h("th",null,"Нікнейм"),h("th",null,"Клас"),h("th",{style:"text-align:right"},"★"),h("th",{style:"text-align:right"},"XP"),h("th",{style:"text-align:right"},"Бали")));
+  BOARD.slice().sort((a,b)=>(b.stars-a.stars)||(b.xp-a.xp)).slice(0,40).forEach((r,i)=>t.append(h("tr",{class:r.id===MY?"me":""},h("td",null,i+1),h("td",null,r.nick),h("td",null,r.cls||""),h("td",{class:"r"},r.stars),h("td",{class:"r"},r.xp),h("td",{class:"r"},r.grade||""))));
+}
+$("#pubBtn").addEventListener("click",async()=>{
+  const nick=($("#nick").value||"").trim().slice(0,20);if(!nick){$("#lbMsg").textContent="Впишіть нікнейм або код.";return;}
+  if(!DB||!MY)return;
+  try{await DB.collection("board").doc(MY).set({nick,cls:(S.cls||"").slice(0,6),stars:stars(),xp:S.quest.xp,grade:grade(),ts:Date.now()});$("#lbMsg").textContent="Записано в рейтинг.";}
+  catch(e){$("#lbMsg").textContent="Не вдалося записати: у вас доступ лише на перегляд. Попросіть учителя дати доступ «Учасник» або надішліть рядок результату.";}
+});
+(async()=>{try{if(!window.claude||!window.claude.use){dbPending=false;renderBoard();return;}
+  USER=await window.claude.use("user");DB=await window.claude.use("db");
+  if(DB&&USER){MY=await USER.id();DB.collection("board").onSnapshot(s=>{BOARD=s.docs.filter(d=>d.exists).map(d=>({id:d.id,...d.data()})).filter(r=>typeof r.nick==="string");renderBoard();},()=>{DB=null;dbPending=false;renderBoard();});}
+  dbPending=false;renderBoard();}catch(e){DB=null;dbPending=false;renderBoard();}})();
+
+/* ---------- надіслати вчителю (Google Форма → журнал і теплова карта) ---------- */
+const FORM_PREFILL="https://docs.google.com/forms/d/e/1FAIpQLSeaDGNzqpEMjZyDt4WUwg3k3FAhGGW4pG1E8IcOk8b4LQsBVw/viewform?usp=pp_url&entry.1997531456=test";
+const TOPIC_J="Прості обчислення", LABN_J=7;
+// число = скільки помилок у завданні (0 — з першої спроби), «н» — не виконано; К — етапи квесту (3★=0, 2★=1, 1★=2)
+function taskStrJ(){const a=[];
+  EX.forEach((e,i)=>{const st=S.ex[e.id];a.push("В"+(i+1)+":"+(st&&st.done?st.tries:(st&&st.tries?st.tries+"н":"н")))});
+  S.quest.best.forEach((b,i)=>a.push("К"+(i+1)+":"+(b?3-b:"н")));
+  (S.labRes||[]).forEach((ok,i)=>a.push("Л"+(i+1)+":"+(ok?0:1)));
+  return a.join(",")}
+const cleanJ=v=>String(v||"").replace(/[|\n\r]/g," ").trim()||"—";
+function sendLineJ(){const errs=EX.reduce((s,e)=>s+((S.ex[e.id]&&S.ex[e.id].tries)||0),0);
+  return ["v1",8,TOPIC_J,cleanJ(S.cls),cleanJ(S.name),1,"—",grade(),fmtN(exPts()),Math.round((S.labOk||0)/LABN_J*100),errs,"—","—","","надіслано",taskStrJ()].join("|")}
+(function(){const cb=$("#copyBtn"),row=cb.parentNode;
+  const a=h("a",{class:"btn",id:"sendBtn",href:"#",target:"_blank",rel:"noopener",style:"text-decoration:none;display:inline-block"},"📤 Надіслати вчителю");
+  const msg=h("span",{class:"dim",id:"sendMsg"});
+  const wrap=h("div",{class:"row"},a,msg);row.parentNode.insertBefore(wrap,row);
+  wrap.after(h("p",{class:"dim",style:"margin:8px 0 0"},"Відкриється Google Форма з уже заповненим результатом — натисніть у ній «Надіслати». Не оновлюйте цю сторінку, доки не надішлете: прогрес не зберігається."));
+  cb.classList.add("ghost");cb.textContent="Скопіювати рядок (запасний варіант)";
+  a.addEventListener("click",e=>{
+    if(!String(S.name||"").trim()||!String(S.cls||"").trim()){e.preventDefault();msg.textContent="Спершу впишіть ім'я, прізвище та клас.";return}
+    a.href=FORM_PREFILL.replace(/(entry\.\d+=)[^&]*/,(m,p)=>p+encodeURIComponent(sendLineJ()));
+    msg.textContent="Форму відкрито в новій вкладці — натисніть там «Надіслати» ✔";});
+})();
+
+/* ---------- старт ---------- */
+renderEx();renderQuest();renderCards();renderSheet();updateScore();renderBoard();
+</script>
+
+
+</body></html>

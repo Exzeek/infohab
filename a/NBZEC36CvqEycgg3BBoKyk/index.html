@@ -1,0 +1,829 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Запити · 9 клас</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Manrope:wght@400;600;700;800&display=swap">
+<style>
+/* Layout: смуга «потоку даних» угорі, вкладки-режими, під ними одна робоча колонка ~760px */
+:root{
+  --bg:#eef3f5; --surface:#ffffff; --surface-2:#e4edf1; --line:#cbd8df;
+  --fg:#12222c; --dim:#546874; --accent:#0d7f86; --accent-ink:#ffffff; --amber:#b77900;
+  --ok:#1d8a4c; --ok-bg:#e1f4e8; --bad:#c43b3b; --bad-bg:#fbe6e6; --boss:#a3372f;
+  --t1:#1d8a4c; --t2:#b77900; --t3:#c43b3b;
+  --display:"Unbounded","Arial Black",system-ui,sans-serif;
+  --body:"Manrope","Segoe UI",system-ui,sans-serif;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0c151b; --surface:#13212a; --surface-2:#1a2d37; --line:#2b414d;
+  --fg:#e5eef2; --dim:#94a9b4; --accent:#3cc4c0; --accent-ink:#06191b; --amber:#f0b43a;
+  --ok:#4fcf89; --ok-bg:#163a29; --bad:#f07070; --bad-bg:#3d1d1f; --boss:#f07a6a;
+  --t1:#4fcf89; --t2:#f0b43a; --t3:#f07070; color-scheme:dark; } }
+:root[data-theme="dark"]{
+  --bg:#0c151b; --surface:#13212a; --surface-2:#1a2d37; --line:#2b414d;
+  --fg:#e5eef2; --dim:#94a9b4; --accent:#3cc4c0; --accent-ink:#06191b; --amber:#f0b43a;
+  --ok:#4fcf89; --ok-bg:#163a29; --bad:#f07070; --bad-bg:#3d1d1f; --boss:#f07a6a;
+  --t1:#4fcf89; --t2:#f0b43a; --t3:#f07070; color-scheme:dark; }
+*{box-sizing:border-box}
+body{background:var(--bg); color:var(--fg); font-family:var(--body); font-size:16px; line-height:1.55}
+.wrap{max-width:780px; margin:0 auto; padding:20px 16px 64px}
+h1,h2,h3{font-family:var(--display); text-wrap:balance; margin:0}
+.dim{color:var(--dim)}
+button{font-family:inherit; font-size:inherit}
+:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+
+/* шапка */
+.top{display:flex; flex-direction:column; gap:14px; padding-block:6px 18px}
+.kicker{font-size:.78rem; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); font-weight:800}
+h1{font-size:clamp(2.1rem,8vw,3.6rem); font-weight:800; letter-spacing:-.02em; line-height:1}
+.ladder{display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 10px; font-family:var(--display); font-weight:500; color:var(--dim)}
+.ladder span:nth-child(odd){color:var(--fg)}
+.ladder span:nth-child(1){font-size:.7rem}.ladder span:nth-child(3){font-size:.8rem}.ladder span:nth-child(5){font-size:.95rem}
+.ladder span:nth-child(7){font-size:1.1rem}.ladder span:nth-child(9){font-size:1.3rem; color:var(--accent)}.ladder span:nth-child(11){font-size:1.55rem; color:var(--accent)}
+.who{display:flex; flex-wrap:wrap; gap:10px}
+.who input{flex:1 1 200px; min-width:0; background:var(--surface); border:1px solid var(--line); color:var(--fg); border-radius:10px; padding:10px 12px; font:inherit}
+.who input#cls{flex:0 1 120px}
+.meter{display:flex; align-items:center; gap:10px; font-size:.85rem; color:var(--dim)}
+.meter .bar{flex:1; height:8px; background:var(--surface-2); border-radius:8px; overflow:hidden}
+.meter .bar i{display:block; height:100%; width:0; background:var(--accent); transition:width .4s}
+
+/* вкладки */
+.tabs{display:flex; gap:6px; overflow-x:auto; padding-bottom:4px; margin-bottom:18px; scrollbar-width:thin}
+.tab{flex:0 0 auto; background:transparent; border:1px solid var(--line); color:var(--dim); border-radius:999px; padding:8px 15px; cursor:pointer; font-weight:700; font-size:.9rem}
+.tab[aria-selected="true"]{background:var(--fg); color:var(--bg); border-color:var(--fg)}
+.tab .n{font-variant-numeric:tabular-nums; opacity:.7; margin-left:4px; font-weight:600}
+.intro{margin:0 0 16px; color:var(--dim); max-width:62ch}
+
+/* картки завдань */
+.list{display:flex; flex-direction:column; gap:14px}
+.card{background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:18px}
+.card.done{border-color:var(--ok)}
+.card-h{display:flex; flex-wrap:wrap; gap:8px 12px; align-items:center; font-size:.78rem; text-transform:uppercase; letter-spacing:.08em; color:var(--dim); font-weight:800; margin-bottom:6px}
+.tier{border-radius:999px; padding:2px 9px; border:1px solid currentColor}
+.tier.t1{color:var(--t1)}.tier.t2{color:var(--t2)}.tier.t3{color:var(--t3)}
+.score-chip{margin-left:auto; color:var(--ok)}
+.q{font-weight:700; font-size:1.04rem; margin:2px 0 14px}
+.opts{display:flex; flex-direction:column; gap:9px}
+.opts.row2{flex-direction:row}.opts.row2 .opt{flex:1; text-align:center}
+.opt{text-align:left; background:var(--surface-2); border:1px solid var(--line); color:var(--fg); padding:12px 14px; border-radius:11px; cursor:pointer; transition:border-color .12s}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt.sel{border-color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent)}
+.opt.ok{background:var(--ok-bg); border-color:var(--ok)}
+.opt.bad{background:var(--bad-bg); border-color:var(--bad); animation:shake .35s}
+.opt:disabled{cursor:default}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.fb{margin-top:12px; padding:11px 13px; border-radius:11px; font-size:.93rem; border:1px solid}
+.fb.ok{background:var(--ok-bg); border-color:var(--ok)} .fb.bad{background:var(--bad-bg); border-color:var(--bad)}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:12px}
+.btn{background:var(--accent); color:var(--accent-ink); border:none; padding:10px 18px; border-radius:999px; cursor:pointer; font-weight:800}
+.btn:hover{filter:brightness(1.08)} .btn:disabled{opacity:.4; cursor:default; filter:none}
+.btn.ghost{background:transparent; color:var(--fg); border:1px solid var(--line)}
+.in{background:var(--bg); border:1px solid var(--accent); color:var(--fg); border-radius:9px; padding:9px 12px; font:inherit; width:220px; max-width:100%; font-variant-numeric:tabular-nums}
+.in.ok{border-color:var(--ok)} .in.bad{border-color:var(--bad); animation:shake .35s}
+.chips{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px}
+.chip{background:var(--surface-2); border:1px solid var(--accent); color:var(--fg); padding:8px 13px; border-radius:999px; cursor:pointer; font-size:.9rem}
+.chip.sel{box-shadow:0 0 0 2px var(--accent)} .chip.bad{border-color:var(--bad); animation:shake .35s}
+.buckets{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px}
+.bucket{min-height:96px; border:2px dashed var(--line); border-radius:12px; padding:10px; cursor:pointer; background:var(--surface-2); text-align:left; color:var(--fg)}
+.bucket:hover{border-color:var(--accent)}
+.bucket h4{margin:0 0 8px; font-size:.82rem; color:var(--accent); text-transform:uppercase; letter-spacing:.06em}
+.bucket .chip{cursor:default; border-color:var(--ok); display:inline-block; margin:0 6px 6px 0; font-size:.82rem}
+.target{display:flex; flex-direction:column; gap:7px; min-height:48px; border:2px dashed var(--line); border-radius:12px; padding:10px; margin-bottom:12px}
+.target:empty::before{content:"Натискайте картки нижче — вони стануть тут у вашому порядку"; color:var(--dim); font-size:.85rem}
+.step{display:flex; align-items:center; gap:10px; background:var(--surface-2); border:1px solid var(--line); border-radius:10px; padding:8px 11px; font-size:.92rem}
+.step.good{border-color:var(--ok)} .step.wrongpos{border-color:var(--bad)}
+.step .n{color:var(--amber); font-weight:800; width:20px; font-variant-numeric:tabular-nums}
+.step button{margin-left:auto; background:var(--surface); border:1px solid var(--line); color:var(--dim); border-radius:8px; width:28px; height:28px; cursor:pointer}
+.mcols{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+@media(max-width:560px){.mcols{grid-template-columns:1fr}}
+.mi{display:block; width:100%; text-align:left; background:var(--surface-2); border:1px solid var(--line); color:var(--fg); border-radius:10px; padding:10px 12px; margin-bottom:8px; cursor:pointer; font-size:.92rem}
+.mi.sel{border-color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent)}
+.mi.done{border-color:var(--ok); background:var(--ok-bg); cursor:default}
+.mi.bad{border-color:var(--bad); animation:shake .35s}
+
+/* квест */
+.hud{display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:12px}
+.pill{background:var(--surface); border:1px solid var(--line); padding:5px 13px; border-radius:999px; font-size:.88rem; font-variant-numeric:tabular-nums}
+.pill b{color:var(--amber)}
+.map{display:flex; flex-direction:column; gap:10px}
+.node{display:flex; align-items:center; gap:14px; background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:13px 15px; cursor:pointer; text-align:left; color:var(--fg); width:100%}
+.node:hover:not(:disabled){border-color:var(--accent)}
+.node:disabled{opacity:.5; cursor:not-allowed}
+.node .ico{font-size:1.7rem; width:50px; height:50px; display:grid; place-items:center; background:var(--surface-2); border-radius:50%; border:2px solid var(--line); flex:0 0 auto}
+.node.cur .ico{border-color:var(--amber)} .node.done .ico{border-color:var(--ok)} .node.boss{border-color:var(--boss)}
+.node .nm{font-weight:800} .node .ds{font-size:.85rem; color:var(--dim)}
+.node .st{margin-left:auto; color:var(--amber); letter-spacing:2px; white-space:nowrap}
+.dots{display:flex; gap:5px; margin:6px 0 12px}.dots i{flex:1; height:6px; border-radius:6px; background:var(--surface-2)}
+.dots i.on{background:var(--accent)} .dots i.cur{background:var(--amber)}
+.boss-bar{height:12px; background:var(--surface-2); border-radius:99px; overflow:hidden}
+.boss-bar i{display:block; height:100%; background:var(--boss); transition:width .5s}
+.center{text-align:center}
+.big{font-family:var(--display); font-size:2.4rem; color:var(--amber); letter-spacing:4px}
+.stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px; margin:14px 0}
+.stat{background:var(--surface-2); border-radius:12px; padding:11px; text-align:center}
+.stat b{display:block; font-family:var(--display); font-size:1.3rem; font-variant-numeric:tabular-nums}
+
+/* картки-терміни */
+.flip{width:100%; min-height:210px; perspective:1000px; background:none; border:none; padding:0; cursor:pointer; color:var(--fg)}
+.flip-in{position:relative; width:100%; min-height:210px; transition:transform .45s; transform-style:preserve-3d}
+.flip.on .flip-in{transform:rotateY(180deg)}
+.face{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:22px; border-radius:var(--r); border:1px solid var(--line); backface-visibility:hidden; background:var(--surface)}
+.face.back{transform:rotateY(180deg); background:var(--surface-2)}
+.face .term{font-family:var(--display); font-size:clamp(1.3rem,5vw,1.9rem); font-weight:700; text-align:center}
+.face .def{font-size:1.08rem; text-align:center; max-width:46ch}
+.face small{color:var(--dim); font-size:.8rem}
+@media (prefers-reduced-motion: reduce){ .flip-in{transition:none} .opt.bad,.chip.bad,.in.bad,.mi.bad{animation:none} }
+
+/* лабораторія */
+.datatable{width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums}
+.datatable th,.datatable td{padding:8px 6px; border-bottom:1px solid var(--line); text-align:left; font-size:.93rem}
+.datatable td.num{text-align:right; font-weight:700}
+.bars{display:flex; flex-direction:column; gap:7px; margin-top:14px}
+.brow{display:grid; grid-template-columns:110px 1fr; gap:10px; align-items:center; font-size:.85rem}
+.btrack{height:18px; background:var(--surface-2); border-radius:5px; overflow:hidden}
+.btrack i{display:block; height:100%; background:var(--accent); border-radius:5px}
+.axis{display:grid; grid-template-columns:110px 1fr; gap:10px; font-size:.72rem; color:var(--dim)}
+.axis div{display:flex; justify-content:space-between; font-variant-numeric:tabular-nums}
+
+/* результат */
+table.res{width:100%; border-collapse:collapse; font-size:.95rem}
+table.res td{padding:9px 6px; border-bottom:1px solid var(--line)}
+table.res td:last-child{text-align:right; font-weight:800; font-variant-numeric:tabular-nums}
+.grade{font-family:var(--display); font-size:4rem; font-weight:800; color:var(--accent); line-height:1}
+textarea.copy{width:100%; height:110px; margin-top:10px; background:var(--surface-2); color:var(--fg); border:1px solid var(--line); border-radius:10px; font:13px/1.4 monospace}
+.sqlstrip{font-family:ui-monospace,"Cascadia Mono",Consolas,monospace; font-size:.95rem; color:var(--dim); display:flex; flex-wrap:wrap; gap:4px 8px}
+.sqlstrip b{color:var(--accent)}
+.datatable th.num{text-align:right}
+.tw{overflow-x:auto}
+.qb{display:flex; flex-direction:column; gap:8px}
+.qb-l{font-size:.78rem; text-transform:uppercase; letter-spacing:.08em; font-weight:800; color:var(--dim); margin-top:6px}
+.qb .chips{margin-bottom:0}
+.qb-row{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
+.qb-in{background:var(--bg); border:1px solid var(--line); color:var(--fg); border-radius:9px; padding:8px 10px; font:inherit; font-size:.92rem; min-width:0; flex:1 1 120px}
+select.qb-in{flex:0 1 auto}
+.qb-row select.qb-in:nth-child(2){flex:0 0 auto}
+pre.sql{margin:6px 0 0; padding:12px 14px; background:var(--surface-2); border-radius:10px; font:14px/1.5 ui-monospace,"Cascadia Mono",Consolas,monospace; white-space:pre-wrap; word-break:break-word; color:var(--fg)}
+.qb-out .datatable{margin-top:8px}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="kicker">Інформатика · 9 клас · Розділ 3 · Тема 3</div>
+    <h1>Запити</h1>
+    <div class="sqlstrip" aria-label="Будова запиту"><b>SELECT</b> поля <b>FROM</b> таблиця <b>WHERE</b> умова <b>ORDER BY</b> порядок</div>
+    <div class="who">
+      <input id="name" placeholder="Ім'я та прізвище" autocomplete="off" aria-label="Ім'я та прізвище">
+      <input id="cls" placeholder="Клас" autocomplete="off" aria-label="Клас">
+    </div>
+    <div class="meter"><span>Виконано</span><div class="bar"><i id="meter"></i></div><span id="meterTxt">0%</span></div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" data-t="ex" aria-selected="true">Вправи<span class="n" id="nEx"></span></button>
+    <button class="tab" role="tab" data-t="quest" aria-selected="false">Квест<span class="n" id="nQuest"></span></button>
+    <button class="tab" role="tab" data-t="cards" aria-selected="false">Картки<span class="n" id="nCards"></span></button>
+    <button class="tab" role="tab" data-t="lab" aria-selected="false">Конструктор<span class="n" id="nLab"></span></button>
+    <button class="tab" role="tab" data-t="test" aria-selected="false">Тест<span class="n" id="nTest"></span></button>
+    <button class="tab" role="tab" data-t="res" aria-selected="false">Результат</button>
+  </nav>
+
+  <section id="p-ex">
+    <p class="intro">14 вправ від базових до складних. Правильна відповідь з першої спроби — 1 бал, з повторної — 0,5.</p>
+    <div class="list" id="exList"></div>
+  </section>
+  <section id="p-quest" hidden>
+    <p class="intro">Пройдіть чотири локації й переможіть Хаос-Фільтр. Помилка коштує серце. Що менше помилок, то більше зірок.</p>
+    <div id="questApp"></div>
+  </section>
+  <section id="p-cards" hidden>
+    <p class="intro">Натисніть картку, щоб перевернути. «Знаю» прибирає її з колоди, «Ще раз» відкладає в кінець.</p>
+    <div id="cardsApp"></div>
+  </section>
+  <section id="p-lab" hidden>
+    <p class="intro">Перед вами таблиця «Олімпіада». Складіть запити в конструкторі: оберіть поля, умови й сортування, натисніть «Виконати запит», а потім «Перевірити». Зараховується результат, тож правильних запитів може бути кілька.</p>
+    <div class="card" id="labData"></div>
+    <div class="list" id="labList" style="margin-top:14px"></div>
+  </section>
+  <section id="p-test" hidden>
+    <p class="intro">12 питань, одна спроба на кожне. Порядок питань і варіантів перемішується.</p>
+    <div id="testApp"></div>
+  </section>
+  <section id="p-res" hidden>
+    <div id="resApp"></div>
+  </section>
+</div>
+
+<script>
+/* ===================== БАЗА ДЛЯ КОНСТРУКТОРА ===================== */
+const DB_NAME="Олімпіада";
+const DB_FIELDS=["Прізвище","Клас","Предмет","Бали","Місто"];
+const DB_NUM=["Клас","Бали"];
+const DB=[
+  [1,"Коваль",9,"Інформатика",87,"Львів"],[2,"Мельник",10,"Математика",92,"Київ"],[3,"Шевчук",9,"Математика",74,"Львів"],
+  [4,"Бондар",11,"Інформатика",95,"Одеса"],[5,"Ткачук",10,"Інформатика",68,"Львів"],[6,"Кравець",9,"Фізика",81,"Київ"],
+  [7,"Олійник",11,"Математика",59,"Дніпро"],[8,"Лисенко",10,"Фізика",90,"Львів"],[9,"Савчук",9,"Інформатика",77,"Київ"],
+  [10,"Руденко",11,"Фізика",85,"Одеса"]
+].map(r=>({id:r[0],"Прізвище":r[1],"Клас":r[2],"Предмет":r[3],"Бали":r[4],"Місто":r[5]}));
+
+/* ===================== ВПРАВИ ===================== */
+const EX = [
+  {tier:1, type:"single", q:"Що таке запит у базі даних?",
+    opts:["Звернення до бази для відбору даних","Новий порожній рядок, доданий у таблицю бази","Файл із резервною копією всієї бази даних","Вікно для гарного друку таблиці на папері"], c:0,
+    e:"Запит відбирає з таблиць лише ті записи й поля, які відповідають заданим умовам."},
+  {tier:1, type:"match", q:"З'єднайте знак порівняння з його значенням: натисніть ліву картку, потім праву.",
+    pairs:[["=","дорівнює"],["<>","не дорівнює"],[">=","більше або дорівнює"],["<","менше"]],
+    e:"Ці знаки використовують в умовах відбору записів."},
+  {tier:1, type:"tf", q:"Запит на вибірку змінює дані в самій таблиці.", c:false,
+    e:"Ні. Запит на вибірку лише показує відібрані записи, таблиця лишається без змін."},
+  {tier:1, type:"order", q:"Збудуйте порядок створення запиту в конструкторі.",
+    items:["Обрати таблицю-джерело","Вибрати поля для результату","Задати умови відбору","Вказати порядок сортування","Виконати запит і переглянути результат"],
+    e:"Джерело → поля → умови → сортування → виконання."},
+  {tier:2, type:"sort", q:"Хто потрапить у результат запиту з умовою Бали > 80? Натисніть картку, потім скриню.",
+    buckets:["Потрапить","Не потрапить"],
+    items:[["Коваль — 87",0],["Кравець — 81",0],["Руденко — 85",0],["Шевчук — 74",1],["Олійник — 59",1],["Гнатюк — 80",1]],
+    e:"Умова «> 80» строга: 80 балів уже не підходить. Для 80 треба «>= 80»."},
+  {tier:2, type:"multi", q:"Учень 9 класу набрав 77 балів. Які умови відберуть його запис?",
+    opts:["Клас = 9","Бали > 80","Бали >= 77","Клас <> 9"], c:[0,2],
+    e:"Клас = 9 — так; 77 >= 77 — так. 77 > 80 — ні, а Клас <> 9 відкидає дев'ятикласників."},
+  {tier:2, type:"numeric", q:"Таблиця має 250 записів. Запит Клас = 9 повернув 64 записи. Скільки записів не потрапили в результат?",
+    a:186, hint:"250 − 64.", e:"250 − 64 = 186 записів."},
+  {tier:2, type:"single", q:"Умова Клас = 9 AND Місто = Львів відбере учнів, які…",
+    opts:["Навчаються в 9 класі й живуть у Львові","Навчаються в 9 класі або живуть у Львові","Не навчаються в 9 класі й не зі Львова","Живуть у будь-якому місті, крім Львова"], c:0,
+    e:"AND (І) вимагає, щоб виконувалися обидві умови одночасно."},
+  {tier:2, type:"fill", q:"Упорядкування записів у результаті запиту за зростанням чи спаданням називається ______.",
+    ok:/^сортуван/i, show:"сортування", e:"Сортування задають для одного чи кількох полів."},
+  {tier:3, type:"single", q:"Який запит поверне найбільше записів?",
+    opts:["Клас = 9 OR Клас = 10","Клас = 9 AND Клас = 10","Клас = 9 AND Бали > 90","Клас = 10 AND Бали > 90"], c:0,
+    e:"OR розширює вибірку. А «Клас = 9 AND Клас = 10» не поверне жодного запису — клас не може бути одночасно 9 і 10."},
+  {tier:3, type:"numeric", q:"Бали п'яти учнів: 56, 73, 88, 91, 67. Скільки записів відбере умова Бали >= 70?",
+    a:3, hint:"Перевірте кожне число: чи воно не менше за 70?", e:"Підходять 73, 88 і 91 — три записи."},
+  {tier:3, type:"match", q:"З'єднайте частину запиту мовою SQL з її роллю.",
+    pairs:[["SELECT","Які поля показати"],["FROM","З якої таблиці брати"],["WHERE","Умова відбору записів"],["ORDER BY","Порядок сортування"]],
+    e:"SELECT … FROM … WHERE … ORDER BY — типова будова запиту."},
+  {tier:3, type:"order", q:"Зберіть запит SQL: прізвища й бали учасників із балом понад 85, від найвищого.",
+    items:["SELECT Прізвище, Бали","FROM Олімпіада","WHERE Бали > 85","ORDER BY Бали DESC"],
+    e:"DESC означає сортування за спаданням, ASC — за зростанням."},
+  {tier:3, type:"single", q:"У таблиці є поля Ціна й Кількість. Як у запиті показати суму за кожен товар?",
+    opts:["Додати обчислюване поле Ціна * Кількість","Створити нову таблицю з тими самими даними","Додати умову відбору Ціна > Кількість","Відсортувати записи за полем Кількість"], c:0,
+    e:"Обчислюване поле рахує значення для кожного запису за формулою."}
+];
+
+/* ===================== КВЕСТ ===================== */
+const LEVELS = [
+  { name:"Архів Запитів", icon:"🗄️", desc:"Що таке запит", ch:[
+    {type:"tf", q:"Запит дає змогу побачити лише потрібні записи, не змінюючи таблицю.", c:true, e:"Так, це запит на вибірку."},
+    {type:"single", q:"Що задають в умові відбору?",
+      opts:["Які записи будуть у результаті","Який шрифт матиме вся таблиця","Скільки сторінок буде в друку","Яким кольором фарбувати всі поля"], c:0,
+      e:"Умова відбору визначає, які записи потраплять у результат."},
+    {type:"fill", q:"Запит, який лише показує відібрані записи, називається запитом на ______.", ok:/^вибірк/i, show:"вибірку", e:"Запит на вибірку не змінює дані."}
+  ]},
+  { name:"Міст Порівнянь", icon:"🌉", desc:"Знаки й умови", ch:[
+    {type:"match", q:"З'єднайте умову з її змістом.",
+      pairs:[["Бали >= 90","Від 90 і вище"],["Бали < 60","Нижче за 60"],["Клас <> 11","Усі, крім 11 класу"],["Місто = Київ","Лише з Києва"]],
+      e:"Уважно читайте знак: >= включає саме число, < — ні."},
+    {type:"numeric", q:"Бали: 90, 85, 90, 72, 95. Скільки записів відбере умова Бали >= 90?", a:3, hint:"Число 90 теж підходить.", e:"90, 90 і 95 — три записи."},
+    {type:"single", q:"Яка умова відбере учнів з 10 і 11 класів?",
+      opts:["Клас >= 10","Клас <= 10","Клас = 10","Клас <> 10"], c:0, e:"Клас >= 10 охоплює 10 і 11."}
+  ]},
+  { name:"Лабіринт Логіки", icon:"🧩", desc:"AND та OR", ch:[
+    {type:"tf", q:"Умова з OR зазвичай повертає не менше записів, ніж кожна з її частин окремо.", c:true, e:"Так, OR об'єднує записи обох умов."},
+    {type:"sort", q:"Учні: Ольга (9 кл, Львів), Ігор (10 кл, Львів), Таня (9 кл, Київ), Петро (11 кл, Одеса). Хто відповідає умові Клас = 9 OR Місто = Львів?",
+      buckets:["Відповідає","Не відповідає"], items:[["Ольга",0],["Ігор",0],["Таня",0],["Петро",1]],
+      e:"Досить однієї умови: Ольга — обидві, Ігор — Львів, Таня — 9 клас. Петро — жодної."},
+    {type:"single", q:"Які учні відповідають умові Клас = 9 AND Місто = Львів з попереднього списку?",
+      opts:["Лише Ольга","Ольга й Ігор","Ольга й Таня","Ігор і Петро"], c:0, e:"AND вимагає обох умов — лише Ольга."}
+  ]},
+  { name:"Вежа SQL", icon:"🏰", desc:"Будова запиту", ch:[
+    {type:"order", q:"Зберіть запит: усі поля таблиці Учні з міста Львів.",
+      items:["SELECT *","FROM Учні","WHERE Місто = 'Львів'"], e:"Зірочка * означає «усі поля»."},
+    {type:"single", q:"Що означає DESC після ORDER BY?",
+      opts:["Сортування за спаданням","Сортування за зростанням","Відбір без повторень","Видалення всіх записів"], c:0, e:"DESC — від більшого до меншого."},
+    {type:"fill", q:"Частина запиту, яка вказує таблицю-джерело, починається словом ______.", ok:/^from$/i, show:"FROM", e:"FROM — «з якої таблиці»."}
+  ]},
+  { name:"Логово Хаос-Фільтра", icon:"👾", desc:"Фінальна битва з босом", boss:true, ch:[
+    {type:"single", oneShot:true, q:"Який знак означає «не дорівнює»?", opts:["<>",">=","<=","=="], c:0, e:"<> — не дорівнює."},
+    {type:"tf", oneShot:true, q:"Умова Бали > 80 відбере запис із 80 балами.", c:false, e:"Ні, > строгий знак: 80 не більше за 80."},
+    {type:"single", oneShot:true, q:"Яке слово в SQL задає умову відбору?", opts:["WHERE","SELECT","FROM","ORDER"], c:0, e:"WHERE — умова відбору."},
+    {type:"single", oneShot:true, q:"Яка зв'язка вимагає виконання обох умов?", opts:["AND","OR","NOT","ALL"], c:0, e:"AND — обидві умови одночасно."},
+    {type:"single", oneShot:true, q:"Що робить обчислюване поле?",
+      opts:["Рахує значення за формулою","Видаляє зайві записи","Сортує таблицю за алфавітом","Додає нову таблицю"], c:0, e:"Обчислюване поле рахує нове значення для кожного запису."}
+  ]}
+];
+
+/* ===================== КАРТКИ ===================== */
+const CARDS = [
+  ["Запит","Звернення до бази даних, щоб відібрати потрібні записи й поля"],
+  ["Запит на вибірку","Показує записи за умовами, не змінюючи таблицю"],
+  ["Умова відбору","Вираз, який визначає, які записи потраплять у результат"],
+  ["Знаки порівняння","=, <>, >, <, >=, <="],
+  ["AND (І)","Запис потрапляє, якщо виконуються обидві умови"],
+  ["OR (АБО)","Запис потрапляє, якщо виконується хоча б одна умова"],
+  ["Сортування","Упорядкування записів за зростанням (ASC) чи спаданням (DESC)"],
+  ["Обчислюване поле","Нове поле в запиті, значення якого рахують за формулою"],
+  ["Конструктор запитів","Вікно, де запит складають, обираючи поля й умови"],
+  ["SELECT","Частина SQL-запиту: які поля показати"],
+  ["FROM","Частина SQL-запиту: з якої таблиці брати дані"],
+  ["WHERE","Частина SQL-запиту: умова відбору"],
+  ["ORDER BY","Частина SQL-запиту: порядок сортування"]
+];
+
+/* ===================== КОНСТРУКТОР (ЛАБОРАТОРІЯ) ===================== */
+const LAB = [
+  {type:"qb", q:"Покажіть прізвища й бали всіх учасників олімпіади з інформатики.",
+    need:{fields:["Прізвище","Бали"], ids:[1,4,5,9], ordered:false},
+    e:"Умова: Предмет = Інформатика; поля: Прізвище, Бали."},
+  {type:"qb", q:"Покажіть прізвища й бали учасників, які набрали понад 85 балів, від найвищого бала до найнижчого.",
+    need:{fields:["Прізвище","Бали"], ids:[4,2,8,1], ordered:true},
+    e:"Умова: Бали > 85; сортування: Бали за спаданням."},
+  {type:"qb", q:"Покажіть прізвища й предмети дев'ятикласників зі Львова.",
+    need:{fields:["Прізвище","Предмет"], ids:[1,3], ordered:false},
+    e:"Дві умови через І: Клас = 9 AND Місто = Львів."},
+  {type:"numeric", q:"Скільки записів таблиці поверне умова Предмет = Фізика OR Бали < 70?",
+    a:5, hint:"Фізика — 3 учасники, бал нижчий за 70 — ще 2. Чи є серед них повтори?", e:"Кравець, Лисенко, Руденко (фізика) + Ткачук, Олійник (< 70) = 5."},
+  {type:"numeric", q:"Запит відібрав усіх учасників з математики. Який у них середній бал?",
+    a:75, hint:"Знайдіть три бали з математики, додайте й поділіть на 3.", e:"(92 + 74 + 59) / 3 = 225 / 3 = 75."},
+  {type:"qb", q:"Покажіть прізвища й міста учасників із Києва або Одеси, за прізвищем в алфавітному порядку.",
+    need:{fields:["Прізвище","Місто"], ids:[4,6,2,10,9], ordered:true},
+    e:"Умова: Місто = Київ OR Місто = Одеса; сортування: Прізвище за зростанням."}
+];
+
+/* ===================== ТЕСТ ===================== */
+const TEST = [
+  {type:"single", q:"Для чого використовують запити до бази даних?",
+    opts:["Щоб відібрати дані за умовами","Щоб змінити шрифт у таблиці","Щоб надрукувати базу на папері","Щоб створити порожню таблицю"], c:0},
+  {type:"single", q:"Яка умова відбере записи з балом від 60 включно?",
+    opts:["Бали >= 60","Бали > 60","Бали <= 60","Бали <> 60"], c:0},
+  {type:"tf", q:"Запит на вибірку не змінює дані в таблиці.", c:true},
+  {type:"single", q:"Що означає зв'язка OR між двома умовами?",
+    opts:["Досить однієї з умов","Потрібні обидві умови","Жодна умова не діє","Умови діють по черзі"], c:0},
+  {type:"single", q:"Що задає ORDER BY Бали ASC?",
+    opts:["Бали за зростанням","Бали за спаданням","Лише найвищі бали з усіх","Лише непарні бали"], c:0},
+  {type:"tf", q:"Умова Клас = 9 AND Клас = 11 може повернути кілька записів.", c:false},
+  {type:"single", q:"Яка частина SQL-запиту визначає поля результату?",
+    opts:["SELECT","WHERE","FROM","ORDER BY"], c:0},
+  {type:"single", q:"Який знак означає «не дорівнює»?",
+    opts:["<>","=<",">>","=="], c:0},
+  {type:"single", q:"Що таке обчислюване поле?",
+    opts:["Поле, значення якого рахують","Поле, де записано найбільше число","Поле, яке не можна змінити","Поле з прізвищами всіх учнів"], c:0},
+  {type:"tf", q:"У конструкторі запитів можна задати і умову відбору, і сортування.", c:true},
+  {type:"single", q:"Бали: 45, 60, 75, 90. Скільки записів відбере умова Бали > 60?",
+    opts:["Два записи","Три записи","Один запис","Чотири записи"], c:0},
+  {type:"single", q:"Що в SQL означає зірочка * після SELECT?",
+    opts:["Усі поля таблиці","Лише перше поле","Усі таблиці бази","Лише числові поля"], c:0}
+];
+
+</script>
+<script>
+const $=(s,el=document)=>el.querySelector(s);
+function h(tag,cls,txt){const e=document.createElement(tag); if(cls) e.className=cls; if(txt!=null) e.textContent=txt; return e;}
+function shuf(a){a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a;}
+const TIER=["","Базовий","Середній","Складний"], TIERDOT=["","🟢","🟡","🔴"];
+function fmt(n){return n.toLocaleString("uk-UA");}
+
+/* ---------- типи завдань (спільні для всіх режимів) ---------- */
+const RENDER={
+  single(st,c,x){
+    const box=h("div","opts"); st.appendChild(box); let fin=false;
+    shuf(c.opts.map((_,i)=>i)).forEach(oi=>{
+      const b=h("button","opt",c.opts[oi]); b.type="button";
+      b.addEventListener("click",()=>{
+        if(fin) return;
+        if(oi===c.c){ fin=true; b.classList.add("ok"); box.querySelectorAll(".opt").forEach(z=>z.disabled=true); x.ok(c.e); return; }
+        b.classList.add("bad"); b.disabled=true; const alive=x.bad();
+        if(c.oneShot||x.oneShot){ fin=true; box.querySelectorAll(".opt").forEach(z=>{z.disabled=true; if(z.textContent===c.opts[c.c]) z.classList.add("ok");});
+          x.fb(false,"Не вдалося. "+(c.e||"Правильно: «"+c.opts[c.c]+"».")); if(alive) x.fail(); }
+        else if(alive) x.fb(false,x.retry);
+      });
+      box.appendChild(b);
+    });
+  },
+  tf(st,c,x){
+    const box=h("div","opts row2"); st.appendChild(box); let fin=false;
+    [["Так",true],["Ні",false]].forEach(([t,v])=>{
+      const b=h("button","opt",t); b.type="button";
+      b.addEventListener("click",()=>{
+        if(fin) return;
+        if(v===c.c){ fin=true; b.classList.add("ok"); box.querySelectorAll(".opt").forEach(z=>z.disabled=true); x.ok(c.e); return; }
+        b.classList.add("bad"); b.disabled=true; const alive=x.bad();
+        if(c.oneShot||x.oneShot){ fin=true; box.querySelectorAll(".opt").forEach(z=>{z.disabled=true; if((z.textContent==="Так")===c.c) z.classList.add("ok");});
+          x.fb(false,"Не вдалося. "+(c.e||"Правильно: «"+(c.c?"Так":"Ні")+"».")); if(alive) x.fail(); }
+        else if(alive) x.fb(false,x.retry);
+      });
+      box.appendChild(b);
+    });
+  },
+  multi(st,c,x){
+    const box=h("div","opts"); st.appendChild(box);
+    const btns=shuf(c.opts.map((_,i)=>i)).map(oi=>{ const b=h("button","opt",c.opts[oi]); b.type="button"; b.dataset.oi=oi;
+      b.addEventListener("click",()=>b.classList.toggle("sel")); box.appendChild(b); return b; });
+    const row=h("div","row"); st.appendChild(row); const chk=h("button","btn","Перевірити"); chk.type="button"; row.appendChild(chk);
+    chk.addEventListener("click",()=>{
+      const picked=btns.filter(b=>b.classList.contains("sel")).map(b=>+b.dataset.oi).sort().join(",");
+      if(picked===c.c.slice().sort().join(",")){ btns.forEach(b=>{b.disabled=true; if(c.c.includes(+b.dataset.oi)) b.classList.add("ok");}); chk.disabled=true; x.ok(c.e); }
+      else { btns.forEach(b=>{ if(b.classList.contains("sel")){ b.classList.add("bad"); setTimeout(()=>b.classList.remove("bad","sel"),500);} });
+        if(x.bad()) x.fb(false,"Не зовсім: перевірте кожне твердження окремо."); }
+    });
+  },
+  fill(st,c,x){ RENDER._input(st,c,x,"text","Ваша відповідь", v=>c.ok.test(v.trim()), c.e+" Відповідь: «"+c.show+"».", "Не те слово. Подумайте ще."); },
+  numeric(st,c,x){ RENDER._input(st,c,x,"number","Впишіть число", v=>parseFloat(String(v).replace(/\s/g,"").replace(",","."))===c.a, c.e, "Не збігається. Підказка: "+c.hint); },
+  _input(st,c,x,type,ph,test,okMsg,badMsg){
+    const row=h("div","row"); row.style.marginTop="0"; st.appendChild(row);
+    const inp=h("input","in"); inp.type=type==="number"?"text":"text"; if(type==="number") inp.inputMode="numeric"; inp.placeholder=ph; inp.setAttribute("aria-label",ph); row.appendChild(inp);
+    const chk=h("button","btn","Перевірити"); chk.type="button"; row.appendChild(chk);
+    const go=()=>{ if(chk.disabled||!inp.value.trim()) return;
+      if(test(inp.value)){ inp.classList.add("ok"); inp.disabled=true; chk.disabled=true; x.ok(okMsg); }
+      else { inp.classList.add("bad"); setTimeout(()=>inp.classList.remove("bad"),450); if(x.bad()) x.fb(false,badMsg); } };
+    chk.addEventListener("click",go); inp.addEventListener("keydown",e=>{ if(e.key==="Enter") go(); });
+  },
+  order(st,c,x){
+    const items=shuf(c.items.map((t,i)=>({t,i}))); let built=[], locked=false;
+    const target=h("div","target"), bank=h("div","chips"), row=h("div","row");
+    const chk=h("button","btn","Перевірити порядок"); chk.type="button"; row.appendChild(chk);
+    st.append(target,bank,row);
+    function draw(){
+      bank.innerHTML=""; target.innerHTML="";
+      items.filter(z=>!built.includes(z)).forEach(z=>{ const b=h("button","chip",z.t); b.type="button";
+        b.addEventListener("click",()=>{ if(locked) return; built.push(z); draw(); }); bank.appendChild(b); });
+      built.forEach((z,p)=>{ const d=h("div","step"); d.append(h("span","n",(p+1)+"."),h("span",null,z.t));
+        if(!locked){ const r=h("button",null,"✕"); r.type="button"; r.setAttribute("aria-label","Повернути картку"); r.addEventListener("click",()=>{ built.splice(p,1); draw(); }); d.appendChild(r); }
+        target.appendChild(d); });
+    }
+    draw();
+    chk.addEventListener("click",()=>{
+      if(built.length<items.length){ x.fb(false,`Спершу додайте всі ${items.length} картки (зараз ${built.length}).`); return; }
+      const rows=[...target.querySelectorAll(".step")]; let good=0;
+      built.forEach((z,p)=>{ const ok=z.i===p; if(ok) good++; rows[p].classList.add(ok?"good":"wrongpos"); });
+      if(good===items.length){ locked=true; draw(); target.querySelectorAll(".step").forEach(r=>r.classList.add("good")); chk.disabled=true; x.ok(c.e); }
+      else if(x.bad()) x.fb(false,`На своєму місці ${good} з ${items.length}. Натисніть ✕, щоб повернути картку.`);
+    });
+  },
+  match(st,c,x){
+    const cols=h("div","mcols"); st.appendChild(cols); const lc=h("div"), rc=h("div"); cols.append(lc,rc);
+    let sel=null, done=0;
+    const mk=(z,col,side)=>{ const d=h("button","mi",z.t); d.type="button"; d.dataset.i=z.i; col.appendChild(d);
+      d.addEventListener("click",()=>{
+        if(d.classList.contains("done")) return;
+        if(side==="L"){ lc.querySelectorAll(".mi").forEach(e=>e.classList.remove("sel")); d.classList.add("sel"); sel=d; return; }
+        if(!sel){ x.fb(false,"Спершу оберіть картку ліворуч."); return; }
+        if(sel.dataset.i===d.dataset.i){ sel.classList.remove("sel"); sel.classList.add("done"); d.classList.add("done"); sel=null; done++; if(done===c.pairs.length) x.ok(c.e); }
+        else { const s=sel; sel=null; d.classList.add("bad"); s.classList.add("bad"); setTimeout(()=>{d.classList.remove("bad"); s.classList.remove("bad","sel");},450);
+          if(x.bad()) x.fb(false,"Ця пара не підходить."); }
+      }); };
+    shuf(c.pairs.map((p,i)=>({t:p[0],i}))).forEach(z=>mk(z,lc,"L"));
+    shuf(c.pairs.map((p,i)=>({t:p[1],i}))).forEach(z=>mk(z,rc,"R"));
+  },
+  sort(st,c,x){
+    const items=shuf(c.items.map((z,i)=>({t:z[0],cat:z[1],i})));
+    const chips=h("div","chips"), bk=h("div","buckets"); st.append(chips,bk);
+    let sel=null, placed=0;
+    c.buckets.forEach((name,bi)=>{ const b=h("button","bucket"); b.type="button"; b.appendChild(h("h4",null,name)); bk.appendChild(b);
+      b.addEventListener("click",()=>{
+        if(!sel){ x.fb(false,"Спершу натисніть картку, потім скриню."); return; }
+        if(sel.it.cat===bi){ const cl=h("span","chip",sel.it.t); b.appendChild(cl); sel.el.remove(); sel=null; placed++; if(placed===items.length) x.ok(c.e); }
+        else { const el=sel.el; el.classList.add("bad"); setTimeout(()=>el.classList.remove("bad"),450); if(x.bad()) x.fb(false,"Не та скриня."); }
+      }); });
+    items.forEach(it=>{ const ch=h("button","chip",it.t); ch.type="button";
+      ch.addEventListener("click",()=>{ chips.querySelectorAll(".chip").forEach(z=>z.classList.remove("sel")); ch.classList.add("sel"); sel={el:ch,it}; });
+      chips.appendChild(ch); });
+  }
+};
+
+/* ---------- конструктор запитів ---------- */
+RENDER.qb=function(st,c,x){
+  const OPS=["=","<>",">","<",">=","<="];
+  const box=h("div","qb"); st.appendChild(box);
+  const fsel=new Set();
+  box.appendChild(h("div","qb-l","1. Поля для результату"));
+  const fw=h("div","chips");
+  DB_FIELDS.forEach(f=>{ const b=h("button","chip",f); b.type="button"; b.setAttribute("aria-pressed","false");
+    b.addEventListener("click",()=>{ fsel.has(f)?fsel.delete(f):fsel.add(f); b.classList.toggle("sel"); b.setAttribute("aria-pressed",String(fsel.has(f))); sync(); }); fw.appendChild(b); });
+  box.appendChild(fw);
+  const mkSel=(arr,first,label)=>{ const s=h("select","qb-in"); s.setAttribute("aria-label",label); if(first) s.appendChild(new Option(first,"")); arr.forEach(a=>s.appendChild(new Option(a,a))); return s; };
+  const cond=n=>{ const r=h("div","qb-row"); const f=mkSel(DB_FIELDS,"— поле —","Поле умови "+n), o=mkSel(OPS,null,"Знак умови "+n), v=h("input","qb-in");
+    v.placeholder="значення"; v.setAttribute("aria-label","Значення умови "+n); r.append(f,o,v);
+    [f,o].forEach(e=>e.addEventListener("change",sync)); v.addEventListener("input",sync); return {r,f,o,v}; };
+  box.appendChild(h("div","qb-l","2. Умови відбору (друга — за потреби)"));
+  const c1=cond(1), c2=cond(2); const lk=mkSel(["AND","OR"],null,"Зв'язка умов"); lk.options[0].text="AND (і)"; lk.options[1].text="OR (або)"; lk.addEventListener("change",sync);
+  const lr=h("div","qb-row"); lr.append(h("span","dim","зв'язка:"),lk);
+  box.append(c1.r,lr,c2.r);
+  box.appendChild(h("div","qb-l","3. Сортування"));
+  const sr=h("div","qb-row"); const sf=mkSel(DB_FIELDS,"— без сортування —","Поле сортування"), sd=mkSel(["ASC","DESC"],null,"Напрям сортування");
+  sd.options[0].text="за зростанням (ASC)"; sd.options[1].text="за спаданням (DESC)"; sr.append(sf,sd); [sf,sd].forEach(e=>e.addEventListener("change",sync)); box.appendChild(sr);
+  const sql=h("pre","sql"); sql.setAttribute("aria-label","Ваш запит мовою SQL"); box.appendChild(sql);
+  const row=h("div","row"); const run=h("button","btn ghost","Виконати запит"), chk=h("button","btn","Перевірити"); run.type=chk.type="button"; row.append(run,chk); box.appendChild(row);
+  const out=h("div","qb-out"); box.appendChild(out);
+  const active=()=>[c1,c2].filter(k=>k.f.value&&k.v.value.trim());
+  const lit=v=>/^-?\d+([.,]\d+)?$/.test(v)?v:"'"+v.replace(/^['"]|['"]$/g,"")+"'";
+  function sync(){
+    const fl=DB_FIELDS.filter(f=>fsel.has(f)); let s="SELECT "+(fl.length?fl.join(", "):"…")+"\nFROM "+DB_NAME;
+    const cs=active().map(k=>`${k.f.value} ${k.o.value} ${lit(k.v.value.trim())}`);
+    if(cs.length) s+="\nWHERE "+cs.join(` ${lk.value} `);
+    if(sf.value) s+=`\nORDER BY ${sf.value} ${sd.value}`;
+    sql.textContent=s;
+  }
+  function test(rec,k){
+    const f=k.f.value, raw=k.v.value.trim(); let a=rec[f], b;
+    if(DB_NUM.includes(f)){ b=parseFloat(raw.replace(",",".")); if(isNaN(b)) return false; }
+    else { a=String(a).toLowerCase(); b=raw.replace(/^['"]|['"]$/g,"").toLowerCase(); }
+    switch(k.o.value){ case "=":return a===b; case "<>":return a!==b; case ">":return a>b; case "<":return a<b; case ">=":return a>=b; default:return a<=b; }
+  }
+  function exec(){
+    const act=active();
+    let rows=DB.filter(r=>act.length===0?true:act.length===1?test(r,act[0]):(lk.value==="AND"?test(r,act[0])&&test(r,act[1]):test(r,act[0])||test(r,act[1])));
+    if(sf.value){ const f=sf.value, d=sd.value==="DESC"?-1:1;
+      rows=rows.slice().sort((p,q)=>(DB_NUM.includes(f)?p[f]-q[f]:String(p[f]).localeCompare(String(q[f]),"uk"))*d); }
+    return rows;
+  }
+  function show(rows){
+    const fl=DB_FIELDS.filter(f=>fsel.has(f)); out.innerHTML="";
+    if(!fl.length){ out.appendChild(h("p","dim","Оберіть хоча б одне поле для результату.")); return; }
+    const w=h("div","tw"), t=h("table","datatable"), th=h("thead"), tr=h("tr");
+    fl.forEach(f=>tr.appendChild(h("th",DB_NUM.includes(f)?"num":null,f))); th.appendChild(tr); t.appendChild(th);
+    const tb=h("tbody"); rows.forEach(r=>{ const z=h("tr"); fl.forEach(f=>z.appendChild(h("td",DB_NUM.includes(f)?"num":null,String(r[f])))); tb.appendChild(z); });
+    t.appendChild(tb); w.appendChild(t); out.appendChild(w); out.appendChild(h("p","dim",`Записів у результаті: ${rows.length}`));
+  }
+  run.addEventListener("click",()=>show(exec()));
+  chk.addEventListener("click",()=>{
+    const rows=exec(); show(rows);
+    const fOk=c.need.fields.length===fsel.size && c.need.fields.every(f=>fsel.has(f));
+    const got=rows.map(r=>r.id), need=c.need.ids;
+    const setOk=got.length===need.length && need.every(i=>got.includes(i));
+    const ordOk=!c.need.ordered || got.join()===need.join();
+    if(fOk&&setOk&&ordOk){ chk.disabled=true; run.disabled=true; box.querySelectorAll("select,input,.chip").forEach(e=>e.disabled=true); x.ok("Запит правильний! "+c.e); return; }
+    const msg=!setOk?`Записи не ті (у вас ${got.length}). Перевірте умови відбору.`:!ordOk?"Записи правильні, але порядок інший. Перевірте сортування.":"Записи правильні, але поля інші. Залиште лише ті, про які просять.";
+    if(x.bad()) x.fb(false,msg);
+  });
+  sync();
+};
+
+/* картка завдання з балами (вправи й лабораторія) */
+function scoredCard(list, c, label, scores, idx, after){
+  const card=h("div","card"); const head=h("div","card-h"); head.appendChild(h("span",null,label));
+  if(c.tier){ head.appendChild(h("span","tier t"+c.tier,TIERDOT[c.tier]+" "+TIER[c.tier])); }
+  const chip=h("span","score-chip"); head.appendChild(chip);
+  card.append(head,h("div","q",c.q)); const st=h("div"); card.appendChild(st);
+  const fbEl=h("div","fb"); fbEl.hidden=true; card.appendChild(fbEl);
+  let tries=0;
+  const x={ retry:"Не зовсім — спробуйте ще раз (за повторну спробу 0,5 бала).",
+    fb(ok,msg){ fbEl.hidden=false; fbEl.className="fb "+(ok?"ok":"bad"); fbEl.textContent=msg; },
+    ok(msg){ scores[idx]=tries===0?1:0.5; chip.textContent=(scores[idx]===1?"+1 бал":"+0,5 бала"); card.classList.add("done"); x.fb(true,msg); after(); },
+    bad(){ tries++; return true; }, fail(){} };
+  RENDER[c.type](st,c,x); list.appendChild(card);
+}
+
+/* ---------- ВПРАВИ ---------- */
+const exScore=new Array(EX.length).fill(null);
+EX.forEach((c,i)=>scoredCard($("#exList"),c,"Вправа "+(i+1),exScore,i,update));
+
+/* ---------- КОНСТРУКТОР ---------- */
+const labScore=new Array(LAB.length).fill(null);
+(function(){
+  const d=$("#labData"); d.appendChild(h("div","card-h","Таблиця «"+DB_NAME+"» · "+DB.length+" записів"));
+  const w=h("div","tw"), t=h("table","datatable"), th=h("thead"), tr=h("tr");
+  DB_FIELDS.forEach(f=>tr.appendChild(h("th",DB_NUM.includes(f)?"num":null,f))); th.appendChild(tr); t.appendChild(th);
+  const tb=h("tbody"); DB.forEach(r=>{ const z=h("tr"); DB_FIELDS.forEach(f=>z.appendChild(h("td",DB_NUM.includes(f)?"num":null,String(r[f])))); tb.appendChild(z); });
+  t.appendChild(tb); w.appendChild(t); d.appendChild(w);
+  LAB.forEach((c,i)=>scoredCard($("#labList"),c,"Завдання "+(i+1),labScore,i,update));
+})();
+
+/* ---------- КАРТКИ ---------- */
+const CS={queue:shuf(CARDS.map((_,i)=>i)), known:new Set(), flipped:false};
+function drawCards(){
+  const app=$("#cardsApp"); app.innerHTML="";
+  const hud=h("div","hud"); hud.append(h("span","pill",`Вивчено: ${CS.known.size} / ${CARDS.length}`), h("span","pill",`У колоді: ${CS.queue.length}`)); app.appendChild(hud);
+  if(!CS.queue.length){
+    const c=h("div","card center"); c.append(h("h3",null,"Колоду вивчено!"), h("p","dim","Перевірте себе в тесті або пройдіть квест."));
+    const r=h("div","row"); r.style.justifyContent="center"; const b=h("button","btn","Почати знову"); b.type="button";
+    b.addEventListener("click",()=>{ CS.queue=shuf(CARDS.map((_,i)=>i)); CS.known.clear(); drawCards(); update(); }); r.appendChild(b); c.appendChild(r); app.appendChild(c); return;
+  }
+  const [term,def]=CARDS[CS.queue[0]];
+  const f=h("button","flip"+(CS.flipped?" on":"")); f.type="button"; f.setAttribute("aria-label","Перевернути картку");
+  const inn=h("div","flip-in"); const fr=h("div","face"); fr.append(h("div","term",term),h("small",null,"натисніть, щоб побачити пояснення"));
+  const bk=h("div","face back"); bk.append(h("small",null,term),h("div","def",def));
+  inn.append(fr,bk); f.appendChild(inn); f.addEventListener("click",()=>{ CS.flipped=!CS.flipped; f.classList.toggle("on"); }); app.appendChild(f);
+  const r=h("div","row"); r.style.justifyContent="center";
+  const no=h("button","btn ghost","Ще раз"), yes=h("button","btn","Знаю"); no.type=yes.type="button";
+  no.addEventListener("click",()=>{ CS.queue.push(CS.queue.shift()); CS.flipped=false; drawCards(); });
+  yes.addEventListener("click",()=>{ CS.known.add(CS.queue.shift()); CS.flipped=false; drawCards(); update(); });
+  r.append(no,yes); app.appendChild(r);
+}
+drawCards();
+
+/* ---------- ТЕСТ ---------- */
+const T={order:[], i:0, score:0, done:false, started:false, answers:[]};
+function startTest(){ T.order=shuf(TEST.map((_,i)=>i)); T.i=0; T.score=0; T.done=false; T.started=true; T.answers=[]; drawTest(); update(); }
+function drawTest(){
+  const app=$("#testApp"); app.innerHTML="";
+  if(!T.started){ const c=h("div","card center"); c.append(h("h3",null,"Підсумковий тест"),h("p","dim","Перед тестом радимо пройти вправи й картки."));
+    const r=h("div","row"); r.style.justifyContent="center"; const b=h("button","btn","Почати тест"); b.type="button"; b.addEventListener("click",startTest); r.appendChild(b); c.appendChild(r); app.appendChild(c); return; }
+  if(T.done){ const c=h("div","card center"); c.append(h("h3",null,"Тест завершено"), h("div","big",`${T.score} / ${TEST.length}`));
+    const r=h("div","row"); r.style.justifyContent="center"; const b=h("button","btn ghost","Пройти ще раз"), g=h("button","btn","До результату"); b.type=g.type="button";
+    b.addEventListener("click",startTest); g.addEventListener("click",()=>showTab("res")); r.append(b,g); c.appendChild(r); app.appendChild(c); return; }
+  const c=TEST[T.order[T.i]], card=h("div","card");
+  const dots=h("div","dots"); T.order.forEach((_,k)=>{ const i=h("i"); if(k<T.i) i.className="on"; if(k===T.i) i.className="cur"; dots.appendChild(i); });
+  card.append(h("div","card-h",`Питання ${T.i+1} з ${TEST.length}`),dots,h("div","q",c.q));
+  const st=h("div"); card.appendChild(st); const fbEl=h("div","fb"); fbEl.hidden=true; card.appendChild(fbEl); const nx=h("div","row"); card.appendChild(nx);
+  const next=()=>{ const b=h("button","btn",T.i===TEST.length-1?"Завершити тест":"Далі →"); b.type="button";
+    b.addEventListener("click",()=>{ T.i++; if(T.i>=TEST.length) T.done=true; drawTest(); update(); }); nx.appendChild(b); };
+  const x={oneShot:true, fb(ok,msg){fbEl.hidden=false; fbEl.className="fb "+(ok?"ok":"bad"); fbEl.textContent=msg;},
+    ok(){ T.score++; x.fb(true,"Правильно!"); next(); }, bad(){ return true; }, fail(){ next(); }};
+  RENDER[c.type](st,c,x); app.appendChild(card);
+}
+drawTest();
+
+/* ---------- КВЕСТ ---------- */
+const MAX_HEARTS=5, XP_OK=10, XP_RETRY=5, XP_BOSS=20;
+const Q={unlocked:0, stars:[], xp:0, lvl:0, ch:0, hearts:MAX_HEARTS, mist:0, lvlXp:0, total:0, restarts:0, bossHP:100, tries:0};
+const qa=()=>$("#questApp");
+const maxXP=()=>LEVELS.reduce((s,L)=>s+L.ch.length*(L.boss?XP_BOSS:XP_OK),0);
+const starStr=n=>"★".repeat(n)+"☆".repeat(3-n);
+const heartsStr=()=>"❤️".repeat(Q.hearts)+"🖤".repeat(MAX_HEARTS-Q.hearts);
+function qHud(extra){ const d=h("div","hud"); d.innerHTML=`<span class="pill">XP: <b>${Q.xp}</b> / ${maxXP()}</span><span class="pill">Зірок: <b>${Q.stars.reduce((a,b)=>a+(b||0),0)}</b> / ${LEVELS.length*3}</span>`+(extra||""); return d; }
+function qMap(){
+  const app=qa(); app.innerHTML=""; app.appendChild(qHud());
+  const map=h("div","map");
+  LEVELS.forEach((L,i)=>{ const locked=i>Q.unlocked, done=Q.stars[i]>0;
+    const b=h("button","node"+(done?" done":"")+(i===Q.unlocked&&!done?" cur":"")+(L.boss?" boss":"")); b.type="button"; b.disabled=locked;
+    b.innerHTML=`<span class="ico">${locked?"🔒":L.icon}</span><span><span class="nm">Рівень ${i+1}: ${L.name}</span><br><span class="ds">${L.desc}</span></span><span class="st">${done?starStr(Q.stars[i]):""}</span>`;
+    b.addEventListener("click",()=>qStart(i)); map.appendChild(b); });
+  app.appendChild(map);
+}
+function qStart(i,restart){ Q.lvl=i; Q.ch=0; Q.hearts=MAX_HEARTS; Q.mist=0; Q.bossHP=100; if(!restart) Q.lvlXp=0; qChallenge(); }
+function qChallenge(){
+  const L=LEVELS[Q.lvl]; if(Q.ch>=L.ch.length) return qFinish();
+  const c=L.ch[Q.ch]; Q.tries=0; const app=qa(); app.innerHTML="";
+  const hp=h("span","pill"); hp.id="hearts"; hp.textContent=heartsStr(); const hud=qHud(); hud.appendChild(hp); app.appendChild(hud);
+  const card=h("div","card"); card.appendChild(h("div","card-h",`${L.icon} ${L.name} · завдання ${Q.ch+1} з ${L.ch.length}`));
+  const dots=h("div","dots"); L.ch.forEach((_,k)=>{ const i=h("i"); if(k<Q.ch) i.className="on"; if(k===Q.ch) i.className="cur"; dots.appendChild(i); }); card.appendChild(dots);
+  if(L.boss){ const bb=h("div","boss-bar"); const i=h("i"); i.id="bossHP"; i.style.width=Q.bossHP+"%"; bb.appendChild(i); card.append(bb,h("p","dim","👾 Хаос-Фільтр · одна спроба на питання")); }
+  card.appendChild(h("div","q",c.q)); const st=h("div"); card.appendChild(st);
+  const fbEl=h("div","fb"); fbEl.hidden=true; card.appendChild(fbEl); const nx=h("div","row"); card.appendChild(nx);
+  const back=h("div","row"); const mb=h("button","btn ghost","← На карту"); mb.type="button"; mb.addEventListener("click",()=>{ Q.xp-=Q.lvlXp; Q.lvlXp=0; qMap(); }); back.appendChild(mb);
+  app.append(card,back);
+  const next=()=>{ const last=Q.ch>=L.ch.length-1; const b=h("button","btn",last?"Завершити рівень":"Далі →"); b.type="button"; b.addEventListener("click",()=>{ Q.ch++; qChallenge(); }); nx.appendChild(b); };
+  const x={ retry:"Не зовсім — спробуйте інший варіант (−1 ❤️).",
+    fb(ok,msg){ fbEl.hidden=false; fbEl.className="fb "+(ok?"ok":"bad"); fbEl.textContent=msg; },
+    ok(msg){ const gain=c.oneShot?(Q.tries===0?XP_BOSS:0):(Q.tries===0?XP_OK:XP_RETRY); Q.xp+=gain; Q.lvlXp+=gain;
+      if(L.boss&&gain>0){ Q.bossHP=Math.max(0,Q.bossHP-100/L.ch.length); const b=$("#bossHP"); if(b) b.style.width=Q.bossHP+"%"; }
+      x.fb(true,msg+(gain?` (+${gain} XP)`:"")); next(); },
+    bad(){ Q.hearts--; Q.mist++; Q.total++; Q.tries++; const hh=$("#hearts"); if(hh) hh.textContent=heartsStr();
+      if(Q.hearts<=0){ setTimeout(qOver,700); return false; } return true; },
+    fail(){ next(); } };
+  RENDER[c.type](st,c,x);
+}
+function qOver(){
+  Q.xp-=Q.lvlXp; Q.lvlXp=0; Q.restarts++; const app=qa(); app.innerHTML="";
+  const c=h("div","card center"); c.append(h("h3",null,"Сервер перезавантажується…"),h("p","dim","Усі серця втрачено. Спробуйте рівень ще раз — тепер ви знаєте більше."));
+  const r=h("div","row"); r.style.justifyContent="center"; const a=h("button","btn","Спробувати знову"), m=h("button","btn ghost","На карту"); a.type=m.type="button";
+  a.addEventListener("click",()=>qStart(Q.lvl,true)); m.addEventListener("click",qMap); r.append(a,m); c.appendChild(r); app.appendChild(c);
+}
+function qFinish(){
+  const stars=Q.mist===0?3:(Q.mist<=2?2:1); Q.stars[Q.lvl]=Math.max(Q.stars[Q.lvl]||0,stars);
+  if(Q.lvl===Q.unlocked&&Q.unlocked<LEVELS.length-1) Q.unlocked++;
+  const L=LEVELS[Q.lvl], app=qa(); app.innerHTML="";
+  const c=h("div","card center"); c.append(h("h3",null,L.boss?"Хаос-Фільтр переможено!":"Рівень пройдено!"),h("div","big",starStr(stars)));
+  const s=h("div","stats"); s.innerHTML=`<div class="stat"><b>${Q.mist}</b>помилок</div><div class="stat"><b>+${Q.lvlXp}</b>XP за рівень</div><div class="stat"><b>${Q.xp}</b>XP загалом</div>`; c.appendChild(s);
+  const r=h("div","row"); r.style.justifyContent="center"; const m=h("button","btn",L.boss?"До результату":"На карту"), a=h("button","btn ghost","Ще раз заради зірок"); m.type=a.type="button";
+  m.addEventListener("click",()=>{ if(L.boss){ qMap(); showTab("res"); } else qMap(); }); a.addEventListener("click",()=>{ Q.xp-=Q.lvlXp; qStart(Q.lvl); });
+  r.append(m,a); c.appendChild(r); app.appendChild(c); update();
+}
+qMap();
+
+/* ---------- РЕЗУЛЬТАТ ---------- */
+const sum=a=>a.reduce((s,v)=>s+(v||0),0), answered=a=>a.filter(v=>v!==null).length;
+function calc(){
+  const exP=sum(exScore)/EX.length, labP=sum(labScore)/LAB.length, testP=T.done?T.score/TEST.length:0;
+  const complete=answered(exScore)===EX.length && answered(labScore)===LAB.length && T.done;
+  const grade=complete?Math.max(1,Math.round((exP+labP+testP)/3*12)):null;
+  const qStars=Q.stars.reduce((a,b)=>a+(b||0),0);
+  return {exP,labP,testP,complete,grade,qStars};
+}
+const pct=v=>Math.round(v*100)+"%";
+function drawRes(){
+  const r=calc(), app=$("#resApp"); app.innerHTML="";
+  const c=h("div","card");
+  const top=h("div","row"); top.style.marginTop="0"; top.style.alignItems="flex-end"; top.style.justifyContent="space-between";
+  const g=h("div"); g.append(h("div","card-h","Оцінка за 12-бальною шкалою"), h("div","grade",r.grade??"—")); top.appendChild(g);
+  top.appendChild(h("p","dim",r.complete?"Оцінка — середнє вправ, конструктора й тесту.":"Оцінка з'явиться, коли ви виконаєте всі вправи, конструктор і тест."));
+  c.appendChild(top);
+  const t=h("table","res");
+  [["Вправи",`${answered(exScore)}/${EX.length} · ${pct(r.exP)}`],["Конструктор",`${answered(labScore)}/${LAB.length} · ${pct(r.labP)}`],
+   ["Тест",T.done?`${T.score}/${TEST.length} · ${pct(r.testP)}`:"не пройдено"],["Квест (бонус)",`${r.qStars}/${LEVELS.length*3} ★ · ${Q.xp} XP`],["Картки",`${CS.known.size}/${CARDS.length} вивчено`]]
+   .forEach(([a,b])=>{ const tr=h("tr"); tr.append(h("td",null,a),h("td",null,b)); t.appendChild(tr); });
+  c.appendChild(t);
+  const row=h("div","row"); const dl=h("button","btn","Завантажити результат (.csv)"), cp=h("button","btn ghost","Скопіювати"); dl.type=cp.type="button";
+  dl.addEventListener("click",downloadCSV); cp.addEventListener("click",()=>copyRes(cp,c)); row.append(dl,cp); c.appendChild(row);
+  c.appendChild(h("p","dim","Надішліть файл або скопійований рядок учителю."));
+  app.appendChild(c);
+}
+function resRow(){
+  const r=calc(), name=$("#name").value.trim()||"Учень (без імені)", cls=$("#cls").value.trim();
+  const header=["ПІБ учня","Клас","Дата","Тема","Вправи %","Конструктор %","Тест (бали)","Квест зірки","Квест XP","Картки вивчено","Оцінка (12)"];
+  const row=[name,cls,new Date().toLocaleString("uk-UA"),"Запити",Math.round(r.exP*100),Math.round(r.labP*100),T.done?`${T.score}/${TEST.length}`:"—",r.qStars,Q.xp,CS.known.size,r.grade??"—"];
+  return {header,row,name};
+}
+async function downloadCSV(){
+  const {header,row,name}=resRow(); const csv="﻿"+header.join(";")+"\n"+row.join(";");
+  const filename="zapyty_"+name.replace(/[^\wа-яіїєґА-ЯІЇЄҐ]+/g,"_")+".csv";
+  try{ if(window.claude&&typeof window.claude.use==="function"){ const d=await window.claude.use("downloads"); if(d){ await d.save({filename,data:csv}); return; } } }catch(e){}
+  copyRes($("#resApp .btn.ghost"),$("#resApp .card"));
+}
+function copyRes(btn,host){
+  const {header,row}=resRow(); const t=header.join("\t")+"\n"+row.join("\t");
+  const fallback=()=>{ let ta=host.querySelector("textarea"); if(!ta){ ta=h("textarea","copy"); ta.readOnly=true; host.appendChild(ta);} ta.value=t; ta.select(); };
+  try{ navigator.clipboard.writeText(t).then(()=>{ btn.textContent="Скопійовано ✓"; }).catch(fallback); }catch(e){ fallback(); }
+}
+
+/* ---------- вкладки й прогрес ---------- */
+function showTab(id){
+  document.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-selected",String(b.dataset.t===id)));
+  ["ex","quest","cards","lab","test","res"].forEach(k=>{ $("#p-"+k).hidden=k!==id; });
+  if(id==="res") drawRes();
+  window.scrollTo({top:0});
+}
+document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>showTab(b.dataset.t)));
+function update(){
+  $("#nEx").textContent=`${answered(exScore)}/${EX.length}`;
+  $("#nLab").textContent=`${answered(labScore)}/${LAB.length}`;
+  $("#nCards").textContent=`${CS.known.size}/${CARDS.length}`;
+  $("#nQuest").textContent=`${Q.stars.filter(s=>s>0).length}/${LEVELS.length}`;
+  $("#nTest").textContent=T.done?`${T.score}/${TEST.length}`:"";
+  const parts=answered(exScore)/EX.length+answered(labScore)/LAB.length+(T.done?1:T.started?T.i/TEST.length:0);
+  const p=Math.round(parts/3*100); $("#meter").style.width=p+"%"; $("#meterTxt").textContent=p+"%";
+  if(!$("#p-res").hidden) drawRes();
+}
+update();
+</script>
+
+<script>
+/* ===== «Надіслати вчителю» (Google Форма журналу) — універсальна кнопка ===== */
+(function(){
+const FORM_PREFILL="https://docs.google.com/forms/d/e/1FAIpQLSeaDGNzqpEMjZyDt4WUwg3k3FAhGGW4pG1E8IcOk8b4LQsBVw/viewform?usp=pp_url&entry.1997531456=test";
+const GRADE=9, TOPIC="Запити";
+const clean=v=>String(v==null?"":v).replace(/[|\n\r]/g," ").trim()||"—";
+const hm=t=>{t=Math.max(0,Math.round(t));return Math.floor(t/60)+" хв "+String(t%60).padStart(2,"0")+" с"};
+function getRow(){
+  try{ if(typeof buildResultRow==="function") return buildResultRow(); }catch(e){}
+  try{ if(typeof resRow==="function") return resRow(); }catch(e){}
+  try{ if(typeof csvLine==="function"){ const p=csvLine().split("\n"); const sp=s=>s.split(";").map(x=>x.replace(/^"|"$/g,"").replace(/""/g,'"'));
+    return {header:sp(p[0]),row:sp(p[1]||"")}; } }catch(e){}
+  return {header:[],row:[]};
+}
+function extra(){
+  try{ if(typeof window.G6compute==="function"){ return (window.G6&&window.G6.frozen)||window.G6compute(); } }catch(e){}
+  return null;
+}
+function getGrade(o,x){
+  if(x&&x.grade!=null) return x.grade;
+  try{ if(typeof computeGrade12==="function"){ const g=computeGrade12(); if(g) return g; } }catch(e){}
+  try{ if(typeof grade==="function"){ const g=grade(); if(g) return g; } }catch(e){}
+  const i=o.header.findIndex(h=>/Оцінка/i.test(h)); return i>=0&&o.row[i]!==""?o.row[i]:"—";
+}
+function line(name,cls){
+  const o=getRow(), x=extra(), g=getGrade(o,x);
+  let ok=0,tot=0; const det=[];
+  o.header.forEach((h,i)=>{ if(i<3&&/ПІБ|Ім'я|Клас|Дата/i.test(h)) return;
+    const v=String(o.row[i]==null?"—":o.row[i]); det.push(clean(h).replace(/[,:]/g," ")+":"+clean(v).replace(/[,]/g,";"));
+    const m=v.match(/^(\d+)\s*\/\s*(\d+)$/); if(m){ok+=+m[1];tot+=+m[2];} });
+  const done=x?!!(window.G6&&window.G6.frozen):(/^\d+$/.test(String(g))&&+g>0);
+  return ["v1",GRADE,TOPIC,clean(cls),clean(name),1,"—",clean(g),tot?ok+" з "+tot:"—","—",
+    x&&x.errors!=null?x.errors:"—", x&&x.T?hm(x.T):"—","—",x&&x.tooFast?"занадто швидко":"",done?"завершено":"не завершено",det.join(",")].join("|");
+}
+const st=document.createElement("style");
+st.textContent=`
+#jFab{position:fixed;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:9998;
+  background:#ffb020;color:#2a1a00;border:0;border-radius:999px;padding:13px 20px;font:800 16px system-ui,"Segoe UI",sans-serif;
+  box-shadow:0 8px 24px rgba(0,0,0,.35);cursor:pointer}
+#jFab:hover{filter:brightness(1.06)} #jFab:focus-visible{outline:3px solid #2f5bea;outline-offset:3px}
+#jPanel{position:fixed;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:9999;
+  width:min(360px,calc(100vw - 32px));background:#fff;color:#1d2433;border-radius:16px;padding:16px;
+  box-shadow:0 16px 40px rgba(0,0,0,.4);font:15px/1.45 system-ui,"Segoe UI",sans-serif;display:flex;flex-direction:column;gap:10px}
+#jPanel b.h{font-size:17px}
+#jPanel input{width:100%;box-sizing:border-box;border:1px solid #c8cfdc;border-radius:10px;padding:10px 12px;font:inherit;color:#1d2433;background:#f7f9fc}
+#jPanel .jrow{display:flex;gap:8px} #jPanel .jrow input:last-child{flex:0 0 110px}
+#jPanel a.jgo{display:block;text-align:center;background:#2f7d4f;color:#fff;text-decoration:none;font-weight:800;border-radius:10px;padding:11px}
+#jPanel .jm{font-size:13px;color:#5b6578} #jPanel .jx{position:absolute;top:8px;right:10px;border:0;background:none;font-size:20px;cursor:pointer;color:#5b6578}`;
+document.head.appendChild(st);
+const fab=document.createElement("button"); fab.id="jFab"; fab.type="button"; fab.textContent="📤 Надіслати вчителю";
+const pn=document.createElement("div"); pn.id="jPanel"; pn.hidden=true;
+pn.innerHTML=`<button class="jx" type="button" aria-label="Закрити">×</button><b class="h">📤 Надіслати результат учителю</b>
+<div class="jm">Надсилай, коли пройдеш усі вправи й тест. Вхід в акаунт не потрібен.</div>
+<div class="jrow"><input id="jName" placeholder="Прізвище та ім'я" autocomplete="off"><input id="jCls" placeholder="Клас, 8-А" maxlength="6" autocomplete="off"></div>
+<a class="jgo" id="jSend" href="#" target="_blank" rel="noopener">Відкрити форму з результатом</a>
+<div class="jm" id="jMsg">Відкриється Google Форма з уже записаним результатом — натисни в ній «Надіслати».</div>`;
+document.body.appendChild(fab); document.body.appendChild(pn);
+const nm=pn.querySelector("#jName"), cl=pn.querySelector("#jCls"), a=pn.querySelector("#jSend"), msg=pn.querySelector("#jMsg");
+fab.addEventListener("click",()=>{ pn.hidden=!pn.hidden; if(pn.hidden) return;
+  const o=getRow(); const n=String(o.row[0]||""), c=String(o.row[1]||"");
+  if(!nm.value&&n&&!/без імені|^—$/.test(n)) nm.value=n; if(!cl.value&&c&&c!=="—"&&!/^\d$/.test(c)) cl.value=c;
+  (nm.value?cl:nm).focus(); });
+pn.querySelector(".jx").addEventListener("click",()=>pn.hidden=true);
+a.addEventListener("click",e=>{
+  if(!nm.value.trim()||!cl.value.trim()){ e.preventDefault(); msg.textContent="Спершу впиши прізвище, ім'я та клас ☝️"; (nm.value.trim()?cl:nm).focus(); return; }
+  a.href=FORM_PREFILL.replace(/(entry\.\d+=)[^&]*/,(m,p)=>p+encodeURIComponent(line(nm.value.trim(),cl.value.trim())));
+  msg.textContent="Форму відкрито в новій вкладці — натисни там «Надіслати» ✔";
+});
+})();
+</script>
+
+</body></html>

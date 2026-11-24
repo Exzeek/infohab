@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HTML/CSS-лабораторія</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;800&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>/* VOICE: робоча майстерня верстальника ліги класу, дизайн-система «Інфо-хаб»
+IDEA: справжній редактор коду з живим переглядом сторінки сайту ліги
+PICTURE: редактор і переглядач поруч — це і є головний образ
+COLOUR/TYPE: колір класу (8 — помаранчевий), Unbounded / Nunito / JetBrains Mono
+LAYOUT: шапка → завдання зліва, редактор і перегляд справа; на телефоні стовпчиком */
+:root{color-scheme:light dark;--bg:light-dark(#f4f6fb,#11141b);--surface:light-dark(#fff,#1a1f2a);--surface-2:light-dark(#e9edf5,#232a38);--ink:light-dark(#18202f,#e8ecf4);--muted:light-dark(#5b6578,#9aa4b6);--line:light-dark(#dfe4ee,#2b3242);--class:light-dark(#e0661b,#f59152);--ok:light-dark(#2e7d32,#7fd283);--ok-bg:light-dark(#e3f3e4,#1f3522);--bad:light-dark(#b3261e,#ff8a80);--bad-bg:light-dark(#fbe7e5,#3a1f1d);--send:#ffb020;--send-ink:#2a1a00;--code:light-dark(#1b1f2a,#0d1017);--code-ink:#e8ecf4}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+[hidden]{display:none!important}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.5 Nunito,system-ui,sans-serif;overflow-x:clip}
+.wrap{max-width:1240px;margin:0 auto;padding:18px max(16px,3vw) 96px}
+.eyebrow{color:var(--muted);font-weight:700;font-size:14px}
+h1{font:800 clamp(26px,4vw,40px)/1.08 Unbounded,system-ui,sans-serif;color:var(--class);margin:4px 0 8px;text-wrap:balance}
+h2{font:700 19px/1.2 Unbounded,system-ui,sans-serif;margin:0 0 8px}
+.story{background:var(--surface);border:1px solid var(--line);border-top:5px solid var(--class);border-radius:16px;padding:12px 16px;display:flex;gap:12px;align-items:center}
+.story .hero{font-size:36px}
+.hud{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.hud span{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-weight:800;font-variant-numeric:tabular-nums}
+.tabs{display:flex;gap:8px;position:sticky;top:0;z-index:5;background:var(--bg);padding:8px 0;overflow-x:auto}
+.tabs button{flex:none;font:800 15px Nunito,sans-serif;border:2px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:8px 16px;min-height:44px;cursor:pointer}
+.tabs button[aria-selected=true]{background:var(--class);border-color:var(--class);color:#fff}
+.grid{display:grid;grid-template-columns:minmax(0,360px) minmax(0,1fr);gap:16px}
+@media(max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.tasks{display:grid;gap:8px;max-height:72vh;overflow:auto}
+@media(max-width:900px){.tasks{max-height:none}}
+.task{border:2px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer;background:var(--surface)}
+.task[aria-current=true]{border-color:var(--class)}
+.task.ok{border-color:var(--ok);background:var(--ok-bg)}
+.task.bad{border-color:var(--bad);background:var(--bad-bg)}
+.task b{display:block}.task small{color:var(--muted);font-weight:700}
+.lvl{font-size:13px;font-weight:800}
+.ed{display:grid;gap:10px}
+.edtabs{display:flex;gap:6px}
+.edtabs button{font:800 14px "JetBrains Mono",monospace;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);border-radius:8px 8px 0 0;padding:6px 14px;cursor:pointer;min-height:40px}
+.edtabs button[aria-selected=true]{background:var(--code);color:var(--code-ink)}
+textarea{width:100%;height:300px;resize:vertical;font:500 15px/1.5 "JetBrains Mono",monospace;background:var(--code);color:var(--code-ink);border:0;border-radius:0 12px 12px 12px;padding:12px;tab-size:2}
+textarea:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid var(--class);outline-offset:2px}
+.prev{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff}
+.prev .bar{background:#e9edf5;color:#5b6578;font:500 13px "JetBrains Mono",monospace;padding:6px 10px;display:flex;gap:6px;align-items:center}
+.prev .bar i{width:10px;height:10px;border-radius:50%;background:#ff5f57;display:inline-block}.prev .bar i+i{background:#febc2e}.prev .bar i+i+i{background:#28c840}
+iframe{width:100%;height:320px;border:0;display:block;background:#fff}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{font:800 15px Nunito,sans-serif;border:2px solid var(--class);background:var(--surface);color:var(--ink);border-radius:999px;padding:9px 16px;min-height:44px;cursor:pointer}
+.btn.pri{background:var(--class);color:#fff}
+.fb{border-radius:12px;padding:10px 12px;font-weight:700}
+.fb.ok{background:var(--ok-bg);color:var(--ok)}.fb.bad{background:var(--bad-bg);color:var(--bad)}
+.hint{color:var(--muted);font-size:15px}
+.real{display:grid;gap:10px}
+.real .card{border-left:6px solid var(--class)}
+.real input{width:100%;font:16px Nunito,sans-serif;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);margin-top:6px}
+.grade{font:800 64px/1 Unbounded,sans-serif;color:var(--class)}
+table.br{border-collapse:collapse;width:100%}table.br td{padding:6px 4px;border-bottom:1px solid var(--line)}table.br td:last-child{text-align:right;font-variant-numeric:tabular-nums;font-weight:800}
+.send{position:fixed;right:16px;bottom:16px;z-index:9;background:var(--send);color:var(--send-ink);border:0;border-radius:999px;padding:12px 20px;font:800 16px Nunito,sans-serif;box-shadow:0 6px 18px rgba(0,0,0,.2);cursor:pointer;min-height:48px}
+.f{display:grid;gap:8px;grid-template-columns:minmax(0,1fr) 110px}
+.f input{font:16px Nunito,sans-serif;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink)}
+code{font-family:"JetBrains Mono",monospace;background:var(--surface-2);padding:1px 5px;border-radius:5px;overflow-wrap:anywhere}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+<div class="eyebrow">Інформатика · 8 клас · Розділ 5 «Сайт і його верстка» · Середовище</div>
+<h1>HTML/CSS-лабораторія ліги</h1>
+<div class="story"><div class="hero" aria-hidden="true">🏀</div><p style="margin:0"><b>Ліга класу запускає власний сайт.</b> Ти — верстальник: пишеш справжній HTML і CSS, сторінка оживає праворуч, а лабораторія перевіряє кожне завдання. Наприкінці — 4 кроки в справжньому Блокноті й браузері.</p></div>
+<div class="hud"><span id="hDone">✅ 0/14</span><span id="hErr">❌ 0</span><span id="hTime">⏱ 00:00</span></div>
+<nav class="tabs" role="tablist">
+<button role="tab" data-t="lab" aria-selected="true">Лабораторія</button>
+<button role="tab" data-t="real" aria-selected="false">У справжньому середовищі</button>
+<button role="tab" data-t="res" aria-selected="false">Результат</button>
+</nav>
+<section id="t-lab" class="grid">
+<div class="card"><h2>Завдання</h2><div class="tasks" id="tasks"></div></div>
+<div class="ed">
+<div class="card" id="cur"></div>
+<div><div class="edtabs" role="tablist"><button data-e="html" aria-selected="true">index.html</button><button data-e="css" aria-selected="false">style.css</button></div>
+<textarea id="code" spellcheck="false" aria-label="Код"></textarea></div>
+<div class="row"><button class="btn pri" id="check">▶ Перевірити завдання</button><button class="btn" id="reset">↺ Почати код спочатку</button></div>
+<div id="fb" class="fb" hidden></div>
+<div class="prev"><div class="bar"><i></i><i></i><i></i>&nbsp;liga-klasu.ua/index.html</div><iframe id="view" sandbox="allow-same-origin" title="Перегляд сторінки"></iframe></div>
+</div>
+</section>
+<section id="t-real" hidden><div class="real" id="real"></div></section>
+<section id="t-res" hidden><div class="card" id="res"></div></section>
+</div>
+<button class="send" id="sendFab">📤 Надіслати вчителю</button>
+<script>
+{
+const NORM={time:25};
+const FORM="https://docs.google.com/forms/d/e/1FAIpQLSeaDGNzqpEMjZyDt4WUwg3k3FAhGGW4pG1E8IcOk8b4LQsBVw/viewform?usp=pp_url&entry.1997531456=";
+const START_HTML='<!DOCTYPE html>\n<html lang="uk">\n<head>\n  <meta charset="utf-8">\n  <title>Ліга класу</title>\n</head>\n<body>\n\n</body>\n</html>';
+const START_CSS='/* Стилі сайту ліги */\n';
+const q=(d,s)=>d.querySelector(s), qa=(d,s)=>[...d.querySelectorAll(s)];
+const cs=(d,el)=>d.defaultView.getComputedStyle(el);
+const T=[
+ {l:"🟢",t:"Заголовок сторінки",d:"Усередині <code>&lt;body&gt;</code> додай заголовок <code>&lt;h1&gt;</code> з текстом <b>Ліга класу</b>.",h:"&lt;h1&gt;Ліга класу&lt;/h1&gt;",c:d=>{const h=q(d,"h1");return h&&/ліга класу/i.test(h.textContent)?"":"Не бачу h1 з текстом «Ліга класу»."}},
+ {l:"🟢",t:"Абзац про лігу",d:"Під заголовком додай абзац <code>&lt;p&gt;</code> щонайменше з 5 слів.",h:"&lt;p&gt;Наша ліга грає щоп'ятниці у спортзалі&lt;/p&gt;",c:d=>{const p=qa(d,"p").find(p=>p.textContent.trim().split(/\s+/).length>=5);return p?"":"Потрібен абзац p, у якому 5 або більше слів."}},
+ {l:"🟢",t:"Список команд",d:"Додай маркований список <code>&lt;ul&gt;</code> з трьома командами (<code>&lt;li&gt;</code>).",h:"&lt;ul&gt;&lt;li&gt;Соколи&lt;/li&gt;…&lt;/ul&gt;",c:d=>{const u=q(d,"ul");return u&&qa(u,"li").length>=3?"":"Потрібен ul, у якому щонайменше 3 li."}},
+ {l:"🟢",t:"Посилання",d:"Додай посилання <code>&lt;a&gt;</code> на будь-який сайт, що починається з <code>https://</code>.",h:"&lt;a href=\"https://uk.wikipedia.org\"&gt;Правила баскетболу&lt;/a&gt;",c:d=>{const a=qa(d,"a[href]").find(a=>/^https:\/\//i.test(a.getAttribute("href"))&&a.textContent.trim());return a?"":"Потрібне посилання a з href на https:// і текстом."}},
+ {l:"🟡",t:"Картинка з описом",d:"Додай <code>&lt;img&gt;</code> з атрибутами <code>src</code> і непорожнім <code>alt</code> (картинка може не завантажитися — головне правильний код).",h:"&lt;img src=\"logo.png\" alt=\"Логотип ліги\"&gt;",c:d=>{const i=qa(d,"img").find(i=>i.getAttribute("src")&&(i.getAttribute("alt")||"").trim().length>=3);return i?"":"Потрібен img із src і alt (щонайменше 3 символи)."}},
+ {l:"🟡",t:"Турнірна таблиця",d:"Додай <code>&lt;table&gt;</code>: рядок заголовків <code>&lt;th&gt;</code> (Команда, Очки) і щонайменше 2 рядки з командами.",h:"&lt;table&gt;&lt;tr&gt;&lt;th&gt;Команда&lt;/th&gt;&lt;th&gt;Очки&lt;/th&gt;&lt;/tr&gt;…",c:d=>{const t=q(d,"table");if(!t)return"Таблиці table немає.";if(qa(t,"th").length<2)return"Додай щонайменше 2 комірки th.";return qa(t,"tr").length>=3?"":"Потрібно 3 рядки tr: заголовок і 2 команди."}},
+ {l:"🟢",t:"Колір фону (CSS)",d:"Перейди у <b>style.css</b>. Задай для <code>body</code> властивість <code>background-color</code> (будь-який колір, крім білого).",h:"body { background-color: #fff4e6; }",c:d=>{const b=cs(d,d.body).backgroundColor;return b&&!/rgba\(0, 0, 0, 0\)|rgb\(255, 255, 255\)/.test(b)?"":"Фон body ще білий або прозорий."}},
+ {l:"🟢",t:"Колір заголовка",d:"У CSS зроби заголовок <code>h1</code> кольоровим (властивість <code>color</code>).",h:"h1 { color: #e0661b; }",c:d=>{const h=q(d,"h1");return h&&cs(d,h).color!=="rgb(0, 0, 0)"?"":"Колір h1 ще чорний."}},
+ {l:"🟡",t:"Шрифт сторінки",d:"Задай для <code>body</code> властивість <code>font-family</code> з іншим шрифтом, наприклад <code>Arial, sans-serif</code>.",h:"body { font-family: Arial, sans-serif; }",c:d=>/times/i.test(cs(d,d.body).fontFamily)?"Шрифт ще стандартний (Times).":""},
+ {l:"🟡",t:"Клас card",d:"Додай елемент <code>&lt;div class=\"card\"&gt;</code> із текстом. У CSS задай для <code>.card</code> відступ <code>padding</code> і рамку <code>border</code>.",h:".card { padding: 12px; border: 2px solid #e0661b; }",c:d=>{const c=q(d,".card");if(!c)return"Немає елемента з класом card.";const s=cs(d,c);return parseFloat(s.paddingTop)>0&&parseFloat(s.borderTopWidth)>0?"":"Для .card потрібні padding і border."}},
+ {l:"🟡",t:"Форма реєстрації",d:"Додай <code>&lt;form&gt;</code> з полем <code>&lt;input type=\"text\"&gt;</code> і кнопкою <code>&lt;button&gt;</code>.",h:"&lt;form&gt;&lt;input type=\"text\"&gt;&lt;button&gt;Записатися&lt;/button&gt;&lt;/form&gt;",c:d=>{const f=q(d,"form");return f&&q(f,"input[type=text],input:not([type])")&&q(f,"button")?"":"У формі має бути input type=\"text\" і button."}},
+ {l:"🔴",t:"Доступна форма",d:"Дай полю <code>id=\"name\"</code>, атрибут <code>required</code> і підпис <code>&lt;label for=\"name\"&gt;</code>.",h:"&lt;label for=\"name\"&gt;Ім'я&lt;/label&gt;&lt;input id=\"name\" type=\"text\" required&gt;",c:d=>{const i=q(d,"input#name");if(!i)return"Немає input з id=\"name\".";if(!i.required)return"Додай атрибут required.";return q(d,'label[for="name"]')?"":"Немає label for=\"name\"."}},
+ {l:"🔴",t:"Семантична розмітка",d:"Обгорни сторінку в семантичні теги: <code>&lt;header&gt;</code> (з h1), <code>&lt;main&gt;</code> і <code>&lt;footer&gt;</code>.",h:"&lt;header&gt;…&lt;/header&gt;&lt;main&gt;…&lt;/main&gt;&lt;footer&gt;…&lt;/footer&gt;",c:d=>{if(!q(d,"header h1"))return"h1 має бути всередині header.";return q(d,"main")&&q(d,"footer")?"":"Потрібні і main, і footer."}},
+ {l:"🔴",t:"Меню в рядок (flex)",d:"Зроби <code>&lt;nav class=\"menu\"&gt;</code> з трьома посиланнями й постав їх у рядок: <code>.menu { display: flex; gap: … }</code>.",h:".menu { display: flex; gap: 16px; }",c:d=>{const m=q(d,"nav.menu");if(!m)return"Немає nav з класом menu.";if(qa(m,"a").length<3)return"У меню потрібно 3 посилання.";const s=cs(d,m);return s.display==="flex"?(parseFloat(s.columnGap)>0?"":"Додай gap між пунктами."):"Для .menu потрібно display: flex."}}
+];
+const REAL=[
+ {t:"Файл у Блокноті",d:"Створи папку <b>LigaSite</b>. Відкрий <b>Блокнот</b>, встав свій HTML-код з лабораторії й збережи як <b>index.html</b> (Тип файлу: «Усі файли», Кодування: UTF-8).",q:"Яке ім'я має твій файл?",ok:v=>/^index\.html$/i.test(v.trim())},
+ {t:"Сторінка в браузері",d:"Відкрий index.html подвійним клацанням. Скопіюй адресу з адресного рядка браузера.",q:"Встав адресу сторінки:",ok:v=>/^file:|^[a-z]:[\\/]/i.test(v.trim())},
+ {t:"Інструменти розробника",d:"Натисни <b>F12</b>, вкладка <b>Elements</b> (Елементи). Клацни на свій h1 і подивись його колір у панелі Styles.",q:"Яке значення color у h1 показали інструменти?",ok:v=>/#[0-9a-f]{3,8}|rgb|[a-z]{3,}/i.test(v.trim())},
+ {t:"Перевірка валідатором",d:"Відкрий <b>validator.w3.org</b> → вкладка «Validate by File Upload» → завантаж index.html → Check.",q:"Скільки помилок (Errors) знайшов валідатор?",ok:v=>/^\d{1,3}$/.test(v.trim())}
+];
+let st={html:START_HTML,css:START_CSS,tab:"html",cur:0,tries:{},ok:{},real:{},t0:0,done:false,attempt:1};
+try{const s=JSON.parse(localStorage.getItem("htmllab8")||"null");if(s&&s.html)st=Object.assign(st,s)}catch(e){}
+const save=()=>{try{localStorage.setItem("htmllab8",JSON.stringify(st))}catch(e){}};
+const $=s=>document.querySelector(s), ta=$("#code"), view=$("#view");
+const mmss=s=>String(Math.floor(s/60)).padStart(2,"0")+":"+String(Math.floor(s%60)).padStart(2,"0");
+const secs=()=>st.t0?Math.floor(((st.done?st.tEnd:Date.now())-st.t0)/1000):0;
+const errs=()=>Object.keys(st.tries).reduce((a,k)=>a+Math.max(0,st.tries[k]-(st.ok[k]?1:0)),0);
+function startT(){if(!st.t0){st.t0=Date.now();save()}}
+function doc(){return view.contentDocument}
+let tm;function render(){clearTimeout(tm);tm=setTimeout(()=>{view.srcdoc=st.html.replace(/<\/head>/i,"<style>"+st.css.replace(/<\/style/gi,"")+"</style></head>")},250)}
+function tasks(){
+ $("#tasks").innerHTML=T.map((t,i)=>`<div class="task${st.ok[i]?" ok":""}" data-i="${i}" role="button" tabindex="0" aria-current="${st.cur===i}"><span class="lvl">${t.l} Завдання ${i+1}</span><b>${t.t}</b>${st.ok[i]?"<small>Виконано ✓</small>":st.tries[i]?`<small>Спроб: ${st.tries[i]}</small>`:""}</div>`).join("");
+ document.querySelectorAll(".task").forEach(e=>{const go=()=>{st.cur=+e.dataset.i;save();tasks();cur()};e.onclick=go;e.onkeydown=k=>{if(k.key==="Enter"||k.key===" "){k.preventDefault();go()}}});
+ const n=Object.keys(st.ok).length;$("#hDone").textContent="✅ "+n+"/"+T.length;$("#hErr").textContent="❌ "+errs();
+}
+function cur(){const t=T[st.cur];$("#cur").innerHTML=`<span class="lvl">${t.l} Завдання ${st.cur+1} з ${T.length}</span><h2 style="margin-top:4px">${t.t}</h2><p style="margin:0 0 8px">${t.d}</p><details class="hint"><summary>Підказка</summary><code>${t.h}</code></details>`;$("#fb").hidden=true}
+function edTab(){document.querySelectorAll(".edtabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.e===st.tab));ta.value=st[st.tab]}
+ta.addEventListener("input",()=>{if(st.done)return;startT();st[st.tab]=ta.value;save();render()});
+ta.addEventListener("keydown",e=>{if(e.key==="Tab"){e.preventDefault();const s=ta.selectionStart;ta.setRangeText("  ",s,ta.selectionEnd,"end");ta.dispatchEvent(new Event("input"))}});
+document.querySelectorAll(".edtabs button").forEach(b=>b.onclick=()=>{st.tab=b.dataset.e;save();edTab()});
+$("#check").onclick=()=>{if(st.done)return;startT();const i=st.cur,d=doc();if(!d||!d.body){return}
+ if(st.ok[i]){show(true,"Це завдання вже виконано.");return}
+ st.tries[i]=(st.tries[i]||0)+1;const m=T[i].c(d);
+ if(!m){st.ok[i]=true;show(true,"✅ Правильно! "+(i<T.length-1?"Переходь до наступного завдання.":"Усі завдання позаду — зазирни у «Справжнє середовище»."));const nx=T.findIndex((t,j)=>!st.ok[j]);if(nx>=0)setTimeout(()=>{st.cur=nx;save();tasks();cur()},900)}
+ else show(false,"❌ "+m);save();tasks()};
+function show(ok,m){const f=$("#fb");f.hidden=false;f.className="fb "+(ok?"ok":"bad");f.textContent=m}
+$("#reset").onclick=()=>{if(st.done)return;st.html=START_HTML;st.css=START_CSS;save();edTab();render()};
+function real(){$("#real").innerHTML=`<p class="hint" style="margin:0">Ці кроки виконуй у справжньому Блокноті й браузері. Кожен крок дає бал до оцінки лабораторії.</p>`+REAL.map((r,i)=>`<div class="card"><span class="lvl">Крок С${i+1}</span><h2 style="margin-top:4px">${r.t}</h2><p style="margin:0">${r.d}</p><label>${r.q}<input data-r="${i}" value="${(st.real[i]||"").replace(/"/g,"&quot;")}" ${st.done?"disabled":""}></label><div class="hint" id="rs${i}">${st.real[i]&&REAL[i].ok(st.real[i])?"✅ Прийнято":""}</div></div>`).join("");
+ document.querySelectorAll("[data-r]").forEach(inp=>inp.oninput=()=>{startT();const i=+inp.dataset.r;st.real[i]=inp.value;save();$("#rs"+i).textContent=REAL[i].ok(inp.value)?"✅ Прийнято":""})}
+function calc(){let got=0;T.forEach((t,i)=>{if(st.ok[i]){const n=st.tries[i]||1;got+=n<=1?1:n===2?.5:.25}});
+ const rd=REAL.filter((r,i)=>st.real[i]&&r.ok(st.real[i])).length;
+ const frac=(got+rd)/(T.length+REAL.length),e=errs(),s=secs(),norm=NORM.time*60;
+ const pE=Math.min(3,Math.max(0,e-2)*.25),pT=s<=norm?0:s<=norm*1.5?1:2;
+ let g=Math.max(1,Math.round(12*frac-pE-pT));if(!(frac>=.95&&e<=2&&s<=norm))g=Math.min(g,11);
+ return{got,rd,frac,e,s,pE,pT,g,fast:s>0&&s<norm*.3}}
+function line(name,cls){const r=calc();const codes=T.map((t,i)=>"Л"+(i+1)+":"+Math.max(0,(st.tries[i]||0)-(st.ok[i]?1:0))+(st.ok[i]?"":"н")).concat(REAL.map((x,i)=>"С"+(i+1)+":0"+(st.real[i]&&x.ok(st.real[i])?"":"н")));
+ const v=["v1","8-"+new Date().getFullYear(),"HTML/CSS-лабораторія (Р5)",cls,name,st.attempt,"лабораторія",r.g,(r.got+r.rd).toFixed(2)+"/"+(T.length+REAL.length),Math.round(r.frac*100),r.e,mmss(r.s).replace(":"," хв ")+" с",NORM.time+" хв",r.fast?"⚠ занадто швидко":"",st.done?"завершено":"не завершено",codes.join(",")];
+ return v.map(x=>String(x).replace(/[|\n\r]/g," ")).join("|")}
+function res(){const r=calc();$("#res").innerHTML=`<div class="row" style="gap:20px;align-items:flex-end"><div><small class="hint">Оцінка</small><div class="grade">${st.done?r.g:"—"}</div><small class="hint">з 12</small></div><div style="flex:1"><table class="br"><tr><td>Завдання лабораторії</td><td>${r.got.toFixed(2)} / ${T.length}</td></tr><tr><td>Кроки в справжньому середовищі</td><td>${r.rd} / ${REAL.length}</td></tr><tr><td>Помилки</td><td>${r.e}</td></tr><tr><td>Час / норма</td><td>${mmss(r.s)} / ${NORM.time}:00</td></tr><tr><td>Штраф за помилки</td><td>−${r.pE}</td></tr><tr><td>Штраф за час</td><td>−${r.pT}</td></tr><tr><td>Спроба</td><td>${st.attempt}</td></tr>${r.fast?"<tr><td colspan=2>⚠ занадто швидко</td></tr>":""}</table></div></div>
+ <div class="row" style="margin-top:12px">${st.done?`<button class="btn" id="again">↺ Пройти знову</button>`:`<button class="btn pri" id="fin">🏁 Завершити й отримати оцінку</button>`}</div>
+ <h2 style="margin-top:18px">📤 Надіслати вчителю</h2><div class="f"><input id="nm" placeholder="Прізвище та ім'я" aria-label="Прізвище та ім'я"><input id="cl" placeholder="Клас, напр. 8-А" aria-label="Клас"></div><div class="row" style="margin-top:8px"><button class="btn pri" id="snd">Відкрити форму журналу</button></div><p class="hint" id="sm">Форма відкриється з уже вписаним результатом — натисни в ній «Надіслати».</p>`;
+ const f=$("#fin");if(f)f.onclick=()=>{st.done=true;st.tEnd=Date.now();save();tasks();real();res()};
+ const a=$("#again");if(a)a.onclick=()=>{const at=st.attempt+1;st={html:START_HTML,css:START_CSS,tab:"html",cur:0,tries:{},ok:{},real:{},t0:0,done:false,attempt:at};save();edTab();render();tasks();cur();real();res()};
+ $("#snd").onclick=()=>{const n=$("#nm").value.trim(),c=$("#cl").value.trim();if(!n||!c){$("#sm").textContent="Впиши прізвище, ім'я та клас.";return}const u=FORM+encodeURIComponent(line(n,c));const l=document.createElement("a");l.href=u;l.target="_blank";l.rel="noopener";document.body.append(l);l.click();l.remove()}}
+function tab(t){document.querySelectorAll(".tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.t===t));["lab","real","res"].forEach(x=>$("#t-"+x).hidden=x!==t);if(t==="res")res()}
+document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>tab(b.dataset.t));
+$("#sendFab").onclick=()=>{tab("res");setTimeout(()=>{const n=$("#nm");if(n)n.focus()},50)};
+setInterval(()=>{$("#hTime").textContent="⏱ "+mmss(secs())},1000);
+edTab();render();tasks();cur();real();
+window.__lab={T,st,calc,line,doc};
+}
+</script>
+</body></html>

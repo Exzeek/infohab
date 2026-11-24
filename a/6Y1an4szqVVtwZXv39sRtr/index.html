@@ -1,0 +1,115 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>4 клас · Цифровий музей Сортика</title>
+<style>
+:root{--c2:#7a4fd8;--c2d:#3f2296;--ink:#1f2433;--r:clamp(12px,1.4vmin,22px);font-size:clamp(14px,1.9vmin,30px)}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;font-family:"Segoe UI","Nunito","Trebuchet MS",system-ui,sans-serif;color:var(--ink);
+  background:radial-gradient(circle at 20% 10%,#e5dbff 0,#b197fc 45%,#845ef7 100%)}
+button{font:inherit;border:0;cursor:pointer}
+.emo{font-family:"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif;line-height:1}
+header{display:flex;align-items:center;gap:1rem;padding:.5rem 1rem;background:var(--c2);color:#fff;box-shadow:0 3px 0 var(--c2d)}
+header h1{margin:0;font-size:1.25rem;flex:1}
+#yb{display:flex;align-items:center;gap:.5rem;background:#2b2100;color:#b2f2bb;border-radius:999px;padding:.3rem .9rem;font-weight:900}
+#yb .bi{width:4rem;height:1.3rem;border:3px solid #b2f2bb;border-radius:.35rem;padding:2px}
+#yb i{display:block;height:100%;background:linear-gradient(90deg,#40c057,#8ce99a);border-radius:.15rem}
+main{position:absolute;top:3.2rem;left:0;right:0;bottom:0;padding:.6rem 1rem;display:flex;flex-direction:column;gap:.5rem}
+.sea{flex:1;display:flex;flex-direction:column;gap:.45rem;min-height:0}
+.arch{flex:1;display:flex;align-items:center;gap:.6rem;background:rgba(255,255,255,.18);border-radius:var(--r);padding:.3rem .6rem;min-height:0}
+.arch .nm{width:11rem;flex:none;font-weight:900;color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.25);font-size:.95rem;line-height:1.15}
+.arch .nm span{display:block;font-size:1.9rem}
+.isl{flex:1;display:flex;align-items:center;justify-content:space-around;gap:.3rem;height:100%}
+.il{position:relative;width:min(8.5vh,5.2rem);height:min(8.5vh,5.2rem);border-radius:22%;
+  background:radial-gradient(circle at 40% 35%,#ffffff,#e5dbff 65%,#b197fc);box-shadow:0 0 0 .3rem #fff8,0 .4rem 0 #0002;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:900;font-size:.8rem;color:#3f2296}
+.il .emo{font-size:1.7rem}
+.il.lock{filter:grayscale(1) brightness(1.1);opacity:.38}
+.il.open{animation:bob 2.4s ease-in-out infinite}
+.il.done{background:radial-gradient(circle at 40% 35%,#d3f9d8,#8ce99a 65%,#40c057)}
+.il.done:after{content:"⭐";position:absolute;top:-.7rem;right:-.5rem;font-size:1.4rem}
+.il.sel{box-shadow:0 0 0 .35rem var(--c2),0 .4rem 0 #0002}
+@keyframes bob{50%{transform:translateY(-6px)}}
+#bot{position:fixed;width:4.6rem;pointer-events:none;transition:left 1.2s ease,top 1.2s ease;z-index:5;transform:translate(-15%,-60%)}
+.card{display:flex;align-items:center;gap:1rem;background:#fff;border-radius:var(--r);padding:.6rem 1rem;box-shadow:0 .4rem 0 #0002;min-height:5.2rem}
+.card .t{flex:1;font-size:1.15rem;font-weight:800}
+.card small{display:block;font-weight:600;color:#5c6378;font-size:.8rem}
+.go{background:var(--c2);color:#fff;font-weight:900;font-size:1.2rem;border-radius:999px;padding:.6rem 1.6rem;box-shadow:0 5px 0 var(--c2d);text-decoration:none}
+.go[aria-disabled="true"]{background:#dee2e6;box-shadow:0 5px 0 #adb5bd;color:#5c6378;pointer-events:none}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* phone: scrolling (v2) */
+@media (max-width:900px),(max-height:600px){
+ html,body{overflow-x:hidden;overflow-y:auto;height:auto;touch-action:manipulation}
+ header{position:sticky;top:0;z-index:6;gap:.5rem;padding:.45rem .6rem}
+ header h1{font-size:1rem}
+ main{position:static;padding:.5rem .5rem 1rem}
+ .sea{flex:none}
+ .arch{flex:none;flex-direction:column;align-items:stretch;padding:.5rem .6rem}
+ .arch .nm{width:auto;display:flex;align-items:center;gap:.4rem}
+ .arch .nm span{display:inline;font-size:1.4rem}
+ .isl{flex-wrap:wrap;justify-content:flex-start;gap:.8rem .55rem;height:auto;padding:.3rem 0}
+ .il{width:3.7rem;height:3.7rem}
+ .il .emo{font-size:1.4rem}
+ #bot{display:none}
+ .card{position:sticky;bottom:.4rem;flex-wrap:wrap;gap:.6rem}
+ .card .t{font-size:1rem;min-width:12rem}
+}
+</style>
+</head>
+<body>
+<header><span class="emo" style="font-size:1.6rem">🏛️</span><h1>4 клас · Цифровий музей Сортика</h1><div id="yb" title="Скільки зал відкрито за рік"><span class="bi"><i id="ybi"></i></span><b id="ybp">0 / 29</b></div></header>
+<main>
+  <div class="sea" id="sea"></div>
+  <div class="card" id="card"></div>
+</main>
+<div id="bot"></div>
+<script>
+const LESSONS={"1":"t01.html","2":"t02.html","3":"t03.html","4":"t04.html","5":"t05.html","6":"t06.html","7":"t07.html","8":"t08.html","9":"t09.html","10":"t10.html","11":"t11.html","16":"t16.html","12":"t12.html","13":"t13.html","14":"t14.html","15":"t15.html","17":"t17.html","18":"t18.html","19":"t19.html","20":"t20.html","21":"t21.html"};
+const STAGES={"1":4,"2":4,"3":4,"4":4,"5":4,"6":4,"7":4,"8":4,"9":4,"10":4,"11":5,"16":4,"12":4,"13":4,"14":4,"15":4,"17":4,"18":4,"19":4,"20":4,"21":4};
+const A=[
+ {n:"Крило «Інформація та пристрої»",e:"💻",t:["Якими бувають комп'ютери?","Як працює цифровий пристрій?","Чи має комп'ютер пам'ять?","Як безпечно знаходити освітню інформацію в інтернеті?","Як зберегти інформацію з інтернету?","Чи завжди слід довіряти інформації з інтернету?","Як використовують інтернет для спілкування?"],i:["💻","🔁","💽","🔍","🖼️","⚖️","💬"]},
+ {n:"Крило «Об'єкти та моделі»",e:"🗂️",t:["Як створювати схеми класифікації об'єктів?","Які дії можна виконувати з об'єктами?","Як створюють моделі?","За якими етапами створюють інформаційну модель?","Як створювати моделі для об'єктів, які рухаються?","У якій програмі зручно працювати з таблицями?","Як побудувати математичну модель?","Як досліджувати об'єкти за допомогою створених моделей?"],i:["🌳","🧩","🌐","📶","🚀","📋","➗","🔬"]},
+ {n:"Крило «Алгоритми»",e:"🧭",t:["Які алгоритмічні структури є в алгоритмах?","Як описують алгоритми з повтореннями?","Як створювати анімації?","Як перевірити помилки в алгоритмі й обрати виграшну стратегію?","Як в алгоритмах використовувати команди розгалуження?","Як описати повне розгалуження в Скретч?","Як описати алгоритми з розгалуженням та повторенням?","Як створити проєкт?"],i:["🧱","🔁","🎞️","🏆","🔀","🐱","🧮","🚀"]},
+ {n:"Крило «Програмування роботів»",e:"🤖",t:["Як і навіщо створюють роботів?","Що таке Micro:Bit?","Що таке середовище програмування?","Як працювати з датчиками?","Як програмують повторення в середовищі програмування?","Як ідеї та вміння можуть допомогти людям?"],i:["🤖","🔲","🖥️","🌡️","🔂","💡"]}
+];
+const ROBOT=`<svg viewBox="0 0 120 150">
+ <line x1="60" y1="6" x2="60" y2="22" stroke="#3f2296" stroke-width="4"/>
+ <path class="ant" d="M60 2 l5 6 -5 6 -5 -6z" fill="#ffd43b"/>
+ <rect x="20" y="20" width="80" height="56" rx="12" fill="#e5dbff" stroke="#3f2296" stroke-width="4"/>
+ <rect x="28" y="30" width="64" height="30" rx="15" fill="#1f2433"/>
+ <circle class="eye" cx="46" cy="45" r="7" fill="#b2f2bb"/>
+ <circle class="eye" cx="74" cy="45" r="7" fill="#b2f2bb"/>
+ <path d="M50 66 Q60 72 70 66" stroke="#3f2296" stroke-width="4" fill="none" stroke-linecap="round"/>
+ <rect x="26" y="80" width="68" height="50" rx="10" fill="#7a4fd8" stroke="#3f2296" stroke-width="4"/>
+ <rect x="34" y="87" width="52" height="11" rx="3" fill="#ff922b"/><rect x="34" y="101" width="52" height="11" rx="3" fill="#40c057"/><rect x="34" y="115" width="52" height="10" rx="3" fill="#4dabf7"/>
+ <circle cx="60" cy="92.5" r="2.5" fill="#fff"/><circle cx="60" cy="106.5" r="2.5" fill="#fff"/><circle cx="60" cy="120" r="2.5" fill="#fff"/>
+ <rect class="arm-l" x="6" y="88" width="20" height="10" rx="5" fill="#b197fc" stroke="#3f2296" stroke-width="3"/>
+ <rect class="arm-r" x="94" y="88" width="20" height="10" rx="5" fill="#b197fc" stroke="#3f2296" stroke-width="3"/>
+ <circle cx="40" cy="138" r="9" fill="#3f2296"/><circle cx="80" cy="138" r="9" fill="#3f2296"/><circle cx="40" cy="138" r="3" fill="#e5dbff"/><circle cx="80" cy="138" r="3" fill="#e5dbff"/>
+</svg>`;
+function done(n){try{const s=JSON.parse(localStorage.getItem('g2:4-T'+String(n).padStart(2,'0'))||'null');return !!(s&&s.done&&s.done.length>=(STAGES[n]||99));}catch(e){return false;}}
+const sea=document.getElementById('sea'),card=document.getElementById('card'),bot=document.getElementById('bot');bot.innerHTML=ROBOT;
+let k=0,els=[],cnt=0,cur=null;
+A.forEach((a,ai)=>{const r=document.createElement('div');r.className='arch';r.innerHTML=`<div class="nm"><span class="emo">${a.e}</span>${ai+1}. ${a.n}</div><div class="isl"></div>`;
+  const box=r.querySelector('.isl');a.t.forEach((t,ti)=>{k++;const n=k,b=document.createElement('button');const d=done(n);if(d)cnt++;
+    b.className='il '+(d?'done':LESSONS[n]?'open':'lock');b.innerHTML=`<span class="emo">${a.i[ti]}</span>${n}`;b.title=t;
+    b.onclick=()=>pick(n,a,t,b);box.appendChild(b);els[n]=b;});sea.appendChild(r);});
+document.getElementById('ybi').style.width=(cnt/29*100)+'%';document.getElementById('ybp').textContent=cnt+' / 29';
+function pick(n,a,t,b){els.forEach(e=>e&&e.classList.remove('sel'));b.classList.add('sel');cur=n;
+  const has=LESSONS[n];card.innerHTML=`<span class="emo" style="font-size:3rem">${b.querySelector('.emo').textContent}</span>
+   <div class="t"><small>Зала ${n} · ${a.n}</small>${t}${done(n)?' ⭐':''}</div>
+   <a class="go" ${has?`href="${LESSONS[n]}"`:'aria-disabled="true"'}>${has?(done(n)?'Увійти ще раз ▶':'Увійти ▶'):'Скоро 🔒'}</a>`;
+  const r=b.getBoundingClientRect();bot.style.left=(r.right)+'px';bot.style.top=(r.top+r.height/2)+'px';}
+// старт: перший непройдений острів з уроком, інакше перший
+let start=1;for(let n=1;n<=29;n++){if(LESSONS[n]&&!done(n)){start=n;break;}}
+requestAnimationFrame(()=>{const b=els[start];let ai=0,acc=0;for(;ai<A.length;ai++){if(start<=acc+A[ai].t.length)break;acc+=A[ai].t.length;}pick(start,A[ai],A[ai].t[start-acc-1],b);});
+addEventListener('resize',()=>{if(cur)els[cur].click();});
+</script>
+</body>
+</html>
+
+</body></html>

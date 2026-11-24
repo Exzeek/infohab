@@ -1,0 +1,249 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5">
+<title>Рандомайзер чисел 1–15</title>
+<style>
+  :root{
+    --bg: #10131f;
+    --panel: #171b2c;
+    --panel-2: #1e2338;
+    --line: #2b3050;
+    --text: #e9ecf7;
+    --text-dim: #9aa2c4;
+    --amber: #f5a742;
+    --teal: #3ecfb2;
+    --violet: #8b7cf6;
+    --red: #ef6a6a;
+    --green: #4fd18c;
+    --radius-lg: 22px;
+    --radius-sm: 10px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1100px 500px at 85% -10%, rgba(139,124,246,.16), transparent 60%),
+      radial-gradient(900px 500px at -10% 110%, rgba(62,207,178,.12), transparent 60%),
+      var(--bg);
+    color:var(--text);
+    font-family:"Segoe UI", Avenir, "Helvetica Neue", Arial, sans-serif;
+    min-height:100vh;
+    display:flex; align-items:center; justify-content:center;
+    padding:24px;
+  }
+  .card{
+    width:100%; max-width:460px;
+    background:var(--panel); border:1px solid var(--line);
+    border-radius:var(--radius-lg); padding:30px 28px 26px;
+    box-shadow:0 30px 60px rgba(0,0,0,.35);
+  }
+  h1{
+    font-size:1.3rem; margin:0 0 4px; font-weight:800; text-align:center; letter-spacing:-.01em;
+  }
+  .sub{color:var(--text-dim); text-align:center; font-size:.88rem; margin-bottom:26px;}
+
+  .display{
+    position:relative;
+    height:200px;
+    background:
+      radial-gradient(240px 160px at 50% 30%, rgba(139,124,246,.18), transparent 70%),
+      var(--panel-2);
+    border:1px solid var(--line);
+    border-radius:var(--radius-lg);
+    display:flex; align-items:center; justify-content:center;
+    margin-bottom:22px;
+    overflow:hidden;
+  }
+  .display .num{
+    font-size:6.5rem; font-weight:800; color:var(--amber);
+    font-variant-numeric:tabular-nums;
+    transition:transform .08s ease;
+  }
+  .display .num.spin{ color:var(--text-dim); }
+  .display .empty{ color:var(--text-dim); font-size:1rem; }
+
+  .btn{
+    width:100%;
+    background:var(--violet); color:#fff; border:none; padding:16px 18px;
+    border-radius:999px; cursor:pointer; font-size:1.05rem; font-weight:700;
+    transition:.15s;
+  }
+  .btn:hover{filter:brightness(1.08);}
+  .btn:active{transform:scale(.98);}
+  .btn:disabled{opacity:.5; cursor:default;}
+
+  .row{display:flex; gap:10px; margin-top:12px;}
+  .btn.secondary{
+    flex:1;
+    background:transparent; border:1px solid var(--line); color:var(--text-dim);
+    padding:11px 14px; border-radius:999px; cursor:pointer; font-size:.86rem; font-weight:600;
+  }
+  .btn.secondary:hover{border-color:var(--violet); color:var(--text);}
+
+  .toggle-row{
+    display:flex; align-items:center; justify-content:space-between;
+    background:var(--panel-2); border:1px solid var(--line); border-radius:var(--radius-sm);
+    padding:12px 14px; margin-top:18px; font-size:.88rem; color:var(--text-dim);
+  }
+  .switch{
+    position:relative; width:42px; height:24px; flex:0 0 auto;
+  }
+  .switch input{opacity:0; width:0; height:0;}
+  .slider{
+    position:absolute; inset:0; background:var(--line); border-radius:999px; cursor:pointer; transition:.15s;
+  }
+  .slider::before{
+    content:""; position:absolute; width:18px; height:18px; left:3px; top:3px;
+    background:#fff; border-radius:50%; transition:.15s;
+  }
+  .switch input:checked + .slider{ background:var(--violet); }
+  .switch input:checked + .slider::before{ transform:translateX(18px); }
+
+  .history{ margin-top:20px; }
+  .history .label{
+    font-size:.72rem; color:var(--teal); text-transform:uppercase; letter-spacing:.08em; margin-bottom:10px;
+  }
+  .chips{ display:flex; flex-wrap:wrap; gap:8px; }
+  .chips span{
+    background:var(--panel-2); border:1px solid var(--line); color:var(--text-dim);
+    padding:6px 12px; border-radius:999px; font-size:.84rem; font-variant-numeric:tabular-nums;
+  }
+  .chips span:first-child{
+    background:rgba(245,167,66,.14); border-color:rgba(245,167,66,.4); color:var(--amber); font-weight:700;
+  }
+  .pool-note{
+    text-align:center; font-size:.78rem; color:var(--text-dim); margin-top:14px;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h1>🎲 Рандомайзер чисел</h1>
+  <div class="sub">Генерує випадкове число від 1 до 15 — натискайте скільки завгодно разів</div>
+
+  <div class="display">
+    <div class="num empty" id="numDisplay">?</div>
+  </div>
+
+  <button class="btn" id="rollBtn">Згенерувати число</button>
+
+  <div class="toggle-row">
+    <span>Без повторів, поки не вийдуть усі 15</span>
+    <label class="switch">
+      <input type="checkbox" id="noRepeatToggle">
+      <span class="slider"></span>
+    </label>
+  </div>
+  <div class="pool-note" id="poolNote"></div>
+
+  <div class="row">
+    <button class="btn secondary" id="resetBtn">Скинути історію</button>
+  </div>
+
+  <div class="history" id="historyBlock" style="display:none;">
+    <div class="label">Останні результати (новіші зліва)</div>
+    <div class="chips" id="historyChips"></div>
+  </div>
+</div>
+
+<script>
+const MIN = 1, MAX = 15;
+const numDisplay = document.getElementById("numDisplay");
+const rollBtn = document.getElementById("rollBtn");
+const resetBtn = document.getElementById("resetBtn");
+const noRepeatToggle = document.getElementById("noRepeatToggle");
+const historyBlock = document.getElementById("historyBlock");
+const historyChips = document.getElementById("historyChips");
+const poolNote = document.getElementById("poolNote");
+
+let history = [];
+let pool = [];       // залишок чисел, які ще не випадали (для режиму "без повторів")
+let rolling = false;
+
+function freshPool(){
+  const arr = [];
+  for(let i = MIN; i <= MAX; i++) arr.push(i);
+  return arr;
+}
+pool = freshPool();
+
+function updatePoolNote(){
+  if(noRepeatToggle.checked){
+    poolNote.textContent = `Залишилось чисел у коробці: ${pool.length} із ${MAX - MIN + 1}`;
+  } else {
+    poolNote.textContent = "";
+  }
+}
+updatePoolNote();
+
+function renderHistory(){
+  if(history.length === 0){
+    historyBlock.style.display = "none";
+    return;
+  }
+  historyBlock.style.display = "block";
+  historyChips.innerHTML = history.slice(0, 20).map(n => `<span>${n}</span>`).join("");
+}
+
+function pickNumber(){
+  if(noRepeatToggle.checked){
+    if(pool.length === 0) pool = freshPool();
+    const idx = Math.floor(Math.random() * pool.length);
+    const val = pool[idx];
+    pool.splice(idx, 1);
+    return val;
+  }
+  return Math.floor(Math.random() * (MAX - MIN + 1)) + MIN;
+}
+
+function roll(){
+  if(rolling) return;
+  rolling = true;
+  rollBtn.disabled = true;
+  numDisplay.classList.remove("empty");
+  numDisplay.classList.add("spin");
+
+  const finalValue = pickNumber();
+  let ticks = 0;
+  const totalTicks = 14 + Math.floor(Math.random() * 6); // коротка "анімація" перебору чисел
+  const interval = setInterval(() => {
+    ticks++;
+    numDisplay.textContent = Math.floor(Math.random() * (MAX - MIN + 1)) + MIN;
+    if(ticks >= totalTicks){
+      clearInterval(interval);
+      numDisplay.textContent = finalValue;
+      numDisplay.classList.remove("spin");
+      history.unshift(finalValue);
+      renderHistory();
+      updatePoolNote();
+      rolling = false;
+      rollBtn.disabled = false;
+    }
+  }, 45);
+}
+
+rollBtn.addEventListener("click", roll);
+
+resetBtn.addEventListener("click", () => {
+  history = [];
+  pool = freshPool();
+  numDisplay.textContent = "?";
+  numDisplay.classList.add("empty");
+  numDisplay.classList.remove("spin");
+  renderHistory();
+  updatePoolNote();
+});
+
+noRepeatToggle.addEventListener("change", () => {
+  pool = freshPool();
+  updatePoolNote();
+});
+</script>
+</body>
+</html>
+
+</body></html>

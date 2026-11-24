@@ -1,0 +1,1461 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5">
+<title>Тема 2. Збір даних — інтерактивні вправи</title>
+<style>
+  :root{
+    --bg: #10131f;
+    --panel: #171b2c;
+    --panel-2: #1e2338;
+    --line: #2b3050;
+    --text: #e9ecf7;
+    --text-dim: #9aa2c4;
+    --amber: #f5a742;
+    --teal: #3ecfb2;
+    --violet: #8b7cf6;
+    --red: #ef6a6a;
+    --green: #4fd18c;
+    --radius-lg: 18px;
+    --radius-sm: 10px;
+    font-size: 17px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1100px 500px at 85% -10%, rgba(139,124,246,.14), transparent 60%),
+      radial-gradient(900px 500px at -10% 110%, rgba(62,207,178,.12), transparent 60%),
+      var(--bg);
+    color:var(--text);
+    font-family: "Segoe UI", Avenir, "Helvetica Neue", Arial, sans-serif;
+    line-height:1.5;
+    min-height:100vh;
+    padding-bottom:60px;
+  }
+  .wrap{max-width:920px; margin:0 auto; padding:0 20px;}
+
+  header.top{
+    padding:34px 20px 26px;
+    border-bottom:1px solid var(--line);
+    background: linear-gradient(180deg, rgba(139,124,246,.08), transparent);
+  }
+  .drive-tag{
+    display:inline-flex; align-items:center; gap:10px;
+    background:var(--panel-2); border:1px solid var(--line);
+    padding:6px 14px 6px 10px; border-radius:999px;
+    font-size:.78rem; color:var(--text-dim); letter-spacing:.02em;
+    margin-bottom:18px;
+  }
+  .drive-tag .dot{width:8px;height:8px;border-radius:50%;background:var(--teal); box-shadow:0 0 8px var(--teal);}
+  h1{
+    font-size:clamp(1.6rem, 4vw, 2.3rem);
+    margin:0 0 8px;
+    font-weight:800;
+    letter-spacing:-.01em;
+  }
+  .sub{color:var(--text-dim); max-width:66ch; font-size:1rem;}
+  .meta-grid{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:12px; margin-top:22px;
+  }
+  .meta-card{
+    background:var(--panel); border:1px solid var(--line);
+    border-radius:var(--radius-sm); padding:14px 16px;
+  }
+  .meta-card .label{font-size:.72rem; color:var(--teal); text-transform:uppercase; letter-spacing:.08em; margin-bottom:6px;}
+  .meta-card .val{font-size:.92rem; color:var(--text);}
+  .who-badge{
+    display:inline-flex; align-items:center; gap:8px; margin-top:16px;
+    background:var(--panel); border:1px solid var(--line); padding:8px 14px;
+    border-radius:999px; font-size:.85rem; color:var(--text-dim);
+  }
+  .who-badge b{color:var(--teal);}
+
+  .flow-strip{ display:flex; gap:8px; margin-top:20px; flex-wrap:wrap; }
+  .flow-strip span{
+    flex:1; min-width:110px; text-align:center; padding:10px 8px; border-radius:var(--radius-sm);
+    font-size:.8rem; font-weight:600; border:1px solid var(--line);
+  }
+  .flow-strip span:nth-child(1){background:rgba(139,124,246,.16); color:#d9d3fb; border-color:rgba(139,124,246,.4);}
+  .flow-strip span:nth-child(2){background:rgba(62,207,178,.12); color:#bdf1e5; border-color:rgba(62,207,178,.35);}
+  .flow-strip span:nth-child(3){background:rgba(245,167,66,.12); color:#f8d8ac; border-color:rgba(245,167,66,.35);}
+  .flow-strip .arrow{flex:0 0 auto; align-self:center; color:var(--text-dim);}
+
+  nav.tabs{
+    display:flex; gap:8px; overflow-x:auto; padding:16px 20px;
+    border-bottom:1px solid var(--line);
+    position:sticky; top:0; background:rgba(16,19,31,.92); backdrop-filter:blur(6px);
+    z-index:10;
+  }
+  nav.tabs::-webkit-scrollbar{height:6px;}
+  nav.tabs::-webkit-scrollbar-thumb{background:var(--line); border-radius:4px;}
+  .tab-btn{
+    flex:0 0 auto;
+    background:var(--panel); color:var(--text-dim); border:1px solid var(--line);
+    padding:9px 16px; border-radius:999px; cursor:pointer; font-size:.86rem;
+    white-space:nowrap; transition:.15s;
+  }
+  .tab-btn:hover{border-color:var(--violet); color:var(--text);}
+  .tab-btn.active{background:var(--violet); color:#fff; border-color:var(--violet);}
+
+  main{padding:28px 20px 10px;}
+  section.view{display:none;}
+  section.view.active{display:block;}
+
+  .ex{
+    background:var(--panel); border:1px solid var(--line);
+    border-radius:var(--radius-lg); padding:22px 22px 24px; margin-bottom:22px;
+    position:relative;
+  }
+  .ex-head{display:flex; align-items:flex-start; justify-content:space-between; gap:14px; margin-bottom:6px; flex-wrap:wrap;}
+  .ex-num{color:var(--text-dim); font-size:.85rem;}
+  .ex-title{font-size:1.15rem; font-weight:700; margin:2px 0 4px;}
+  .level-chip{
+    font-size:.78rem; padding:4px 10px; border-radius:999px; white-space:nowrap;
+    border:1px solid var(--line);
+  }
+  .lvl-basic{color:var(--green); border-color:rgba(79,209,140,.4); background:rgba(79,209,140,.08);}
+  .lvl-mid{color:var(--amber); border-color:rgba(245,167,66,.4); background:rgba(245,167,66,.08);}
+  .lvl-high{color:var(--red); border-color:rgba(239,106,106,.4); background:rgba(239,106,106,.08);}
+  .type-tag{font-size:.76rem; color:var(--teal); margin-bottom:12px;}
+  .prompt{margin:10px 0 16px; font-size:1rem;}
+  .prompt b{color:var(--amber);}
+
+  .opt-list{display:flex; flex-direction:column; gap:10px;}
+  .opt{
+    text-align:left; width:100%;
+    background:var(--panel-2); color:var(--text); border:1px solid var(--line);
+    padding:13px 16px; border-radius:var(--radius-sm); cursor:pointer;
+    font-size:.98rem; transition:.12s;
+  }
+  .opt:hover{border-color:var(--violet);}
+  .opt.correct{background:rgba(79,209,140,.15); border-color:var(--green);}
+  .opt.wrong{background:rgba(239,106,106,.15); border-color:var(--red);}
+  .opt.disabled{cursor:default; opacity:.85;}
+  .opt.picked-multi{border-color:var(--violet); box-shadow:inset 0 0 0 1px var(--violet);}
+
+  .feedback{
+    margin-top:14px; padding:12px 14px; border-radius:var(--radius-sm);
+    font-size:.92rem; display:none;
+  }
+  .feedback.show{display:block;}
+  .feedback.ok{background:rgba(79,209,140,.12); border:1px solid rgba(79,209,140,.4); color:#cdeedd;}
+  .feedback.bad{background:rgba(239,106,106,.12); border:1px solid rgba(239,106,106,.4); color:#f6d3d3;}
+
+  .btn{
+    background:var(--violet); color:#fff; border:none; padding:10px 18px;
+    border-radius:999px; cursor:pointer; font-size:.9rem; font-weight:600;
+    margin-top:14px;
+  }
+  .btn:hover{filter:brightness(1.08);}
+  .btn.secondary{background:transparent; border:1px solid var(--line); color:var(--text-dim);}
+  .btn:disabled{opacity:.4; cursor:default;}
+
+  .match-wrap{display:grid; grid-template-columns:1fr 1fr; gap:22px;}
+  @media (max-width:560px){.match-wrap{grid-template-columns:1fr;}}
+  .match-col .m-item{
+    background:var(--panel-2); border:1px solid var(--line); padding:12px 14px;
+    border-radius:var(--radius-sm); margin-bottom:9px; cursor:pointer; font-size:.92rem;
+  }
+  .match-col .m-item.selected{border-color:var(--violet); box-shadow:inset 0 0 0 1px var(--violet);}
+  .match-col .m-item.linked-correct{border-color:var(--green); background:rgba(79,209,140,.12);}
+  .match-col .m-item.linked-wrong{border-color:var(--red); background:rgba(239,106,106,.12);}
+  .match-col .m-item.done{cursor:default;}
+
+  .order-list{display:flex; flex-direction:column; gap:8px;}
+  .order-item{
+    background:var(--panel-2); border:1px solid var(--line); border-radius:var(--radius-sm);
+    padding:11px 14px; display:flex; align-items:center; gap:12px; font-size:.92rem;
+  }
+  .order-item .idx{color:var(--amber); font-weight:700; width:22px;}
+  .order-item .arrows{margin-left:auto; display:flex; gap:6px;}
+  .order-item .arrows button{
+    background:var(--panel); border:1px solid var(--line); color:var(--text);
+    width:30px; height:30px; border-radius:8px; cursor:pointer;
+  }
+  .order-item.correct-pos{border-color:var(--green);}
+  .order-item.wrong-pos{border-color:var(--red);}
+
+  .drag-source{display:flex; flex-wrap:wrap; gap:10px; margin-bottom:16px; min-height:20px;}
+  .drag-chip{
+    background:var(--panel-2); border:1px solid var(--violet); color:var(--text);
+    padding:9px 14px; border-radius:999px; cursor:grab; font-size:.88rem;
+    user-select:none;
+  }
+  .drag-chip.placed{opacity:.35; cursor:default;}
+  .buckets{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media (max-width:560px){.buckets{grid-template-columns:1fr;}}
+  .bucket{
+    min-height:110px; background:var(--panel-2); border:2px dashed var(--line);
+    border-radius:var(--radius-sm); padding:12px;
+  }
+  .bucket.over{border-color:var(--teal);}
+  .bucket h4{margin:0 0 8px; font-size:.85rem; color:var(--teal);}
+  .bucket .drag-chip{margin:0 6px 6px 0; cursor:default; border-color:var(--line);}
+  .bucket .drag-chip.right{border-color:var(--green); background:rgba(79,209,140,.14);}
+  .bucket .drag-chip.wrong{border-color:var(--red); background:rgba(239,106,106,.14);}
+
+  .fill-text{font-size:1rem; line-height:2.1; margin-bottom:14px;}
+  .blank-input{
+    background:var(--bg); border:1px solid var(--violet); color:var(--text);
+    border-radius:6px; padding:4px 8px; font-size:.95rem; width:170px; text-align:center;
+  }
+  .blank-input.correct{border-color:var(--green); background:rgba(79,209,140,.1);}
+  .blank-input.wrong{border-color:var(--red); background:rgba(239,106,106,.1);}
+  .wordbank{display:flex; flex-wrap:wrap; gap:8px; margin:6px 0 16px;}
+  .wordbank span{
+    background:var(--panel-2); border:1px solid var(--line); padding:5px 12px;
+    border-radius:999px; font-size:.82rem; color:var(--text-dim);
+  }
+
+  .progress-bar{
+    height:8px; background:var(--panel-2); border-radius:99px; overflow:hidden; margin-bottom:22px;
+    border:1px solid var(--line);
+  }
+  .progress-fill{height:100%; width:0%; background:linear-gradient(90deg, var(--teal), var(--violet)); transition:width .3s;}
+  .score-badge{
+    display:inline-flex; align-items:center; gap:8px; background:var(--panel-2);
+    border:1px solid var(--line); padding:6px 14px; border-radius:999px; font-size:.85rem; color:var(--text-dim);
+  }
+  .result-box{ text-align:center; padding:40px 20px; }
+  .result-box .big{font-size:3rem; font-weight:800; color:var(--amber); margin-bottom:6px;}
+  .note{
+    font-size:.82rem; color:var(--text-dim); background:var(--panel-2); border:1px solid var(--line);
+    border-radius:var(--radius-sm); padding:10px 14px; margin:14px 0 26px;
+  }
+
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(8,9,16,.86); z-index:100;
+    display:flex; align-items:center; justify-content:center; padding:20px;
+    backdrop-filter:blur(3px);
+  }
+  .modal-box{
+    background:var(--panel); border:1px solid var(--line); border-radius:var(--radius-lg);
+    padding:28px 26px; max-width:420px; width:100%;
+  }
+  .modal-box h2{margin:0 0 10px; font-size:1.25rem;}
+  .modal-box p{color:var(--text-dim); font-size:.92rem; margin-bottom:18px;}
+  .modal-box input{
+    width:100%; background:var(--panel-2); border:1px solid var(--line); color:var(--text);
+    padding:11px 14px; border-radius:var(--radius-sm); font-size:.95rem; margin-bottom:12px;
+  }
+
+  .report-table{width:100%; border-collapse:collapse; font-size:.88rem; margin-bottom:18px;}
+  .report-table th, .report-table td{
+    text-align:left; padding:10px 10px; border-bottom:1px solid var(--line);
+  }
+  .report-table th{color:var(--text-dim); font-weight:600; font-size:.78rem; text-transform:uppercase; letter-spacing:.04em;}
+  .report-summary{
+    background:var(--panel-2); border:1px solid var(--line); border-radius:var(--radius-sm);
+    padding:14px 16px; margin-bottom:18px; font-size:.95rem;
+  }
+  .report-actions{display:flex; gap:10px; flex-wrap:wrap;}
+
+  /* practical task specific */
+  .scenario-box{
+    background:var(--panel-2); border:1px solid var(--line); border-radius:var(--radius-sm);
+    padding:16px 18px; margin-bottom:18px; font-size:.96rem;
+  }
+  .scenario-box .tag{font-size:.72rem; color:var(--violet); text-transform:uppercase; letter-spacing:.06em; margin-bottom:8px;}
+  .step-block{
+    border-top:1px solid var(--line); padding-top:18px; margin-top:18px;
+  }
+  .step-block:first-of-type{border-top:none; padding-top:0; margin-top:0;}
+  .step-block h3{font-size:1rem; margin:0 0 10px; color:var(--teal);}
+  .toggle-row{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    background:var(--panel-2); border:1px solid var(--line); border-radius:var(--radius-sm);
+    padding:12px 16px; margin-bottom:10px;
+  }
+  .toggle-row .q{font-size:.92rem; flex:1;}
+  .toggle-btns{display:flex; gap:6px; flex:0 0 auto;}
+  .toggle-btns button{
+    background:var(--panel); border:1px solid var(--line); color:var(--text-dim);
+    padding:7px 14px; border-radius:999px; cursor:pointer; font-size:.84rem;
+  }
+  .toggle-btns button.chosen-yes{background:rgba(79,209,140,.18); border-color:var(--green); color:#cdeedd;}
+  .toggle-btns button.chosen-no{background:rgba(239,106,106,.18); border-color:var(--red); color:#f6d3d3;}
+  .toggle-row.right{border-color:var(--green);}
+  .toggle-row.wrong{border-color:var(--red);}
+  .pill-radio{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:6px;}
+  .pill-radio button{
+    background:var(--panel-2); border:1px solid var(--line); color:var(--text);
+    padding:10px 18px; border-radius:999px; cursor:pointer; font-size:.92rem;
+  }
+  .pill-radio button.chosen{border-color:var(--violet); box-shadow:inset 0 0 0 1px var(--violet); background:rgba(139,124,246,.12);}
+  .pill-radio button.right{border-color:var(--green); background:rgba(79,209,140,.15);}
+  .pill-radio button.wrong{border-color:var(--red); background:rgba(239,106,106,.15);}
+  .practical-score{
+    text-align:center; padding:24px 16px; background:var(--panel-2); border:1px solid var(--line);
+    border-radius:var(--radius-sm); margin-top:18px;
+  }
+  .practical-score .big{font-size:2.4rem; font-weight:800; color:var(--amber);}
+
+  /* clickable text-span markers (harder interactive practical task) */
+  .textspan{cursor:pointer; padding:1px 4px; border-radius:5px; transition:.12s;}
+  .textspan:hover{background:rgba(139,124,246,.18);}
+  .textspan.picked{background:rgba(139,124,246,.28); box-shadow:inset 0 0 0 1px var(--violet);}
+  .textspan.right{background:rgba(79,209,140,.22); box-shadow:inset 0 0 0 1px var(--green);}
+  .textspan.missed{background:rgba(239,106,106,.16); box-shadow:inset 0 0 0 1px var(--red); text-decoration:underline dotted var(--red);}
+  .textspan.wrong-pick{background:rgba(239,106,106,.3); box-shadow:inset 0 0 0 1px var(--red);}
+  .grade-badge{
+    text-align:center; padding:22px 16px; background:linear-gradient(160deg, rgba(245,167,66,.14), var(--panel-2));
+    border:1px solid rgba(245,167,66,.4); border-radius:var(--radius-sm); margin-bottom:18px;
+  }
+  .grade-badge .big{font-size:2.6rem; font-weight:800; color:var(--amber); line-height:1.1;}
+  .grade-badge .lbl{color:var(--text-dim); font-size:.85rem; margin-top:6px;}
+</style>
+</head>
+<body>
+
+<div class="modal-overlay" id="nameModal">
+  <div class="modal-box">
+    <h2>Перш ніж почати 👋</h2>
+    <p>Введіть своє ім'я та прізвище — це потрібно, щоб зафіксувати ваш результат для вчителя.</p>
+    <input id="studentNameInput" placeholder="Ім'я та прізвище" autocomplete="off">
+    <input id="studentClassInput" placeholder="Клас (необов'язково)" autocomplete="off">
+    <button class="btn" id="startBtn" style="margin-top:4px;">Почати вправи</button>
+  </div>
+</div>
+
+<header class="top">
+  <div class="wrap">
+    <div class="drive-tag"><span class="dot"></span> Розділ 2 · Дані, інформація, безпека</div>
+    <h1>Тема 2. Збір даних</h1>
+    <p class="sub">Інтерактивні вправи за матеріалом підручника з інформатики. Пройдіть завдання по черзі, виконайте практичне завдання, а наприкінці — фінальний тест із підрахунком балів.</p>
+    <div class="meta-grid">
+      <div class="meta-card"><div class="label">Клас</div><div class="val">9 клас</div></div>
+      <div class="meta-card"><div class="label">Основні поняття</div><div class="val">Форми даних, первинні й вторинні джерела даних, внутрішні й зовнішні джерела, якість інформації, атрибути якості (точність, доцільність, актуальність, стислість, повнота)</div></div>
+      <div class="meta-card"><div class="label">Навички</div><div class="val">Розрізняти первинні/вторинні та внутрішні/зовнішні джерела даних; оцінювати якість інформації за 5 атрибутами; застосовувати перелік перевірочних запитань до реального джерела</div></div>
+    </div>
+    <div class="flow-strip">
+      <span>Первинні дані</span><span class="arrow">→</span><span>Вторинні дані</span><span class="arrow">→</span><span>Якісна інформація</span>
+    </div>
+    <div class="who-badge" id="whoBadge">Учень: <b>—</b></div>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" data-view="v1">1–3 · Форми даних</button>
+  <button class="tab-btn" data-view="v2">4–6 · Джерела даних</button>
+  <button class="tab-btn" data-view="v3">7–9 · Якість інформації</button>
+  <button class="tab-btn" data-view="v4">10–12 · Практика</button>
+  <button class="tab-btn" data-view="vpractical">🧪 Практичне завдання</button>
+  <button class="tab-btn" data-view="vtest">🏁 Фінальний тест</button>
+  <button class="tab-btn" data-view="vprogress">📊 Мій прогрес</button>
+</nav>
+
+<main class="wrap">
+
+<div class="note">Примітка щодо джерела: невеликий текст дрібним шрифтом у нижньому колонтитулі сторінок (службові позначки видавництва щодо копіювання) на скриншотах нерозбірливий, тому він не використовувався у вправах, оскільки не містить навчального матеріалу.</div>
+
+<!-- ================= VIEW 1 ================= -->
+<section class="view active" id="v1">
+
+  <div class="ex" data-ex="1">
+    <div class="ex-head">
+      <div><div class="ex-num">Вправа 1</div><div class="ex-title">Що таке «збір даних»?</div></div>
+      <div class="level-chip lvl-basic">🟢 Базовий</div>
+    </div>
+    <div class="type-tag">Тип: один правильний варіант</div>
+    <div class="prompt">Оберіть правильне твердження про <b>збір даних</b>.</div>
+    <div class="opt-list" data-type="single" data-correct="2">
+      <button class="opt">Збір даних потрібен лише наприкінці проєкту, щоб підбити підсумки</button>
+      <button class="opt">Дані завжди надходять лише в одній формі — у вигляді чисел</button>
+      <button class="opt">Збір даних — найважливіший етап будь-якого проєкту, і методи збору залежать від типу даних</button>
+      <button class="opt">Якість зібраних даних не впливає на подальший аналіз</button>
+    </div>
+    <div class="feedback"></div>
+  </div>
+
+  <div class="ex" data-ex="2">
+    <div class="ex-head">
+      <div><div class="ex-num">Вправа 2</div><div class="ex-title">Так чи ні: форми та збір даних</div></div>
+      <div class="level-chip lvl-basic">🟢 Базовий</div>
+    </div>
+    <div class="type-tag">Тип: так / ні (кілька тверджень)</div>
+    <div id="tf2"></div>
+  </div>
+
+  <div class="ex" data-ex="3">
+    <div class="ex-head">
+      <div><div class="ex-num">Вправа 3</div><div class="ex-title">Форма даних ↔ приклад</div></div>
+      <div class="level-chip lvl-basic">🟢 Базовий</div>
+    </div>
+    <div class="type-tag">Тип: встановлення відповідності (натисніть по одному елементу зліва і справа)</div>
+    <div class="prompt">З'єднайте форму даних із прикладом, який їй відповідає.</div>
+    <div id="match3"></div>
+    <div class="feedback"></div>
+  </div>
+
+</section>
+
+<!-- ================= VIEW 2 ================= -->
+<section class="view" id="v2">
+
+  <div class="ex" data-ex="4">
+    <div class="ex-head">
+      <div><div class="ex-num">Вправа 4</div><div class="ex-title">Ознаки первинних джерел</div></div>
+      <div class="level-chip lvl-mid">🟡 Середній</div>
+    </div>
+    <div class="type-tag">Тип: декілька правильних відповідей</div>
+    <div class="prompt">Оберіть <b>усі</b> твердження, які правильно описують <b>первинні джерела даних</b> (а не вторинні).</div>
+    <div class="opt-list" data-type="multi" data-correct="0,1,3">
+      <button class="opt">Зібрані безпосередньо з першоджерела (наприклад, за допомогою датчиків, реєстраторів або анкет)</button>
+      <button class="opt">Перебувають у сирому, неорганізованому вигляді</button>
+      <button class="opt">Отримані з книг, журналів, документів або вебсайтів</button>
+      <button class="opt">Точніші, оскільки відображають актуальні дані</button>
+    </div>
+    <button class="btn" data-check="4">Перевірити</button>
+    <div class="feedback"></div>
+  </div>
+
+  <div class="ex" data-ex="5">
+    <div class="ex-head">
+      <div><div class="ex-num">Вправа 5</div><div class="ex-title">Заповніть пропуски: анемометр і вітрово-холодовий індекс</div></div>
+      <div class="level-chip lvl-mid">🟡 Середній</div>
+    </div>
+    <div class="type-tag">Тип: заповнення пропусків</div>
+    <div class="fill-text" id="fill5"></div>
+    <div class="wordbank">Слова для довідки: первинним · вторинне · швидкості вітру</div>
+    <button class="btn" data-check="5">Перевірити</button>
+    <div class="feedback"></div>
+  </div>
+
+  <div class="ex" data-ex="6">
+    <div class="ex-head">
+      <div><div class="ex-num">Вправа 6</div><div class="ex-title">Внутрішні чи зовнішні джерела?</div></div>
+      <div class="level-chip lvl-mid">🟡 Середній</div>
+    </div>
+    <div class="type-tag">Тип: перетягування елементів (drag & drop) за категоріями</div>
+    <div class="prompt">Перетягніть кожне джерело даних у відповідну категорію (за таблицею «Внутрішні дані / Зовнішні дані» з підручника).</div>
+    <div class="drag-source" id="dragSource6"></div>
+    <div class="buckets">
+      <div class="bucket" id="bucketInt" data-cat="int"><h4>Внутрішні джерела</h4></div>
+      <div class="bucket" id="bucketExt" data-cat="ext"><h4>Зовнішні джерела</h4></div>
+    </div>
+    <button class="btn" data-check="6">Перевірити розподіл</button>
+    <div class="feedback"></div>
+  </div>
+
+</section>
+
+<!-- ================= VIEW 3 ================= -->
+<section class="view" id="v3">
+
+  <div class="ex" data-ex="7">
+    <div class="ex-head">
+      <div><div class="ex-num">Вправа 7</div><div class="ex-title">Кроки перевірки хронології інформації</div></div>
+      <div class="level-chip lvl-mid">🟡 Середній</div>
+    </div>
+    <div class="type-tag">Тип: встановлення правильної послідовності (кнопками ↑ ↓)</div>
+    <div class="prompt">Розташуйте кроки перевірки хронології (актуальності) інформації в тому порядку, як їх наведено в підручнику.</div>
+    <div class="order-list" id="order7"></div>
+    <button class="btn" data-check="7">Перевірити порядок</button>
+    <div class="feedback"></div>
+  </div>
+
+  <div class="ex" data-ex="8">
+    <div class="ex-head">
+      <div><div class="ex-num">Вправа 8</div><div class="ex-title">Атрибут якості ↔ суть перевірки</div></div>
+      <div class="level-chip lvl-mid">🟡 Середній</div>
+    </div>
+    <div class="type-tag">Тип: встановлення відповідності</div>
+    <div class="prompt">З'єднайте кожен атрибут якості інформації з тим, що саме він означає.</div>
+    <div id="match8"></div>
+    <div class="feedback"></div>
+  </div>
+
+  <div class="ex" data-ex="9">
+    <div class="ex-head">
+      <div><div class="ex-num">Вправа 9</div><div class="ex-title">Знайди помилку</div></div>
+      <div class="level-chip lvl-high">🔴 Високий</div>
+    </div>
+    <div class="type-tag">Тип: знайди помилку</div>
+    <div class="prompt">Учениця написала в конспекті: <br><br>
+    <em>«Вторинні дані завжди точніші за первинні, адже їх уже опрацювали й зібрали в зручному вигляді».</em><br><br>
+    Оберіть варіант, який <b>правильно виправляє</b> цю помилку.</div>
+    <div class="opt-list" data-type="single" data-correct="1">
+      <button class="opt">Твердження правильне, помилки немає</button>
+      <button class="opt">Помилка в тому, що саме первинні дані зазвичай точніші, бо зібрані безпосередньо з першоджерела, тоді як вторинні — менш точні, оскільки відображають вже минулі події й пройшли додаткову обробку</button>
+      <button class="opt">Помилка в тому, що вторинні дані не можна отримати з книг чи документів</button>
+      <button class="opt">Помилка в тому, що первинні дані завжди дешевші за вторинні</button>
+    </div>
+    <div class="feedback"></div>
+  </div>
+
+</section>
+
+<!-- ================= VIEW 4 ================= -->
+<section class="view" id="v4">
+
+  <div class="ex" data-ex="10">
+    <div class="ex-head">
+      <div><div class="ex-num">Вправа 10</div><div class="ex-title">Ситуація: вітрово-холодовий індекс</div></div>
+      <div class="level-chip lvl-high">🔴 Високий</div>
+    </div>
+    <div class="type-tag">Тип: ситуаційне завдання</div>
+    <div class="prompt">Дослідник узяв дані про швидкість вітру з одного датчика та дані про температуру повітря з іншого датчика, щоб обчислити за формулою вітрово-холодовий індекс. Отриманий індекс є прикладом:</div>
+    <div class="opt-list" data-type="single" data-correct="1">
+      <button class="opt">Первинного джерела даних, бо його виміряв сам дослідник</button>
+      <button class="opt">Вторинного джерела даних, бо його отримали шляхом обробки вже зібраних іншими даних</button>
+      <button class="opt">Внутрішнього джерела даних організації</button>
+      <button class="opt">Даних, форма яких — зображення</button>
+    </div>
+    <div class="feedback"></div>
+  </div>
+
+  <div class="ex" data-ex="11">
+    <div class="ex-head">
+      <div><div class="ex-num">Вправа 11</div><div class="ex-title">Перевірка точності інформації</div></div>
+      <div class="level-chip lvl-high">🔴 Високий</div>
+    </div>
+    <div class="type-tag">Тип: декілька правильних відповідей</div>
+    <div class="prompt">Оберіть <b>усі</b> запитання, які підручник радить ставити, щоб перевірити, чи є інформація <b>точною</b>.</div>
+    <div class="opt-list" data-type="multi" data-correct="0,1,3">
+      <button class="opt">Чи можна перевірити факти, статистику або інформацію з інших джерел?</button>
+      <button class="opt">Чи відомо, що автор інформації є експертом у цій сфері?</button>
+      <button class="opt">Чи є фото на сторінці яскравим та привабливим?</button>
+      <button class="opt">Чи не містить інформація неправильно написаних слів, пропущених чи неправильно розміщених символів та неправильно оформлених цитат?</button>
+    </div>
+    <button class="btn" data-check="11">Перевірити</button>
+    <div class="feedback"></div>
+  </div>
+
+  <div class="ex" data-ex="12">
+    <div class="ex-head">
+      <div><div class="ex-num">Вправа 12</div><div class="ex-title">П'ять атрибутів якості</div></div>
+      <div class="level-chip lvl-high">🔴 Високий</div>
+    </div>
+    <div class="type-tag">Тип: один правильний варіант</div>
+    <div class="prompt">Скільки атрибутів якості інформації описано в підручнику, і який із варіантів <b>НЕ</b> входить до цього переліку?</div>
+    <div class="opt-list" data-type="single" data-correct="2">
+      <button class="opt">П'ять атрибутів: точність, доцільність, актуальність, стислість, повнота</button>
+      <button class="opt">До переліку входить атрибут «актуальність» (дата публікації та свіжість інформації)</button>
+      <button class="opt">До переліку входить атрибут «популярність» (кількість переглядів чи вподобань джерела)</button>
+      <button class="opt">До переліку входить атрибут «повнота» (наскільки інформація дає повну картину)</button>
+    </div>
+    <div class="feedback"></div>
+  </div>
+
+</section>
+
+<!-- ================= PRACTICAL TASK ================= -->
+<section class="view" id="vpractical">
+  <div class="ex">
+    <div class="ex-head">
+      <div><div class="ex-title">🧪 Практичне завдання: Розслідування якості джерела</div><div class="ex-num">Складніший кейс із 4 етапів — самостійно знаходьте ознаки проблем у тексті, а не лише обирайте «так/ні»</div></div>
+      <div class="level-chip lvl-high">🔴 Практика · 4 етапи</div>
+    </div>
+
+    <div class="scenario-box">
+      <div class="tag">Ситуація</div>
+      Для шкільного проєкту про вітрово-холодовий індекс ви шукаєте додаткові джерела даних в інтернеті й знаходите статтю в особистому блозі.
+    </div>
+
+    <div class="step-block">
+      <h3>Крок 1. Знайдіть ознаки низької якості прямо в тексті статті</h3>
+      <p style="color:var(--text-dim); font-size:.9rem; margin-top:-4px;">Натисніть на ті фрагменти, які насторожують щодо якості цього джерела. Серед варіантів є й такі, що насправді свідчать про добру якість, — не переплутайте.</p>
+      <div class="scenario-box" id="emailBox" style="font-size:.94rem; line-height:2;">
+        <span class="textspan" data-correct="yes">Автор: Аноним_2009 (більше про автора невідомо)</span><br>
+        <span class="textspan" data-correct="yes">Останнє оновлення: 2014 рік</span><br><br>
+        <span class="textspan" data-correct="yes">«ТОП-1 СЕНСАЦІЯ: вчені в ШОЦІ від цього способу виміряти холод!!!»</span> — так починається стаття.<br><br>
+        Автор наводить формулу розрахунку вітрово-холодового індексу, <span class="textspan" data-correct="yes">але дані про конкретні виміри подано без жодного посилання на джерело вимірювань чи прилад</span>.
+        <span class="textspan" data-correct="no">У статті також є посилання на офіційний сайт Національної гідрометеорологічної служби</span>, а
+        <span class="textspan" data-correct="no">текст написаний зрозумілою для школярів мовою</span>.
+        На жаль, <span class="textspan" data-correct="yes">сторінку заповнюють понад 15 рекламних банерів і спливаючих вікон, через які важко знайти основний текст</span>.
+      </div>
+      <div class="feedback" id="fb-email"></div>
+    </div>
+
+    <div class="step-block">
+      <h3>Крок 2. Визначте одразу ДВІ характеристики джерела за описом ситуації</h3>
+      <div class="prompt" style="margin-bottom:10px;"><b>Кейс А:</b> Учень особисто виміряв вологість повітря шкільним гігрометром просто на уроці природознавства.</div>
+      <div class="pill-radio" id="pCase1" data-correct="ПервВнутр">
+        <button data-v="ПервВнутр">Первинне та внутрішнє</button>
+        <button data-v="ПервЗовн">Первинне та зовнішнє</button>
+        <button data-v="ВторВнутр">Вторинне та внутрішнє</button>
+        <button data-v="ВторЗовн">Вторинне та зовнішнє</button>
+      </div>
+      <div class="feedback" id="fb-case1"></div>
+
+      <div class="prompt" style="margin:18px 0 10px;"><b>Кейс Б:</b> Дослідницька команда іншого університету опублікувала узагальнену статтю про клімат регіону за останні 10 років, і школа використовує ці готові дані для порівняння зі своїми спостереженнями.</div>
+      <div class="pill-radio" id="pCase2" data-correct="ВторЗовн">
+        <button data-v="ПервВнутр">Первинне та внутрішнє</button>
+        <button data-v="ПервЗовн">Первинне та зовнішнє</button>
+        <button data-v="ВторВнутр">Вторинне та внутрішнє</button>
+        <button data-v="ВторЗовн">Вторинне та зовнішнє</button>
+      </div>
+      <div class="feedback" id="fb-case2"></div>
+    </div>
+
+    <div class="step-block">
+      <h3>Крок 3. Оцініть якість типового погодного вебсайту за атрибутами</h3>
+      <p style="color:var(--text-dim); font-size:.9rem; margin-top:-4px;">Для кожного твердження оберіть «Так», якщо воно правильно описує ознаку якісного джерела, або «Ні», якщо ні. Є пастки.</p>
+      <div id="qualityChecklist"></div>
+      <div class="feedback" id="fb-step3"></div>
+    </div>
+
+    <div class="step-block">
+      <h3>Крок 4. Розташуйте кроки перевірки нового джерела в правильному порядку</h3>
+      <p style="color:var(--text-dim); font-size:.9rem; margin-top:-4px;">Перш ніж довіряти новому джерелу даних, у якому порядку логічно його перевіряти?</p>
+      <div class="order-list" id="orderPractical"></div>
+      <div class="feedback" id="fb-step4"></div>
+    </div>
+
+    <button class="btn" id="checkPracticalBtn">Завершити практичне завдання й показати підсумок</button>
+    <div id="practicalResultArea"></div>
+  </div>
+</section>
+
+<!-- ================= FINAL TEST ================= -->
+<section class="view" id="vtest">
+  <div class="ex">
+    <div class="ex-head">
+      <div><div class="ex-title">🏁 Фінальний тест: Збір даних</div><div class="ex-num">12 запитань · автоматичний підрахунок балів</div></div>
+      <div class="score-badge" id="scoreBadge">Питання 1 / 12 · 0 балів</div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div id="testArea"></div>
+  </div>
+</section>
+
+<!-- ================= PROGRESS REPORT ================= -->
+<section class="view" id="vprogress">
+  <div class="ex">
+    <div class="ex-head">
+      <div><div class="ex-title">📊 Мій прогрес</div><div class="ex-num">Результати всіх вправ, практичного завдання й фінального тесту для вчителя</div></div>
+    </div>
+    <div id="progressArea"></div>
+  </div>
+</section>
+
+</main>
+
+<script>
+/* ============ STUDENT NAME MODAL ============ */
+let studentInfo = { name:"", cls:"" };
+const whoBadge = document.getElementById("whoBadge");
+document.getElementById("startBtn").addEventListener("click", ()=>{
+  const n = document.getElementById("studentNameInput").value.trim();
+  const c = document.getElementById("studentClassInput").value.trim();
+  studentInfo.name = n || "Учень (без імені)";
+  studentInfo.cls = c;
+  whoBadge.innerHTML = `Учень: <b>${studentInfo.name}</b>${c ? " · клас " + c : ""}`;
+  document.getElementById("nameModal").style.display = "none";
+});
+["studentNameInput","studentClassInput"].forEach(id=>{
+  document.getElementById(id).addEventListener("keydown", e=>{
+    if(e.key === "Enter") document.getElementById("startBtn").click();
+  });
+});
+
+/* ============ PROGRESS TRACKING ============ */
+const progress = {};
+function setProgress(exId, correct, total){
+  progress[String(exId)] = { correct, total };
+  if(document.getElementById("vprogress").classList.contains("active")) renderReport();
+}
+
+/* ============ TAB NAVIGATION ============ */
+document.querySelectorAll(".tab-btn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+    document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById(btn.dataset.view).classList.add("active");
+    if(btn.dataset.view === "vprogress") renderReport();
+    window.scrollTo({top:0, behavior:"smooth"});
+  });
+});
+
+/* ============ SINGLE CHOICE ============ */
+document.querySelectorAll('.opt-list[data-type="single"]').forEach(list=>{
+  const correct = parseInt(list.dataset.correct);
+  const fb = list.parentElement.querySelector(".feedback");
+  const exId = list.closest(".ex").dataset.ex;
+  list.querySelectorAll(".opt").forEach((btn,i)=>{
+    btn.addEventListener("click", ()=>{
+      if(list.classList.contains("locked")) return;
+      list.classList.add("locked");
+      list.querySelectorAll(".opt").forEach((b,j)=>{
+        b.classList.add("disabled");
+        if(j===correct) b.classList.add("correct");
+      });
+      const isCorrect = (i===correct);
+      setProgress(exId, isCorrect?1:0, 1);
+      if(isCorrect){
+        btn.classList.add("correct");
+        fb.textContent = "✅ Правильно! " + explainFor(list, true);
+        fb.className = "feedback show ok";
+      } else {
+        btn.classList.add("wrong");
+        fb.textContent = "❌ Неправильно. " + explainFor(list, false);
+        fb.className = "feedback show bad";
+      }
+    });
+  });
+});
+
+function explainFor(list, isCorrect){
+  const exId = list.closest(".ex").dataset.ex;
+  const bank = {
+    "1": {c:"Так, збір даних — найважливіший етап проєкту, а методи збору залежать від типу даних, хоча завжди мають перевіряти їхню точність і достовірність.", w:"Дані можуть надходити в різних формах, якість зібраних даних напряму впливає на подальший аналіз, а збір потрібен на початку, а не лише наприкінці проєкту."},
+    "9": {c:"Первинні дані зазвичай точніші, бо зібрані напряму з першоджерела; вторинні — менш точні, оскільки відображають уже минулі події й пройшли додаткову обробку.", w:"Подумайте: яке саме джерело даних зазвичай точніше — те, що зібране напряму, чи те, що пройшло обробку й відображає вже минулі події?"},
+    "10": {c:"Так, це вторинне джерело — індекс отримано шляхом обробки й об'єднання даних, які вже були зібрані з інших (первинних) джерел.", w:"Індекс тут не вимірюють напряму датчиком, а обчислюють на основі вже зібраних кимось даних — це ознака вторинного джерела."},
+    "12": {c:"Підручник називає рівно п'ять атрибутів якості: точність, доцільність, актуальність, стислість і повнота. «Популярність» серед них немає.", w:"«Популярність» (перегляди чи вподобання) не входить до п'яти атрибутів якості інформації, описаних у підручнику."}
+  };
+  const info = bank[exId];
+  if(!info) return "";
+  return isCorrect ? info.c : info.w;
+}
+
+/* ============ MULTI CHOICE ex4 & ex11 ============ */
+document.querySelectorAll('.opt-list[data-type="multi"]').forEach(list=>{
+  list.querySelectorAll(".opt").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      if(list.classList.contains("locked")) return;
+      btn.classList.toggle("picked-multi");
+    });
+  });
+});
+function checkMulti(checkBtnSelector, exId, explanation){
+  document.querySelector(checkBtnSelector).addEventListener("click", function(){
+    const ex = this.closest(".ex");
+    const list = ex.querySelector(".opt-list");
+    const correctSet = list.dataset.correct.split(",").map(Number);
+    const fb = ex.querySelector(".feedback");
+    if(list.classList.contains("locked")) return;
+    list.classList.add("locked");
+    let allOk = true;
+    list.querySelectorAll(".opt").forEach((b,i)=>{
+      const picked = b.classList.contains("picked-multi");
+      const shouldPick = correctSet.includes(i);
+      b.classList.add("disabled");
+      if(shouldPick){ b.classList.add("correct"); if(!picked) allOk=false; }
+      else if(picked){ b.classList.add("wrong"); allOk=false; }
+    });
+    setProgress(exId, allOk?1:0, 1);
+    fb.className = "feedback show " + (allOk ? "ok" : "bad");
+    fb.textContent = (allOk ? "✅ Точно! " : "❌ Не зовсім. ") + explanation;
+    this.disabled = true;
+  });
+}
+checkMulti('[data-check="4"]', "4", "Первинні дані зібрані безпосередньо з першоджерела, перебувають у сирому вигляді й точніші. А от отримання з книг/журналів/сайтів — це ознака саме вторинних джерел.");
+checkMulti('[data-check="11"]', "11", "Підручник радить перевіряти факти й статистику з інших джерел, авторитетність автора та відсутність помилок у написанні. А от привабливість фото ніяк не свідчить про точність інформації.");
+
+/* ============ TRUE/FALSE ex2 ============ */
+const tf2data = [
+  {t:"Дані можуть складатися не лише з тексту й чисел, а й із зображень, відео чи звуку.", c:true, e:"Так, підручник прямо зазначає, що дані можуть складатися із зображень, відео чи звуку, а не лише бути буквено-цифровими."},
+  {t:"Збір даних здійснюється за допомогою різних пристроїв, як-от датчики, реєстратори або анкети.", c:true, e:"Так, це один зі способів отримання даних, наведений у підручнику."},
+  {t:"Методи збору даних завжди однакові, незалежно від типу даних, які потрібно зібрати.", c:false, e:"Навпаки — методи збору даних залежать від типу даних, але завжди мають перевіряти їхню точність і достовірність."},
+  {t:"Перевага первинних даних полягає в тому, що вони спеціально адаптовані до потреб аналізу.", c:true, e:"Так, це саме та перевага первинних даних, яку наводить підручник у рубриці «Довідка»."}
+];
+const tf2el = document.getElementById("tf2");
+let tf2Correct = 0;
+tf2data.forEach((item,i)=>{
+  const row = document.createElement("div");
+  row.style.marginBottom = "14px";
+  row.innerHTML = `
+    <div class="prompt" style="margin-bottom:8px;">${i+1}. ${item.t}</div>
+    <div class="opt-list" style="display:flex; flex-direction:row; gap:10px;">
+      <button class="opt" data-v="true" style="flex:1;">Так</button>
+      <button class="opt" data-v="false" style="flex:1;">Ні</button>
+    </div>
+    <div class="feedback"></div>
+  `;
+  tf2el.appendChild(row);
+  const fb = row.querySelector(".feedback");
+  const btns = row.querySelectorAll(".opt");
+  btns.forEach(b=>{
+    b.addEventListener("click", ()=>{
+      if(row.dataset.done) return;
+      row.dataset.done = "1";
+      const val = b.dataset.v === "true";
+      btns.forEach(x=>x.classList.add("disabled"));
+      if(val === item.c){
+        tf2Correct++;
+        b.classList.add("correct");
+        fb.textContent = "✅ Правильно. " + item.e;
+        fb.className = "feedback show ok";
+      } else {
+        b.classList.add("wrong");
+        btns.forEach(x=>{ if((x.dataset.v==="true")===item.c) x.classList.add("correct"); });
+        fb.textContent = "❌ Неправильно. " + item.e;
+        fb.className = "feedback show bad";
+      }
+      setProgress("2", tf2Correct, tf2data.length);
+    });
+  });
+});
+
+/* ============ MATCH ex3 & ex8 ============ */
+function buildMatch(containerId, pairs){
+  const container = document.getElementById(containerId);
+  const exId = container.closest(".ex").dataset.ex;
+  const left = pairs.map((p,i)=>({...p, idx:i}));
+  const right = [...left].sort(()=>Math.random()-0.5);
+  container.innerHTML = `
+    <div class="match-wrap">
+      <div class="match-col" id="${containerId}-L"></div>
+      <div class="match-col" id="${containerId}-R"></div>
+    </div>
+  `;
+  const Lcol = document.getElementById(containerId+"-L");
+  const Rcol = document.getElementById(containerId+"-R");
+  left.forEach(p=>{
+    const d = document.createElement("div");
+    d.className = "m-item"; d.textContent = p.left; d.dataset.idx = p.idx;
+    Lcol.appendChild(d);
+  });
+  right.forEach(p=>{
+    const d = document.createElement("div");
+    d.className = "m-item"; d.textContent = p.right; d.dataset.idx = p.idx;
+    Rcol.appendChild(d);
+  });
+  let selL = null, matched = 0;
+  const total = pairs.length;
+  const fb = container.parentElement.querySelector(".feedback");
+  setProgress(exId, 0, total);
+  Lcol.querySelectorAll(".m-item").forEach(el=>{
+    el.addEventListener("click", ()=>{
+      if(el.classList.contains("done")) return;
+      Lcol.querySelectorAll(".m-item").forEach(x=>x.classList.remove("selected"));
+      el.classList.add("selected");
+      selL = el;
+    });
+  });
+  Rcol.querySelectorAll(".m-item").forEach(el=>{
+    el.addEventListener("click", ()=>{
+      if(el.classList.contains("done") || !selL) return;
+      const isRight = el.dataset.idx === selL.dataset.idx;
+      if(isRight){
+        selL.classList.remove("selected"); selL.classList.add("linked-correct","done");
+        el.classList.add("linked-correct","done");
+        matched++;
+        setProgress(exId, matched, total);
+        if(matched===total && fb){
+          fb.className = "feedback show ok";
+          fb.textContent = "✅ Усі пари з'єднано правильно! Чудова робота.";
+        }
+      } else {
+        el.classList.add("linked-wrong");
+        selL.classList.add("linked-wrong");
+        setTimeout(()=>{ el.classList.remove("linked-wrong"); selL.classList.remove("linked-wrong","selected"); }, 700);
+      }
+      selL = null;
+    });
+  });
+}
+buildMatch("match3", [
+  {left:"Текстові дані", right:"Повідомлення другу з нагадуванням про зустріч"},
+  {left:"Числові дані", right:"Кількість переглянутих учнем фільмів за місяць"},
+  {left:"Буквено-цифрові дані", right:"Пароль, що складається з літер, цифр і символів"},
+  {left:"Дані у вигляді зображення, відео чи звуку", right:"Фотографія, відеозапис або аудіозапис"}
+]);
+buildMatch("match8", [
+  {left:"Точність", right:"Наскільки інформація вільна від помилок і чи можна перевірити факти з інших джерел"},
+  {left:"Доцільність", right:"Наскільки інформація пов'язана саме з вашою темою чи питанням дослідження"},
+  {left:"Актуальність", right:"Наскільки свіжою є інформація і коли її востаннє публікували чи редагували"},
+  {left:"Повнота", right:"Чи надає інформація повну картину, необхідну для прийняття правильного рішення"}
+]);
+
+/* ============ ORDER ex7 ============ */
+function buildOrder(containerId, itemsInCorrectOrder){
+  const container = document.getElementById(containerId);
+  const shuffled = itemsInCorrectOrder.map((t,i)=>({t, correctIdx:i})).sort(()=>Math.random()-0.5);
+  function render(){
+    container.innerHTML = "";
+    shuffled.forEach((item,pos)=>{
+      const row = document.createElement("div");
+      row.className = "order-item";
+      row.innerHTML = `<span class="idx">${pos+1}.</span><span>${item.t}</span>
+        <span class="arrows">
+          <button data-dir="up" ${pos===0?"disabled":""}>↑</button>
+          <button data-dir="down" ${pos===shuffled.length-1?"disabled":""}>↓</button>
+        </span>`;
+      row.querySelector('[data-dir="up"]').addEventListener("click", ()=>{
+        [shuffled[pos-1], shuffled[pos]] = [shuffled[pos], shuffled[pos-1]];
+        render();
+      });
+      row.querySelector('[data-dir="down"]').addEventListener("click", ()=>{
+        [shuffled[pos+1], shuffled[pos]] = [shuffled[pos], shuffled[pos+1]];
+        render();
+      });
+      container.appendChild(row);
+    });
+  }
+  render();
+  container._getOrder = ()=>shuffled.map(s=>s.correctIdx);
+}
+buildOrder("order7", [
+  "Перевірте дати використання джерел",
+  "Перевірте історію ключових слів стосовно інтелектуальних прав, як-от зареєстровані торгові марки, авторські права, патенти та комерційні таємниці",
+  "Перевірте історію переглядів або редагування інформації",
+  "Перевірте дату публікації"
+]);
+document.querySelector('[data-check="7"]').addEventListener("click", function(){
+  const container = document.getElementById("order7");
+  const order = container._getOrder();
+  const isCorrect = order.every((v,i)=>v===i);
+  const items = container.querySelectorAll(".order-item");
+  items.forEach((el,i)=>{ el.classList.add(order[i]===i ? "correct-pos" : "wrong-pos"); });
+  setProgress("7", isCorrect?1:0, 1);
+  const fb = this.parentElement.querySelector(".feedback");
+  fb.className = "feedback show " + (isCorrect ? "ok" : "bad");
+  fb.textContent = isCorrect
+    ? "✅ Порядок правильний! Саме такий порядок кроків підручник наводить для перевірки хронології (актуальності) інформації."
+    : "❌ Порядок ще не зовсім правильний — зелена рамка означає «на своєму місці», червона — «потрібно пересунути». Спробуйте ще раз.";
+  this.disabled = isCorrect;
+});
+
+/* ============ FILL BLANK ex5 ============ */
+const fill5el = document.getElementById("fill5");
+fill5el.innerHTML = `Анемометр — це датчик <input class="blank-input" id="b1" placeholder="чого?" data-answer="швидкості вітру">, який є
+  <input class="blank-input" id="b2" placeholder="яким джерелом?" data-answer="первинним"> джерелом даних, оскільки вимірює показники напряму.
+  Якщо ж на основі цих вимірювань та інших даних обчислити вітрово-холодовий індекс, отриманий результат стане вже
+  <input class="blank-input" id="b3" placeholder="яке джерело?" data-answer="вторинне"> джерело даних.`;
+document.querySelector('[data-check="5"]').addEventListener("click", function(){
+  const ex = this.closest(".ex");
+  const exId = ex.dataset.ex;
+  const inputs = ex.querySelectorAll(".blank-input");
+  let correctCount = 0;
+  inputs.forEach(inp=>{
+    const val = inp.value.trim().toLowerCase();
+    const ans = inp.dataset.answer.toLowerCase();
+    if(val === ans){ inp.classList.add("correct"); inp.classList.remove("wrong"); correctCount++; }
+    else { inp.classList.add("wrong"); inp.classList.remove("correct"); }
+  });
+  setProgress(exId, correctCount, inputs.length);
+  const allOk = correctCount === inputs.length;
+  const fb = ex.querySelector(".feedback");
+  fb.className = "feedback show " + (allOk ? "ok" : "bad");
+  fb.textContent = allOk
+    ? "✅ Правильно! Анемометр — приклад первинного джерела даних (вимірює напряму), а вітрово-холодовий індекс, обчислений на основі цих і додаткових даних, — приклад вторинного джерела."
+    : "❌ Є неточності. Правильні слова: «швидкості вітру», «первинним», «вторинне». Порівняйте зі своїми відповідями (підсвічено червоним).";
+});
+
+/* ============ DRAG & DROP CATEGORIES ex6 ============ */
+const dragItems6 = [
+  {t:"Попередні маркетингові дослідження", cat:"int"},
+  {t:"Фінансові звіти", cat:"int"},
+  {t:"Дані про обсяги продажів", cat:"int"},
+  {t:"Інвентаризація запасів", cat:"int"},
+  {t:"Урядові джерела", cat:"ext"},
+  {t:"Інтернет", cat:"ext"},
+  {t:"Корпоративна звітність", cat:"ext"},
+  {t:"Університети", cat:"ext"}
+];
+const src6 = document.getElementById("dragSource6");
+dragItems6.forEach((item,i)=>{
+  const chip = document.createElement("div");
+  chip.className = "drag-chip";
+  chip.textContent = item.t;
+  chip.draggable = true;
+  chip.dataset.cat = item.cat;
+  chip.dataset.i = i;
+  chip.addEventListener("dragstart", e=>{ e.dataTransfer.setData("text/plain", i); });
+  src6.appendChild(chip);
+});
+["bucketInt","bucketExt"].forEach(id=>{
+  const bucket = document.getElementById(id);
+  bucket.addEventListener("dragover", e=>{ e.preventDefault(); bucket.classList.add("over"); });
+  bucket.addEventListener("dragleave", ()=> bucket.classList.remove("over"));
+  bucket.addEventListener("drop", e=>{
+    e.preventDefault();
+    bucket.classList.remove("over");
+    const i = e.dataTransfer.getData("text/plain");
+    const chip = src6.querySelector(`.drag-chip[data-i="${i}"]`);
+    if(chip && !chip.classList.contains("placed")){
+      const clone = chip.cloneNode(true);
+      clone.draggable = false;
+      bucket.appendChild(clone);
+      chip.classList.add("placed");
+    }
+  });
+});
+document.querySelector('[data-check="6"]').addEventListener("click", function(){
+  const ex = this.closest(".ex");
+  const exId = ex.dataset.ex;
+  const fb = ex.querySelector(".feedback");
+  let total = dragItems6.length, correct=0, placed=0;
+  ["bucketInt","bucketExt"].forEach(id=>{
+    const bucket = document.getElementById(id);
+    const cat = bucket.dataset.cat;
+    bucket.querySelectorAll(".drag-chip").forEach(chip=>{
+      placed++;
+      if(chip.dataset.cat === cat){ chip.classList.add("right"); correct++; }
+      else { chip.classList.add("wrong"); }
+    });
+  });
+  const allPlaced = placed === total;
+  if(allPlaced) setProgress(exId, correct, total);
+  fb.className = "feedback show " + (correct===total && allPlaced ? "ok" : "bad");
+  fb.textContent = !allPlaced
+    ? `Перетягніть усі ${total} карток у кошики перед перевіркою (розміщено: ${placed}).`
+    : (correct===total
+        ? "✅ Усі картки розподілено правильно! Внутрішні джерела перебувають під контролем організації, зовнішні — поза її межами."
+        : `Розподілено правильно ${correct} з ${total}. Картки з червоною рамкою — потрібно перенести в інший кошик.`);
+});
+
+/* ============ PRACTICAL TASK ============ */
+function setupPillRadio(id){
+  const box = document.getElementById(id);
+  const correct = box.dataset.correct;
+  box.querySelectorAll("button").forEach(b=>{
+    b.addEventListener("click", ()=>{
+      if(box.dataset.locked) return;
+      box.querySelectorAll("button").forEach(x=>x.classList.remove("chosen"));
+      b.classList.add("chosen");
+      box.dataset.picked = b.dataset.v;
+    });
+  });
+}
+setupPillRadio("pCase1");
+setupPillRadio("pCase2");
+
+const qualityItems = [
+  {label:"Точність — інформацію можна перевірити з інших джерел, вона без орфографічних/граматичних помилок", correct:true},
+  {label:"Доцільність — інформація прямо стосується вашого запиту про погоду", correct:true},
+  {label:"Актуальність — дані оновлюються практично в реальному часі (видно поточну дату/час на сайті)", correct:true},
+  {label:"Стислість — сайт показує лише перевантажену, надмірну кількість деталей, які важко зрозуміти", correct:false},
+  {label:"Повнота — сайт дає достатньо показників (температура, вітер, опади тощо), щоб скласти повну картину погоди", correct:true},
+  {label:"Джерело можна вважати якісним лише тому, що воно посилається на «науковців», навіть без імен чи назв установ", correct:false},
+  {label:"Якщо кілька незалежних джерел підтверджують ті самі дані, це підвищує довіру до інформації", correct:true}
+];
+const checklistEl = document.getElementById("qualityChecklist");
+qualityItems.forEach((item,i)=>{
+  const row = document.createElement("div");
+  row.className = "toggle-row";
+  row.dataset.correct = item.correct ? "yes" : "no";
+  row.innerHTML = `
+    <div class="q">${item.label}</div>
+    <div class="toggle-btns">
+      <button data-v="yes">Так</button>
+      <button data-v="no">Ні</button>
+    </div>
+  `;
+  checklistEl.appendChild(row);
+  row.querySelectorAll(".toggle-btns button").forEach(b=>{
+    b.addEventListener("click", ()=>{
+      if(row.dataset.locked) return;
+      row.querySelectorAll(".toggle-btns button").forEach(x=>x.classList.remove("chosen-yes","chosen-no"));
+      b.classList.add(b.dataset.v === "yes" ? "chosen-yes" : "chosen-no");
+      row.dataset.picked = b.dataset.v;
+    });
+  });
+});
+
+/* Step 1 helper: clickable low-quality markers inside the blog excerpt */
+const emailBox = document.getElementById("emailBox");
+emailBox.querySelectorAll(".textspan").forEach(sp=>{
+  sp.addEventListener("click", ()=>{
+    if(emailBox.dataset.locked) return;
+    sp.classList.toggle("picked");
+  });
+});
+
+/* Step 4 helper: order of steps to verify a new data source */
+buildOrder("orderPractical", [
+  "Перевірити, хто автор і чи має він експертизу в цій темі",
+  "Перевірити дату публікації та останнього оновлення",
+  "Порівняти дані з іншими незалежними джерелами",
+  "Перевірити, чи є посилання на першоджерела або методику збору даних",
+  "Оцінити, чи достатньо даних, щоб відповісти на ваше питання (повнота)"
+]);
+
+document.getElementById("checkPracticalBtn").addEventListener("click", ()=>{
+  let totalPoints = 0, maxPoints = 0;
+  const resultArea = document.getElementById("practicalResultArea");
+
+  // Step 1: find low-quality markers in the blog excerpt (5 points)
+  emailBox.dataset.locked = "1";
+  let markCorrect = 0, markTotalCorrect = 0, markWrongPicks = 0;
+  emailBox.querySelectorAll(".textspan").forEach(sp=>{
+    const isCorrect = sp.dataset.correct === "yes";
+    const picked = sp.classList.contains("picked");
+    if(isCorrect) markTotalCorrect++;
+    if(isCorrect && picked){ sp.classList.add("right"); markCorrect++; }
+    else if(isCorrect && !picked){ sp.classList.add("missed"); }
+    else if(!isCorrect && picked){ sp.classList.add("wrong-pick"); markWrongPicks++; }
+  });
+  maxPoints += markTotalCorrect;
+  totalPoints += markCorrect;
+  const fbEmail = document.getElementById("fb-email");
+  fbEmail.className = "feedback show " + (markCorrect===markTotalCorrect && markWrongPicks===0 ? "ok" : "bad");
+  fbEmail.textContent = `Знайдено правильних ознак низької якості: ${markCorrect} з ${markTotalCorrect}` +
+    (markWrongPicks>0 ? ` · помилково позначено як проблему: ${markWrongPicks} (обведено червоним — посилання на офіційну службу й зрозуміла мова тексту, навпаки, ознаки ДОБРОЇ якості)` : "") +
+    `. Зеленим підсвічено знайдені ознаки, пунктиром — пропущені: невідомий автор, застаріле оновлення (2014), сенсаційний заголовок, відсутність посилання на джерело вимірювань і перевантаженість рекламою.`;
+
+  // Step 2: two four-way classification cases (2 points each)
+  [ {id:"pCase1", fbId:"fb-case1", ok:"✅ Правильно! ", bad:"❌ Неправильно. ", text:"Учень виміряв дані сам (первинне) прямо в школі на уроці (внутрішнє) — це первинне та внутрішнє джерело."},
+    {id:"pCase2", fbId:"fb-case2", ok:"✅ Правильно! ", bad:"❌ Неправильно. ", text:"Дані вже оброблені й узагальнені іншими (вторинне) і отримані поза межами школи, з іншого університету (зовнішнє) — це вторинне та зовнішнє джерело."} ].forEach(cfg=>{
+    const box = document.getElementById(cfg.id);
+    maxPoints += 2;
+    box.dataset.locked = "1";
+    const picked = box.dataset.picked;
+    box.querySelectorAll("button").forEach(b=>{
+      if(b.dataset.v === box.dataset.correct) b.classList.add("right");
+      else if(b.dataset.v === picked && picked !== box.dataset.correct) b.classList.add("wrong");
+    });
+    const ok = (picked === box.dataset.correct) ? 2 : 0;
+    totalPoints += ok;
+    const fb = document.getElementById(cfg.fbId);
+    fb.className = "feedback show " + (ok===2 ? "ok" : "bad");
+    fb.textContent = (ok===2 ? cfg.ok : cfg.bad) + cfg.text;
+  });
+
+  // Step 3: checklist (7 points, with traps)
+  let step3ok = 0;
+  checklistEl.querySelectorAll(".toggle-row").forEach(row=>{
+    row.dataset.locked = "1";
+    const picked = row.dataset.picked;
+    const isRight = picked === row.dataset.correct;
+    row.classList.add(isRight ? "right" : "wrong");
+    if(isRight) step3ok++;
+  });
+  maxPoints += qualityItems.length;
+  totalPoints += step3ok;
+  const fb3 = document.getElementById("fb-step3");
+  fb3.className = "feedback show " + (step3ok===qualityItems.length ? "ok" : "bad");
+  fb3.textContent = `Правильних відповідей у чек-листі: ${step3ok} з ${qualityItems.length}. Зверніть увагу: перевантаженість деталями — ознака НЕякісного джерела, а розпливчасте посилання на «науковців» без імен чи установ не робить джерело авторитетним.`;
+
+  // Step 4: ordering (5 points, partial credit per correct position)
+  const orderContainer = document.getElementById("orderPractical");
+  const order = orderContainer._getOrder();
+  let orderCorrect = 0;
+  const orderItems = orderContainer.querySelectorAll(".order-item");
+  order.forEach((v,i)=>{ if(v===i) orderCorrect++; });
+  orderItems.forEach((el,i)=>{ el.classList.add(order[i]===i ? "correct-pos" : "wrong-pos"); });
+  maxPoints += order.length;
+  totalPoints += orderCorrect;
+  const fb4 = document.getElementById("fb-step4");
+  fb4.className = "feedback show " + (orderCorrect===order.length ? "ok" : "bad");
+  fb4.textContent = `На правильній позиції: ${orderCorrect} з ${order.length} кроків. Рекомендований порядок: спершу перевірити автора, потім дату оновлення, потім порівняти з іншими джерелами, перевірити посилання на першоджерела і насамкінець оцінити повноту даних.`;
+
+  setProgress("practical", totalPoints, maxPoints);
+
+  const pct = Math.round((totalPoints/maxPoints)*100);
+  resultArea.innerHTML = `
+    <div class="practical-score">
+      <div class="big">${totalPoints} / ${maxPoints}</div>
+      <div style="color:var(--text-dim);">${pct}% правильних рішень у практичному завданні (4 етапи)</div>
+    </div>
+  `;
+  document.getElementById("checkPracticalBtn").disabled = true;
+});
+
+/* ============ FINAL TEST ============ */
+const testQuestions = [
+  {q:"Чому збір даних вважають найважливішим етапом проєкту?", opts:["Тому що він відбувається лише раз на рік","Тому що від точності й достовірності зібраних даних залежить якість подальшого аналізу","Тому що він не потребує жодних пристроїв","Тому що його завжди виконує лише одна людина"], c:1, e:"Збір даних критично важливий, бо від точності й достовірності зібраних даних залежить якість подальшого аналізу та висновків."},
+  {q:"Які форми, крім тексту й чисел, можуть мати дані?", opts:["Лише текстові","Зображення, відео чи звук","Тільки буквено-цифрові","Дані завжди мають лише одну форму"], c:1, e:"Дані можуть складатися із зображень, відео чи звуку, а не лише бути текстовими чи числовими."},
+  {q:"Що таке первинне джерело даних?", opts:["Дані, отримані з книг чи журналів","Дані, зібрані безпосередньо з першоджерела (наприклад, датчиком чи анкетою)","Дані, які вже оброблені та впорядковані іншими дослідниками","Дані, зібрані для рекламних цілей"], c:1, e:"Первинне джерело — це дані, зібрані безпосередньо з першоджерела, наприклад за допомогою датчиків, реєстраторів або анкет."},
+  {q:"Що таке вторинне джерело даних?", opts:["Дані, зібрані напряму датчиком","Дані, які створюються, коли використовуємо вже зібрані іншими первинні дані","Дані, які завжди точніші за первинні","Дані, які неможливо перевірити"], c:1, e:"Вторинні дані створюються, коли ми використовуємо вже зібрані іншими вихідні (первинні) дані."},
+  {q:"Який приклад є первинним джерелом даних за підручником?", opts:["Стаття в журналі про погоду", "Анемометр, який вимірює швидкість вітру", "Вітрово-холодовий індекс, обчислений дослідником", "Сайт AccuWeather із прогнозом"], c:1, e:"Анемометр — датчик, який напряму вимірює швидкість вітру, тому є первинним джерелом даних."},
+  {q:"Яка ознака ТОЧНІШЕ описує первинні дані порівняно з вторинними?", opts:["Вони дешевші й менш трудомісткі у зборі","Вони перебувають у вже впорядкованій та обробленій формі","Вони точніші, оскільки не пройшли додаткової обробки і відображають поточний стан","Вони завжди отримані з книг чи вебсайтів"], c:2, e:"Первинні дані точніші саме тому, що зібрані напряму й не спотворені додатковою обробкою чи часом."},
+  {q:"Що є внутрішнім джерелом даних для організації?", opts:["Урядові джерела","Фінансові звіти цієї організації","Інтернет","Університети"], c:1, e:"Фінансові звіти організації — це дані, зібрані й контрольовані самою організацією, тобто внутрішнє джерело."},
+  {q:"Що є зовнішнім джерелом даних для організації?", opts:["Дані про обсяги продажів цієї організації","Інвентаризація запасів цієї організації","Корпоративна звітність інших організацій, доступна через інтернет","Попередні маркетингові дослідження цієї організації"], c:2, e:"Корпоративна звітність, зібрана поза межами самої організації (наприклад, з інтернету), є зовнішнім джерелом даних."},
+  {q:"Що таке «якість інформації»?", opts:["Кількість символів у тексті","Фактор, який показує, наскільки інформацію можна використовувати для прийняття рішень","Розмір файлу з інформацією","Кількість джерел, з яких її отримано"], c:1, e:"Якість інформації — важливий фактор, який показує, наскільки інформацію можна використовувати для прийняття рішень."},
+  {q:"Який із перелічених є одним із п'яти атрибутів якості інформації?", opts:["Швидкість завантаження сторінки","Актуальність","Кількість вподобань у соцмережах","Розмір шрифту"], c:1, e:"Актуальність — один із п'яти атрибутів якості інформації, поряд із точністю, доцільністю, стислістю та повнотою."},
+  {q:"Що перевіряють насамперед, щоб оцінити АКТУАЛЬНІСТЬ інформації?", opts:["Дату публікації та наскільки свіжою є інформація","Кількість граматичних помилок у тексті","Чи є автор відомою особою","Обсяг тексту (кількість слів)"], c:0, e:"Актуальність визначають передусім за датою публікації чи створення інформації та тим, наскільки вона сучасна."},
+  {q:"Що означає атрибут якості «повнота»?", opts:["Інформація має бути максимально короткою","Інформація повинна надавати новизну картину реальності, а не лише частину, потрібну для прийняття правильного рішення","Інформація повинна містити якомога більше зображень","Інформація повинна бути написана лише експертами"], c:1, e:"Повнота — це міра того, наскільки надана інформація дає повну картину реальності, необхідну для прийняття правильного рішення."}
+];
+let curQ = 0, score = 0;
+const testArea = document.getElementById("testArea");
+const scoreBadge = document.getElementById("scoreBadge");
+const progressFill = document.getElementById("progressFill");
+
+function renderQuestion(){
+  if(curQ >= testQuestions.length){ renderResult(); return; }
+  const item = testQuestions[curQ];
+  scoreBadge.textContent = `Питання ${curQ+1} / ${testQuestions.length} · ${score} балів`;
+  progressFill.style.width = Math.round((curQ/testQuestions.length)*100) + "%";
+  testArea.innerHTML = `
+    <div class="prompt" style="font-size:1.05rem;">${item.q}</div>
+    <div class="opt-list" id="curOpts"></div>
+    <div class="feedback" id="curFb"></div>
+  `;
+  const optsEl = document.getElementById("curOpts");
+  item.opts.forEach((opt,i)=>{
+    const b = document.createElement("button");
+    b.className = "opt";
+    b.textContent = opt;
+    b.addEventListener("click", ()=>{
+      if(optsEl.classList.contains("locked")) return;
+      optsEl.classList.add("locked");
+      const fb = document.getElementById("curFb");
+      optsEl.querySelectorAll(".opt").forEach((x,j)=>{
+        x.classList.add("disabled");
+        if(j===item.c) x.classList.add("correct");
+      });
+      if(i===item.c){
+        b.classList.add("correct");
+        score++;
+        fb.textContent = "✅ Правильно! " + item.e;
+        fb.className = "feedback show ok";
+      } else {
+        b.classList.add("wrong");
+        fb.textContent = "❌ Неправильно. " + item.e;
+        fb.className = "feedback show bad";
+      }
+      const nextBtn = document.createElement("button");
+      nextBtn.className = "btn";
+      nextBtn.textContent = curQ === testQuestions.length-1 ? "Показати результат" : "Наступне питання →";
+      nextBtn.addEventListener("click", ()=>{ curQ++; renderQuestion(); });
+      testArea.appendChild(nextBtn);
+    });
+    optsEl.appendChild(b);
+  });
+}
+
+function renderResult(){
+  progressFill.style.width = "100%";
+  scoreBadge.textContent = `Завершено · ${score} / ${testQuestions.length} балів`;
+  setProgress("final", score, testQuestions.length);
+  const pct = Math.round((score/testQuestions.length)*100);
+  let msg = "";
+  if(pct >= 85) msg = "Відмінний результат! Ви добре засвоїли тему.";
+  else if(pct >= 60) msg = "Непоганий результат, але варто повторити деякі поняття.";
+  else msg = "Варто ще раз переглянути вправи 1–12 та повторити тему.";
+  testArea.innerHTML = `
+    <div class="result-box">
+      <div class="big">${score} / ${testQuestions.length}</div>
+      <div style="color:var(--text-dim); margin-bottom:18px;">${pct}% правильних відповідей — ${msg}</div>
+      <button class="btn" id="retryBtn">Спробувати ще раз</button>
+      <div style="margin-top:8px;"><button class="btn secondary" id="goProgressBtn">Переглянути повний прогрес →</button></div>
+    </div>
+  `;
+  document.getElementById("retryBtn").addEventListener("click", ()=>{
+    curQ = 0; score = 0; renderQuestion();
+  });
+  document.getElementById("goProgressBtn").addEventListener("click", ()=>{
+    document.querySelector('.tab-btn[data-view="vprogress"]').click();
+  });
+}
+renderQuestion();
+
+/* ============ PROGRESS REPORT + EXPORT ============ */
+const EX_COUNT = 12;
+
+/* 12-бальна оцінка = середнє з трьох відсотків (вправи, практичне завдання, фінальний тест),
+   переведене пропорційно у шкалу 1–12. Показується лише коли всі три частини виконано. */
+function computeGrade12(){
+  let sumCorrect = 0, sumTotal = 0;
+  for(let i=1; i<=EX_COUNT; i++){
+    const p = progress[String(i)];
+    if(p){ sumCorrect += p.correct; sumTotal += p.total; }
+  }
+  const pp = progress["practical"];
+  const fp = progress["final"];
+  const exercisesDone = sumTotal > 0 && Object.keys(progress).filter(k=>k!=="final" && k!=="practical").length === EX_COUNT;
+  if(!exercisesDone || !pp || !fp) return null;
+  const exPct = (sumCorrect/sumTotal)*100;
+  const prPct = (pp.correct/pp.total)*100;
+  const fnPct = (fp.correct/fp.total)*100;
+  const avgPct = (exPct + prPct + fnPct) / 3;
+  return Math.max(1, Math.min(12, Math.round((avgPct/100)*12)));
+}
+
+function renderReport(){
+  const area = document.getElementById("progressArea");
+  let rows = "";
+  let sumCorrect = 0, sumTotal = 0;
+  for(let i=1; i<=EX_COUNT; i++){
+    const key = String(i);
+    const exEl = document.querySelector('.ex[data-ex="'+key+'"]');
+    const title = exEl ? exEl.querySelector(".ex-title").textContent : ("Вправа " + key);
+    const level = exEl ? exEl.querySelector(".level-chip").textContent.trim() : "";
+    const p = progress[key];
+    let statusHtml;
+    if(!p || p.total === 0){
+      statusHtml = '<span style="color:var(--text-dim);">ще не виконано</span>';
+    } else {
+      const pct = Math.round((p.correct / p.total) * 100);
+      sumCorrect += p.correct; sumTotal += p.total;
+      const color = pct === 100 ? "var(--green)" : (pct > 0 ? "var(--amber)" : "var(--red)");
+      statusHtml = `<span style="color:${color}; font-weight:600;">${p.correct}/${p.total} (${pct}%)</span>`;
+    }
+    rows += `<tr><td>${i}</td><td>${title}</td><td>${level}</td><td>${statusHtml}</td></tr>`;
+  }
+  const pp = progress["practical"];
+  const practicalHtml = pp
+    ? `${pp.correct}/${pp.total} (${Math.round(pp.correct/pp.total*100)}%)`
+    : '<span style="color:var(--text-dim);">ще не виконано</span>';
+  const fp = progress["final"];
+  const finalHtml = fp
+    ? `${fp.correct}/${fp.total} (${Math.round(fp.correct/fp.total*100)}%)`
+    : '<span style="color:var(--text-dim);">ще не пройдено</span>';
+  const overallPct = sumTotal > 0 ? Math.round((sumCorrect/sumTotal)*100) : 0;
+  const grade12 = computeGrade12();
+  const gradeHtml = grade12 !== null
+    ? `<div class="grade-badge"><div class="big">${grade12} / 12</div><div class="lbl">Орієнтовна оцінка за 12-бальною шкалою — середнє з відсотків за вправи, практичне завдання й фінальний тест</div></div>`
+    : `<div class="grade-badge"><div class="lbl">Оцінка за 12-бальною шкалою з'явиться тут після виконання <b>всіх 12 вправ</b>, практичного завдання і фінального тесту</div></div>`;
+
+  area.innerHTML = `
+    ${gradeHtml}
+    <div class="report-summary">
+      Учень: <b>${studentInfo.name || "—"}</b>${studentInfo.cls ? " · клас " + studentInfo.cls : ""}<br>
+      Виконано вправ: ${Object.keys(progress).filter(k=>k!=="final" && k!=="practical").length} із ${EX_COUNT} ·
+      Загальний результат по вправах: <b>${sumCorrect}/${sumTotal || 0}</b> (${overallPct}%) ·
+      Практичне завдання: <b>${practicalHtml}</b> ·
+      Фінальний тест: <b>${finalHtml}</b>
+    </div>
+    <table class="report-table">
+      <thead><tr><th>№</th><th>Вправа</th><th>Рівень</th><th>Результат</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div class="report-actions">
+      <button class="btn" id="downloadCsvBtn">Завантажити результати (.csv)</button>
+      <button class="btn secondary" id="copyResultsBtn">Скопіювати результати в буфер</button>
+    </div>
+    <div class="note" style="margin-top:16px;">
+      Порада для вчителя: попросіть кожного учня натиснути «Завантажити результати» після завершення уроку й надіслати вам файл .csv
+      (наприклад, через Google Classroom, електронну пошту або месенджер). Відкривши декілька таких файлів в Excel або Google Таблицях,
+      можна вставити рядки одне під одним і отримати спільну таблицю результатів усього класу.
+    </div>
+  `;
+  document.getElementById("downloadCsvBtn").addEventListener("click", downloadCSV);
+  document.getElementById("copyResultsBtn").addEventListener("click", copyResults);
+}
+
+function buildResultRow(){
+  const header = ["ПІБ учня","Клас","Дата"];
+  for(let i=1;i<=EX_COUNT;i++) header.push("Вправа "+i);
+  header.push("Практичне завдання");
+  header.push("Фінальний тест");
+  header.push("Оцінка (12-бальна)");
+  const row = [studentInfo.name || "Учень (без імені)", studentInfo.cls || "", new Date().toLocaleString("uk-UA")];
+  for(let i=1;i<=EX_COUNT;i++){
+    const p = progress[String(i)];
+    row.push(p ? (p.correct + "/" + p.total) : "—");
+  }
+  const pp = progress["practical"];
+  row.push(pp ? (pp.correct + "/" + pp.total) : "—");
+  const fp = progress["final"];
+  row.push(fp ? (fp.correct + "/" + fp.total) : "—");
+  const grade12 = computeGrade12();
+  row.push(grade12 !== null ? grade12 : "—");
+  return {header, row};
+}
+
+async function downloadCSV(){
+  const {header, row} = buildResultRow();
+  const csv = "﻿" + [header.join(";"), row.join(";")].join("\n");
+  const safeName = (studentInfo.name || "student").replace(/[^\wа-яіїєґА-ЯІЇЄҐ]+/g, "_");
+  const filename = `rezultaty_${safeName}.csv`;
+
+  // Коли сторінка відкрита як опублікований артефакт claude.ai, звичайне посилання-завантаження
+  // не спрацьовує — використовуємо офіційний спосіб збереження файлу для глядача.
+  try{
+    if(window.claude && typeof window.claude.use === "function"){
+      const downloads = await window.claude.use("downloads");
+      if(downloads){
+        await downloads.save({filename, data: csv});
+        return;
+      }
+    }
+  }catch(e){ /* якщо не вдалося — переходимо до звичайного способу нижче */ }
+
+  // Коли файл відкрито локально у браузері (поза артефактом) — звичайне завантаження через blob-посилання.
+  const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function copyResults(){
+  const {header, row} = buildResultRow();
+  const text = header.join("\t") + "\n" + row.join("\t");
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn = document.getElementById("copyResultsBtn");
+    const old = btn.textContent;
+    btn.textContent = "Скопійовано ✓";
+    setTimeout(()=>{ btn.textContent = old; }, 1800);
+  }).catch(()=>{
+    alert("Не вдалося скопіювати автоматично. Виділіть і скопіюйте текст вручну:\n\n" + header.join("\t") + "\n" + row.join("\t"));
+  });
+}
+</script>
+</body>
+</html>
+
+<script>
+/* ===== «Надіслати вчителю» (Google Форма журналу) — універсальна кнопка ===== */
+(function(){
+const FORM_PREFILL="https://docs.google.com/forms/d/e/1FAIpQLSeaDGNzqpEMjZyDt4WUwg3k3FAhGGW4pG1E8IcOk8b4LQsBVw/viewform?usp=pp_url&entry.1997531456=test";
+const GRADE=9, TOPIC="Збір даних";
+const clean=v=>String(v==null?"":v).replace(/[|\n\r]/g," ").trim()||"—";
+const hm=t=>{t=Math.max(0,Math.round(t));return Math.floor(t/60)+" хв "+String(t%60).padStart(2,"0")+" с"};
+function getRow(){
+  try{ if(typeof buildResultRow==="function") return buildResultRow(); }catch(e){}
+  try{ if(typeof resRow==="function") return resRow(); }catch(e){}
+  try{ if(typeof csvLine==="function"){ const p=csvLine().split("\n"); const sp=s=>s.split(";").map(x=>x.replace(/^"|"$/g,"").replace(/""/g,'"'));
+    return {header:sp(p[0]),row:sp(p[1]||"")}; } }catch(e){}
+  return {header:[],row:[]};
+}
+function extra(){
+  try{ if(typeof window.G6compute==="function"){ return (window.G6&&window.G6.frozen)||window.G6compute(); } }catch(e){}
+  return null;
+}
+function getGrade(o,x){
+  if(x&&x.grade!=null) return x.grade;
+  try{ if(typeof computeGrade12==="function"){ const g=computeGrade12(); if(g) return g; } }catch(e){}
+  try{ if(typeof grade==="function"){ const g=grade(); if(g) return g; } }catch(e){}
+  const i=o.header.findIndex(h=>/Оцінка/i.test(h)); return i>=0&&o.row[i]!==""?o.row[i]:"—";
+}
+function line(name,cls){
+  const o=getRow(), x=extra(), g=getGrade(o,x);
+  let ok=0,tot=0; const det=[];
+  o.header.forEach((h,i)=>{ if(i<3&&/ПІБ|Ім'я|Клас|Дата/i.test(h)) return;
+    const v=String(o.row[i]==null?"—":o.row[i]); det.push(clean(h).replace(/[,:]/g," ")+":"+clean(v).replace(/[,]/g,";"));
+    const m=v.match(/^(\d+)\s*\/\s*(\d+)$/); if(m){ok+=+m[1];tot+=+m[2];} });
+  const done=x?!!(window.G6&&window.G6.frozen):(/^\d+$/.test(String(g))&&+g>0);
+  return ["v1",GRADE,TOPIC,clean(cls),clean(name),1,"—",clean(g),tot?ok+" з "+tot:"—","—",
+    x&&x.errors!=null?x.errors:"—", x&&x.T?hm(x.T):"—","—",x&&x.tooFast?"занадто швидко":"",done?"завершено":"не завершено",det.join(",")].join("|");
+}
+const st=document.createElement("style");
+st.textContent=`
+#jFab{position:fixed;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:9998;
+  background:#ffb020;color:#2a1a00;border:0;border-radius:999px;padding:13px 20px;font:800 16px system-ui,"Segoe UI",sans-serif;
+  box-shadow:0 8px 24px rgba(0,0,0,.35);cursor:pointer}
+#jFab:hover{filter:brightness(1.06)} #jFab:focus-visible{outline:3px solid #2f5bea;outline-offset:3px}
+#jPanel{position:fixed;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:9999;
+  width:min(360px,calc(100vw - 32px));background:#fff;color:#1d2433;border-radius:16px;padding:16px;
+  box-shadow:0 16px 40px rgba(0,0,0,.4);font:15px/1.45 system-ui,"Segoe UI",sans-serif;display:flex;flex-direction:column;gap:10px}
+#jPanel b.h{font-size:17px}
+#jPanel input{width:100%;box-sizing:border-box;border:1px solid #c8cfdc;border-radius:10px;padding:10px 12px;font:inherit;color:#1d2433;background:#f7f9fc}
+#jPanel .jrow{display:flex;gap:8px} #jPanel .jrow input:last-child{flex:0 0 110px}
+#jPanel a.jgo{display:block;text-align:center;background:#2f7d4f;color:#fff;text-decoration:none;font-weight:800;border-radius:10px;padding:11px}
+#jPanel .jm{font-size:13px;color:#5b6578} #jPanel .jx{position:absolute;top:8px;right:10px;border:0;background:none;font-size:20px;cursor:pointer;color:#5b6578}`;
+document.head.appendChild(st);
+const fab=document.createElement("button"); fab.id="jFab"; fab.type="button"; fab.textContent="📤 Надіслати вчителю";
+const pn=document.createElement("div"); pn.id="jPanel"; pn.hidden=true;
+pn.innerHTML=`<button class="jx" type="button" aria-label="Закрити">×</button><b class="h">📤 Надіслати результат учителю</b>
+<div class="jm">Надсилай, коли пройдеш усі вправи й тест. Вхід в акаунт не потрібен.</div>
+<div class="jrow"><input id="jName" placeholder="Прізвище та ім'я" autocomplete="off"><input id="jCls" placeholder="Клас, 8-А" maxlength="6" autocomplete="off"></div>
+<a class="jgo" id="jSend" href="#" target="_blank" rel="noopener">Відкрити форму з результатом</a>
+<div class="jm" id="jMsg">Відкриється Google Форма з уже записаним результатом — натисни в ній «Надіслати».</div>`;
+document.body.appendChild(fab); document.body.appendChild(pn);
+const nm=pn.querySelector("#jName"), cl=pn.querySelector("#jCls"), a=pn.querySelector("#jSend"), msg=pn.querySelector("#jMsg");
+fab.addEventListener("click",()=>{ pn.hidden=!pn.hidden; if(pn.hidden) return;
+  const o=getRow(); const n=String(o.row[0]||""), c=String(o.row[1]||"");
+  if(!nm.value&&n&&!/без імені|^—$/.test(n)) nm.value=n; if(!cl.value&&c&&c!=="—"&&!/^\d$/.test(c)) cl.value=c;
+  (nm.value?cl:nm).focus(); });
+pn.querySelector(".jx").addEventListener("click",()=>pn.hidden=true);
+a.addEventListener("click",e=>{
+  if(!nm.value.trim()||!cl.value.trim()){ e.preventDefault(); msg.textContent="Спершу впиши прізвище, ім'я та клас ☝️"; (nm.value.trim()?cl:nm).focus(); return; }
+  a.href=FORM_PREFILL.replace(/(entry\.\d+=)[^&]*/,(m,p)=>p+encodeURIComponent(line(nm.value.trim(),cl.value.trim())));
+  msg.textContent="Форму відкрито в новій вкладці — натисни там «Надіслати» ✔";
+});
+})();
+</script>
+
+</body></html>

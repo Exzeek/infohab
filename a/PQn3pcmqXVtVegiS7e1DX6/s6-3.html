@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ігротека: 6 клас · Спілкування онлайн</title>
+<style>
+:root{--cl:#2f9e44;--cd:#69db7c;--bg:#f6f7fb;--ink:#1f2433;--muted:#5c6378;--card:#fff;--line:#e3e6ee;--ok:#2b8a3e;--bad:#c92a2a;--A:#1c7ed6;--B:#e8590c;--C:#2f9e44;--D:#9c36b5;--r:16px;
+  font-size:clamp(15px,1.45vw,26px)}
+@media (prefers-color-scheme:dark){:root{--bg:#14161d;--ink:#eef0f6;--muted:#a3a9b8;--card:#1e212b;--line:#2c303c;--cl:var(--cd)}}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:"Nunito","Segoe UI",system-ui,sans-serif}
+button{font:inherit;cursor:pointer;border:0;color:inherit}
+h1,h2,h3{margin:0;line-height:1.15}
+.top{display:flex;align-items:center;gap:.8rem;padding:.6rem 1rem;background:var(--cl);color:#fff;flex-wrap:wrap}
+.top .t{flex:1;min-width:12rem}
+.top small{opacity:.85;display:block;font-size:.75rem}
+.top b{font-size:1.1rem}
+.hb{background:#ffffff26;color:#fff;border-radius:999px;padding:.35rem .8rem;font-weight:800;font-size:.85rem}
+.hb[aria-pressed=false]{opacity:.55}
+main{padding:1rem;max-width:1500px;margin:0 auto}
+.screen[hidden]{display:none!important}
+/* setup */
+.modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(14rem,1fr));gap:1rem;margin:1rem 0}
+.mode{background:var(--card);border:3px solid var(--line);border-radius:var(--r);padding:1rem;text-align:left;display:flex;flex-direction:column;gap:.4rem;box-shadow:0 4px 0 var(--line);transition:transform .15s}
+.mode:hover{transform:translateY(-3px)}
+.mode[aria-pressed=true]{border-color:var(--cl);box-shadow:0 4px 0 var(--cl)}
+.mode .ic{font-size:2.6rem}
+.mode h3{font-size:1.15rem}
+.mode p{margin:0;color:var(--muted);font-size:.85rem}
+.mode .tag{font-size:.7rem;font-weight:800;color:var(--cl);text-transform:uppercase;letter-spacing:.04em}
+.row{display:flex;gap:.8rem;flex-wrap:wrap;align-items:center;margin:.6rem 0}
+.pill{background:var(--card);border:2px solid var(--line);border-radius:999px;padding:.4rem .9rem;font-weight:700}
+.pill[aria-pressed=true]{background:var(--cl);border-color:var(--cl);color:#fff}
+.teamname{border:2px solid var(--line);border-radius:12px;padding:.4rem .7rem;font:inherit;font-weight:800;width:11rem;background:var(--card);color:var(--ink)}
+.big{background:var(--cl);color:#fff;border-radius:999px;padding:.7rem 2rem;font-size:1.25rem;font-weight:900;box-shadow:0 5px 0 #0003}
+.big:disabled{opacity:.5}
+.ghost{background:var(--card);color:var(--ink);border:2px solid var(--line);border-radius:999px;padding:.5rem 1.2rem;font-weight:800}
+.lead{color:var(--muted);margin:.3rem 0 0}
+/* scorebar */
+.scores{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:.8rem}
+.sc{flex:1;min-width:9rem;background:var(--card);border-radius:var(--r);padding:.5rem .9rem;border:3px solid transparent;display:flex;align-items:center;gap:.6rem;box-shadow:0 3px 0 var(--line)}
+.sc.on{border-color:var(--tc)}
+.sc .dot{width:1.1rem;height:1.1rem;border-radius:50%;background:var(--tc)}
+.sc .nm{font-weight:800;flex:1}
+.sc .pt{font-size:1.6rem;font-weight:900;color:var(--tc)}
+.status{font-weight:800;margin:.2rem 0 .8rem;font-size:1.05rem}
+/* question modal */
+.qm{position:fixed;inset:0;background:#0008;display:flex;align-items:center;justify-content:center;z-index:50;padding:1rem}
+.qm[hidden]{display:none}
+.qbox{background:var(--card);border-radius:22px;max-width:62rem;width:100%;padding:1.4rem 1.6rem;box-shadow:0 20px 50px #0006;border-top:10px solid var(--tc,var(--cl))}
+.qbox .who{font-weight:900;color:var(--tc,var(--cl));font-size:.95rem}
+.qbox .topic{color:var(--muted);font-size:.8rem}
+.qbox .q{font-size:1.45rem;font-weight:800;margin:.5rem 0 1rem;white-space:pre-line}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
+.opt{background:var(--bg);border:3px solid var(--line);border-radius:14px;padding:.8rem 1rem;font-size:1.15rem;font-weight:700;text-align:left;display:flex;gap:.6rem;align-items:center}
+.opt b{background:var(--cl);color:#fff;border-radius:8px;min-width:2rem;text-align:center;padding:.1rem .3rem}
+.opt.ok{border-color:var(--ok);background:#d3f9d8;color:#123}
+.opt.bad{border-color:var(--bad);background:#ffe3e3;color:#300}
+.timer{height:.5rem;background:var(--line);border-radius:9px;overflow:hidden;margin-top:1rem}
+.timer i{display:block;height:100%;background:var(--tc,var(--cl));width:100%}
+.verdict{font-size:1.3rem;font-weight:900;margin-top:.8rem;min-height:1.6rem}
+.verdict.ok{color:var(--ok)}.verdict.bad{color:var(--bad)}
+/* BLOCK */
+.bwrap{display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap;align-items:flex-start}
+.bteam{display:flex;flex-direction:column;align-items:center;gap:.5rem;opacity:.55;transition:opacity .3s}
+.bteam.on{opacity:1}
+.bteam h3{color:var(--tc)}
+.board{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;background:var(--line);padding:6px;border-radius:14px;width:min(40vw,30rem);aspect-ratio:1}
+.cell{background:var(--card);border-radius:5px;position:relative}
+.cell.f{background:var(--tc);box-shadow:inset 0 -4px 0 #0003}
+.cell.v{background:#868e96;box-shadow:inset 0 -4px 0 #0003}
+.cell.pv{background:color-mix(in srgb,var(--tc) 40%,var(--card))}
+.cell.no{background:#ffc9c9}
+.cell.clr{animation:pop .5s}
+@keyframes pop{50%{transform:scale(1.25);background:#ffd43b}}
+.tray{display:flex;gap:1rem;align-items:center;min-height:6rem;justify-content:center;flex-wrap:wrap}
+.piece{display:grid;gap:3px;padding:.4rem;border-radius:12px;border:3px dashed transparent;background:var(--card)}
+.piece.sel{border-color:var(--tc)}
+.piece i{width:1.4rem;height:1.4rem;border-radius:4px}
+.piece i.f{background:var(--tc)}
+/* RUNNER */
+.run{position:relative;width:min(92vw,56rem);height:min(60vh,34rem);min-height:20rem;margin:0 auto;border-radius:20px;overflow:hidden;background:linear-gradient(#1b2a4a,#23395d)}
+.lane{position:absolute;top:0;bottom:0;width:33.333%;border-left:2px dashed #ffffff22}
+.runner{position:absolute;bottom:4%;width:12%;aspect-ratio:1;font-size:3.2rem;display:flex;align-items:center;justify-content:center;transition:left .18s;transform:translateX(-50%)}
+.gate{position:absolute;width:30%;transform:translateX(-50%);background:#fff;color:#1f2433;border-radius:14px;padding:.4rem .5rem;font-weight:800;font-size:.95rem;text-align:center;box-shadow:0 6px 0 #0004;min-height:3.2rem;display:flex;align-items:center;justify-content:center}
+.gate.wall{background:#495057;color:#fff}
+.gate.ok{background:#8ce99a}.gate.bad{background:#ffa8a8}
+.coin{position:absolute;font-size:1.6rem;transform:translate(-50%,-50%)}
+.rq{position:absolute;left:0;right:0;top:0;padding:.6rem 1rem;background:#000a;color:#fff;font-weight:800;font-size:1.15rem;text-align:center;z-index:3;white-space:pre-line}
+.rhud{position:absolute;right:.8rem;bottom:.6rem;color:#fff;font-weight:900;z-index:3;font-size:1.1rem}
+.rbtns{display:flex;justify-content:center;gap:1rem;margin-top:.8rem}
+.rbtns button{font-size:1.6rem;padding:.4rem 1.6rem}
+.ovl{position:absolute;left:50%;top:55%;transform:translate(-50%,-50%);z-index:6;font-size:1.5rem!important;padding:.8rem 1.8rem!important;box-shadow:0 8px 30px #0008}
+.ovl[hidden]{display:none}
+.hold{position:absolute;left:50%;transform:translateX(-50%);color:#fff;font-weight:900;font-size:1.05rem;background:#0009;border-radius:999px;padding:.15rem .8rem;z-index:3;white-space:nowrap}
+/* LUDO */
+.track{display:grid;grid-template-columns:repeat(10,1fr);gap:6px;max-width:64rem;margin:0 auto}
+.tc{aspect-ratio:1;background:var(--card);border-radius:12px;border:2px solid var(--line);position:relative;display:flex;align-items:center;justify-content:center;font-size:1.3rem}
+.tc small{position:absolute;left:5px;top:3px;font-size:.6rem;color:var(--muted);font-weight:800}
+.tc.start{background:#e7f5ff}.tc.fin{background:#fff3bf}
+.tokens{position:absolute;inset:auto 2px 2px 2px;display:flex;gap:2px;justify-content:center;flex-wrap:wrap}
+.tok{width:1.15rem;height:1.15rem;border-radius:50%;background:var(--tc);border:2px solid #fff;box-shadow:0 2px 3px #0005;transition:all .3s}
+.dice{font-size:4rem;line-height:1;display:inline-block}
+.dice.roll{animation:rl .6s}
+@keyframes rl{25%{transform:rotate(90deg) scale(1.2)}50%{transform:rotate(180deg)}75%{transform:rotate(270deg) scale(1.2)}}
+.ludo-ctl{display:flex;gap:1.2rem;align-items:center;justify-content:center;margin:1rem 0}
+.legend{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;color:var(--muted);font-size:.8rem;margin-top:.6rem}
+/* HOLE */
+.hole{position:relative;width:min(94vw,64rem);height:min(60vh,34rem);min-height:20rem;margin:0 auto;border-radius:20px;overflow:hidden;background:radial-gradient(circle at 30% 30%,#e9f5ff,#cfe3f7);touch-action:none;cursor:crosshair}
+@media (prefers-color-scheme:dark){.hole{background:radial-gradient(circle at 30% 30%,#24304a,#182033)}}
+.hq{position:absolute;left:0;right:0;top:0;padding:.5rem 1rem;background:#000b;color:#fff;font-weight:800;text-align:center;z-index:3;font-size:1.1rem;white-space:pre-line}
+.hobj{position:absolute;transform:translate(-50%,-50%);background:#fff;color:#1f2433;border-radius:14px;padding:.35rem .6rem;font-weight:800;font-size:.9rem;box-shadow:0 4px 0 #0003;max-width:14rem;text-align:center;transition:opacity .25s,transform .25s}
+.hobj.gone{opacity:0;transform:translate(-50%,-50%) scale(.1)}
+.hh{position:absolute;border-radius:50%;background:radial-gradient(circle,#000 55%,#222 70%,#555 100%);transform:translate(-50%,-50%);box-shadow:0 0 0 4px var(--tc),0 0 30px #0008;z-index:2}
+.hhud{position:absolute;right:.8rem;bottom:.6rem;font-weight:900;z-index:3;background:#fffd;color:#1f2433;border-radius:999px;padding:.2rem .8rem}
+.float{position:absolute;font-weight:900;font-size:1.4rem;z-index:4;pointer-events:none;animation:up 1s forwards}
+@keyframes up{to{transform:translateY(-3rem);opacity:0}}
+/* results */
+.res{text-align:center}
+.res .win{font-size:2.4rem;font-weight:900;margin:.6rem 0}
+.podium{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin:1rem 0}
+.podium div{background:var(--card);border-radius:var(--r);padding:1rem 1.4rem;border-top:8px solid var(--tc);min-width:10rem}
+.podium b{display:block;font-size:2rem;color:var(--tc)}
+.review{max-width:52rem;margin:1rem auto;text-align:left;background:var(--card);border-radius:var(--r);padding:1rem 1.2rem}
+.review li{margin:.3rem 0}
+canvas#fx{position:fixed;inset:0;pointer-events:none;z-index:60}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="t"><small id="eyebrow"></small><b id="htitle"></b></div>
+  <button class="hb" id="bSnd" aria-pressed="true">🔔 Звук</button>
+  <button class="hb" id="bMenu">☰ Обрати гру</button>
+  <button class="hb" id="bFull">⛶</button>
+</header>
+<main>
+<section class="screen" id="setup">
+  <h1 id="stitle"></h1>
+  <p class="lead">Ігри для великого екрана: команди по черзі відповідають на питання розділу. Оберіть формат — питання ті самі, гра щоразу інша.</p>
+  <div class="modes" id="modes"></div>
+  <div class="row"><b>Команди:</b><span id="nteams"></span></div>
+  <div class="row" id="names"></div>
+  <div class="row"><b>Теми:</b><span id="topics"></span></div>
+  <div class="row"><b>Час на відповідь:</b><span id="times"></span></div>
+  <div class="row"><button class="big" id="go">▶ Почати гру</button><span class="lead" id="hint"></span></div>
+</section>
+<section class="screen" id="game" hidden>
+  <div class="scores" id="scores"></div>
+  <div class="status" id="status"></div>
+  <div id="stage"></div>
+</section>
+<section class="screen res" id="result" hidden></section>
+</main>
+<div class="qm" id="qm" hidden><div class="qbox" id="qbox"></div></div>
+<canvas id="fx"></canvas>
+<script>
+const G={"id": "arc-6-3", "grade": 6, "section": 3, "title": "Ігротека: 6 клас · Спілкування онлайн", "topics": ["Основи роботи в мережі", "Блог", "Соціальні мережі", "Інструменти спілкування", "Поводження в цифровому просторі"], "matchUrl": "../X6TXHBTSE26hDVmvCJr1RK/"};
+const BANK=[{"t": 1, "l": 1, "q": "LAN чи WAN?\n«Мережа комп'ютерного класу»", "o": ["LAN (локальна)", "WAN (глобальна)"]}, {"t": 1, "l": 1, "q": "LAN чи WAN?\n«Домашня мережа: ноутбук і принтер»", "o": ["LAN (локальна)", "WAN (глобальна)"]}, {"t": 1, "l": 1, "q": "З'єднай топологію з описом.\n«Лінійна» —", "o": ["Постійний зв'язок між двома вузлами", "Кожен вузол підключено до одного кабелю", "Сервери обслуговують запити клієнтів", "«Мова» спілкування комп'ютерів"]}, {"t": 1, "l": 1, "q": "З'єднай топологію з описом.\n«Клієнт-сервер» —", "o": ["Сервери обслуговують запити клієнтів", "Постійний зв'язок між двома вузлами", "Кожен вузол підключено до одного кабелю", "«Мова» спілкування комп'ютерів"]}, {"t": 1, "l": 1, "q": "З'єднай топологію з описом.\n«Протокол» —", "o": ["«Мова» спілкування комп'ютерів", "Постійний зв'язок між двома вузлами", "Кожен вузол підключено до одного кабелю", "Сервери обслуговують запити клієнтів"]}, {"t": 1, "l": 2, "q": "Яка технологія передає дані імпульсами світла?", "o": ["Оптичне волокно", "Телефонна лінія ADSL", "Мідний кабель для живлення", "Звичайна поштова листівка"]}, {"t": 1, "l": 2, "q": "У 2026 р. в Україні стартував пілотний 5G (зокрема у Львові). Яка головна перевага 5G над 4G?", "o": ["Значно вища швидкість передачі", "Працює взагалі без антен і веж", "Не потребує жодних SIM-карток", "Передає дані лише вночі"]}, {"t": 1, "l": 2, "q": "Рівень 1: розсортуй мережі\n«Комп'ютерний клас школи» — куди?", "o": ["🏠 LAN", "🌍 WAN"]}, {"t": 1, "l": 2, "q": "Рівень 1: розсортуй мережі\n«Ноутбук і принтер ферми» — куди?", "o": ["🏠 LAN", "🌍 WAN"]}, {"t": 1, "l": 2, "q": "Рівень 1: розсортуй мережі\n«Wi-Fi удома» — куди?", "o": ["🏠 LAN", "🌍 WAN"]}, {"t": 1, "l": 2, "q": "Рівень 1: розсортуй мережі\n«Інтернет» — куди?", "o": ["🌍 WAN", "🏠 LAN"]}, {"t": 1, "l": 2, "q": "Рівень 1: розсортуй мережі\n«Мережа банку в 10 країнах» — куди?", "o": ["🌍 WAN", "🏠 LAN"]}, {"t": 1, "l": 2, "q": "Рівень 1: розсортуй мережі\n«Мережа між містами України» — куди?", "o": ["🌍 WAN", "🏠 LAN"]}, {"t": 1, "l": 2, "q": "Покупець ввів адресу сайту ферми. Куди браузер надсилає запит СПЕРШУ?", "o": ["На сервер провайдера", "Одразу покупцеві в Instagram", "На принтер ферми", "У кошик браузера"]}, {"t": 1, "l": 2, "q": "Провайдер не знає, де сайт. Де він шукає IP-адресу?", "o": ["У службі DNS", "У Диспетчері пристроїв", "У налаштуваннях миші", "У нотатках презентації"]}, {"t": 1, "l": 2, "q": "Хто відповідає сторінкою сайту ферми?", "o": ["Вебсервер", "Клавіатура покупця", "Датчик вологості", "Колонтитул слайда"]}, {"t": 2, "l": 1, "q": "У якому порядку зазвичай показуються публікації в блозі?", "o": ["Найновіші вгорі", "Найстаріші вгорі", "За алфавітом", "Випадково щодня"]}, {"t": 2, "l": 1, "q": "З'єднай частину історії блогів з фактом.\n«Йорн Баргер, 1997» —", "o": ["Придумав термін «weblog»", "Скоротив до «blog»", "Сервіс блогів від Google", "Схожий на блог, але блог читають інші"]}, {"t": 2, "l": 1, "q": "З'єднай частину історії блогів з фактом.\n«Пітер Мерхольц, 1999» —", "o": ["Скоротив до «blog»", "Придумав термін «weblog»", "Сервіс блогів від Google", "Схожий на блог, але блог читають інші"]}, {"t": 2, "l": 1, "q": "З'єднай частину історії блогів з фактом.\n«Blogger» —", "o": ["Сервіс блогів від Google", "Придумав термін «weblog»", "Скоротив до «blog»", "Схожий на блог, але блог читають інші"]}, {"t": 2, "l": 1, "q": "Що можна публікувати в блозі ферми?\n«Рецепт салату з мікрозеленню»", "o": ["Можна", "Не можна"]}, {"t": 2, "l": 1, "q": "Що можна публікувати в блозі ферми?\n«Фото лотків з паростками»", "o": ["Можна", "Не можна"]}, {"t": 2, "l": 1, "q": "Що можна публікувати в блозі ферми?\n«Графік росту гороху»", "o": ["Можна", "Не можна"]}, {"t": 2, "l": 2, "q": "Де налаштувати, яка інформація про тебе видима всім у Google?", "o": ["Обліковий запис Google", "Вставити зображення в публікацію", "Попередній перегляд публікації", "Пошук відео на YouTube"]}, {"t": 2, "l": 1, "q": "Яку дію з коментарем обрати?\n«Образа на адресу автора»", "o": ["Видалити", "Відповісти"]}, {"t": 2, "l": 1, "q": "Яку дію з коментарем обрати?\n«Спам із підозрілим посиланням»", "o": ["Видалити", "Відповісти"]}, {"t": 2, "l": 2, "q": "Генеративний ШІ може написати пост за секунду. Яке правило чесного блогера в 2026 році?", "o": ["Перевіряти факти й чесно згадувати ШІ", "Видавати текст ШІ за повністю свій", "Публікувати без жодного читання й перевірки", "Копіювати чужі пости через ШІ"]}, {"t": 2, "l": 1, "q": "Назва блогу?", "o": ["Класний Врожай", "Блог 1", "Таємний щоденник 6-А з адресами"]}, {"t": 2, "l": 1, "q": "Відображуване ім'я автора?", "o": ["Команда ферми 6-А", "Повне ім'я, адреса й телефон", "Пароль від пошти"]}, {"t": 2, "l": 1, "q": "Хто дав дозвіл?", "o": ["Батьки й учитель", "Ніхто, я сам вирішив", "Незнайомець з чату гри"]}, {"t": 2, "l": 1, "q": "Тема оформлення?", "o": ["Світла, легко читати", "Чорний текст на чорному фоні", "Миготливий фон із неоновими літерами"]}, {"t": 2, "l": 2, "q": "«Скільки днів росте редиска?»", "o": ["Ввічливо відповісти на запитання", "Видалити, бо він питає щось зайве", "Проігнорувати назавжди", "Заблокувати весь блог"]}, {"t": 2, "l": 2, "q": "«Ваша ферма — відстій, а ви…» (образи)", "o": ["Видалити образливий коментар", "Відповісти ще сильнішою образою", "Закрити блог назавжди", "Поширити образу друзям"]}, {"t": 2, "l": 2, "q": "«Безкоштовні айфони тут!!! klik-link.xyz»", "o": ["Видалити як спам, не клікати", "Перейти й перевірити посилання", "Подякувати за подарунок", "Переслати всьому класу"]}, {"t": 3, "l": 1, "q": "Що з цього більшість соцмереж НЕ дозволяє?", "o": ["Бачити чужі паролі", "Створити профіль із фото", "Ставити вподобайки", "Приєднуватися до груп"]}, {"t": 3, "l": 1, "q": "Горизонтальна чи вертикальна соцмережа?\n«Люди зі спільною метою: працюють у команді»", "o": ["Вертикальна", "Горизонтальна"]}, {"t": 3, "l": 1, "q": "Горизонтальна чи вертикальна соцмережа?\n«Професійна мережа для кар'єри»", "o": ["Вертикальна", "Горизонтальна"]}, {"t": 3, "l": 1, "q": "З'єднай вид соцмережі з прикладом використання.\n«Медіаконтент» —", "o": ["Ділитися фото й відео", "Спланувати мандрівку", "Зібрати бібліотеку цікавого", "Відгуки про продукти й послуги"]}, {"t": 3, "l": 1, "q": "З'єднай вид соцмережі з прикладом використання.\n«Для подорожей» —", "o": ["Спланувати мандрівку", "Ділитися фото й відео", "Зібрати бібліотеку цікавого", "Відгуки про продукти й послуги"]}, {"t": 3, "l": 1, "q": "З'єднай вид соцмережі з прикладом використання.\n«Соціальні закладки» —", "o": ["Зібрати бібліотеку цікавого", "Ділитися фото й відео", "Спланувати мандрівку", "Відгуки про продукти й послуги"]}, {"t": 3, "l": 2, "q": "Що таке гібридна соцмережа?", "o": ["Є і сайт, і застосунок", "Працює лише на папері", "Існує тільки у вигляді SMS", "Доступна лише в бібліотеці"]}, {"t": 3, "l": 1, "q": "Небезпека чи безпечна дія?\n«Профіль «Лише для друзів»»", "o": ["Безпечно", "Небезпека"]}, {"t": 3, "l": 1, "q": "Небезпека чи безпечна дія?\n«Додавати в друзі лише знайомих»", "o": ["Безпечно", "Небезпека"]}, {"t": 3, "l": 2, "q": "З 10 грудня 2025 р. в Австралії підліткам до 16 років заборонено мати акаунти в 10 соцмережах. На кого закон поклав відповідальність?", "o": ["На компанії-власниці соцмереж", "На самих дітей і їхніх батьків", "На вчителів інформатики в школах", "На провайдерів мобільного зв'язку"]}, {"t": 3, "l": 1, "q": "Сторінка ферми?", "o": ["Публічна, без особистих даних", "Публічна, з телефонами всіх учнів", "Закрита, порожня й без жодного допису"]}, {"t": 3, "l": 1, "q": "Особистий профіль учня?", "o": ["Лише для друзів", "Публічний для всіх у світі", "Відкритий з адресою дому"]}, {"t": 3, "l": 1, "q": "Геолокація в дописах?", "o": ["Вимкнено", "Увімкнено в кожному пості", "Транслювати наживо щодня"]}, {"t": 3, "l": 1, "q": "Хто може писати повідомлення?", "o": ["Лише друзі", "Будь-хто, навіть незнайомці", "Лише незнайомці з подарунками"]}, {"t": 3, "l": 2, "q": "«Ваш акаунт заблокують! Введіть пароль тут: f4rm-login.xyz»", "o": ["Це фішинг — не вводити, поскаржитися", "Ввести пароль, щоб не заблокували", "Переслати однокласникам на перевірку", "Відповісти своїм паролем у чаті"]}, {"t": 3, "l": 2, "q": "Незнайомець: «Давай зустрінемося, я теж люблю мікрозелень!»", "o": ["Не йти, розповісти дорослим", "Погодитися й прийти самому вночі", "Надіслати свою адресу та фото", "Нікому про це не розповідати"]}, {"t": 3, "l": 2, "q": "Однокласник щодня пише образливі коментарі під твоїми фото.", "o": ["Скріншоти, блок, скарга, дорослі", "Відповідати такими самими образами", "Видалити всі свої акаунти й мовчати", "Поширити його фото з насмішками"]}, {"t": 3, "l": 2, "q": "Справа №4: користь чи ризик?\n«Витік особистих даних» — куди?", "o": ["⚠️ Ризик", "👍 Користь"]}, {"t": 3, "l": 2, "q": "Справа №4: користь чи ризик?\n«Цькування від однолітків» — куди?", "o": ["⚠️ Ризик", "👍 Користь"]}, {"t": 3, "l": 2, "q": "Справа №4: користь чи ризик?\n«Години в стрічці замість реального життя» — куди?", "o": ["⚠️ Ризик", "👍 Користь"]}, {"t": 4, "l": 1, "q": "З'єднай позначку біля повідомлення з її значенням.\n«Дві сірі галочки» —", "o": ["Доставлено на телефон", "Надіслано, ще не доставлено", "Одержувач прочитав", "Ще не надіслано"]}, {"t": 4, "l": 1, "q": "З'єднай позначку біля повідомлення з її значенням.\n«Дві сині галочки» —", "o": ["Одержувач прочитав", "Надіслано, ще не доставлено", "Доставлено на телефон", "Ще не надіслано"]}, {"t": 4, "l": 1, "q": "З'єднай позначку біля повідомлення з її значенням.\n«Годинник» —", "o": ["Ще не надіслано", "Надіслано, ще не доставлено", "Доставлено на телефон", "Одержувач прочитав"]}, {"t": 4, "l": 1, "q": "Що вміє більшість месенджерів?\n«Друкувати на принтері сусіда»", "o": ["Ні", "Так"]}, {"t": 4, "l": 2, "q": "Куди WhatsApp автоматично зберігає отримані фото?", "o": ["У папку «Медіа WhatsApp»", "У кошик операційної системи", "На хмарний диск учителя", "У Диспетчер пристроїв"]}, {"t": 4, "l": 2, "q": "Навіщо вмикати зникаючі повідомлення у Viber?", "o": ["Для приватності й вільної пам'яті", "Щоб усі повідомлення стали платними", "Щоб друкувати їх автоматично", "Щоб бачити чужі листування"]}, {"t": 4, "l": 1, "q": "Приймати файл чи ні?\n««Prize.exe» від невідомого номера»", "o": ["Не приймати", "Можна прийняти"]}, {"t": 4, "l": 1, "q": "Приймати файл чи ні?\n«Архів «Відповіді_ЗНО» від незнайомця»", "o": ["Не приймати", "Можна прийняти"]}, {"t": 4, "l": 2, "q": "З червня 2026 р. WhatsApp запускає імена користувачів (usernames). Що це дає?", "o": ["Можна не показувати номер телефону", "Месенджер стає повністю платним", "Повідомлення починають друкуватися", "Пропадає наскрізне шифрування"]}, {"t": 4, "l": 2, "q": "Покупець: «Скільки коштує 100 г редиски?» Біля твоєї відповіді — дві сині галочки. Що це означає?", "o": ["Покупець прочитав відповідь", "Повідомлення ще не надіслано", "Покупця заблоковано назавжди", "Чат видалено"]}, {"t": 4, "l": 2, "q": "Невідомий номер о 23:00 дзвонить по відео й не пише, хто це.", "o": ["Не брати, заблокувати, поскаржитися", "Відповісти й показати всю кімнату", "Надіслати свою домашню адресу для доставки", "Передзвонити й назвати свою школу"]}, {"t": 4, "l": 2, "q": "У групі покупців хтось почав сварку великими літерами.", "o": ["Спокійно нагадати правила групи", "Відповісти ще більшими літерами", "Видалити групу без пояснень", "Переслати сварку в інші чати"]}, {"t": 4, "l": 2, "q": "Безпека файлів у месенджері\n«Фото від учительки в групі ферми» — куди?", "o": ["✅ Відкрити", "⛔ Не відкривати"]}, {"t": 4, "l": 2, "q": "Безпека файлів у месенджері\n«Голосове від мами» — куди?", "o": ["✅ Відкрити", "⛔ Не відкривати"]}, {"t": 4, "l": 2, "q": "Безпека файлів у месенджері\n«Розклад від старости класу» — куди?", "o": ["✅ Відкрити", "⛔ Не відкривати"]}, {"t": 5, "l": 1, "q": "Активний чи пасивний цифровий слід?\n«Ти опублікував фото в соцмережі»", "o": ["Активний", "Пасивний"]}, {"t": 5, "l": 1, "q": "Активний чи пасивний цифровий слід?\n«Сайт записав, скільки часу ти був на сторінці»", "o": ["Пасивний", "Активний"]}, {"t": 5, "l": 1, "q": "Активний чи пасивний цифровий слід?\n«Ти залишив коментар під відео»", "o": ["Активний", "Пасивний"]}, {"t": 5, "l": 1, "q": "Активний чи пасивний цифровий слід?\n«Застосунок зібрав геолокацію без твого відома»", "o": ["Пасивний", "Активний"]}, {"t": 5, "l": 1, "q": "Що означає повідомлення ВЕЛИКИМИ ЛІТЕРАМИ за правилами нетикету?", "o": ["Це наче крик", "Це ввічливо", "Так пишуть у листах до вчителя", "Так легше читати довгі тексти"]}, {"t": 5, "l": 1, "q": "З'єднай поняття з поясненням.\n«Флейм» —", "o": ["«Словесна війна» з образами", "Небажані масові повідомлення", "Повторюване цькування через гаджети", "Відповідальне використання технологій"]}, {"t": 5, "l": 1, "q": "З'єднай поняття з поясненням.\n«Спам» —", "o": ["Небажані масові повідомлення", "«Словесна війна» з образами", "Повторюване цькування через гаджети", "Відповідальне використання технологій"]}, {"t": 5, "l": 1, "q": "З'єднай поняття з поясненням.\n«Кібербулінг» —", "o": ["Повторюване цькування через гаджети", "«Словесна війна» з образами", "Небажані масові повідомлення", "Відповідальне використання технологій"]}, {"t": 5, "l": 1, "q": "Чи можна так робити?\n«Використовувати піратські фільми»", "o": ["Ні", "Так"]}, {"t": 5, "l": 1, "q": "Чи можна так робити?\n«Повідомити свій пароль «службі підтримки»»", "o": ["Ні", "Так"]}, {"t": 5, "l": 2, "q": "Золоте правило нетикету:", "o": ["Чини з іншими так, як хочеш собі", "Пиши все, що думаєш, бо тебе не бачать", "Відповідай на образу ще сильнішою", "Видаляй усі думки, з якими не згоден"]}, {"t": 5, "l": 2, "q": "Після австралійської заборони соцмереж до 16 років деякі діти малювали собі вуса, щоб обдурити перевірку віку за обличчям. Чому така перевірка — питання цифрового громадянства?", "o": ["Бо стосується чесності й безпеки онлайн", "Бо вуса заборонені в усіх соцмережах", "Бо камера смартфона ламається від вусів", "Бо це правило лише для дорослих"]}, {"t": 5, "l": 2, "q": "«Ваша редиска гірша за нашу, ви всі…» Як відповісти від імені ферми?", "o": ["Ввічливо подякувати й запросити", "Відповісти образою на образу", "Написати КАПСЛОКОМ «САМІ ТАКІ»", "Опублікувати домашню адресу автора"]}, {"t": 5, "l": 2, "q": "Хтось пише образливі речі вже вдесяте й про різних учнів.", "o": ["Видалити, блок, сказати дорослим", "Не звертати жодної уваги ще місяць", "Відповідати йому щодня", "Перейменувати сторінку ферми"]}, {"t": 5, "l": 2, "q": "Користувач не згоден з порадою щодо поливу, але пише ввічливо.", "o": ["Пояснити свою думку", "Видалити його коментар одразу", "Заблокувати за незгоду назавжди", "Висміяти його в сторіс ферми"]}, {"t": 5, "l": 2, "q": "Смішне фото однокласника, що впав у лоток з ґрунтом. Опублікувати на сторінці ферми?", "o": ["Лише з його згоди", "Так, бо смішно всім, крім нього", "Так, але підписати його повним ім'ям", "Розіслати в усі чати школи"]}, {"t": 5, "l": 2, "q": "Знайшли класний рецепт на чужому блозі. Як взяти для свого?", "o": ["Попросити дозволу й дати посилання", "Скопіювати як свій, ніхто не помітить", "Переписати й додати свій підпис", "Взяти фото й текст без жодної згадки"]}, {"t": 5, "l": 2, "q": "Друг просить твій пароль від сторінки ферми «на хвилинку».", "o": ["Не давати свій пароль", "Дати, бо він же друг", "Надіслати пароль у загальний чат", "Записати пароль на дошці в класі"]}];
+</script>
+<script>
+"use strict";
+const $=s=>document.querySelector(s);
+const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const rnd=n=>Math.floor(Math.random()*n);
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]]}return a};
+const RM=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const TEAMC=["--A","--B","--C","--D"];
+const DEFN=["Ракети","Комети","Блискавки","Метеори"];
+const MODES=[
+ {id:"block",ic:"🧱",name:"Блок-бласт",tag:"як Block Blast — №1 за завантаженнями 2025",desc:"Правильна відповідь дає фігуру: став її на поле й збирай повні рядки та стовпці. Помилка — сірий «вірус» на полі.",teams:[2]},
+ {id:"run",ic:"🏃",name:"Кібер-ранер",tag:"як Subway Surfers",desc:"Ранер біжить трьома доріжками. Перед ним ворота з відповідями — перестрибни на правильну доріжку (← →). Помилка — мінус життя.",teams:[2,3,4]},
+ {id:"ludo",ic:"🎲",name:"Лудо-гонка",tag:"як Ludo King",desc:"Кидай кубик, але рухайся лише після правильної відповіді. Бонусні клітинки, пастки й «збий суперника» — до фінішу!",teams:[2,3,4]},
+ {id:"hole",ic:"🕳️",name:"Чорна діра",tag:"як Hole.io",desc:"Керуй діркою пальцем чи мишею й «ковтай» лише правильні відповіді. Що більше ковтаєш правильно — то більша діра.",teams:[2,3,4]}
+];
+let MATCH_URL=G.matchUrl||"";
+const S={mode:"block",n:2,names:DEFN.slice(),topics:new Set(G.topics.map((_,i)=>i+1)),time:30,snd:true};
+try{const s=JSON.parse(localStorage.getItem("arc:"+G.id)||"null");if(s){S.mode=s.mode||S.mode;S.n=s.n||2;S.names=s.names||S.names;S.time=s.time||30}}catch(e){}
+const saveS=()=>{try{localStorage.setItem("arc:"+G.id,JSON.stringify({mode:S.mode,n:S.n,names:S.names,time:S.time}))}catch(e){}};
+$("#eyebrow").textContent=`Інформатика · ${G.grade} клас · Розділ ${G.section}`;
+$("#htitle").textContent=G.title;$("#stitle").textContent=G.title;document.title=G.title;
+/* ---------- sound ---------- */
+let AC=null;const tone=(seq)=>{if(!S.snd)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();let t=AC.currentTime;seq.forEach(([f,d,ty])=>{const o=AC.createOscillator(),g=AC.createGain();o.type=ty||"triangle";o.frequency.value=f;g.gain.setValueAtTime(.18,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+d);t+=d*.8})}catch(e){}};
+const sOk=()=>tone([[660,.12],[880,.18]]),sBad=()=>tone([[220,.25,"sawtooth"]]),sWin=()=>tone([[523,.15],[659,.15],[784,.15],[1047,.35]]),sTick=()=>tone([[1200,.03,"square"]]);
+$("#bSnd").onclick=e=>{S.snd=!S.snd;e.currentTarget.setAttribute("aria-pressed",S.snd)};
+$("#bFull").onclick=()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}catch(e){}};
+$("#bMenu").onclick=()=>{stopAll();show("setup")};
+function show(id){["setup","game","result"].forEach(x=>$("#"+x).hidden=x!==id);$("#qm").hidden=true}
+/* ---------- confetti ---------- */
+const cv=$("#fx"),cx=cv.getContext("2d");let parts=[];
+function confetti(n){if(RM)return;cv.width=innerWidth;cv.height=innerHeight;const cols=["#f59f00","#2f9e44","#4dabf7","#e64980","#ffd43b","#845ef7"];for(let i=0;i<(n||160);i++)parts.push({x:innerWidth/2+(Math.random()-.5)*300,y:innerHeight*.35,vx:(Math.random()-.5)*16,vy:-Math.random()*15-4,s:6+Math.random()*8,c:cols[i%6],life:130});if(parts.length===(n||160))requestAnimationFrame(fx)}
+function fx(){cx.clearRect(0,0,cv.width,cv.height);parts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.45;p.life--;cx.fillStyle=p.c;cx.fillRect(p.x,p.y,p.s,p.s*.6)});parts=parts.filter(p=>p.life>0&&p.y<cv.height+20);if(parts.length)requestAnimationFrame(fx);else cx.clearRect(0,0,cv.width,cv.height)}
+/* ---------- setup ---------- */
+function renderSetup(){
+ const M=$("#modes");M.innerHTML="";
+ MODES.concat(MATCH_URL?[{id:"match",ic:"🏀",name:"Баскетбольний матч",tag:"класичний формат",desc:"Кидки на 1, 2 і 3 очки, підбирання, овертайм. Відкривається окремою сторінкою.",teams:[2]}]:[]).forEach(m=>{
+  const b=el(m.id==="match"?"a":"button","mode",`<span class="ic">${m.ic}</span><span class="tag">${esc(m.tag)}</span><h3>${esc(m.name)}</h3><p>${esc(m.desc)}</p>`);
+  b.setAttribute("aria-pressed",S.mode===m.id);if(m.id==="match"){b.href=MATCH_URL;b.target="_blank";b.rel="noopener";b.style.textDecoration="none";b.style.color="inherit"}b.onclick=e=>{if(m.id==="match")return;S.mode=m.id;if(!m.teams.includes(S.n))S.n=m.teams[0];saveS();renderSetup()};M.appendChild(b)});
+ const md=MODES.find(m=>m.id===S.mode);
+ const N=$("#nteams");N.innerHTML="";[2,3,4].forEach(k=>{const b=el("button","pill",k+" команди");b.setAttribute("aria-pressed",S.n===k);b.disabled=!md.teams.includes(k);if(b.disabled)b.style.opacity=.35;b.onclick=()=>{S.n=k;saveS();renderSetup()};N.appendChild(b)});
+ const NM=$("#names");NM.innerHTML="";for(let i=0;i<S.n;i++){const w=el("label","",`<span style="display:inline-block;width:.9rem;height:.9rem;border-radius:50%;background:var(${TEAMC[i]});margin-right:.3rem"></span>`);const inp=el("input","teamname");inp.value=S.names[i]||DEFN[i];inp.oninput=()=>{S.names[i]=inp.value||DEFN[i];saveS()};w.appendChild(inp);NM.appendChild(w)}
+ const T=$("#topics");T.innerHTML="";G.topics.forEach((t,i)=>{const b=el("button","pill",esc(t));b.setAttribute("aria-pressed",S.topics.has(i+1));b.onclick=()=>{S.topics.has(i+1)?S.topics.delete(i+1):S.topics.add(i+1);if(!S.topics.size)S.topics.add(i+1);renderSetup()};T.appendChild(b)});
+ const TM=$("#times");TM.innerHTML="";[[20,"20 с"],[30,"30 с"],[45,"45 с"],[0,"без таймера"]].forEach(([v,l])=>{const b=el("button","pill",l);b.setAttribute("aria-pressed",S.time===v);b.onclick=()=>{S.time=v;saveS();renderSetup()};TM.appendChild(b)});
+ $("#hint").textContent=`Питань у добірці: ${pool().length}`;
+}
+$("#go").onclick=()=>start();
+/* ---------- questions ---------- */
+function pool(min){return BANK.filter(q=>q.o&&q.o.length>=2&&S.topics.has(q.t)&&(!min||q.o.length>=min))}
+let deck=[],deckMin=0;
+function nextQ(min){if(!deck.length||deckMin!==(min||0)){deck=shuffle(pool(min));deckMin=min||0;if(!deck.length)deck=shuffle(pool())}return deck.pop()}
+const MISS=[];
+/* ask: shows modal, resolves {ok,q} */
+let qTimer=null;
+function ask(team,opts={}){return new Promise(res=>{
+ const q=opts.q||nextQ(opts.min);const order=shuffle(q.o.map((_,i)=>i));
+ const box=$("#qbox");box.style.setProperty("--tc",`var(${TEAMC[team]})`);
+ box.innerHTML=`<div class="who">${esc(T[team].name)}${opts.lead?" · "+esc(opts.lead):""}</div><div class="topic">${esc(G.topics[q.t-1]||"")}</div><div class="q">${esc(q.q)}</div><div class="opts"></div>${S.time?'<div class="timer"><i></i></div>':""}<div class="verdict"></div>`;
+ const O=box.querySelector(".opts"),V=box.querySelector(".verdict");let done=false;
+ const fin=(ok,pick)=>{if(done)return;done=true;clearInterval(qTimer);[...O.children].forEach((b,k)=>{b.disabled=true;if(order[k]===0)b.classList.add("ok");else if(k===pick)b.classList.add("bad")});
+  if(ok){sOk();V.className="verdict ok";V.textContent="✔ Правильно!"}else{sBad();V.className="verdict bad";V.textContent=pick<0?"⏰ Час вийшов!":"✘ Ні. Правильна відповідь підсвічена.";MISS.push(q)}
+  setTimeout(()=>{$("#qm").hidden=true;res({ok,q})},ok?900:2000)};
+ order.forEach((i,k)=>{const b=el("button","opt",`<b>${"АБВГДЕ"[k]}</b><span>${esc(q.o[i])}</span>`);b.onclick=()=>fin(i===0,k);O.appendChild(b)});
+ $("#qm").hidden=false;
+ if(S.time){const bar=box.querySelector(".timer i");const t0=Date.now(),D=S.time*1000;qTimer=setInterval(()=>{const left=Math.max(0,D-(Date.now()-t0));bar.style.width=(left/D*100)+"%";if(left<5000&&left>0&&Math.round(left/100)%10===0)sTick();if(!left)fin(false,-1)},100)}
+ const kh=e=>{if(done){removeEventListener("keydown",kh);return}const k="1234".indexOf(e.key);if(k>=0&&k<order.length)fin(order[k]===0,k)};addEventListener("keydown",kh);
+})}
+/* ---------- game state ---------- */
+let T=[],cur=0,running=null;
+function scores(){const W=$("#scores");W.innerHTML="";T.forEach((t,i)=>{const d=el("div","sc"+(i===cur?" on":""),`<span class="dot"></span><span class="nm">${esc(t.name)}</span>${t.extra?`<span>${t.extra}</span>`:""}<span class="pt">${t.score}</span>`);d.style.setProperty("--tc",`var(${TEAMC[i]})`);W.appendChild(d)})}
+function status(h){$("#status").innerHTML=h}
+function float(parent,x,y,txt,col){const f=el("div","float",txt);f.style.left=x+"px";f.style.top=y+"px";f.style.color=col||"#2b8a3e";parent.appendChild(f);setTimeout(()=>f.remove(),1000)}
+function stopAll(){if(running&&running.stop)running.stop();running=null;clearInterval(qTimer)}
+function start(){stopAll();MISS.length=0;deck=[];T=[];for(let i=0;i<S.n;i++)T.push({name:S.names[i]||DEFN[i],score:0});cur=0;show("game");$("#stage").innerHTML="";
+ ({block:Block,run:Runner,ludo:Ludo,hole:Hole})[S.mode]()}
+function finish(note){stopAll();const best=Math.max(...T.map(t=>t.score)),win=T.filter(t=>t.score===best);sWin();confetti();
+ const R=$("#result");R.innerHTML=`<h2>${MODES.find(m=>m.id===S.mode).ic} ${esc(MODES.find(m=>m.id===S.mode).name)} — фінал</h2><div class="win">${win.length>1?"Нічия! 🤝":"🏆 Перемогли «"+esc(win[0].name)+"»!"}</div>${note?`<p class="lead">${note}</p>`:""}<div class="podium">${T.map((t,i)=>`<div style="--tc:var(${TEAMC[i]})">${esc(t.name)}<b>${t.score}</b></div>`).join("")}</div>`+
+  (MISS.length?`<div class="review"><b>Повторимо разом (помилки в грі):</b><ol>${[...new Map(MISS.map(q=>[q.q,q])).values()].slice(0,10).map(q=>`<li>${esc(q.q.replace(/\n/g," "))} — <b>${esc(q.o[0])}</b></li>`).join("")}</ol></div>`:`<p class="lead">Жодної помилки — супер!</p>`)+
+  `<div class="row" style="justify-content:center"><button class="big" id="again">↻ Ще раз</button><button class="ghost" id="other">Інша гра</button></div>`;
+ show("result");$("#again").onclick=()=>start();$("#other").onclick=()=>show("setup")}
+
+/* ================= BLOCK BLAST ================= */
+const SHAPES=[[[1,1]],[[1,1,1]],[[1,1,1,1]],[[1],[1]],[[1],[1],[1]],[[1,1],[1,1]],[[1,0],[1,0],[1,1]],[[1,1,1],[0,1,0]],[[0,1,1],[1,1,0]],[[1,1],[1,0]],[[1,1,1],[1,0,0]],[[1,1,1],[1,1,1]],[[1]]];
+const rot=s=>s[0].map((_,c)=>s.map(r=>r[c]).reverse());
+function Block(){
+ const ROUNDS=8;let round=1;const B=T.map(()=>Array.from({length:8},()=>Array(8).fill(0)));
+ const st=$("#stage");st.innerHTML=`<div class="bwrap" id="bw"></div><div class="tray" id="tray"></div><div class="row" style="justify-content:center" id="bctl"></div>`;
+ const els=T.map((t,i)=>{const w=el("div","bteam");w.style.setProperty("--tc",`var(${TEAMC[i]})`);w.innerHTML=`<h3>${esc(t.name)}</h3>`;const b=el("div","board");for(let k=0;k<64;k++){const c=el("div","cell");c.dataset.k=k;b.appendChild(c)}w.appendChild(b);$("#bw").appendChild(w);return{w,b}});
+ const draw=()=>{T.forEach((t,i)=>{els[i].w.classList.toggle("on",i===cur);[...els[i].b.children].forEach((c,k)=>{const v=B[i][k>>3][k&7];c.className="cell"+(v===1?" f":v===2?" v":"")})});scores()};
+ const fits=(i,sh,r,c)=>sh.every((row,y)=>row.every((v,x)=>!v||(r+y<8&&c+x<8&&!B[i][r+y][c+x])));
+ const anyFit=(i,sh)=>{for(let r=0;r<8;r++)for(let c=0;c<8;c++)if(fits(i,sh,r,c))return true;return false};
+ let piece=null,turnDone=null;
+ const trayDraw=()=>{const tr=$("#tray");tr.innerHTML="";tr.style.setProperty("--tc",`var(${TEAMC[cur]})`);if(!piece)return;
+  const p=el("div","piece sel");p.style.gridTemplateColumns=`repeat(${piece[0].length},1.4rem)`;piece.forEach(r=>r.forEach(v=>p.appendChild(el("i",v?"f":""))));tr.appendChild(p);
+  const rb=el("button","ghost","⟳ Повернути");rb.onclick=()=>{piece=rot(piece);trayDraw()};tr.appendChild(rb);
+  tr.appendChild(el("span","lead","Клацніть клітинку на полі — туди стане лівий верхній кут фігури."))};
+ const hover=(i,k,on)=>{if(!piece||i!==cur)return;const r=k>>3,c=k&7,ok=fits(i,piece,r,c);piece.forEach((row,y)=>row.forEach((v,x)=>{if(!v)return;const rr=r+y,cc=c+x;if(rr<8&&cc<8){const cell=els[i].b.children[rr*8+cc];if(on)cell.classList.add(ok?"pv":"no");else cell.classList.remove("pv","no")}}))};
+ els.forEach((e,i)=>{[...e.b.children].forEach(c=>{const k=+c.dataset.k;c.onmouseenter=()=>hover(i,k,true);c.onmouseleave=()=>hover(i,k,false);c.onclick=()=>place(i,k)})});
+ function place(i,k){if(!piece||i!==cur)return;const r=k>>3,c=k&7;if(!fits(i,piece,r,c)){sBad();return}
+  let n=0;piece.forEach((row,y)=>row.forEach((v,x)=>{if(v){B[i][r+y][c+x]=1;n++}}));piece=null;trayDraw();
+  // clear lines
+  const rows=[],cols=[];for(let y=0;y<8;y++)if(B[i][y].every(v=>v))rows.push(y);for(let x=0;x<8;x++)if(B[i].every(row=>row[x]))cols.push(x);
+  const L=rows.length+cols.length;let pts=n;if(L){pts+=L*10*L;tone([[523,.1],[659,.1],[784,.1],[1047,.2]]);rows.forEach(y=>{for(let x=0;x<8;x++){B[i][y][x]=0;els[i].b.children[y*8+x].classList.add("clr")}});cols.forEach(x=>{for(let y=0;y<8;y++){B[i][y][x]=0;els[i].b.children[y*8+x].classList.add("clr")}})}
+  T[i].score+=pts;const rc=els[i].b.getBoundingClientRect();float(document.body,rc.left+rc.width/2,rc.top+rc.height/2,"+"+pts+(L>1?` комбо ×${L}!`:""));
+  draw();setTimeout(()=>turnDone&&turnDone(),L?600:250)}
+ async function loop(){
+  while(round<=ROUNDS){for(let i=0;i<T.length;i++){cur=i;draw();status(`Раунд ${round} з ${ROUNDS} · хід команди «${esc(T[i].name)}»`);
+   const {ok}=await ask(i,{lead:`раунд ${round}`});if(!running)return;
+   if(ok){let sh=SHAPES[rnd(SHAPES.length)];for(let t=0;t<4&&!anyFit(i,sh);t++)sh=rot(sh);if(!anyFit(i,sh))sh=[[1]];
+    if(!anyFit(i,sh)){status("Поле заповнене — фігура не влазить!");await new Promise(r=>setTimeout(r,1500));continue}
+    piece=sh;trayDraw();status(`«${esc(T[i].name)}» ставить фігуру на своє поле`);await new Promise(r=>turnDone=r);turnDone=null}
+   else{const empty=[];for(let k=0;k<64;k++)if(!B[i][k>>3][k&7])empty.push(k);if(empty.length){const k=empty[rnd(empty.length)];B[i][k>>3][k&7]=2;draw();els[i].b.children[k].classList.add("clr")}await new Promise(r=>setTimeout(r,700))}
+  }round++}
+  finish("Бали: клітинка фігури +1, кожна зібрана лінія +10 (дві лінії разом — ×2, комбо!).")}
+ running={stop(){running=null;turnDone&&turnDone()}};draw();loop()}
+
+/* ================= RUNNER ================= */
+function Runner(){
+ const GATES=8;let ti=0;
+ const st=$("#stage");st.innerHTML=`<div class="run" id="run"><div class="rq" id="rq"></div><div class="lane" style="left:0;border:0"></div><div class="lane" style="left:33.33%"></div><div class="lane" style="left:66.66%"></div><div class="runner" id="me">🏃</div><div class="rhud" id="rh"></div><button class="big ovl" id="startRun">▶ Старт забігу</button></div><div class="rbtns"><button class="ghost" id="L">⬅</button><button class="ghost" id="R">➡</button></div>`;
+ const run=$("#run"),me=$("#me");let lane=1,raf=null,alive=false;
+ const setLane=l=>{lane=Math.max(0,Math.min(2,l));me.style.left=(16.66+lane*33.33)+"%"};setLane(1);
+ $("#L").onclick=()=>setLane(lane-1);$("#R").onclick=()=>setLane(lane+1);
+ run.onpointerdown=e=>{const r=run.getBoundingClientRect();setLane(Math.floor((e.clientX-r.left)/r.width*3))};
+ const kh=e=>{if(e.key==="ArrowLeft"||e.key==="a"){setLane(lane-1);e.preventDefault()}if(e.key==="ArrowRight"||e.key==="d"){setLane(lane+1);e.preventDefault()}};addEventListener("keydown",kh);
+ const begin=()=>{cur=ti;scores();T[ti].extra="❤️❤️❤️";T[ti].lives=3;scores();status(`Біжить команда «${esc(T[ti].name)}» · ${GATES} воріт · ← → або торкніться доріжки`);$("#startRun").hidden=false;$("#startRun").disabled=false;$("#startRun").textContent="▶ Старт забігу «"+T[ti].name+"»";try{run.scrollIntoView({block:"center",behavior:"smooth"})}catch(_){}$("#rq").textContent="Натисніть «Старт», коли команда готова";};
+ $("#startRun").onclick=e=>{e.stopPropagation();$("#startRun").hidden=true;go()};$("#startRun").onpointerdown=e=>e.stopPropagation();
+ function go(){alive=true;let gate=0,speed=.05,objs=[],last=performance.now(),spawnIn=0;
+  const H=()=>run.clientHeight;
+  const spawnGate=()=>{const q=nextQ();const opts=q.o.length>=3?shuffle([0,...shuffle(q.o.map((_,i)=>i).slice(1)).slice(0,2)]):null;
+   let lanes;if(opts)lanes=opts; else {lanes=shuffle([0,1]);lanes.splice(1,0,-1)}
+   $("#rq").textContent=q.q.replace(/\n/g," ");
+   const rd=Math.min(10000,Math.max(4000,2500+40*(q.q.length+q.o.join("").length)));const hl=el("div","hold","");run.appendChild(hl);
+   const row={y:-60,hold:rd,hl,q,items:lanes.map((oi,l)=>{const g=el("div","gate"+(oi<0?" wall":""),oi<0?"🧱":esc(q.o[oi]));g.style.left=(16.66+l*33.33)+"%";run.appendChild(g);return{g,oi}}),hit:false};objs.push(row);
+   for(let k=0;k<3;k++){const c=el("div","coin","🪙");c.style.left=(16.66+rnd(3)*33.33)+"%";run.appendChild(c);objs.push({coin:c,y:-260-k*90})}};
+  spawnGate();gate++;
+  const step=t=>{if(!alive)return;const dt=Math.min(50,t-last);last=t;const h=H(),py=h*.84;
+   objs.forEach(o=>{o.y+=speed*dt*(h/600);const el_=o.coin||null;if(o.coin){o.coin.style.top=o.y+"px";const cl=Math.round((parseFloat(o.coin.style.left)-16.66)/33.33);if(!o.got&&Math.abs(o.y-py)<30&&cl===lane){o.got=true;o.coin.remove();T[ti].score+=1;tone([[1320,.05]]);scores()}}
+    else{if(o.hold>0){const stop=h*.2;if(o.y>=stop){o.y=stop;o.hold-=dt;o.hl.textContent="⏳ Читай і обирай доріжку: "+Math.ceil(o.hold/1000)+" с";o.hl.style.top=(o.y+70)+"px"}else o.y=Math.min(stop,o.y+speed*dt*(h/600)*4);if(o.hold<=0)o.hl.remove()}
+     o.items.forEach(it=>it.g.style.top=o.y+"px");if(!o.hit&&o.y+30>py-20){o.hit=true;const it=o.items[lane];const ok=it.oi===0;o.items.forEach(x=>{if(x.oi===0)x.g.classList.add("ok");else if(x===it)x.g.classList.add("bad")});
+      const r=run.getBoundingClientRect();if(ok){T[ti].score+=10;sOk();float(run,me.offsetLeft,me.offsetTop,"+10")}else{T[ti].lives--;MISS.push(o.q);sBad();float(run,me.offsetLeft,me.offsetTop,"💥","#c92a2a");me.animate&&me.animate([{transform:"translateX(-50%) rotate(0)"},{transform:"translateX(-50%) rotate(25deg)"},{transform:"translateX(-50%) rotate(0)"}],{duration:400})}
+      T[ti].extra="❤️".repeat(Math.max(0,T[ti].lives))+"🖤".repeat(3-Math.max(0,T[ti].lives));scores();speed*=1.05}}});
+   objs=objs.filter(o=>{if(o.y>h+80){if(o.coin)o.coin.remove();else{o.items.forEach(x=>x.g.remove());o.hl&&o.hl.remove()}return false}return true});
+   $("#rh").textContent=`Ворота ${Math.min(gate,GATES)}/${GATES}`;
+   const gatesLeft=objs.some(o=>!o.coin);
+   if(!gatesLeft){if(T[ti].lives<=0||gate>=GATES){alive=false;endRun();return}spawnGate();gate++}
+   raf=requestAnimationFrame(step)};raf=requestAnimationFrame(step)}
+ function endRun(){[...run.querySelectorAll(".gate,.coin")].forEach(x=>x.remove());const bonus=T[ti].lives>0?T[ti].lives*5:0;T[ti].score+=bonus;T[ti].extra="";scores();
+  $("#rq").textContent=`Фініш! «${T[ti].name}»: ${T[ti].score} балів`+(bonus?` (бонус за життя +${bonus})`:"");ti++;
+  if(ti>=T.length)setTimeout(()=>finish("Бали: правильні ворота +10, монетка +1, кожне збережене життя +5."),1600);else setTimeout(begin,1800)}
+ running={stop(){alive=false;cancelAnimationFrame(raf);removeEventListener("keydown",kh)}};begin()}
+
+/* ================= LUDO ================= */
+function Ludo(){
+ const N=30;const SP={4:"⭐",9:"🌀",13:"⚡",17:"⭐",21:"🌀",25:"⚡",27:"🌀"};
+ const pos=T.map(()=>0);let turns=0;const MAXT=12*T.length;
+ const st=$("#stage");
+ const order=[];for(let r=0;r<3;r++){const row=[];for(let c=0;c<10;c++)row.push(r*10+c);if(r%2)row.reverse();order.push(...row)}
+ st.innerHTML=`<div class="track" id="tr"></div><div class="ludo-ctl"><span class="dice" id="dice">🎲</span><button class="big" id="roll">Кинути кубик</button></div><div class="legend"><span>⭐ +2 клітинки</span><span>🌀 назад на 3</span><span>⚡ ще один кидок</span><span>Стати на суперника — він відступає на 4</span></div>`;
+ const tr=$("#tr");
+ const cellEls=[];for(let gi=0;gi<30;gi++){const k=order[gi];const c=el("div","tc"+(k===0?" start":k===N-1?" fin":""),`<small>${k===0?"старт":k===N-1?"фініш":k}</small>${SP[k]||(k===N-1?"🏁":"")}<div class="tokens"></div>`);tr.appendChild(c);cellEls[k]=c}
+ const draw=()=>{cellEls.forEach(c=>c.querySelector(".tokens").innerHTML="");pos.forEach((p,i)=>{const t=el("span","tok");t.style.setProperty("--tc",`var(${TEAMC[i]})`);t.title=T[i].name;cellEls[Math.min(p,N-1)].querySelector(".tokens").appendChild(t)});T.forEach((t,i)=>{t.score=pos[i];t.extra=""});scores()};
+ const D="⚀⚁⚂⚃⚄⚅";const dice=$("#dice"),rb=$("#roll");
+ const wait=ms=>new Promise(r=>setTimeout(r,ms));
+ async function turn(){if(!running)return;draw();status(`Хід команди «${esc(T[cur].name)}» — киньте кубик`);rb.disabled=false;
+  await new Promise(r=>rb.onclick=r);rb.disabled=true;const v=1+rnd(6);dice.classList.remove("roll");void dice.offsetWidth;dice.classList.add("roll");tone([[300,.05],[400,.05],[500,.05]]);await wait(600);dice.textContent=D[v-1];
+  const {ok}=await ask(cur,{lead:`на кубику ${v} — відповідь вирішує, чи підеш`});if(!running)return;
+  let again=false;
+  if(ok){for(let s=0;s<v&&pos[cur]<N-1;s++){pos[cur]++;draw();tone([[700,.04]]);await wait(160)}
+   const sp=SP[pos[cur]];if(sp==="⭐"){status("⭐ Бонус: +2!");await wait(500);pos[cur]=Math.min(N-1,pos[cur]+2)}else if(sp==="🌀"){status("🌀 Вихор: назад на 3!");await wait(500);pos[cur]=Math.max(0,pos[cur]-3)}else if(sp==="⚡"){status("⚡ Ще один кидок!");again=true}
+   pos.forEach((p,j)=>{if(j!==cur&&p===pos[cur]&&p>0&&p<N-1){pos[j]=Math.max(0,p-4);status(`💥 «${esc(T[cur].name)}» збиває «${esc(T[j].name)}» — назад на 4!`)}});draw();await wait(700)}
+  else{status("Кубик «згорів» — фішка стоїть.");await wait(900)}
+  if(pos[cur]>=N-1){T[cur].score=N;draw();finish(`«${esc(T[cur].name)}» перша дісталася фінішу!`);return}
+  turns++;if(turns>=MAXT){finish("Час гри вийшов — перемагає команда, що пройшла найдалі.");return}
+  if(!again)cur=(cur+1)%T.length;turn()}
+ running={stop(){running=null}};draw();turn()}
+
+/* ================= HOLE ================= */
+function Hole(){
+ const TURN=50;let ti=0;
+ const st=$("#stage");st.innerHTML=`<div class="hole" id="ha"><div class="hq" id="hq"></div><div class="hh" id="hh"></div><div class="hhud" id="hhud"></div><button class="big ovl" id="hs">▶ Старт</button></div>`;
+ const A=$("#ha"),HH=$("#hh");let hx=200,hy=200,tx=200,ty=200,R=34,objs=[],q=null,alive=false,raf=null,t0=0,last=0;
+ const place=()=>{HH.style.left=hx+"px";HH.style.top=hy+"px";HH.style.width=HH.style.height=(R*2)+"px"};
+ const aim=e=>{const r=A.getBoundingClientRect();tx=e.clientX-r.left;ty=e.clientY-r.top};
+ A.onpointerdown=e=>{aim(e);try{A.setPointerCapture(e.pointerId)}catch(_){}};A.onpointermove=e=>{if(e.buttons||e.pointerType==="mouse")aim(e)};
+ const keys={};const kd=e=>{keys[e.key]=1;if(e.key.startsWith("Arrow"))e.preventDefault()},ku=e=>keys[e.key]=0;addEventListener("keydown",kd);addEventListener("keyup",ku);
+ function newQ(){objs.forEach(o=>o.e.remove());objs=[];q=nextQ();$("#hq").textContent="Ковтай правильну відповідь: "+q.q.replace(/\n/g," ");
+  const W=A.clientWidth,H=A.clientHeight;const idx=shuffle(q.o.map((_,i)=>i));
+  idx.forEach(i=>{const e=el("div","hobj",esc(q.o[i]));A.appendChild(e);let x,y,t=0;do{x=90+Math.random()*(W-180);y=100+Math.random()*(H-150);t++}while(t<200&&(Math.hypot(x-hx,y-hy)<R+130||objs.some(o=>Math.abs(o.x-x)<190&&Math.abs(o.y-y)<80)));
+   objs.push({e,x,y,vx:(Math.random()-.5)*.6,vy:(Math.random()-.5)*.6,ok:i===0})})}
+ function begin(){cur=ti;R=34;hx=A.clientWidth/2;hy=A.clientHeight/2;tx=hx;ty=hy;place();scores();status(`Грає «${esc(T[ti].name)}» · ${TURN} секунд · ведіть діру пальцем, мишею або стрілками`);
+  $("#hq").textContent="Натисніть «Старт», коли команда готова";$("#hs").hidden=false;$("#hs").disabled=false;$("#hs").textContent="▶ Старт «"+T[ti].name+"»";try{A.scrollIntoView({block:"center",behavior:"smooth"})}catch(_){}HH.style.setProperty("--tc",`var(${TEAMC[ti]})`)}
+ $("#hs").onpointerdown=e=>e.stopPropagation();$("#hs").onclick=e=>{e.stopPropagation();$("#hs").hidden=true;alive=true;t0=performance.now();last=t0;newQ();raf=requestAnimationFrame(step)};
+ function step(t){if(!alive)return;const dt=Math.min(40,t-last);last=t;const W=A.clientWidth,H=A.clientHeight;
+  const sp=.45*dt;if(keys.ArrowLeft)tx=hx-60;if(keys.ArrowRight)tx=hx+60;if(keys.ArrowUp)ty=hy-60;if(keys.ArrowDown)ty=hy+60;
+  const dx=tx-hx,dy=ty-hy,d=Math.hypot(dx,dy);if(d>2){const m=Math.min(d,sp);hx+=dx/d*m;hy+=dy/d*m}hx=Math.max(R,Math.min(W-R,hx));hy=Math.max(R+40,Math.min(H-R,hy));place();
+  for(const o of objs){if(o.eaten)continue;o.x+=o.vx*dt*.06;o.y+=o.vy*dt*.06;if(o.x<50||o.x>W-50)o.vx*=-1;if(o.y<80||o.y>H-30)o.vy*=-1;o.e.style.left=o.x+"px";o.e.style.top=o.y+"px";
+   if(Math.hypot(o.x-hx,o.y-hy)<R*.85){o.eaten=true;o.e.classList.add("gone");
+    if(o.ok){T[ti].score+=10;R=Math.min(80,R+5);sOk();float(A,hx,hy-R,"+10");setTimeout(()=>alive&&newQ(),450)}
+    else{T[ti].score=Math.max(0,T[ti].score-3);R=Math.max(26,R-4);sBad();float(A,hx,hy-R,"−3","#c92a2a");if(!MISS.includes(q))MISS.push(q)}
+    scores()}}
+  const left=Math.max(0,TURN-(t-t0)/1000);$("#hhud").textContent=`⏱ ${Math.ceil(left)} с · ${T[ti].score} балів`;
+  if(!left){alive=false;objs.forEach(o=>o.e.remove());objs=[];ti++;if(ti>=T.length){finish("Бали: правильна відповідь +10, неправильна −3. Діра росте від правильних!");return}setTimeout(begin,800);return}
+  raf=requestAnimationFrame(step)}
+ running={stop(){alive=false;cancelAnimationFrame(raf);removeEventListener("keydown",kd);removeEventListener("keyup",ku)}};begin()}
+
+renderSetup();show("setup");
+window.__arc={start,S,T:()=>T};
+</script>
+</body>
+</html>

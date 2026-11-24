@@ -1,0 +1,287 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Вікторина 8 класу</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;800&family=Manrope:wght@500;700;800&family=JetBrains+Mono:wght@700&display=swap">
+<style>
+/* Великий екран: телевізійне табло «категорія × бали» → питання на весь екран → табло команд унизу */
+:root{--bg:#0A1C2B;--tile:#123651;--tile2:#184566;--line:#24577D;--fg:#F4F8FB;--muted:#9DB8CC;--gold:#FFB703;--ok:#2EC27E;--bad:#FF5D5D;
+  --a:#E5383B;--b:#1C7ED6;--c:#E8A400;--d:#2B9348;
+  --t0:#FF6B6B;--t1:#4DABF7;--t2:#69DB7C;--t3:#FFA94D;
+  --fd:"Unbounded","Arial Black",system-ui,sans-serif;--fb:"Manrope","Segoe UI",system-ui,sans-serif;--fm:"JetBrains Mono",ui-monospace,monospace;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--fb);overflow-x:hidden}
+button{font:inherit;color:inherit}
+button:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.app{min-height:100%;display:flex;flex-direction:column;gap:clamp(8px,1.6vh,18px);padding-block:clamp(10px,2vh,22px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{font-family:var(--fd);font-weight:800;font-size:clamp(1rem,1.8vw,1.6rem);letter-spacing:.01em}
+.brand small{display:block;font-family:var(--fb);font-weight:600;font-size:.55em;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.tools{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:0;border-radius:12px;padding:10px 18px;font-weight:800;cursor:pointer;background:var(--gold);color:#1A1A1A;font-size:clamp(.95rem,1.3vw,1.2rem)}
+.btn.ghost{background:var(--tile);color:var(--fg)}
+.btn:disabled{opacity:.4;cursor:default}
+main{flex:1;display:flex;flex-direction:column;min-height:0}
+/* setup */
+.setup{flex:1;display:grid;place-items:center;text-align:center}
+.setup .box{display:grid;gap:18px;justify-items:center;max-width:900px}
+.setup h1{font-family:var(--fd);font-size:clamp(1.8rem,4.6vw,3.6rem);margin:0;line-height:1.1;text-wrap:balance}
+.setup p{margin:0;color:var(--muted);font-size:clamp(1rem,1.5vw,1.25rem);max-width:62ch;line-height:1.5}
+.cats{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.cats span{background:var(--tile);border-radius:999px;padding:6px 14px;font-weight:700}
+.teamsel{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.teamsel button{border:2px solid var(--line);background:var(--tile);border-radius:14px;padding:10px 18px;font-weight:800;cursor:pointer;font-size:1.1rem}
+.teamsel button[aria-pressed="true"]{border-color:var(--gold);color:var(--gold)}
+.names{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.names input{font:inherit;font-weight:800;background:var(--tile);color:var(--fg);border:2px solid var(--line);border-radius:12px;padding:10px 12px;width:min(220px,100%);text-align:center;font-size:1.05rem}
+/* board */
+.board{flex:1;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:clamp(6px,.8vw,12px);grid-auto-rows:1fr}
+.ch{background:transparent;text-align:center;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px;padding:4px;min-height:clamp(60px,12vh,120px)}
+.ch .ic{font-size:clamp(1.6rem,3.4vw,3rem);line-height:1}
+.ch b{font-family:var(--fd);font-weight:600;font-size:clamp(.66rem,1.1vw,1rem);line-height:1.2;text-wrap:balance}
+.cell{border:0;border-radius:14px;background:linear-gradient(180deg,var(--tile2),var(--tile));font-family:var(--fd);font-weight:800;font-size:clamp(1.3rem,3.2vw,3rem);color:var(--gold);cursor:pointer;min-height:clamp(52px,10vh,110px);box-shadow:0 4px 0 rgba(0,0,0,.35);transition:transform .15s}
+.cell:hover:not(:disabled){transform:translateY(-3px)}
+.cell:disabled{cursor:default;box-shadow:none;color:transparent;background:rgba(18,54,81,.35)}
+.cell.won{color:#0A1C2B;font-size:clamp(.8rem,1.4vw,1.2rem)}
+.cell .fire{font-size:.5em;vertical-align:super}
+@media (max-width:700px){.board{grid-template-columns:repeat(3,minmax(0,1fr))}.ch{display:none}.cell{font-size:1.2rem}.cell::before{content:attr(data-ic) " ";font-size:.9rem}}
+/* question */
+.qv{flex:1;display:grid;grid-template-rows:auto 1fr auto auto;gap:clamp(8px,1.6vh,18px);min-height:0}
+.qhead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.tag{display:inline-flex;align-items:center;gap:8px;background:var(--tile);border-radius:999px;padding:6px 16px;font-weight:800;font-size:clamp(.9rem,1.4vw,1.2rem)}
+.tag.val{background:var(--gold);color:#1A1A1A;font-family:var(--fd)}
+.tag.trend{background:#5A1E12;color:#FFD3B8}
+.tag.bonus{background:#4B2A00;color:var(--gold);animation:glow 1.2s ease-in-out infinite}
+@keyframes glow{50%{box-shadow:0 0 0 6px rgba(255,183,3,.25)}}
+.qbody{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:clamp(12px,2vw,32px);align-items:center;min-height:0}
+@media (max-width:800px){.qbody{grid-template-columns:1fr}}
+.qtext{font-family:var(--fd);font-weight:600;font-size:clamp(1.3rem,3vw,2.8rem);line-height:1.22;text-wrap:balance;margin:0}
+.pic{display:grid;place-items:center;min-height:0}
+.pic .emo{font-size:clamp(4rem,14vh,10rem);line-height:1;animation:bob 3s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-8px)}}
+.pic svg{width:100%;max-width:520px;max-height:40vh;height:auto}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:clamp(8px,1vw,14px)}
+@media (max-width:640px){.opts{grid-template-columns:1fr}}
+.opt{display:flex;align-items:center;gap:14px;border-radius:14px;padding:clamp(12px,2vh,22px) 18px;font-weight:800;font-size:clamp(1.05rem,2.1vw,1.9rem);color:#fff;box-shadow:0 5px 0 rgba(0,0,0,.3);transition:opacity .4s,transform .4s,outline-color .4s;min-width:0}
+.opt span{min-width:0;overflow-wrap:anywhere}
+.opt svg{flex:0 0 auto;width:clamp(26px,2.8vw,44px);height:auto}
+.o0{background:var(--a)}.o1{background:var(--b)}.o2{background:var(--c)}.o3{background:var(--d)}
+.opt.dim{opacity:.25}.opt.win{transform:scale(1.03);outline:5px solid #fff}
+.reveal{background:var(--tile);border-radius:16px;padding:clamp(12px,2vh,20px) clamp(14px,2vw,26px);font-size:clamp(1rem,1.7vw,1.5rem);line-height:1.45;animation:rise .5s both}
+.reveal b{color:var(--gold)}
+@keyframes rise{from{transform:translateY(16px);opacity:0}}
+.ctrl{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.timer{flex:1 1 220px;height:16px;background:var(--tile);border-radius:99px;overflow:hidden;position:relative;max-width:520px}
+.timer i{position:absolute;inset:0 auto 0 0;background:var(--gold);border-radius:99px;transition:width .25s linear}
+.timer.low i{background:var(--bad)}
+.tnum{font-family:var(--fm);font-size:clamp(1.2rem,2.2vw,2rem);min-width:3ch;text-align:right}
+.award{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.award .lbl{color:var(--muted);font-weight:700}
+.tb{border:0;border-radius:12px;padding:10px 16px;font-weight:800;cursor:pointer;color:#0A1C2B;font-size:clamp(.95rem,1.3vw,1.2rem)}
+.tb.minus{background:transparent!important;border:2px solid currentColor;padding:8px 12px}
+/* scoreboard */
+.scores{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:clamp(6px,1vw,14px)}
+.sc{border-radius:14px;padding:clamp(8px,1.4vh,14px) 14px;display:flex;justify-content:space-between;align-items:center;gap:8px;color:#0A1C2B;font-weight:800;min-width:0}
+.sc .nm{font-size:clamp(.9rem,1.5vw,1.35rem);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sc .pt{font-family:var(--fd);font-size:clamp(1.2rem,2.6vw,2.3rem);font-variant-numeric:tabular-nums}
+.sc.bump{animation:bump .6s}
+@keyframes bump{40%{transform:scale(1.08)}}
+.c0{background:var(--t0)}.c1{background:var(--t1)}.c2{background:var(--t2)}.c3{background:var(--t3)}
+/* final */
+.final{flex:1;display:grid;gap:20px;align-content:center;justify-items:center;text-align:center}
+.final h1{font-family:var(--fd);font-size:clamp(2rem,5vw,4rem);margin:0}
+.podium{display:flex;align-items:flex-end;gap:clamp(10px,2vw,28px);justify-content:center;width:100%;max-width:900px}
+.pd{flex:1;display:grid;gap:8px;animation:rise 1s both}
+.pd .blk{border-radius:16px 16px 0 0;display:grid;place-items:center;font-family:var(--fd);font-size:clamp(2rem,5vw,4.4rem);color:#0A1C2B}
+.pd .who{font-weight:800;font-size:clamp(1.1rem,2.2vw,2rem)}
+.pd .pts{font-family:var(--fm);color:var(--muted)}
+canvas#cf{position:fixed;inset:0;pointer-events:none;z-index:50}
+.hint{color:var(--muted);font-size:.9rem}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="app">
+  <div class="top">
+    <div class="brand">Інфо-битва 8 класу<small>Загальна вікторина · Розділи 1–2</small></div>
+    <div class="tools" id="tools"></div>
+  </div>
+  <main id="main"></main>
+  <div class="scores" id="scores"></div>
+</div>
+<canvas id="cf" aria-hidden="true"></canvas>
+
+<script>
+const SH=['<svg viewBox="0 0 100 100"><polygon points="50,8 95,90 5,90" fill="#fff"/></svg>','<svg viewBox="0 0 100 100"><polygon points="50,5 95,50 50,95 5,50" fill="#fff"/></svg>','<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="#fff"/></svg>','<svg viewBox="0 0 100 100"><rect x="10" y="10" width="80" height="80" fill="#fff"/></svg>'];
+const T="font-family:Manrope,sans-serif;font-weight:800";
+const PIC={
+ binary:`<svg viewBox="0 0 420 200"><g style="font-family:'JetBrains Mono',monospace;font-weight:700" text-anchor="middle">
+  ${[0,1,1,0].map((b,i)=>`<rect x="${30+i*95}" y="30" width="80" height="100" rx="14" fill="${b?'#FFB703':'#184566'}"/><text x="${70+i*95}" y="102" font-size="64" fill="${b?'#0A1C2B':'#9DB8CC'}">${b}</text><text x="${70+i*95}" y="170" font-size="22" fill="#9DB8CC">${[8,4,2,1][i]}</text>`).join("")}</g></svg>`,
+ range:`<svg viewBox="0 0 430 260"><g style="${T}" font-size="18" text-anchor="middle">
+  <rect x="10" y="10" width="410" height="240" rx="10" fill="#F4F8FB"/>
+  ${["","A","B","C","D"].map((h,i)=>i?`<rect x="${10+50+(i-1)*90}" y="10" width="90" height="36" fill="#DDE7EF"/><text x="${10+50+(i-1)*90+45}" y="34" fill="#123651">${h}</text>`:"").join("")}
+  ${[1,2,3,4,5].map(r=>`<rect x="10" y="${46+(r-1)*40}" width="50" height="40" fill="#DDE7EF"/><text x="35" y="${72+(r-1)*40}" fill="#123651">${r}</text>`).join("")}
+  <rect x="150" y="86" width="180" height="120" fill="#4DABF7" opacity=".45" stroke="#1C7ED6" stroke-width="4"/>
+  ${[0,1,2,3].map(c=>`<line x1="${60+c*90}" y1="10" x2="${60+c*90}" y2="246" stroke="#C9D7E3"/>`).join("")}${[0,1,2,3,4].map(r=>`<line x1="10" y1="${46+r*40}" x2="420" y2="${46+r*40}" stroke="#C9D7E3"/>`).join("")}</g></svg>`,
+ avg:`<svg viewBox="0 0 420 270"><g style="${T}" font-size="20">
+  <rect x="20" y="10" width="380" height="250" rx="12" fill="#F4F8FB"/><rect x="20" y="10" width="380" height="42" rx="12" fill="#69DB7C"/>
+  <text x="44" y="38" fill="#0A1C2B">Команда</text><text x="300" y="38" fill="#0A1C2B">Очки (F)</text>
+  ${[["Барси",10],["Тигри",7],["Ракети",5],["Леви",0]].map((r,i)=>`<text x="44" y="${90+i*42}" fill="#123651" font-weight="700">${r[0]}</text><text x="330" y="${90+i*42}" fill="#123651">${r[1]}</text><line x1="30" x2="390" y1="${102+i*42}" y2="${102+i*42}" stroke="#C9D7E3"/>`).join("")}
+  <text x="44" y="250" fill="#1C7ED6" font-family="JetBrains Mono,monospace">=AVERAGE(F3:F6)</text></g></svg>`,
+ names:`<svg viewBox="0 0 430 200"><g style="${T}" font-size="22">
+  <rect x="10" y="10" width="410" height="180" rx="12" fill="#F4F8FB"/>
+  <rect x="10" y="10" width="410" height="44" rx="12" fill="#DDE7EF"/><text x="40" y="40" fill="#123651">A</text><text x="180" y="40" fill="#123651">B</text><text x="310" y="40" fill="#123651">C</text>
+  <text x="30" y="100" fill="#123651" font-weight="700">Марко</text><text x="160" y="100" fill="#123651" font-weight="700">Ткачук</text><text x="300" y="100" fill="#E8A400">?</text>
+  <line x1="140" y1="54" x2="140" y2="190" stroke="#C9D7E3"/><line x1="280" y1="54" x2="280" y2="190" stroke="#C9D7E3"/>
+  <text x="30" y="160" fill="#1C7ED6" font-family="JetBrains Mono,monospace" font-size="19">C2: =CONCATENATE(A2;" ";B2)</text></g></svg>`
+};
+const CATS=[
+ {n:"Кодування й архітектура",ic:"🖥️",qs:[
+  {t:"mc",q:"Що з переліченого — пристрій введення?",emo:"🎤",o:["Мікрофон","Монітор","Принтер","Навушники"],a:0,why:"Мікрофон вводить звук у комп'ютер. Монітор, принтер і навушники — пристрої виведення."},
+  {t:"open",q:"Яке десяткове число записано у двійковій системі?",pic:"binary",ans:"0110₂ = 4 + 2 = 6",why:"Ваги позицій 8, 4, 2, 1. Додаємо там, де стоїть 1: 4 + 2 = 6."},
+  {t:"mc",q:"Який компонент виконує обчислення — «мозок» комп'ютера?",emo:"🧠",o:["Процесор","Відеокарта","Жорсткий диск","Блок живлення"],a:0,why:"Центральний процесор (CPU) виконує команди програм."},
+  {t:"mc",q:"Що з переліченого — операційна система?",emo:"🐧",o:["Linux","Chrome","Excel","Scratch"],a:0,why:"Linux, Windows, macOS, Android — операційні системи. Chrome — браузер, Excel — програма для таблиць, Scratch — середовище програмування."},
+  {t:"mc",trend:true,q:"Нові ноутбуки 2024–2026 мають окремий процесорний блок для задач ШІ. Як його називають?",emo:"🤖",o:["NPU","GPU","CPU","PSU"],a:0,why:"NPU (Neural Processing Unit) — нейропроцесор. Він виконує ШІ-задачі (розпізнавання мови, обробку фото) швидше й економніше за CPU."}]},
+ {n:"Збереження й захист даних",ic:"🛡️",qs:[
+  {t:"mc",q:"Що з переліченого — хмарне сховище?",emo:"☁️",o:["Google Диск","Флешка USB","Жорсткий диск","Карта пам'яті"],a:0,why:"Хмарне сховище зберігає файли на серверах в інтернеті, і їх можна відкрити з будь-якого пристрою."},
+  {t:"mc",q:"Який пароль найнадійніший?",emo:"🔐",o:["Lviv!Kava7#Sonce","password12345678","qwertyuiop2026","MarkoTkachuk2012"],a:0,why:"Надійний пароль довгий і змішує великі й малі літери, цифри та символи, а не містить ім'я, рік чи послідовність клавіш."},
+  {t:"mc",q:"Як називають шкідливу програму, що шифрує файли й вимагає викуп?",emo:"💰",o:["вимагач","шпигун","троян","черв'як"],a:0,why:"Програма-вимагач (ransomware) блокує файли. Найкращий захист — резервні копії й оновлення."},
+  {t:"open",q:"Що означає правило резервного копіювання «3-2-1»?",emo:"💾",ans:"3 копії даних, на 2 різних носіях, 1 копія — в іншому місці (наприклад, у хмарі)",why:"Так дані переживуть і поломку диска, і втрату ноутбука, і атаку вимагача."},
+  {t:"mc",trend:true,q:"Замість паролів сервіси все частіше пропонують вхід відбитком пальця чи обличчям через телефон. Як це називається?",emo:"👆",o:["ключі доступу (passkeys)","двоетапна SMS-перевірка","менеджер паролів у браузері","капча з картинками"],a:0,why:"Passkeys підтримують Google, Apple, Microsoft і багато сайтів. Ключ не можна «підгледіти» чи вкрасти фішинговим листом, як пароль."}]},
+ {n:"Сучасні технології й довкілля",ic:"🚀",qs:[
+  {t:"mc",q:"Як називають мережу пристроїв, що самі обмінюються даними через інтернет (розумний дім)?",emo:"🏠",o:["Інтернет речей","Хмарні сервіси","Локальна мережа","Блокчейн"],a:0,why:"Інтернет речей (IoT): розумні лампи, термостати, датчики, годинники."},
+  {t:"open",q:"Як називається технологія, що повністю занурює у віртуальний світ через окуляри-шолом?",emo:"🥽",ans:"VR — віртуальна реальність",why:"VR замінює світ навколо віртуальним. AR (доповнена реальність) лише додає віртуальні об'єкти до справжнього світу, як у камері телефона."},
+  {t:"mc",q:"Що робити зі старим телефоном, щоб не шкодити довкіллю?",emo:"♻️",o:["Здати на утилізацію","Викинути у звичайне сміття","Закопати подалі від дому","Спалити разом з листям"],a:0,why:"Електроніка містить шкідливі речовини й цінні метали. Її здають у пункти прийому електронних відходів."},
+  {t:"mc",q:"Що з переліченого — приклад 3D-друку в медицині?",emo:"🦾",o:["Протези за розміром пацієнта","Рентгенівські знімки у хмарі","Електронні медичні картки","Онлайн-запис до лікаря"],a:0,why:"3D-принтер друкує протези, моделі органів для підготовки до операцій, імпланти за точним розміром."},
+  {t:"mc",trend:true,q:"Великі центри обробки даних для ШІ потребують дуже багато…",emo:"🏭",o:["електроенергії та води","паперу для принтерів","бензину для генераторів","пластикових флешок"],a:0,why:"Сервери споживають електроенергію, а для охолодження часто використовують воду. Тому компанії будують дата-центри біля електростанцій на відновлюваній енергії."}]},
+ {n:"Таблиці: дані й формат",ic:"📊",qs:[
+  {t:"mc",q:"Як називається основний документ Excel для роботи з даними?",emo:"📄",o:["аркуш","слайд","сторінка","абзац"],a:0,why:"Аркуш — сітка з рядків і стовпців. Кілька аркушів утворюють книгу."},
+  {t:"open",q:"Запишіть адресу виділеного діапазону.",pic:"range",ans:"B2:C4",why:"Діапазон записують адресами першої та останньої комірок через двокрапку."},
+  {t:"mc",q:"Як виглядатиме число 0,4 у Відсотковому форматі?",emo:"💯",o:["40%","4%","0,4%","400%"],a:0,why:"Відсотковий формат множить число на 100 і додає знак %."},
+  {t:"mc",q:"Що робить Перевірка даних?",emo:"✅",o:["Не дає ввести неправильне значення","Автоматично виправляє помилки в тексті","Перевіряє орфографію в комірках","Видаляє порожні рядки аркуша"],a:0,why:"Перевірка даних (Дані → Знаряддя даних) обмежує, що можна ввести: число в межах, дату, значення зі списку."},
+  {t:"mc",trend:true,q:"Яка функція Google Таблиць генерує текст із даних за допомогою ШІ?",emo:"✨",o:["=AI()","=GPT()","=BOT()","=ASK()"],a:0,why:"Функція =AI() пише тексти, класифікує й підсумовує дані прямо в комірках. А «Fill with Gemini» з квітня 2026 року сама заповнює стовпці."}]},
+ {n:"Прості обчислення",ic:"➗",qs:[
+  {t:"mc",q:"З якого знака починається будь-яка формула?",emo:"✏️",o:["=","+","#","*"],a:0,why:"Без знака = Excel сприйме запис як текст."},
+  {t:"open",q:"Що покаже формула =2+3*4?",emo:"🧮",ans:"14",why:"Спершу множення: 3 × 4 = 12, потім додавання: 2 + 12 = 14."},
+  {t:"open",q:"Що покаже формула під таблицею?",pic:"avg",ans:"5,5",why:"(10 + 7 + 5 + 0) : 4 = 22 : 4 = 5,5."},
+  {t:"mc",q:"Формулу =B3*3+C3 протягнули маркером заповнення з F3 у F4. Що буде у F4?",emo:"↘️",o:["=B4*3+C4","=B3*3+C3","=B4*4+C4","=B4*3+C3"],a:0,why:"Автозаповнення зсуває адреси комірок на рядок нижче, а число 3 у формулі не змінюється."},
+  {t:"mc",trend:true,q:"Що вміє Copilot Agent Mode в Excel (2026)?",emo:"🧑‍💻",o:["Будувати й виправляти формули за запитом","Друкувати таблиці без підключення принтера","Замінювати всі функції однією кнопкою","Вимикати ручне введення даних у комірки"],a:0,why:"ШІ-помічник створює таблиці, формули й діаграми за текстовим запитом. Але перевіряє результат людина — тому формули треба розуміти."}]},
+ {n:"Складні розрахунки",ic:"🧮",qs:[
+  {t:"mc",q:"Що покаже =POWER(3;2)?",emo:"📐",o:["9","6","5","8"],a:0,why:"3² = 3 × 3 = 9. Те саме: =3^2."},
+  {t:"mc",q:"Яка функція рахує лише комірки з числами?",emo:"🔢",o:["COUNT","COUNTA","TODAY","LEFT"],a:0,why:"COUNT рахує числа, COUNTA — усі непорожні комірки."},
+  {t:"open",q:"Що покаже =LEFT(\"Тигри\";3)?",emo:"🐯",ans:"Тиг",why:"LEFT бере вказану кількість символів зліва."},
+  {t:"open",q:"Що з'явиться в комірці C2?",pic:"names",ans:"Марко Ткачук",why:"CONCATENATE склеює A2, пробіл \" \" і B2. Без пробілу вийшло б «МаркоТкачук»."},
+  {t:"mc",trend:true,q:"В Excel 365 з'явилися функції для роботи з текстом за шаблоном. Яка з них замінює текст?",emo:"🔁",o:["REGEXREPLACE","REGEXTEST","REGEXEXTRACT","REGEXCOUNT"],a:0,why:"REGEXREPLACE замінює за шаблоном, REGEXTEST перевіряє збіг, REGEXEXTRACT витягує частину тексту. REGEXCOUNT в Excel немає."}]}
+];
+const VALS=[100,200,300,400,500];
+const DEF_TEAMS=[["🦊 Лисиці"],["🦉 Сови"],["🐺 Вовки"],["🐻 Ведмеді"]];
+const QTIME=30;
+let G=load()||fresh(3);
+function fresh(n){const cells=[];CATS.forEach((c,ci)=>VALS.forEach((v,vi)=>cells.push(ci+"-"+vi)));const bonus=shuffle(cells.filter(k=>!k.endsWith("-0"))).slice(0,2);
+  return{phase:"setup",n,names:DEF_TEAMS.map(x=>x[0]),score:[0,0,0,0],done:{},bonus,cur:null};}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a}
+function save(){try{localStorage.setItem("quiz8v1",JSON.stringify(G))}catch(e){}}
+function load(){try{const s=JSON.parse(localStorage.getItem("quiz8v1"));return s&&s.names?s:null}catch(e){return null}}
+const $=s=>document.querySelector(s),main=$("#main");
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let timer=null,left=QTIME,revealed=false,awarded=false;
+
+function scores(bump){
+  const s=$("#scores");if(G.phase==="setup"){s.innerHTML="";return}
+  s.innerHTML=G.names.slice(0,G.n).map((nm,i)=>`<div class="sc c${i}${bump===i?" bump":""}"><span class="nm">${esc(nm)}</span><span class="pt">${G.score[i]}</span></div>`).join("");
+}
+function tools(){
+  const t=$("#tools");
+  if(G.phase==="setup"){t.innerHTML="";return}
+  t.innerHTML=`${G.phase==="q"?'<button class="btn ghost" id="toBoard">◀ До табло</button>':""}<button class="btn ghost" id="fs" title="На весь екран">⛶</button>${G.phase==="board"?'<button class="btn ghost" id="fin">Фінал 🏆</button><button class="btn ghost" id="reset">Нова гра</button>':""}`;
+  const fs=$("#fs");if(fs)fs.onclick=()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen().catch(()=>{})}catch(e){}};
+  const tb=$("#toBoard");if(tb)tb.onclick=toBoard;
+  const fin=$("#fin");if(fin)fin.onclick=()=>{G.phase="final";save();render()};
+  const rs=$("#reset");if(rs)rs.onclick=()=>{if(rs.dataset.sure){G=fresh(G.n);save();render()}else{rs.dataset.sure=1;rs.textContent="Точно? Натисніть ще раз"}};
+}
+function render(){tools();scores();
+  if(G.phase==="setup")return setup();
+  if(G.phase==="board")return board();
+  if(G.phase==="q")return question();
+  if(G.phase==="final")return final();
+}
+function setup(){
+  main.innerHTML=`<div class="setup"><div class="box">
+   <h1>Інфо-битва: загальна вікторина 8 класу</h1>
+   <p>30 питань у 6 категоріях. Команди по черзі обирають категорію й бали, клас радиться і відповідає. Чим дорожче питання, тим складніше. Питання за 500 — «🔥 у тренді»: про те, що змінилося у світі останнім часом. Десь сховані два бонуси ×2.</p>
+   <div class="cats">${CATS.map(c=>`<span>${c.ic} ${c.n}</span>`).join("")}</div>
+   <div><div class="hint" style="margin-bottom:8px">Скільки команд?</div><div class="teamsel">${[2,3,4].map(k=>`<button data-n="${k}" aria-pressed="${G.n===k}">${k} команди</button>`).join("")}</div></div>
+   <div class="names">${G.names.slice(0,G.n).map((nm,i)=>`<input id="tn${i}" value="${esc(nm)}" maxlength="18" aria-label="Назва команди ${i+1}" style="border-color:var(--t${i})">`).join("")}</div>
+   <button class="btn" id="start" style="font-size:clamp(1.1rem,1.8vw,1.6rem);padding:14px 30px">Почати гру ▶</button>
+   <p class="hint">Клавіші: Пробіл — показати відповідь, Esc — до табло. Гра зберігається в цьому браузері, тож оновлення сторінки її не зітре.</p>
+  </div></div>`;
+  main.querySelectorAll(".teamsel button").forEach(b=>b.onclick=()=>{readNames();G.n=+b.dataset.n;render()});
+  $("#start").onclick=()=>{readNames();G.phase="board";save();render()};
+}
+function readNames(){for(let i=0;i<G.n;i++){const el=$("#tn"+i);if(el)G.names[i]=el.value.trim()||DEF_TEAMS[i][0]}}
+function board(){
+  let h=CATS.map(c=>`<div class="ch"><span class="ic">${c.ic}</span><b>${c.n}</b></div>`).join("");
+  VALS.forEach((v,vi)=>CATS.forEach((c,ci)=>{const k=ci+"-"+vi,d=G.done[k];
+    h+=d!=null?`<button class="cell won${d<0?"":" c"+d}" disabled style="${d<0?"":""}">${d<0?"—":esc(G.names[d])}</button>`
+      :`<button class="cell" data-k="${k}" data-ic="${c.ic}" aria-label="${c.n}, ${v} балів">${v}${vi===4?'<span class="fire">🔥</span>':""}</button>`;}));
+  main.innerHTML=`<div class="board">${h}</div>`;
+  main.querySelectorAll(".cell[data-k]").forEach(b=>b.onclick=()=>openQ(b.dataset.k));
+  if(Object.keys(G.done).length===30&&!G.endShown){G.endShown=true;save();setTimeout(()=>{G.phase="final";save();render()},600)}
+}
+function openQ(k){G.cur=k;G.phase="q";revealed=false;awarded=false;left=QTIME;save();render();startTimer()}
+function startTimer(){clearInterval(timer);timer=setInterval(()=>{if(revealed)return clearInterval(timer);left=Math.max(0,left-.25);paintTimer();if(left<=0){clearInterval(timer)}},250)}
+function paintTimer(){const i=$("#tbar i"),n=$("#tnum"),w=$("#tbar");if(!i)return;i.style.width=(left/QTIME*100)+"%";n.textContent=Math.ceil(left);w.classList.toggle("low",left<=10);if(left<=0)n.textContent="⏰"}
+function question(){
+  const [ci,vi]=G.cur.split("-").map(Number),c=CATS[ci],q=c.qs[vi],val=VALS[vi]*(G.bonus.includes(G.cur)?2:1),isB=G.bonus.includes(G.cur);
+  const picKey=revealed&&q.picA?q.picA:q.pic;
+  const pic=picKey?`<div class="pic">${PIC[picKey]}</div>`:`<div class="pic"><span class="emo" aria-hidden="true">${q.emo||c.ic}</span></div>`;
+  let opts="";
+  if(q.t==="mc"){const order=G.order&&G.order[G.cur]||(G.order=Object.assign(G.order||{},{[G.cur]:shuffle(q.o.map((_,i)=>i))}))[G.cur];
+    opts=`<div class="opts">${order.map((oi,pos)=>`<div class="opt o${pos}${revealed?(oi===q.a?" win":" dim"):""}">${SH[pos]}<span>${esc(q.o[oi])}</span></div>`).join("")}</div>`;}
+  else if(q.t==="tf")opts=`<div class="opts">${[["Правда",1],["Неправда",0]].map(([t,col],j)=>`<div class="opt o${col}${revealed?(j===q.a?" win":" dim"):""}">${SH[col]}<span>${t}</span></div>`).join("")}</div>`;
+  main.innerHTML=`<div class="qv">
+    <div class="qhead"><div style="display:flex;gap:8px;flex-wrap:wrap"><span class="tag">${c.ic} ${c.n}</span><span class="tag val">${val}</span>${q.trend?'<span class="tag trend">🔥 У тренді</span>':""}${isB?'<span class="tag bonus">⭐ Бонус ×2</span>':""}</div>
+      ${q.t==="open"&&!revealed?'<span class="tag">🗣️ Відповідаємо вголос</span>':""}</div>
+    <div class="qbody"><h2 class="qtext">${esc(q.q)}</h2>${pic}</div>
+    ${opts}
+    ${revealed?`<div class="reveal">${q.ans?`Відповідь: <b>${esc(q.ans)}</b><br>`:""}${esc(q.why)}</div>`:""}
+    <div class="ctrl">
+      ${revealed?`<div class="award"><span class="lbl">Бали:</span>${G.names.slice(0,G.n).map((nm,i)=>`<button class="tb c${i}" data-t="${i}">+${val} ${esc(nm)}</button>`).join("")}<button class="btn ghost" data-t="-1">Ніхто</button>${G.names.slice(0,G.n).map((nm,i)=>`<button class="tb minus" style="color:var(--t${i})" data-m="${i}" title="Штраф ${esc(nm)}">−${val/2}</button>`).join("")}</div>`
+      :`<div style="display:flex;gap:12px;align-items:center;flex:1"><div class="timer" id="tbar"><i style="width:${left/QTIME*100}%"></i></div><span class="tnum" id="tnum">${Math.ceil(left)}</span>
+        <button class="btn ghost" id="more">+15 с</button></div><button class="btn" id="rev">Показати відповідь</button>`}
+    </div></div>`;
+  paintTimer();
+  const rev=$("#rev");if(rev)rev.onclick=doReveal;
+  const more=$("#more");if(more)more.onclick=()=>{left=Math.min(QTIME+30,left+15);paintTimer();startTimer()};
+  main.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>award(+b.dataset.t,val));
+  main.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{const i=+b.dataset.m;G.score[i]-=val/2;save();scores(i);b.disabled=true});
+}
+function doReveal(){revealed=true;clearInterval(timer);question()}
+function award(t,val){G.done[G.cur]=t;if(t>=0)G.score[t]+=val;const bump=t;G.phase="board";G.cur=null;save();render();if(bump>=0){scores(bump);burst(bump)}}
+function toBoard(){clearInterval(timer);G.phase="board";G.cur=null;save();render()}
+function final(){
+  const R=G.names.slice(0,G.n).map((n,i)=>({n,i,s:G.score[i]})).sort((a,b)=>b.s-a.s);
+  const order=[R[1],R[0],R[2]].filter(Boolean);const H={0:"clamp(140px,32vh,320px)",1:"clamp(100px,22vh,220px)",2:"clamp(70px,15vh,150px)"};
+  main.innerHTML=`<div class="final"><h1>🏆 Переможці Інфо-битви</h1><div class="podium">${order.map(r=>{const place=R.indexOf(r);return `<div class="pd" style="animation-delay:${(2-place)*.6}s"><div class="who">${esc(r.n)}</div><div class="pts">${r.s} балів</div><div class="blk c${r.i}" style="height:${H[place]}">${place+1}</div></div>`}).join("")}</div>
+   <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center"><button class="btn ghost" id="back">◀ До табло</button><button class="btn" id="new">Нова гра</button></div></div>`;
+  $("#back").onclick=()=>{G.phase="board";save();render()};$("#new").onclick=()=>{G=fresh(G.n);save();render()};
+  confetti();
+}
+function burst(i){const el=document.querySelectorAll(".sc")[i];if(!el)return;const r=el.getBoundingClientRect();confetti(r.left+r.width/2,r.top,60,1400)}
+function confetti(x0,y0,n=200,ms=4500){
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+  const cv=$("#cf"),x=cv.getContext("2d");cv.width=innerWidth;cv.height=innerHeight;
+  const cols=["#FF6B6B","#4DABF7","#69DB7C","#FFA94D","#FFB703","#ffffff"];
+  const P=Array.from({length:n},()=>x0!=null?{x:x0,y:y0,vx:(Math.random()-.5)*10,vy:-4-Math.random()*8,r:0,vr:(Math.random()-.5)*.4,c:cols[Math.random()*6|0],w:6+Math.random()*5,h:9+Math.random()*6}
+    :{x:Math.random()*cv.width,y:-20-Math.random()*cv.height*.5,vx:(Math.random()-.5)*3,vy:2+Math.random()*3,r:Math.random()*6,vr:(Math.random()-.5)*.3,c:cols[Math.random()*6|0],w:7+Math.random()*6,h:10+Math.random()*8});
+  const t0=performance.now();(function f(t){x.clearRect(0,0,cv.width,cv.height);P.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=x0!=null?.3:.03;p.r+=p.vr;x.save();x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=p.c;x.fillRect(-p.w/2,-p.h/2,p.w,p.h);x.restore()});
+    if(t-t0<ms)requestAnimationFrame(f);else x.clearRect(0,0,cv.width,cv.height)})(t0);
+}
+document.addEventListener("keydown",e=>{if(e.target.tagName==="INPUT")return;
+  if(G.phase==="q"&&e.code==="Space"&&!revealed){e.preventDefault();doReveal()}
+  if(G.phase==="q"&&e.key==="Escape")toBoard();});
+if(G.phase==="q"){revealed=false;left=QTIME;startTimer()}
+render();
+</script>
+
+</body></html>

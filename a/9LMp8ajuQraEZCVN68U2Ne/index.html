@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Практична робота</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&family=Unbounded:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{--c:#364fc7;--c2:#dbe4ff;--ink:#1d1d24;--muted:#5b5b6b;--bg:#f7f6fb;--card:#fff;--line:#e3e1ec;--ok:#2b8a3e;--okbg:#ebfbee;--bad:#c92a2a;--badbg:#fff5f5;--r:18px}
+@media (prefers-color-scheme:dark){:root{--ink:#f1f0f7;--muted:#b4b3c4;--bg:#16161c;--card:#22222b;--line:#34343f;--okbg:#17321f;--badbg:#3a1a1a}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:400 19px/1.5 Nunito,system-ui,sans-serif}
+.wrap{max-width:860px;margin:0 auto;padding:16px}
+h1,h2{font-family:Unbounded,Nunito,sans-serif;line-height:1.2}h1{font-size:24px;color:var(--c);margin:6px 0}h2{font-size:21px;margin:0 0 8px}
+.eyebrow{font-size:14px;color:var(--muted);font-weight:700}
+.story{display:flex;gap:12px;align-items:center;background:var(--c2);color:#1d1d24;border-radius:var(--r);padding:12px 14px;margin:10px 0}
+.story .hero{font-size:46px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-top:12px}
+.tile{background:var(--card);border:3px solid var(--line);border-radius:var(--r);padding:14px;text-align:left;font:inherit;color:inherit;cursor:pointer;display:grid;gap:4px}
+.tile:hover{border-color:var(--c)}.tile .n{font-family:Unbounded;font-size:15px;color:var(--c)}.tile .e{font-size:36px}.tile.done{border-color:var(--ok);background:var(--okbg)}
+.card{background:var(--card);border-radius:var(--r);padding:16px;border:2px solid var(--line);margin-top:12px}
+.btn{font:inherit;font-weight:800;background:var(--c);color:#fff;border:0;border-radius:999px;padding:10px 20px;cursor:pointer;min-height:48px}
+.btn.ghost{background:transparent;color:var(--c);border:2px solid var(--c)}
+.say{font-size:20px;font-weight:700;margin:4px 0 10px}
+.items{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0}
+.it{font:inherit;background:var(--card);color:inherit;border:3px solid var(--line);border-radius:16px;padding:8px 12px;cursor:pointer;display:flex;gap:8px;align-items:center;min-height:56px;position:relative}
+.it .e{font-size:30px}.it.sel{border-color:var(--c);box-shadow:0 0 0 3px var(--c2)}.it.ok{border-color:var(--ok);background:var(--okbg)}.it.no{border-color:var(--bad);background:var(--badbg);animation:shake .4s}
+.it.gone{opacity:.35;pointer-events:none}
+.bins{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.bin{position:relative;font:inherit;color:inherit;background:var(--c2);border:3px dashed var(--c);border-radius:var(--r);min-height:110px;padding:10px;cursor:pointer;display:grid;align-content:start;gap:6px;text-align:center}
+.bin h3{margin:0;font-size:18px;color:#1d1d24}.bin .in{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;font-size:26px}
+.fb{min-height:30px;font-weight:800;margin-top:8px}.fb.ok{color:var(--ok)}.fb.bad{color:var(--bad)}
+.hand{position:absolute;right:-8px;bottom:-14px;font-size:30px;animation:poke 1s infinite;pointer-events:none}
+@keyframes poke{50%{transform:translate(-4px,-6px)}}@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.steps{display:grid;gap:10px}.step{position:relative;display:flex;gap:10px;align-items:center;font:inherit;color:inherit;background:var(--card);border:3px solid var(--line);border-radius:16px;padding:10px 12px;text-align:left;cursor:pointer}
+.step .bx{font-size:28px}.step.ok{border-color:var(--ok);background:var(--okbg)}
+.stars{font-size:44px;letter-spacing:6px}
+.code{display:inline-block;font-family:Unbounded;font-size:26px;background:var(--c2);color:#1d1d24;border-radius:12px;padding:6px 16px;margin:6px 0}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.prog{height:10px;border-radius:5px;background:var(--line);overflow:hidden;margin:8px 0}.prog i{display:block;height:100%;background:var(--c);transition:width .4s}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body><div class="wrap" id="app"></div>
+<script>
+window.P={"grade": 3, "color": "#1971c2", "color2": "#d0ebff", "hero": "🧒", "voice": true, "id": "p3-1", "code": "КОД", "section": "Розділ 1 · Інформація і повідомлення", "title": "Практична робота: Тимко-шифрувальник", "story": "Привіт! Я <b>Тимко</b>. Інформацію передають повідомленнями, зберігають на носіях і записують кодами. Допоможи мені розшифрувати світ!", "tasks": [{"id": "t1", "type": "sort", "icon": "💾", "title": "Носії інформації", "say": "Розклади: це <b>носій інформації</b> чи <b>ні</b>?", "done": "Ти знаєш носії!", "bins": ["💾 Носій", "🚫 Не носій"], "items": [["📕", "книжка", 0, "Зберігає текст.", "Подумай ще."], ["💿", "диск", 0, "Зберігає файли.", "Подумай ще."], ["🗒️", "нотатник", 0, "Записи на папері.", "Подумай ще."], ["🍌", "банан", 1, "Його їдять.", "Подумай ще."], ["🔌", "флешка", 0, "Зберігає файли.", "Подумай ще."], ["🧦", "шкарпетка", 1, "Її носять на нозі.", "Подумай ще."]]}, {"id": "t2", "type": "match", "icon": "🚦", "title": "Розшифруй код", "say": "З'єднай <b>код</b> і його <b>значення</b>.", "done": "Ти розшифровуєш коди!", "pairs": [["🔴", "червоне світло", "✋", "стій"], ["🟢", "зелене світло", "🚶", "іди"], ["♻️", "знак переробки", "🗑️", "сортуй сміття"], ["⚠️", "трикутник", "👀", "обережно"]]}, {"id": "t3", "type": "order", "icon": "📨", "title": "Шлях повідомлення", "say": "Розстав, як іде повідомлення від Тимка до бабусі.", "done": "Ти знаєш, як передають повідомлення!", "items": [["🧒", "Тимко пише"], ["📱", "Телефон надсилає"], ["📡", "Сигнал летить"], ["👵", "Бабуся читає"]]}, {"id": "t4", "type": "pick", "icon": "🔐", "title": "Таємний шифр", "say": "Шифр Тимка: кожна літера — її номер в абетці (А=1, Б=2, В=3…). Розгадай!", "done": "Ти справжній шифрувальник!", "rounds": [{"q": "Що означає код <b>1-2-1</b>?", "o": [["🔤", "АБА"], ["🔤", "БАБ"], ["🔤", "ААБ"]], "a": 0, "ok": "АБА!", "hint": "А=1, Б=2."}, {"q": "Як закодувати слово <b>ВАБ</b>?", "o": [["🔢", "3-1-2"], ["🔢", "1-2-3"], ["🔢", "2-1-3"]], "a": 0, "ok": "3-1-2!", "hint": "В — третя літера."}]}, {"id": "t5", "type": "steps", "icon": "📝", "title": "Збережи повідомлення", "say": "Збережи своє повідомлення на комп'ютері.", "done": "Повідомлення збережено на носії!", "list": ["Відкрий програму <b>Блокнот</b> через Пуск", "Напиши: <b>Привіт, Тимко!</b>", "Натисни <b>Файл → Зберегти як</b>", "Назви файл <b>повідомлення</b> і натисни <b>Зберегти</b>"], "check": {"q": "Де тепер зберігається твоє повідомлення?", "o": [["💾", "у пам'яті ПК"], ["☁️", "у хмарах на небі"], ["🧠", "лише в моїй голові"]], "a": 0, "hint": "Ти натиснув «Зберегти»."}}]};
+</script>
+<script>
+(function(){
+const P=window.P, app=document.getElementById("app");
+document.documentElement.style.setProperty("--c",P.color);document.documentElement.style.setProperty("--c2",P.color2);
+document.title=P.title;
+const el=(t,a={},...k)=>{const e=document.createElement(t);for(const x in a){const v=a[x];if(v==null)continue;if(x==="class")e.className=v;else if(x==="html")e.innerHTML=v;else if(x.startsWith("on"))e.addEventListener(x.slice(2),v);else e.setAttribute(x,v);}k.flat().forEach(c=>c!=null&&e.append(c.nodeType?c:document.createTextNode(c)));return e;};
+const SH=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const KEY="prak-"+P.id; let st={}; try{st=JSON.parse(localStorage.getItem(KEY))||{};}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(st));}catch(e){}};
+function speak(t){ try{ if(!P.voice) return; const u=new SpeechSynthesisUtterance(t.replace(/<[^>]+>/g,"")); u.lang="uk-UA"; speechSynthesis.cancel(); speechSynthesis.speak(u);}catch(e){} }
+function header(){ return [el("div",{class:"eyebrow"},"Інформатика · "+P.grade+" клас · "+P.section),el("h1",{},P.title),el("div",{class:"story"},el("div",{class:"hero"},P.hero),el("div",{html:P.story}))]; }
+function menu(){ app.innerHTML=""; app.append(...header()); const done=P.tasks.filter(t=>st[t.id]).length;
+  app.append(el("div",{class:"prog"},el("i",{style:"width:"+(100*done/P.tasks.length)+"%"})),el("div",{class:"eyebrow"},"Виконано "+done+" з "+P.tasks.length+" завдань"));
+  const g=el("div",{class:"grid"}); P.tasks.forEach((t,k)=>{ g.append(el("button",{class:"tile"+(st[t.id]?" done":""),type:"button",onclick:()=>{location.hash="z"+(k+1);}},el("span",{class:"n"},"Завдання "+(k+1)+(st[t.id]?" · "+"⭐".repeat(st[t.id]):"")),el("span",{class:"e"},t.icon),el("b",{},t.title))); });
+  app.append(g);
+  if(done===P.tasks.length){ const s=P.tasks.reduce((a,t)=>a+st[t.id],0), max=3*P.tasks.length; app.append(el("div",{class:"card"},el("h2",{},"🏆 Практичну роботу виконано!"),el("div",{class:"stars"},"⭐ "+s+" з "+max),el("p",{},"Покажи вчителю кодове слово:"),el("div",{class:"code"},P.code),el("p",{class:"eyebrow"},"Оцінка: "+Math.max(1,Math.round(12*s/max))+" з 12"))); }
+  app.append(el("p",{class:"eyebrow",style:"margin-top:14px"},"Скануй QR-код на картці завдання, щоб відкрити його одразу.")); }
+function task(k){ const t=P.tasks[k]; app.innerHTML=""; let errs=0;
+  const fb=el("div",{class:"fb","aria-live":"polite"}), body=el("div");
+  app.append(el("div",{class:"top"},el("button",{class:"btn ghost",type:"button",onclick:()=>{location.hash="";}},"← Усі завдання"),el("span",{class:"eyebrow"},"Завдання "+(k+1)+" з "+P.tasks.length)),
+    el("div",{class:"card"},el("h2",{},t.icon+" "+t.title),el("div",{class:"say",html:t.say}),body,fb));
+  speak(t.say);
+  const bad=(node,msg)=>{ errs++; node.classList.remove("no"); void node.offsetWidth; node.classList.add("no"); fb.className="fb bad"; fb.innerHTML="❌ "+(msg||"Спробуй ще!"); };
+  const hint=(node)=>{ if(errs>=2&&node&&!node.querySelector(".hand")) node.append(el("span",{class:"hand","aria-hidden":"true"},"👆")); };
+  const win=()=>{ const s=errs===0?3:errs<=2?2:1; st[t.id]=Math.max(st[t.id]||0,s); save(); fb.className="fb ok"; fb.innerHTML="✅ "+(t.done||"Молодець!");
+    body.append(el("div",{class:"card",style:"text-align:center"},el("div",{class:"stars"},"⭐".repeat(s)+"☆".repeat(3-s)),el("button",{class:"btn",type:"button",onclick:()=>{ location.hash=k+1<P.tasks.length?"z"+(k+2):""; }},k+1<P.tasks.length?"Наступне завдання →":"До результату →"))); speak(t.done||"Молодець!"); };
+  const T={
+   sort(){ let pick=null, left=t.items.length; const its=el("div",{class:"items"}), bins=el("div",{class:"bins"});
+     const bs=t.bins.map((b,bi)=>{ const inn=el("div",{class:"in"}); const B=el("button",{class:"bin",type:"button"},el("h3",{},b),inn); B.onclick=()=>{ if(!pick) return; const it=pick; if(it.k===bi){ inn.append(it.e); it.node.classList.add("gone"); it.node.classList.remove("sel"); pick=null; fb.className="fb ok"; fb.innerHTML="✅ "+(it.why||"Так!"); if(--left===0) win(); } else { bad(it.node,it.hint); hint(bs[it.k]); } }; bins.append(B); return B; });
+     SH(t.items).forEach(x=>{ const it={e:x[0],n:x[1],k:x[2],why:x[3],hint:x[4]}; it.node=el("button",{class:"it",type:"button"},el("span",{class:"e"},x[0]),x[1]); it.node.onclick=()=>{ its.querySelectorAll(".sel").forEach(n=>n.classList.remove("sel")); pick=it; it.node.classList.add("sel"); fb.textContent="Тепер натисни на кошик 👇"; }; its.append(it.node); });
+     body.append(el("div",{class:"eyebrow"},"1) Натисни на картку  2) Натисни на кошик"),its,bins); },
+   pick(){ let r=0; const rounds=t.rounds; const box=el("div"); body.append(box);
+     const show=()=>{ box.innerHTML=""; if(r>=rounds.length){ win(); return; } const q=rounds[r]; const its=el("div",{class:"items"}); let nodes=[];
+       box.append(el("div",{class:"eyebrow"},(r+1)+" з "+rounds.length),el("p",{class:"say",html:q.q}),its);
+       SH(q.o.map((o,i)=>({o,i}))).forEach(({o,i})=>{ const b=el("button",{class:"it",type:"button"},el("span",{class:"e"},o[0]),o[1]); nodes[i]=b; b.onclick=()=>{ if(i===q.a){ b.classList.add("ok"); fb.className="fb ok"; fb.innerHTML="✅ "+(q.ok||"Правильно!"); r++; setTimeout(show,900); } else { bad(b,q.hint); hint(nodes[q.a]); } }; its.append(b); }); speak(q.q); };
+     show(); },
+   order(){ let n=0; const its=el("div",{class:"items"}), line=el("div",{class:"items",style:"min-height:60px;border:3px dashed var(--line);border-radius:16px;padding:6px"}); const nodes=[];
+     SH(t.items.map((x,i)=>({x,i}))).forEach(({x,i})=>{ const b=el("button",{class:"it",type:"button"},el("span",{class:"e"},x[0]),x[1]); nodes[i]=b; b.onclick=()=>{ if(i===n){ b.classList.add("ok","gone"); line.append(el("span",{class:"it ok"},el("span",{class:"e"},x[0]),(n+1)+". "+x[1])); n++; fb.className="fb ok"; fb.textContent="✅ Так!"; if(n===t.items.length) win(); } else { bad(b,t.hint||"Що відбувається спочатку?"); hint(nodes[n]); } }; its.append(b); });
+     body.append(el("div",{class:"eyebrow"},"Натискай по порядку: що спочатку, що потім"),its,el("div",{class:"eyebrow"},"Твій порядок:"),line); },
+   match(){ let pickL=null, left=t.pairs.length; const L=el("div",{style:"display:grid;gap:8px"}), R=el("div",{style:"display:grid;gap:8px"}); const rn=[];
+     const ln=t.pairs.map((p,i)=>{ const b=el("button",{class:"it",type:"button"},el("span",{class:"e"},p[0]),p[1]); b.onclick=()=>{ if(b.classList.contains("gone")) return; L.querySelectorAll(".sel").forEach(x=>x.classList.remove("sel")); pickL=i; b.classList.add("sel"); fb.textContent="Тепер обери пару праворуч 👉"; }; return b; });
+     SH(t.pairs.map((p,i)=>({p,i}))).forEach(({p,i})=>{ const b=el("button",{class:"it",type:"button"},el("span",{class:"e"},p[2]),p[3]); rn[i]=b; b.onclick=()=>{ if(pickL==null) return; if(pickL===i){ b.classList.add("ok","gone"); ln[i].classList.remove("sel"); ln[i].classList.add("ok","gone"); pickL=null; fb.className="fb ok"; fb.textContent="✅ Пара!"; if(--left===0) win(); } else { bad(b,t.hint||"Це не пара."); hint(rn[pickL]); } }; R.append(b); });
+     ln.forEach(b=>L.append(b)); body.append(el("div",{style:"display:grid;grid-template-columns:1fr 1fr;gap:12px"},L,R)); },
+   tf(){ let r=0; const box=el("div"); body.append(box); const qs=t.items;
+     const show=()=>{ box.innerHTML=""; if(r>=qs.length){ win(); return; } const q=qs[r];
+       const yes=el("button",{class:"it",type:"button"},el("span",{class:"e"},"👍"),"Правда"), no=el("button",{class:"it",type:"button"},el("span",{class:"e"},"👎"),"Вигадка");
+       const go=(v,b,o)=>{ if(v===q[2]){ b.classList.add("ok"); fb.className="fb ok"; fb.innerHTML="✅ "+q[3]; r++; setTimeout(show,1100); } else { bad(b,q[4]||"Подумай ще."); hint(o); } };
+       yes.onclick=()=>go(true,yes,no); no.onclick=()=>go(false,no,yes);
+       box.append(el("div",{class:"eyebrow"},(r+1)+" з "+qs.length),el("div",{class:"items"},el("div",{class:"it",style:"cursor:default"},el("span",{class:"e"},q[0]),q[1])),el("div",{class:"items"},yes,no)); speak(q[1]); };
+     show(); },
+   steps(){ let n=0; const box=el("div",{class:"steps"});
+     t.list.forEach((s,i)=>{ const b=el("button",{class:"step",type:"button"},el("span",{class:"bx"},"⬜"),el("span",{html:s})); b.onclick=()=>{ if(b.classList.contains("ok")) return; if(i!==n){ bad(b,"Спершу попередній крок ☝️"); hint(box.children[n]); return; } b.classList.add("ok"); b.firstChild.textContent="✅"; n++; fb.className="fb ok"; fb.textContent="✅ Крок виконано!"; if(n===t.list.length){ if(t.check) ask(); else win(); } }; box.append(b); });
+     const ask=()=>{ const q=t.check, its=el("div",{class:"items"}); const nodes=[]; body.append(el("p",{class:"say",html:"❓ "+q.q}),its);
+       SH(q.o.map((o,i)=>({o,i}))).forEach(({o,i})=>{ const b=el("button",{class:"it",type:"button"},el("span",{class:"e"},o[0]),o[1]); nodes[i]=b; b.onclick=()=>{ if(i===q.a){ b.classList.add("ok"); win(); } else { bad(b,q.hint); hint(nodes[q.a]); } }; its.append(b); }); speak(q.q); };
+     body.append(el("div",{class:"eyebrow"},"👩‍🏫 На комп'ютері: виконуй крок і натискай на нього"),box); }
+  }; T[t.type](); scrollTo(0,0); }
+function route(){ const m=location.hash.match(/^#z(\d+)$/); const k=m?+m[1]-1:-1; if(k>=0&&k<P.tasks.length) task(k); else menu(); }
+addEventListener("hashchange",route); route();
+})();
+</script></body></html>

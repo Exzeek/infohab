@@ -1,0 +1,237 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Картки Розділ 1 · 8 клас</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Manrope:wght@400;600;700;800&display=swap">
+<style>
+/* Layout: шапка з правилами білета, вкладки «Білет / Усі картки / Журнал», картки-фліпи в сітці */
+:root{
+  --bg:#f1f0ec; --surface:#ffffff; --surface-2:#e9e7e0; --line:#d4d0c5;
+  --fg:#1d1b16; --dim:#5f5b50; --accent:#2f5bd3; --accent-ink:#ffffff;
+  --t1:#1f8a4c; --t2:#b27500; --t3:#c23b3b; --ok-bg:#e2f3e8; --mid-bg:#fbf0d9; --bad-bg:#fae4e4;
+  --display:"Unbounded","Arial Black",system-ui,sans-serif;
+  --body:"Manrope","Segoe UI",system-ui,sans-serif; --r:14px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#14130f; --surface:#1f1d18; --surface-2:#2a2821; --line:#3d3a30;
+  --fg:#efece4; --dim:#a8a395; --accent:#7f9cff; --accent-ink:#0b1230;
+  --t1:#5fd18f; --t2:#f0b545; --t3:#f07a7a; --ok-bg:#183626; --mid-bg:#3a2e14; --bad-bg:#3d1d1f; color-scheme:dark; } }
+:root[data-theme="dark"]{
+  --bg:#14130f; --surface:#1f1d18; --surface-2:#2a2821; --line:#3d3a30;
+  --fg:#efece4; --dim:#a8a395; --accent:#7f9cff; --accent-ink:#0b1230;
+  --t1:#5fd18f; --t2:#f0b545; --t3:#f07a7a; --ok-bg:#183626; --mid-bg:#3a2e14; --bad-bg:#3d1d1f; color-scheme:dark; }
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg); color:var(--fg); font-family:var(--body); font-size:16px; line-height:1.55}
+.wrap{max-width:900px; margin:0 auto; padding:20px 16px 64px}
+h1,h2,h3{font-family:var(--display); margin:0; text-wrap:balance}
+button{font:inherit}
+:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+.dim{color:var(--dim)}
+.kicker{font-size:.78rem; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); font-weight:800}
+h1{font-size:clamp(1.9rem,7vw,3rem); font-weight:800; letter-spacing:-.02em; line-height:1.05; margin:6px 0 10px}
+.rules{display:flex; flex-wrap:wrap; gap:8px; margin:6px 0 16px}
+.lv{display:inline-flex; align-items:center; gap:6px; font-weight:800; font-size:.85rem; border:1.5px solid currentColor; border-radius:999px; padding:3px 11px}
+.lv.l1{color:var(--t1)} .lv.l2{color:var(--t2)} .lv.l3{color:var(--t3)}
+.tabs{display:flex; gap:6px; overflow-x:auto; margin:4px 0 18px}
+.tab{flex:0 0 auto; background:transparent; border:1px solid var(--line); color:var(--dim); border-radius:999px; padding:8px 16px; cursor:pointer; font-weight:700}
+.tab[aria-selected="true"]{background:var(--fg); color:var(--bg); border-color:var(--fg)}
+.panel{display:flex; flex-direction:column; gap:14px}
+.box{background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:16px}
+.row{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+.btn{background:var(--accent); color:var(--accent-ink); border:none; border-radius:999px; padding:10px 18px; font-weight:800; cursor:pointer}
+.btn.ghost{background:transparent; color:var(--fg); border:1px solid var(--line)}
+.btn:disabled{opacity:.4; cursor:default}
+input.t,select.t{background:var(--bg); border:1px solid var(--line); color:var(--fg); border-radius:10px; padding:9px 12px; font:inherit; min-width:0}
+input.t{flex:1 1 220px}
+.chips{display:flex; flex-wrap:wrap; gap:6px}
+.chip{background:var(--surface-2); border:1px solid var(--line); color:var(--fg); border-radius:999px; padding:6px 12px; cursor:pointer; font-size:.86rem}
+.chip[aria-pressed="true"]{background:var(--accent); color:var(--accent-ink); border-color:var(--accent)}
+.grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:12px}
+.card{position:relative; min-height:200px; perspective:1000px; background:none; border:none; padding:0; cursor:pointer; text-align:left; color:var(--fg); width:100%}
+.inner{position:relative; width:100%; height:100%; min-height:200px; transition:transform .45s; transform-style:preserve-3d}
+.card.on .inner{transform:rotateY(180deg)}
+.face{position:absolute; inset:0; display:flex; flex-direction:column; gap:8px; padding:14px 16px; border-radius:var(--r); background:var(--surface); border:1px solid var(--line); border-top:6px solid var(--lvc); backface-visibility:hidden; overflow:auto}
+.face.back{transform:rotateY(180deg); background:var(--surface-2)}
+.card.l1{--lvc:var(--t1)} .card.l2{--lvc:var(--t2)} .card.l3{--lvc:var(--t3)}
+.meta{display:flex; justify-content:space-between; gap:8px; font-size:.72rem; text-transform:uppercase; letter-spacing:.07em; font-weight:800; color:var(--dim)}
+.meta .pts{color:var(--lvc)}
+.qtext{font-weight:700; font-size:1.02rem}
+.atext{font-size:.95rem}
+.hint{margin-top:auto; font-size:.74rem; color:var(--dim)}
+.ticket{display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:12px}
+.slot{display:flex; flex-direction:column; gap:8px}
+.marks{display:flex; gap:6px}
+.mk{flex:1; border:1px solid var(--line); background:var(--surface); color:var(--fg); border-radius:10px; padding:7px 4px; cursor:pointer; font-size:.82rem; font-weight:700}
+.mk[aria-pressed="true"].full{background:var(--ok-bg); border-color:var(--t1)}
+.mk[aria-pressed="true"].half{background:var(--mid-bg); border-color:var(--t2)}
+.mk[aria-pressed="true"].zero{background:var(--bad-bg); border-color:var(--t3)}
+.score{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap}
+.score b{font-family:var(--display); font-size:3rem; color:var(--accent); line-height:1; font-variant-numeric:tabular-nums}
+.tw{overflow-x:auto}
+table.log{width:100%; border-collapse:collapse; font-size:.9rem; font-variant-numeric:tabular-nums}
+table.log th,table.log td{padding:8px 6px; border-bottom:1px solid var(--line); text-align:left}
+table.log th{font-size:.74rem; text-transform:uppercase; letter-spacing:.06em; color:var(--dim)}
+textarea.copy{width:100%; height:110px; margin-top:10px; background:var(--surface-2); color:var(--fg); border:1px solid var(--line); border-radius:10px; font:13px/1.4 monospace}
+@media (prefers-reduced-motion: reduce){ .inner{transition:none} }
+</style>
+
+<div class="wrap">
+  <div class="kicker">Інформатика · 8 клас · Розділ 1 «Основи інформатики» · оцінювання</div>
+  <h1>Картки для опитування</h1>
+  <p class="dim" style="max-width:64ch">28 карток за сімома темами розділу. Білет складається з трьох карток різного рівня — разом 12 балів. Натисніть на картку, щоб побачити очікувану відповідь.</p>
+  <div class="rules"><span class="lv l1">🟢 Базовий · 3 бали</span><span class="lv l2">🟡 Середній · 4 бали</span><span class="lv l3">🔴 Складний · 5 балів</span></div>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" data-t="ticket" aria-selected="true">Білет</button>
+    <button class="tab" role="tab" data-t="all" aria-selected="false">Усі картки</button>
+    <button class="tab" role="tab" data-t="log" aria-selected="false">Журнал <span id="logN"></span></button>
+  </nav>
+
+  <section id="p-ticket" class="panel">
+    <div class="box">
+      <div class="row">
+        <input class="t" id="stud" placeholder="Ім'я та прізвище учня" aria-label="Ім'я та прізвище учня" autocomplete="off">
+        <select class="t" id="scope" aria-label="Теми для білета"><option value="all">Усі теми розділу</option></select>
+        <button class="btn" type="button" id="draw">Витягнути білет</button>
+      </div>
+    </div>
+    <div class="ticket" id="ticket"></div>
+    <div class="box" id="scoreBox" hidden>
+      <div class="score"><b id="sc">0</b><span class="dim">з 12 балів</span></div>
+      <p class="dim" style="margin:6px 0 10px">Оцініть кожну відповідь: повністю — усі бали картки, частково — половина, не відповів — 0.</p>
+      <div class="row"><button class="btn" type="button" id="save" disabled>Записати в журнал</button><span class="dim" id="saveMsg"></span></div>
+    </div>
+  </section>
+
+  <section id="p-all" class="panel" hidden>
+    <div class="box">
+      <div class="chips" id="topicChips" aria-label="Фільтр за темою"></div>
+      <div class="chips" id="lvChips" style="margin-top:8px" aria-label="Фільтр за рівнем"></div>
+    </div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <section id="p-log" class="panel" hidden>
+    <div class="box">
+      <div class="tw"><table class="log"><thead><tr><th>Учень</th><th>Картки</th><th>Бали</th><th>Час</th></tr></thead><tbody id="logBody"><tr><td colspan="4" class="dim">Поки що нікого не опитано. Витягніть білет на вкладці «Білет».</td></tr></tbody></table></div>
+      <div class="row" style="margin-top:12px"><button class="btn" type="button" id="dl">Завантажити журнал (.csv)</button><button class="btn ghost" type="button" id="cp">Скопіювати</button></div>
+      <div id="copyHost"></div>
+    </div>
+  </section>
+</div>
+
+<script>
+const TOPICS=["Кодування даних","Архітектура комп'ютера","Операційні системи","Збереження даних","Захист цифрових пристроїв","Сучасні технології","Технології та довкілля"];
+const PTS={1:3,2:4,3:5};
+/* [тема, рівень, питання, очікувана відповідь] */
+const CARDS=[
+ [0,1,"Що таке біт і байт? Як вони пов'язані?","Біт — найменша одиниця даних (0 або 1). 1 байт = 8 біт."],
+ [0,2,"Переведіть число 13 у двійкову систему числення.","1101₂, бо 13 = 8 + 4 + 1."],
+ [0,2,"Скільки байтів у 3 КБ? Покажіть обчислення.","3 × 1024 = 3072 байти."],
+ [0,3,"Скільки біт потрібно, щоб закодувати 40 різних символів? Поясніть.","6 біт: 2⁵ = 32 замало, 2⁶ = 64 вистачає."],
+ [1,1,"Назвіть основні пристрої комп'ютера та їх призначення.","Процесор — опрацьовує дані; пам'ять — зберігає; пристрої введення й виведення — обмін даними з людиною."],
+ [1,1,"Що таке системна шина?","Канал, яким передаються дані й команди між процесором, пам'яттю та іншими пристроями."],
+ [1,2,"Чим оперативна пам'ять відрізняється від зовнішньої?","Оперативна — швидка, зберігає дані лише під час роботи й втрачає їх без живлення. Зовнішня — повільніша, зберігає дані довготривало."],
+ [1,3,"Процесор із частотою 3 ГГц виконує одну операцію за такт. Скільки операцій він виконає за 2 секунди?","3 млрд × 2 = 6 млрд операцій (1 ГГц = 1 млрд тактів за секунду)."],
+ [2,1,"Що таке операційна система? Наведіть три приклади.","Набір програм, що керує пристроями й забезпечує роботу користувача та програм. Windows, Android, macOS, Linux, iOS."],
+ [2,2,"Назвіть щонайменше чотири функції операційної системи.","Керування пам'яттю, процесами, пристроями й файлами; інтерфейс користувача; захист і безпека."],
+ [2,2,"Чим графічний інтерфейс відрізняється від командного рядка?","У графічному — вікна, значки, мишка; у командному рядку команди вводять текстом з клавіатури."],
+ [2,3,"Розберіть шлях D:\\Школа\\Інформатика\\звіт.docx: диск, папки, ім'я, розширення.","Диск D:, папка «Школа», вкладена папка «Інформатика», ім'я файлу «звіт», розширення .docx (текстовий документ)."],
+ [3,1,"Назвіть три види носіїв даних.","Наприклад: жорсткий диск (HDD), SSD, флешка, карта пам'яті, оптичний диск, хмарне сховище."],
+ [3,2,"Порівняйте хмарне сховище і флешку: одна перевага й один недолік кожного.","Хмара: доступ з будь-якого пристрою / потрібен інтернет. Флешка: працює без інтернету / легко загубити або пошкодити."],
+ [3,2,"Поясніть правило резервного копіювання 3-2-1.","3 копії даних, на 2 різних видах носіїв, 1 копія — в іншому місці (наприклад, у хмарі)."],
+ [3,3,"Одне фото займає 4 МБ. Скільки фото вміститься на флешку 2 ГБ (1 ГБ = 1024 МБ)?","2 × 1024 = 2048 МБ; 2048 / 4 = 512 фото."],
+ [4,1,"Що таке шкідлива програма? Назвіть два види.","Програма, що шкодить пристрою чи даним. Віруси, черв'яки, трояни, програми-шпигуни, програми-вимагачі."],
+ [4,2,"Назвіть чотири ознаки надійного пароля.","Від 12 символів; великі й малі літери; цифри; спецсимволи; без особистих даних; різний для різних сервісів."],
+ [4,2,"Що таке двофакторна автентифікація і навіщо вона?","Вхід за двома ознаками: пароль + код із телефона. Навіть якщо пароль украдуть, увійти без другого кроку не вдасться."],
+ [4,3,"Прийшов лист: «Ваш акаунт заблоковано, перейдіть за посиланням». Назвіть ознаки фішингу й свої дії.","Тиск і поспіх, підозріла адреса, посилання на чужий сайт, прохання ввести пароль. Не переходити, перевірити через офіційний сайт, повідомити дорослих."],
+ [5,1,"Що таке штучний інтелект? Наведіть приклад.","Технології, що виконують завдання, які потребують «розумної» поведінки: розпізнавання мовлення, перекладач, рекомендації відео."],
+ [5,2,"Що таке інтернет речей? Наведіть два приклади.","Пристрої, що обмінюються даними через інтернет без участі людини: розумна лампа, термостат, фітнес-браслет, датчики теплиці."],
+ [5,2,"Чим віртуальна реальність відрізняється від доповненої?","VR повністю замінює довкілля штучним світом; AR додає цифрові об'єкти до реального зображення."],
+ [5,3,"Наведіть по два аргументи «за» і «проти» використання ШІ для домашніх завдань.","За: пояснення складного, перевірка себе. Проти: можна не навчитися, ШІ помиляється, нечесність. Важливо — як саме використовувати."],
+ [6,1,"Що таке електронні відходи?","Зламана чи непотрібна техніка: телефони, комп'ютери, батарейки, кабелі."],
+ [6,2,"Назвіть три принципи відповідального використання техніки в правильному порядку.","Зменшуйте споживання → використовуйте повторно → віддавайте на переробку."],
+ [6,2,"Чому дата-центри впливають на довкілля?","Споживають багато електроенергії та води для охолодження серверів."],
+ [6,3,"Утворилося 100 т електронних відходів, перероблено 27 %. Скільки тонн не перероблено і чому це проблема?","100 − 27 = 73 т. Важкі метали забруднюють ґрунт і воду, втрачаються цінні матеріали."]
+];
+
+const $=(s,el=document)=>el.querySelector(s);
+const h=(t,c,x)=>{const e=document.createElement(t); if(c) e.className=c; if(x!=null) e.textContent=x; return e;};
+const LVN={1:"🟢 Базовий",2:"🟡 Середній",3:"🔴 Складний"};
+
+function cardEl(i){
+  const [t,l,q,a]=CARDS[i];
+  const b=h("button","card l"+l); b.type="button"; b.setAttribute("aria-label",`${TOPICS[t]}. ${q} Натисніть, щоб побачити відповідь`);
+  const inn=h("div","inner");
+  const f=h("div","face"); const m=h("div","meta"); m.append(h("span",null,"Т"+(t+1)+" · "+TOPICS[t]),h("span","pts",PTS[l]+" б")); f.append(m,h("div","qtext",q),h("div","hint","Натисніть — відповідь"));
+  const bk=h("div","face back"); const m2=h("div","meta"); m2.append(h("span",null,"Очікувана відповідь"),h("span","pts",LVN[l])); bk.append(m2,h("div","atext",a),h("div","hint","Натисніть — питання"));
+  inn.append(f,bk); b.appendChild(inn); b.addEventListener("click",()=>b.classList.toggle("on")); return b;
+}
+
+/* ---- усі картки ---- */
+let fT=null, fL=null;
+function chips(host,list,get,set){ host.innerHTML=""; list.forEach(([v,label])=>{ const c=h("button","chip",label); c.type="button"; c.setAttribute("aria-pressed",String(get()===v)); c.addEventListener("click",()=>{ set(get()===v?null:v); drawAll(); }); host.appendChild(c); }); }
+function drawAll(){
+  chips($("#topicChips"),TOPICS.map((n,i)=>[i,"Т"+(i+1)+". "+n]),()=>fT,v=>fT=v);
+  chips($("#lvChips"),[[1,LVN[1]],[2,LVN[2]],[3,LVN[3]]],()=>fL,v=>fL=v);
+  const g=$("#grid"); g.innerHTML="";
+  CARDS.forEach((c,i)=>{ if((fT===null||c[0]===fT)&&(fL===null||c[1]===fL)) g.appendChild(cardEl(i)); });
+}
+drawAll();
+
+/* ---- білет ---- */
+TOPICS.forEach((n,i)=>$("#scope").appendChild(new Option("Т"+(i+1)+". "+n,String(i))));
+const used=new Set(); let cur=null;
+function pick(level,scope){
+  let pool=CARDS.map((c,i)=>i).filter(i=>CARDS[i][1]===level&&(scope==="all"||CARDS[i][0]===+scope));
+  if(!pool.length) pool=CARDS.map((c,i)=>i).filter(i=>CARDS[i][1]===level);
+  let fresh=pool.filter(i=>!used.has(i)); if(!fresh.length){ pool.forEach(i=>used.delete(i)); fresh=pool; }
+  const i=fresh[Math.floor(Math.random()*fresh.length)]; used.add(i); return i;
+}
+$("#draw").addEventListener("click",()=>{
+  const scope=$("#scope").value; cur={ids:[1,2,3].map(l=>pick(l,scope)), marks:[null,null,null]};
+  const tk=$("#ticket"); tk.innerHTML="";
+  cur.ids.forEach((id,k)=>{ const s=h("div","slot"); s.appendChild(cardEl(id));
+    const mk=h("div","marks"); [["full","Повністю",1],["half","Частково",.5],["zero","Не відповів",0]].forEach(([cls,lab,v])=>{
+      const b=h("button","mk "+cls,lab); b.type="button"; b.setAttribute("aria-pressed","false");
+      b.addEventListener("click",()=>{ cur.marks[k]=v; mk.querySelectorAll(".mk").forEach(z=>z.setAttribute("aria-pressed","false")); b.setAttribute("aria-pressed","true"); score(); });
+      mk.appendChild(b); });
+    s.appendChild(mk); tk.appendChild(s); });
+  $("#scoreBox").hidden=false; $("#saveMsg").textContent=""; score();
+});
+function total(){ return cur.ids.reduce((s,id,k)=>s+(cur.marks[k]||0)*PTS[CARDS[id][1]],0); }
+function score(){ const t=total(); $("#sc").textContent=String(t).replace(".",","); $("#save").disabled=cur.marks.some(m=>m===null); }
+
+/* ---- журнал ---- */
+const LOG=[];
+$("#save").addEventListener("click",()=>{
+  const name=$("#stud").value.trim()||"Учень "+(LOG.length+1);
+  const t=total(); LOG.push({name, cards:cur.ids.map(id=>"Т"+(CARDS[id][0]+1)+(["","🟢","🟡","🔴"][CARDS[id][1]])).join(" "), pts:Math.round(t), raw:t, time:new Date().toLocaleTimeString("uk-UA",{hour:"2-digit",minute:"2-digit"})});
+  $("#saveMsg").textContent=`Записано: ${name} — ${Math.round(t)} б.`; $("#save").disabled=true; $("#stud").value=""; drawLog();
+});
+function drawLog(){
+  $("#logN").textContent=LOG.length?`(${LOG.length})`:"";
+  const b=$("#logBody"); b.innerHTML="";
+  if(!LOG.length){ const tr=h("tr"); const td=h("td","dim","Поки що нікого не опитано."); td.colSpan=4; tr.appendChild(td); b.appendChild(tr); return; }
+  LOG.forEach(r=>{ const tr=h("tr"); [r.name,r.cards,String(r.pts),r.time].forEach(v=>tr.appendChild(h("td",null,v))); b.appendChild(tr); });
+}
+function rows(){ return [["Учень","Картки","Бали (12)","Час"],...LOG.map(r=>[r.name,r.cards,r.pts,r.time])]; }
+$("#dl").addEventListener("click",async()=>{
+  const csv="\ufeff"+rows().map(r=>r.join(";")).join("\n"); const filename="opytuvannia_r1_8.csv";
+  try{ if(window.claude&&typeof window.claude.use==="function"){ const d=await window.claude.use("downloads"); if(d){ await d.save({filename,data:csv}); return; } } }catch(e){}
+  copyLog();
+});
+function copyLog(){ const t=rows().map(r=>r.join("\t")).join("\n");
+  const fb=()=>{ let ta=$("#copyHost textarea"); if(!ta){ ta=h("textarea","copy"); ta.readOnly=true; $("#copyHost").appendChild(ta);} ta.value=t; ta.select(); };
+  try{ navigator.clipboard.writeText(t).then(()=>{ $("#cp").textContent="Скопійовано ✓"; }).catch(fb); }catch(e){ fb(); } }
+$("#cp").addEventListener("click",copyLog);
+
+/* ---- вкладки ---- */
+document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.setAttribute("aria-selected",String(x===b)));
+  ["ticket","all","log"].forEach(k=>$("#p-"+k).hidden=k!==b.dataset.t);
+}));
+</script>
+
+</body></html>

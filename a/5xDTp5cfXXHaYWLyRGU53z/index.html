@@ -1,0 +1,1613 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5">
+<title>Створюємо презентацію — інтерактивні вправи</title>
+<style>
+  :root{
+    --bg: #10131f;
+    --panel: #171b2c;
+    --panel-2: #1e2338;
+    --line: #2b3050;
+    --text: #e9ecf7;
+    --text-dim: #9aa2c4;
+    --amber: #f5a742;
+    --teal: #3ecfb2;
+    --violet: #8b7cf6;
+    --red: #ef6a6a;
+    --green: #4fd18c;
+    --radius-lg: 18px;
+    --radius-sm: 10px;
+    font-size: 18px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1100px 500px at 85% -10%, rgba(139,124,246,.16), transparent 60%),
+      radial-gradient(900px 500px at -10% 110%, rgba(62,207,178,.14), transparent 60%),
+      var(--bg);
+    color:var(--text);
+    font-family: "Segoe UI", Avenir, "Helvetica Neue", Arial, sans-serif;
+    line-height:1.55;
+    min-height:100vh;
+    padding-bottom:60px;
+  }
+  .wrap{max-width:920px; margin:0 auto; padding:0 20px;}
+
+  header.top{
+    padding:34px 20px 26px;
+    border-bottom:1px solid var(--line);
+    background: linear-gradient(180deg, rgba(139,124,246,.1), transparent);
+  }
+  .drive-tag{
+    display:inline-flex; align-items:center; gap:10px;
+    background:var(--panel-2); border:1px solid var(--line);
+    padding:6px 14px 6px 10px; border-radius:999px;
+    font-size:.8rem; color:var(--text-dim); letter-spacing:.02em;
+    margin-bottom:18px;
+  }
+  .drive-tag .dot{width:8px;height:8px;border-radius:50%;background:var(--teal); box-shadow:0 0 8px var(--teal);}
+  h1{
+    font-size:clamp(1.7rem, 4vw, 2.4rem);
+    margin:0 0 8px;
+    font-weight:800;
+    letter-spacing:-.01em;
+  }
+  .sub{color:var(--text-dim); max-width:66ch; font-size:1.02rem;}
+  .meta-grid{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:12px; margin-top:22px;
+  }
+  .meta-card{
+    background:var(--panel); border:1px solid var(--line);
+    border-radius:var(--radius-sm); padding:14px 16px;
+  }
+  .meta-card .label{font-size:.74rem; color:var(--teal); text-transform:uppercase; letter-spacing:.08em; margin-bottom:6px;}
+  .meta-card .val{font-size:.95rem; color:var(--text);}
+  .who-badge{
+    display:inline-flex; align-items:center; gap:8px; margin-top:16px;
+    background:var(--panel); border:1px solid var(--line); padding:8px 14px;
+    border-radius:999px; font-size:.88rem; color:var(--text-dim);
+  }
+  .who-badge b{color:var(--teal);}
+
+  .slide-strip{ display:flex; gap:8px; margin-top:20px; flex-wrap:wrap; }
+  .slide-strip span{
+    flex:1; min-width:110px; text-align:center; padding:11px 8px; border-radius:var(--radius-sm);
+    font-size:.85rem; font-weight:600; border:1px solid var(--line);
+  }
+  .slide-strip span:nth-child(1){background:rgba(139,124,246,.16); color:#d9d3fb; border-color:rgba(139,124,246,.4);}
+  .slide-strip span:nth-child(2){background:rgba(62,207,178,.12); color:#bdf1e5; border-color:rgba(62,207,178,.35);}
+  .slide-strip span:nth-child(3){background:rgba(245,167,66,.12); color:#f8d8ac; border-color:rgba(245,167,66,.35);}
+  .slide-strip span:nth-child(4){background:rgba(239,106,106,.12); color:#f6c9c9; border-color:rgba(239,106,106,.35);}
+  .slide-strip .arrow{flex:0 0 auto; align-self:center; color:var(--text-dim);}
+
+  nav.tabs{
+    display:flex; gap:8px; overflow-x:auto; padding:16px 20px;
+    border-bottom:1px solid var(--line);
+    position:sticky; top:0; background:rgba(16,19,31,.94); backdrop-filter:blur(6px);
+    z-index:10;
+  }
+  nav.tabs::-webkit-scrollbar{height:6px;}
+  nav.tabs::-webkit-scrollbar-thumb{background:var(--line); border-radius:4px;}
+  .tab-btn{
+    flex:0 0 auto;
+    background:var(--panel); color:var(--text-dim); border:1px solid var(--line);
+    padding:10px 17px; border-radius:999px; cursor:pointer; font-size:.9rem;
+    white-space:nowrap; transition:.15s;
+  }
+  .tab-btn:hover{border-color:var(--violet); color:var(--text);}
+  .tab-btn.active{background:var(--violet); color:#fff; border-color:var(--violet);}
+
+  main{padding:28px 20px 10px;}
+  section.view{display:none;}
+  section.view.active{display:block;}
+
+  .ex{
+    background:var(--panel); border:1px solid var(--line);
+    border-radius:var(--radius-lg); padding:22px 22px 24px; margin-bottom:22px;
+    position:relative;
+  }
+  .ex-head{display:flex; align-items:flex-start; justify-content:space-between; gap:14px; margin-bottom:6px; flex-wrap:wrap;}
+  .ex-num{color:var(--text-dim); font-size:.88rem;}
+  .ex-title{font-size:1.2rem; font-weight:700; margin:2px 0 4px;}
+  .level-chip{
+    font-size:.8rem; padding:5px 11px; border-radius:999px; white-space:nowrap;
+    border:1px solid var(--line);
+  }
+  .lvl-basic{color:var(--green); border-color:rgba(79,209,140,.4); background:rgba(79,209,140,.08);}
+  .lvl-mid{color:var(--amber); border-color:rgba(245,167,66,.4); background:rgba(245,167,66,.08);}
+  .lvl-high{color:var(--red); border-color:rgba(239,106,106,.4); background:rgba(239,106,106,.08);}
+  .type-tag{font-size:.8rem; color:var(--teal); margin-bottom:12px;}
+  .prompt{margin:10px 0 16px; font-size:1.05rem;}
+  .prompt b{color:var(--amber);}
+
+  .opt-list{display:flex; flex-direction:column; gap:10px;}
+  .opt{
+    text-align:left; width:100%;
+    background:var(--panel-2); color:var(--text); border:1px solid var(--line);
+    padding:14px 17px; border-radius:var(--radius-sm); cursor:pointer;
+    font-size:1.02rem; transition:.12s;
+  }
+  .opt:hover{border-color:var(--violet);}
+  .opt.correct{background:rgba(79,209,140,.15); border-color:var(--green);}
+  .opt.wrong{background:rgba(239,106,106,.15); border-color:var(--red);}
+  .opt.disabled{cursor:default; opacity:.85;}
+  .opt.picked-multi{border-color:var(--violet); box-shadow:inset 0 0 0 1px var(--violet);}
+
+  .feedback{
+    margin-top:14px; padding:13px 15px; border-radius:var(--radius-sm);
+    font-size:.96rem; display:none;
+  }
+  .feedback.show{display:block;}
+  .feedback.ok{background:rgba(79,209,140,.12); border:1px solid rgba(79,209,140,.4); color:#cdeedd;}
+  .feedback.bad{background:rgba(239,106,106,.12); border:1px solid rgba(239,106,106,.4); color:#f6d3d3;}
+
+  .btn{
+    background:var(--violet); color:#fff; border:none; padding:11px 20px;
+    border-radius:999px; cursor:pointer; font-size:.95rem; font-weight:600;
+    margin-top:14px;
+  }
+  .btn:hover{filter:brightness(1.08);}
+  .btn.secondary{background:transparent; border:1px solid var(--line); color:var(--text-dim);}
+  .btn:disabled{opacity:.4; cursor:default;}
+
+  .match-wrap{display:grid; grid-template-columns:1fr 1fr; gap:22px;}
+  @media (max-width:560px){.match-wrap{grid-template-columns:1fr;}}
+  .match-col .m-item{
+    background:var(--panel-2); border:1px solid var(--line); padding:13px 15px;
+    border-radius:var(--radius-sm); margin-bottom:9px; cursor:pointer; font-size:.96rem;
+  }
+  .match-col .m-item.selected{border-color:var(--violet); box-shadow:inset 0 0 0 1px var(--violet);}
+  .match-col .m-item.linked-correct{border-color:var(--green); background:rgba(79,209,140,.12);}
+  .match-col .m-item.linked-wrong{border-color:var(--red); background:rgba(239,106,106,.12);}
+  .match-col .m-item.done{cursor:default;}
+
+  .order-list{display:flex; flex-direction:column; gap:8px;}
+  .order-item{
+    background:var(--panel-2); border:1px solid var(--line); border-radius:var(--radius-sm);
+    padding:12px 15px; display:flex; align-items:center; gap:12px; font-size:.96rem;
+  }
+  .order-item .idx{color:var(--amber); font-weight:700; width:22px;}
+  .order-item .arrows{margin-left:auto; display:flex; gap:6px;}
+  .order-item .arrows button{
+    background:var(--panel); border:1px solid var(--line); color:var(--text);
+    width:32px; height:32px; border-radius:8px; cursor:pointer; font-size:1rem;
+  }
+  .order-item.correct-pos{border-color:var(--green);}
+  .order-item.wrong-pos{border-color:var(--red);}
+
+  .drag-source{display:flex; flex-wrap:wrap; gap:10px; margin-bottom:16px; min-height:20px;}
+  .drag-chip{
+    background:var(--panel-2); border:1px solid var(--violet); color:var(--text);
+    padding:10px 15px; border-radius:999px; cursor:grab; font-size:.92rem;
+    user-select:none;
+  }
+  .drag-chip.placed{opacity:.35; cursor:default;}
+  .buckets{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media (max-width:560px){.buckets{grid-template-columns:1fr;}}
+  .bucket{
+    min-height:110px; background:var(--panel-2); border:2px dashed var(--line);
+    border-radius:var(--radius-sm); padding:12px;
+  }
+  .bucket.over{border-color:var(--teal);}
+  .bucket h4{margin:0 0 8px; font-size:.88rem; color:var(--teal);}
+  .bucket .drag-chip{margin:0 6px 6px 0; cursor:default; border-color:var(--line);}
+  .bucket .drag-chip.right{border-color:var(--green); background:rgba(79,209,140,.14);}
+  .bucket .drag-chip.wrong{border-color:var(--red); background:rgba(239,106,106,.14);}
+
+  .fill-text{font-size:1.02rem; line-height:2.2; margin-bottom:14px;}
+  .blank-input{
+    background:var(--bg); border:1px solid var(--violet); color:var(--text);
+    border-radius:6px; padding:5px 9px; font-size:.98rem; width:170px; text-align:center;
+  }
+  .blank-input.correct{border-color:var(--green); background:rgba(79,209,140,.1);}
+  .blank-input.wrong{border-color:var(--red); background:rgba(239,106,106,.1);}
+  .wordbank{display:flex; flex-wrap:wrap; gap:8px; margin:6px 0 16px;}
+  .wordbank span{
+    background:var(--panel-2); border:1px solid var(--line); padding:6px 13px;
+    border-radius:999px; font-size:.85rem; color:var(--text-dim);
+  }
+
+  .progress-bar{
+    height:9px; background:var(--panel-2); border-radius:99px; overflow:hidden; margin-bottom:22px;
+    border:1px solid var(--line);
+  }
+  .progress-fill{height:100%; width:0%; background:linear-gradient(90deg, var(--teal), var(--violet)); transition:width .3s;}
+  .score-badge{
+    display:inline-flex; align-items:center; gap:8px; background:var(--panel-2);
+    border:1px solid var(--line); padding:7px 15px; border-radius:999px; font-size:.88rem; color:var(--text-dim);
+  }
+  .result-box{ text-align:center; padding:40px 20px; }
+  .result-box .big{font-size:3.2rem; font-weight:800; color:var(--amber); margin-bottom:6px;}
+  .note{
+    font-size:.86rem; color:var(--text-dim); background:var(--panel-2); border:1px solid var(--line);
+    border-radius:var(--radius-sm); padding:11px 15px; margin:14px 0 26px;
+  }
+
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(8,9,16,.88); z-index:100;
+    display:flex; align-items:center; justify-content:center; padding:20px;
+    backdrop-filter:blur(3px);
+  }
+  .modal-box{
+    background:var(--panel); border:1px solid var(--line); border-radius:var(--radius-lg);
+    padding:30px 26px; max-width:420px; width:100%;
+  }
+  .modal-box h2{margin:0 0 10px; font-size:1.3rem;}
+  .modal-box p{color:var(--text-dim); font-size:.95rem; margin-bottom:18px;}
+  .modal-box input{
+    width:100%; background:var(--panel-2); border:1px solid var(--line); color:var(--text);
+    padding:12px 15px; border-radius:var(--radius-sm); font-size:.98rem; margin-bottom:12px;
+  }
+
+  .report-table{width:100%; border-collapse:collapse; font-size:.9rem; margin-bottom:18px;}
+  .report-table th, .report-table td{
+    text-align:left; padding:10px 10px; border-bottom:1px solid var(--line);
+  }
+  .report-table th{color:var(--text-dim); font-weight:600; font-size:.8rem; text-transform:uppercase; letter-spacing:.04em;}
+  .report-summary{
+    background:var(--panel-2); border:1px solid var(--line); border-radius:var(--radius-sm);
+    padding:14px 16px; margin-bottom:18px; font-size:.97rem;
+  }
+  .report-actions{display:flex; gap:10px; flex-wrap:wrap;}
+
+  /* practical task */
+  .scenario-box{
+    background:var(--panel-2); border:1px solid var(--line); border-radius:var(--radius-sm);
+    padding:17px 19px; margin-bottom:18px; font-size:1rem;
+  }
+  .scenario-box .tag{font-size:.76rem; color:var(--violet); text-transform:uppercase; letter-spacing:.06em; margin-bottom:8px;}
+  .step-block{ border-top:1px solid var(--line); padding-top:18px; margin-top:18px; }
+  .step-block:first-of-type{border-top:none; padding-top:0; margin-top:0;}
+  .step-block h3{font-size:1.04rem; margin:0 0 10px; color:var(--teal);}
+  .pill-radio{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:6px;}
+  .pill-radio button{
+    background:var(--panel-2); border:1px solid var(--line); color:var(--text);
+    padding:11px 19px; border-radius:999px; cursor:pointer; font-size:.96rem;
+  }
+  .pill-radio button.chosen{border-color:var(--violet); box-shadow:inset 0 0 0 1px var(--violet); background:rgba(139,124,246,.12);}
+  .pill-radio button.right{border-color:var(--green); background:rgba(79,209,140,.15);}
+  .pill-radio button.wrong{border-color:var(--red); background:rgba(239,106,106,.15);}
+  .toggle-row{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    background:var(--panel-2); border:1px solid var(--line); border-radius:var(--radius-sm);
+    padding:13px 16px; margin-bottom:10px;
+  }
+  .toggle-row .q{font-size:.96rem; flex:1;}
+  .toggle-btns{display:flex; gap:6px; flex:0 0 auto;}
+  .toggle-btns button{
+    background:var(--panel); border:1px solid var(--line); color:var(--text-dim);
+    padding:8px 15px; border-radius:999px; cursor:pointer; font-size:.86rem;
+  }
+  .toggle-btns button.chosen-yes{background:rgba(79,209,140,.18); border-color:var(--green); color:#cdeedd;}
+  .toggle-btns button.chosen-no{background:rgba(239,106,106,.18); border-color:var(--red); color:#f6d3d3;}
+  .toggle-row.right{border-color:var(--green);}
+  .toggle-row.wrong{border-color:var(--red);}
+  .practical-score{
+    text-align:center; padding:26px 16px; background:var(--panel-2); border:1px solid var(--line);
+    border-radius:var(--radius-sm); margin-top:18px;
+  }
+  .practical-score .big{font-size:2.5rem; font-weight:800; color:var(--amber);}
+
+  /* slide preview mock */
+  .slide-mock{
+    background:#fff; color:#1a1a2e; border-radius:10px; padding:18px 20px;
+    font-family: Arial, sans-serif; margin-bottom:6px; position:relative; overflow:hidden;
+    box-shadow: 0 6px 20px rgba(0,0,0,.35);
+  }
+  .slide-mock .mock-title{font-size:1.15rem; font-weight:700; margin-bottom:8px; color:#2b2440;}
+  .slide-mock .mock-body{font-size:.82rem; color:#444; line-height:1.5;}
+  .slide-mock .mock-label{
+    position:absolute; top:8px; right:10px; font-size:.65rem; color:#999; text-transform:uppercase; letter-spacing:.06em;
+  }
+  .mock-wrap{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;}
+  @media (max-width:560px){.mock-wrap{grid-template-columns:1fr;}}
+  .mock-pick{
+    border:3px solid transparent; border-radius:12px; cursor:pointer; padding:2px;
+  }
+  .mock-pick.chosen{border-color:var(--violet);}
+  .mock-pick.right{border-color:var(--green);}
+  .mock-pick.wrong{border-color:var(--red);}
+</style>
+</head>
+<body>
+
+<div class="modal-overlay" id="nameModal">
+  <div class="modal-box">
+    <h2>Перш ніж почати 👋</h2>
+    <p>Введи своє ім'я та прізвище — це потрібно, щоб зафіксувати твій результат для вчителя.</p>
+    <input id="studentNameInput" placeholder="Ім'я та прізвище" autocomplete="off">
+    <input id="studentClassInput" placeholder="Клас (необов'язково)" autocomplete="off">
+    <button class="btn" id="startBtn" style="margin-top:4px;">Почати вправи</button>
+  </div>
+</div>
+
+<header class="top">
+  <div class="wrap">
+    <div class="drive-tag"><span class="dot"></span> Інформатика · Google Презентації</div>
+    <h1>Створюємо презентацію</h1>
+    <p class="sub">Інтерактивні вправи про те, як зробити гарну й зрозумілу презентацію в Google Презентаціях. Пройди завдання по черзі, виконай практичне завдання, а наприкінці — фінальний тест із підрахунком балів.</p>
+    <div class="meta-grid">
+      <div class="meta-card"><div class="label">Клас</div><div class="val">6 клас</div></div>
+      <div class="meta-card"><div class="label">Інструмент</div><div class="val">Google Презентації (Google Slides)</div></div>
+      <div class="meta-card"><div class="label">Основні поняття</div><div class="val">Слайд, макет слайда, титульний слайд, тема оформлення, текст і зображення на слайді, перехід між слайдами, режим показу презентації</div></div>
+      <div class="meta-card"><div class="label">Навички</div><div class="val">Створювати й редагувати слайди, обирати вдалий макет і оформлення, додавати текст і зображення, запускати показ презентації, дотримуватися правил хорошої презентації</div></div>
+    </div>
+    <div class="slide-strip">
+      <span>Задум</span><span class="arrow">→</span><span>Слайди</span><span class="arrow">→</span><span>Оформлення</span><span class="arrow">→</span><span>Показ</span>
+    </div>
+    <div class="who-badge" id="whoBadge">Учень: <b>—</b></div>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" data-view="v1">1–3 · Що таке презентація</button>
+  <button class="tab-btn" data-view="v2">4–6 · Слайди й макети</button>
+  <button class="tab-btn" data-view="v3">7–9 · Оформлення</button>
+  <button class="tab-btn" data-view="v4">10–12 · Показ і практика</button>
+  <button class="tab-btn" data-view="vpractical">🧪 Практичне завдання</button>
+  <button class="tab-btn" data-view="vtest">🏁 Фінальний тест</button>
+  <button class="tab-btn" data-view="vprogress">📊 Мій прогрес</button>
+</nav>
+
+<main class="wrap">
+
+<div class="note">Ці вправи побудовані на загальновідомих правилах роботи з Google Презентаціями (стандартний інтерфейс сервісу, доступний кожному учню за посиланням slides.google.com), а не на конкретному підручнику зі скріншотами.</div>
+
+<!-- ================= VIEW 1 ================= -->
+<section class="view active" id="v1">
+
+  <div class="ex" data-ex="1">
+    <div class="ex-head">
+      <div><div class="ex-num">Вправа 1</div><div class="ex-title">Що таке презентація?</div></div>
+      <div class="level-chip lvl-basic">🟢 Базовий</div>
+    </div>
+    <div class="type-tag">Тип: один правильний варіант</div>
+    <div class="prompt">Оберіть правильне визначення поняття <b>«презентація»</b>.</div>
+    <div class="opt-list" data-type="single" data-correct="1">
+      <button class="opt">Будь-який текстовий документ, надрукований на аркуші паперу</button>
+      <button class="opt">Набір слайдів, які показують по черзі, щоб наочно розповісти про якусь тему</button>
+      <button class="opt">Програма для малювання картинок</button>
+      <button class="opt">Файл, який можна лише слухати, але не можна дивитися</button>
+    </div>
+    <div class="feedback"></div>
+  </div>
+
+  <div class="ex" data-ex="2">
+    <div class="ex-head">
+      <div><div class="ex-num">Вправа 2</div><div class="ex-title">Так чи ні: перші кроки в Google Презентаціях</div></div>
+      <div class="level-chip lvl-basic">🟢 Базовий</div>
+    </div>
+    <div class="type-tag">Тип: так / ні (кілька тверджень)</div>
+    <div id="tf2"></div>
+  </div>
+
+  <div class="ex" data-ex="3">
+    <div class="ex-head">
+      <div><div class="ex-num">Вправа 3</div><div class="ex-title">Елемент інтерфейсу ↔ призначення</div></div>
+      <div class="level-chip lvl-basic">🟢 Базовий</div>
+    </div>
+    <div class="type-tag">Тип: встановлення відповідності (натисни по одному елементу зліва і справа)</div>
+    <div class="prompt">З'єднай елемент вікна Google Презентацій із тим, для чого він потрібен.</div>
+    <div id="match3"></div>
+    <div class="feedback"></div>
+  </div>
+
+</section>
+
+<!-- ================= VIEW 2 ================= -->
+<section class="view" id="v2">
+
+  <div class="ex" data-ex="4">
+    <div class="ex-head">
+      <div><div class="ex-num">Вправа 4</div><div class="ex-title">Що можна додати на слайд</div></div>
+      <div class="level-chip lvl-mid">🟡 Середній</div>
+    </div>
+    <div class="type-tag">Тип: декілька правильних відповідей</div>
+    <div class="prompt">Оберіть <b>усі</b> об'єкти, які можна додати на слайд у Google Презентаціях.</div>
+    <div class="opt-list" data-type="multi" data-correct="0,1,2,3">
+      <button class="opt">Текст (заголовок або текстове поле)</button>
+      <button class="opt">Зображення з комп'ютера або з інтернету</button>
+      <button class="opt">Таблицю або діаграму</button>
+      <button class="opt">Відео з YouTube</button>
+    </div>
+    <button class="btn" data-check="4">Перевірити</button>
+    <div class="feedback"></div>
+  </div>
+
+  <div class="ex" data-ex="5">
+    <div class="ex-head">
+      <div><div class="ex-num">Вправа 5</div><div class="ex-title">Заповни пропуски: макет слайда</div></div>
+      <div class="level-chip lvl-mid">🟡 Середній</div>
+    </div>
+    <div class="type-tag">Тип: заповнення пропусків</div>
+    <div class="fill-text" id="fill5"></div>
+    <div class="wordbank">Слова для довідки: макет · титульний · новий слайд</div>
+    <button class="btn" data-check="5">Перевірити</button>
+    <div class="feedback"></div>
+  </div>
+
+  <div class="ex" data-ex="6">
+    <div class="ex-head">
+      <div><div class="ex-num">Вправа 6</div><div class="ex-title">Обери правильний слайд</div></div>
+      <div class="level-chip lvl-mid">🟡 Середній</div>
+    </div>
+    <div class="type-tag">Тип: вибір зображення (натисни на потрібний слайд)</div>
+    <div class="prompt">Учень готує <b>титульний слайд</b> для презентації про космос. Натисни на той варіант слайда, який найкраще підходить для титульного слайда.</div>
+    <div class="mock-wrap" id="mock6">
+      <div class="mock-pick" data-correct="true">
+        <div class="slide-mock">
+          <div class="mock-label">Слайд A</div>
+          <div class="mock-title" style="font-size:1.4rem; text-align:center; margin-top:10px;">Подорож у космос</div>
+          <div class="mock-body" style="text-align:center; color:#777;">Іван Петренко, 6-А клас</div>
+        </div>
+      </div>
+      <div class="mock-pick" data-correct="false">
+        <div class="slide-mock">
+          <div class="mock-label">Слайд Б</div>
+          <div class="mock-body">Планети Сонячної системи різняться розміром, складом і відстанню від Сонця. Меркурій — найближча до Сонця планета, а Нептун — найвіддаленіша. У Сонячній системі є вісім планет, кожна з яких має свої унікальні особливості...</div>
+        </div>
+      </div>
+    </div>
+    <div class="feedback"></div>
+  </div>
+
+</section>
+
+<!-- ================= VIEW 3 ================= -->
+<section class="view" id="v3">
+
+  <div class="ex" data-ex="7">
+    <div class="ex-head">
+      <div><div class="ex-num">Вправа 7</div><div class="ex-title">Порядок створення презентації</div></div>
+      <div class="level-chip lvl-mid">🟡 Середній</div>
+    </div>
+    <div class="type-tag">Тип: встановлення правильної послідовності (кнопками ↑ ↓)</div>
+    <div class="prompt">Розташуй кроки створення презентації в Google Презентаціях у правильному порядку.</div>
+    <div class="order-list" id="order7"></div>
+    <button class="btn" data-check="7">Перевірити порядок</button>
+    <div class="feedback"></div>
+  </div>
+
+  <div class="ex" data-ex="8">
+    <div class="ex-head">
+      <div><div class="ex-num">Вправа 8</div><div class="ex-title">Добре чи погано для слайда?</div></div>
+      <div class="level-chip lvl-mid">🟡 Середній</div>
+    </div>
+    <div class="type-tag">Тип: перетягування елементів (drag & drop) за категоріями</div>
+    <div class="prompt">Перетягни кожну пораду у відповідну категорію — «Добра порада» чи «Погана порада» для оформлення слайда.</div>
+    <div class="drag-source" id="dragSource8"></div>
+    <div class="buckets">
+      <div class="bucket" id="bucketGood" data-cat="good"><h4>✅ Добра порада</h4></div>
+      <div class="bucket" id="bucketBad" data-cat="bad"><h4>❌ Погана порада</h4></div>
+    </div>
+    <button class="btn" data-check="8">Перевірити розподіл</button>
+    <div class="feedback"></div>
+  </div>
+
+  <div class="ex" data-ex="9">
+    <div class="ex-head">
+      <div><div class="ex-num">Вправа 9</div><div class="ex-title">Знайди помилку</div></div>
+      <div class="level-chip lvl-high">🔴 Високий</div>
+    </div>
+    <div class="type-tag">Тип: знайди помилку</div>
+    <div class="prompt">Учень сказав однокласнику: <br><br>
+    <em>«Щоб презентація виглядала цікаво, треба на кожному слайді використати інший шрифт, інший розмір тексту і різні яскраві кольори фону — тоді слайди точно не будуть однаковими й нудними».</em><br><br>
+    Оберіть варіант, який <b>правильно виправляє</b> цю пораду.</div>
+    <div class="opt-list" data-type="single" data-correct="1">
+      <button class="opt">Порада правильна, так і треба робити</button>
+      <button class="opt">Помилка в тому, що презентація виглядає найкраще, коли всі слайди оформлені в одному стилі (однакові шрифти, схожі кольори) — це називають єдиною темою оформлення; занадто різні слайди виглядають хаотично й відволікають від змісту</button>
+      <button class="opt">Помилка в тому, що на слайдах узагалі не можна використовувати кольори</button>
+      <button class="opt">Помилка в тому, що шрифт на слайдах змінювати заборонено programmoю</button>
+    </div>
+    <div class="feedback"></div>
+  </div>
+
+</section>
+
+<!-- ================= VIEW 4 ================= -->
+<section class="view" id="v4">
+
+  <div class="ex" data-ex="10">
+    <div class="ex-head">
+      <div><div class="ex-num">Вправа 10</div><div class="ex-title">Ситуація: забагато тексту на слайді</div></div>
+      <div class="level-chip lvl-high">🔴 Високий</div>
+    </div>
+    <div class="type-tag">Тип: ситуаційне завдання</div>
+    <div class="prompt">Учениця підготувала слайд, на якому суцільним текстом написано п'ять речень дрібним шрифтом, і планує просто прочитати цей текст під час виступу. Що їй варто зробити, щоб слайд і виступ стали кращими?</div>
+    <div class="opt-list" data-type="single" data-correct="2">
+      <button class="opt">Залишити все як є — головне, що вся інформація є на слайді</button>
+      <button class="opt">Зробити шрифт ще меншим, щоб текст точно помістився</button>
+      <button class="opt">Скоротити текст на слайді до кількох ключових слів чи коротких пунктів, а докладно розповісти все своїми словами під час виступу</button>
+      <button class="opt">Прибрати текст зі слайда повністю й нічого не показувати</button>
+    </div>
+    <div class="feedback"></div>
+  </div>
+
+  <div class="ex" data-ex="11">
+    <div class="ex-head">
+      <div><div class="ex-num">Вправа 11</div><div class="ex-title">Практичне міні-завдання: запуск показу</div></div>
+      <div class="level-chip lvl-high">🔴 Високий</div>
+    </div>
+    <div class="type-tag">Тип: практичне міні-завдання — послідовність дій</div>
+    <div class="prompt">Розташуй кроки запуску показу презентації на весь екран у правильному порядку.</div>
+    <div class="order-list" id="order11"></div>
+    <button class="btn" data-check="11">Перевірити порядок</button>
+    <div class="feedback"></div>
+  </div>
+
+  <div class="ex" data-ex="12">
+    <div class="ex-head">
+      <div><div class="ex-num">Вправа 12</div><div class="ex-title">Спільна робота над презентацією</div></div>
+      <div class="level-chip lvl-high">🔴 Високий</div>
+    </div>
+    <div class="type-tag">Тип: один правильний варіант</div>
+    <div class="prompt">Двоє учнів готують спільний проєкт у Google Презентаціях. Який спосіб роботи є найзручнішим завдяки тому, що презентація зберігається в хмарі (Google Диску)?</div>
+    <div class="opt-list" data-type="single" data-correct="1">
+      <button class="opt">Кожен робить свою окрему презентацію на своєму комп'ютері, а потім друкує слайди на папері</button>
+      <button class="opt">Один учень відкриває доступ до презентації іншому через посилання чи «Поділитися», і вони можуть редагувати одну й ту саму презентацію одночасно з різних пристроїв</button>
+      <button class="opt">Презентацію можна редагувати лише на тому комп'ютері, де її створили</button>
+      <button class="opt">Щоб працювати вдвох, презентацію обов'язково потрібно передавати на флешці</button>
+    </div>
+    <div class="feedback"></div>
+  </div>
+
+</section>
+
+<!-- ================= PRACTICAL TASK ================= -->
+<section class="view" id="vpractical">
+  <div class="ex">
+    <div class="ex-head">
+      <div><div class="ex-title">🧪 Практичне завдання: Плануємо презентацію</div><div class="ex-num">Застосуй вивчене до реального міні-проєкту — це не тест, а практика планування</div></div>
+      <div class="level-chip lvl-high">🔴 Практика</div>
+    </div>
+
+    <div class="scenario-box">
+      <div class="tag">Завдання</div>
+      Тобі потрібно підготувати презентацію на 5 слайдів на тему <b>«Моя улюблена тварина»</b> для показу однокласникам у Google Презентаціях. Пройди кроки нижче, щоб спланувати структуру та перевірити, чи розумієш правила хорошої презентації.
+    </div>
+
+    <div class="step-block">
+      <h3>Крок 1. З чого має починатися презентація?</h3>
+      <div class="prompt" style="margin-bottom:10px;">Що має бути на першому (титульному) слайді?</div>
+      <div class="pill-radio" id="pStep1" data-correct="title">
+        <button data-v="title">Назва теми та ім'я автора</button>
+        <button data-v="facts">Одразу всі факти про тварину</button>
+        <button data-v="empty">Слайд краще залишити порожнім</button>
+      </div>
+      <div class="feedback" id="fb-step1"></div>
+    </div>
+
+    <div class="step-block">
+      <h3>Крок 2. Скільки слайдів варто присвятити основному змісту?</h3>
+      <div class="prompt" style="margin-bottom:10px;">У тебе всього 5 слайдів: 1 титульний. Скільки слайдів логічно залишити для розкриття теми (зовнішність, харчування, місце проживання) і скільки для підсумку?</div>
+      <div class="pill-radio" id="pStep2" data-correct="3-1">
+        <button data-v="3-1">3 слайди зміст + 1 підсумковий слайд</button>
+        <button data-v="0-4">0 слайдів зміст + 4 підсумкові слайди</button>
+        <button data-v="4-0">4 слайди зміст без жодного підсумку</button>
+      </div>
+      <div class="feedback" id="fb-step2"></div>
+    </div>
+
+    <div class="step-block">
+      <h3>Крок 3. Оціни правила для гарного слайда</h3>
+      <p style="color:var(--text-dim); font-size:.92rem; margin-top:-4px;">Для кожного правила познач «Так», якщо його варто дотримуватись під час створення слайдів, або «Ні», якщо це погана порада.</p>
+      <div id="rulesChecklist"></div>
+      <div class="feedback" id="fb-step3"></div>
+    </div>
+
+    <button class="btn" id="checkPracticalBtn">Перевірити практичне завдання</button>
+    <div id="practicalResultArea"></div>
+  </div>
+</section>
+
+<!-- ================= FINAL TEST ================= -->
+<section class="view" id="vtest">
+  <div class="ex">
+    <div class="ex-head">
+      <div><div class="ex-title">🏁 Фінальний тест: Створюємо презентацію</div><div class="ex-num">12 запитань · автоматичний підрахунок балів</div></div>
+      <div class="score-badge" id="scoreBadge">Питання 1 / 12 · 0 балів</div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div id="testArea"></div>
+  </div>
+</section>
+
+<!-- ================= PROGRESS REPORT ================= -->
+<section class="view" id="vprogress">
+  <div class="ex">
+    <div class="ex-head">
+      <div><div class="ex-title">📊 Мій прогрес</div><div class="ex-num">Результати всіх вправ, практичного завдання й фінального тесту для вчителя</div></div>
+    </div>
+    <div id="progressArea"></div>
+  </div>
+</section>
+
+</main>
+
+<script>
+/* ============ STUDENT NAME MODAL ============ */
+let studentInfo = { name:"", cls:"" };
+const whoBadge = document.getElementById("whoBadge");
+document.getElementById("startBtn").addEventListener("click", ()=>{
+  const n = document.getElementById("studentNameInput").value.trim();
+  const c = document.getElementById("studentClassInput").value.trim();
+  studentInfo.name = n || "Учень (без імені)";
+  studentInfo.cls = c;
+  whoBadge.innerHTML = `Учень: <b>${studentInfo.name}</b>${c ? " · клас " + c : ""}`;
+  document.getElementById("nameModal").style.display = "none";
+});
+["studentNameInput","studentClassInput"].forEach(id=>{
+  document.getElementById(id).addEventListener("keydown", e=>{
+    if(e.key === "Enter") document.getElementById("startBtn").click();
+  });
+});
+
+/* ============ PROGRESS TRACKING ============ */
+const progress = {};
+function setProgress(exId, correct, total){
+  progress[String(exId)] = { correct, total };
+  if(document.getElementById("vprogress").classList.contains("active")) renderReport();
+}
+
+/* ============ TAB NAVIGATION ============ */
+document.querySelectorAll(".tab-btn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+    document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById(btn.dataset.view).classList.add("active");
+    if(btn.dataset.view === "vprogress") renderReport();
+    window.scrollTo({top:0, behavior:"smooth"});
+  });
+});
+
+/* ============ SINGLE CHOICE ============ */
+document.querySelectorAll('.opt-list[data-type="single"]').forEach(list=>{
+  const correct = parseInt(list.dataset.correct);
+  const fb = list.parentElement.querySelector(".feedback");
+  const exId = list.closest(".ex").dataset.ex;
+  list.querySelectorAll(".opt").forEach((btn,i)=>{
+    btn.addEventListener("click", ()=>{
+      if(list.classList.contains("locked")) return;
+      list.classList.add("locked");
+      list.querySelectorAll(".opt").forEach((b,j)=>{
+        b.classList.add("disabled");
+        if(j===correct) b.classList.add("correct");
+      });
+      const isCorrect = (i===correct);
+      setProgress(exId, isCorrect?1:0, 1);
+      if(isCorrect){
+        btn.classList.add("correct");
+        fb.textContent = "✅ Правильно! " + explainFor(list, true);
+        fb.className = "feedback show ok";
+      } else {
+        btn.classList.add("wrong");
+        fb.textContent = "❌ Неправильно. " + explainFor(list, false);
+        fb.className = "feedback show bad";
+      }
+    });
+  });
+});
+
+function explainFor(list, isCorrect){
+  const exId = list.closest(".ex").dataset.ex;
+  const bank = {
+    "1": {c:"Так, презентація — це набір слайдів, які показують по черзі, щоб наочно й послідовно розповісти про тему.", w:"Презентація — це саме набір слайдів для наочної розповіді, а не звичайний друкований текст чи програма для малювання."},
+    "9": {c:"Найкращі презентації мають єдиний стиль оформлення на всіх слайдах — однакові чи схожі шрифти й кольори. Це робить презентацію зрозумілою й охайною, а не хаотичною.", w:"Занадто різні шрифти й кольори на кожному слайді відволікають глядачів і роблять презентацію хаотичною, а не цікавою."},
+    "10": {c:"Найкраще рішення — залишити на слайді лише ключові слова чи короткі пункти, а докладно розповісти своїми словами під час виступу. Так глядачі слухають доповідача, а не читають суцільний текст.", w:"Ані зменшення шрифту, ані повне видалення тексту, ані залишення все як є не вирішують головну проблему — забагато тексту на слайді."},
+    "12": {c:"Оскільки презентація в Google зберігається в хмарі, доступ до неї можна відкрити іншій людині через посилання чи кнопку «Поділитися» — і редагувати одночасно з різних пристроїв.", w:"Друк на папері, флешки чи робота лише на одному комп'ютері — це незручні способи, які не використовують головну перевагу хмарних сервісів."}
+  };
+  const info = bank[exId];
+  if(!info) return "";
+  return isCorrect ? info.c : info.w;
+}
+
+/* ============ MULTI CHOICE ex4 ============ */
+document.querySelectorAll('.opt-list[data-type="multi"]').forEach(list=>{
+  list.querySelectorAll(".opt").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      if(list.classList.contains("locked")) return;
+      btn.classList.toggle("picked-multi");
+    });
+  });
+});
+document.querySelector('[data-check="4"]').addEventListener("click", function(){
+  const ex = this.closest(".ex");
+  const exId = ex.dataset.ex;
+  const list = ex.querySelector(".opt-list");
+  const correctSet = list.dataset.correct.split(",").map(Number);
+  const fb = ex.querySelector(".feedback");
+  if(list.classList.contains("locked")) return;
+  list.classList.add("locked");
+  let allOk = true;
+  list.querySelectorAll(".opt").forEach((b,i)=>{
+    const picked = b.classList.contains("picked-multi");
+    const shouldPick = correctSet.includes(i);
+    b.classList.add("disabled");
+    if(shouldPick){ b.classList.add("correct"); if(!picked) allOk=false; }
+    else if(picked){ b.classList.add("wrong"); allOk=false; }
+  });
+  setProgress(exId, allOk?1:0, 1);
+  fb.className = "feedback show " + (allOk ? "ok" : "bad");
+  fb.textContent = (allOk ? "✅ Точно! " : "❌ Не зовсім. ") +
+    "На слайд у Google Презентаціях можна додати текст, зображення, таблиці й діаграми, а також вставити відео з YouTube — усі чотири варіанти правильні.";
+  this.disabled = true;
+});
+
+/* ============ TRUE/FALSE ex2 ============ */
+const tf2data = [
+  {t:"Щоб створити нову презентацію в Google Презентаціях, потрібно бути підключеним до інтернету (або мати ввімкнений офлайн-режим).", c:true, e:"Так, Google Презентації — це онлайн-сервіс, який зазвичай працює через інтернет, хоча для нього можна ввімкнути офлайн-доступ заздалегідь."},
+  {t:"Одна презентація в Google Презентаціях може містити лише один слайд.", c:false, e:"Ні, презентація зазвичай містить кілька слайдів — стільки, скільки потрібно для розповіді, і нові слайди можна додавати в будь-який момент."},
+  {t:"Презентація автоматично зберігається на Google Диску під час роботи.", c:true, e:"Так, Google Презентації автоматично зберігають зміни на Google Диску, тому не потрібно окремо натискати «Зберегти»."},
+  {t:"Змінювати текст на слайді можна лише один раз — після цього його не можна редагувати.", c:false, e:"Ні, текст на слайдах можна редагувати необмежену кількість разів у будь-який момент роботи над презентацією."}
+];
+const tf2el = document.getElementById("tf2");
+let tf2Correct = 0;
+tf2data.forEach((item,i)=>{
+  const row = document.createElement("div");
+  row.style.marginBottom = "14px";
+  row.innerHTML = `
+    <div class="prompt" style="margin-bottom:8px;">${i+1}. ${item.t}</div>
+    <div class="opt-list" style="display:flex; flex-direction:row; gap:10px;">
+      <button class="opt" data-v="true" style="flex:1;">Так</button>
+      <button class="opt" data-v="false" style="flex:1;">Ні</button>
+    </div>
+    <div class="feedback"></div>
+  `;
+  tf2el.appendChild(row);
+  const fb = row.querySelector(".feedback");
+  const btns = row.querySelectorAll(".opt");
+  btns.forEach(b=>{
+    b.addEventListener("click", ()=>{
+      if(row.dataset.done) return;
+      row.dataset.done = "1";
+      const val = b.dataset.v === "true";
+      btns.forEach(x=>x.classList.add("disabled"));
+      if(val === item.c){
+        tf2Correct++;
+        b.classList.add("correct");
+        fb.textContent = "✅ Правильно. " + item.e;
+        fb.className = "feedback show ok";
+      } else {
+        b.classList.add("wrong");
+        btns.forEach(x=>{ if((x.dataset.v==="true")===item.c) x.classList.add("correct"); });
+        fb.textContent = "❌ Неправильно. " + item.e;
+        fb.className = "feedback show bad";
+      }
+      setProgress("2", tf2Correct, tf2data.length);
+    });
+  });
+});
+
+/* ============ MATCH ex3 ============ */
+function buildMatch(containerId, pairs){
+  const container = document.getElementById(containerId);
+  const exId = container.closest(".ex").dataset.ex;
+  const left = pairs.map((p,i)=>({...p, idx:i}));
+  const right = [...left].sort(()=>Math.random()-0.5);
+  container.innerHTML = `
+    <div class="match-wrap">
+      <div class="match-col" id="${containerId}-L"></div>
+      <div class="match-col" id="${containerId}-R"></div>
+    </div>
+  `;
+  const Lcol = document.getElementById(containerId+"-L");
+  const Rcol = document.getElementById(containerId+"-R");
+  left.forEach(p=>{
+    const d = document.createElement("div");
+    d.className = "m-item"; d.textContent = p.left; d.dataset.idx = p.idx;
+    Lcol.appendChild(d);
+  });
+  right.forEach(p=>{
+    const d = document.createElement("div");
+    d.className = "m-item"; d.textContent = p.right; d.dataset.idx = p.idx;
+    Rcol.appendChild(d);
+  });
+  let selL = null, matched = 0;
+  const total = pairs.length;
+  const fb = container.parentElement.querySelector(".feedback");
+  setProgress(exId, 0, total);
+  Lcol.querySelectorAll(".m-item").forEach(el=>{
+    el.addEventListener("click", ()=>{
+      if(el.classList.contains("done")) return;
+      Lcol.querySelectorAll(".m-item").forEach(x=>x.classList.remove("selected"));
+      el.classList.add("selected");
+      selL = el;
+    });
+  });
+  Rcol.querySelectorAll(".m-item").forEach(el=>{
+    el.addEventListener("click", ()=>{
+      if(el.classList.contains("done") || !selL) return;
+      const isRight = el.dataset.idx === selL.dataset.idx;
+      if(isRight){
+        selL.classList.remove("selected"); selL.classList.add("linked-correct","done");
+        el.classList.add("linked-correct","done");
+        matched++;
+        setProgress(exId, matched, total);
+        if(matched===total && fb){
+          fb.className = "feedback show ok";
+          fb.textContent = "✅ Усі пари з'єднано правильно! Чудова робота.";
+        }
+      } else {
+        el.classList.add("linked-wrong");
+        selL.classList.add("linked-wrong");
+        setTimeout(()=>{ el.classList.remove("linked-wrong"); selL.classList.remove("linked-wrong","selected"); }, 700);
+      }
+      selL = null;
+    });
+  });
+}
+buildMatch("match3", [
+  {left:"Панель слайдів (зліва)", right:"Показує всі слайди презентації в мініатюрному вигляді, щоб швидко між ними перемикатися"},
+  {left:"Робоча область (по центру)", right:"Місце, де редагують поточний обраний слайд — додають текст і зображення"},
+  {left:"Кнопка «Показ презентації»", right:"Запускає перегляд презентації на весь екран, як під час виступу"},
+  {left:"Кнопка «+» (новий слайд)", right:"Додає новий порожній слайд одразу після поточного"}
+]);
+
+/* ============ IMAGE-CHOICE ex6 ============ */
+(function(){
+  const container = document.getElementById("mock6");
+  const exId = "6";
+  const fb = container.parentElement.querySelector(".feedback");
+  let answered = false;
+  container.querySelectorAll(".mock-pick").forEach(el=>{
+    el.addEventListener("click", ()=>{
+      if(answered) return;
+      answered = true;
+      const isCorrect = el.dataset.correct === "true";
+      container.querySelectorAll(".mock-pick").forEach(x=>{
+        x.classList.add(x.dataset.correct === "true" ? "right" : (x===el ? "wrong" : ""));
+      });
+      setProgress(exId, isCorrect?1:0, 1);
+      fb.className = "feedback show " + (isCorrect ? "ok" : "bad");
+      fb.textContent = isCorrect
+        ? "✅ Правильно! Слайд А — це вдалий титульний слайд: коротка назва теми та ім'я автора, без зайвого тексту."
+        : "❌ Неправильно. Слайд Б містить забагато суцільного тексту — такий обсяг підходить для слайда зі змістом, а не для титульного слайда, який має бути коротким і зрозумілим з першого погляду.";
+    });
+  });
+})();
+
+/* ============ ORDER ex7 & ex11 ============ */
+function buildOrder(containerId, itemsInCorrectOrder){
+  const container = document.getElementById(containerId);
+  const shuffled = itemsInCorrectOrder.map((t,i)=>({t, correctIdx:i})).sort(()=>Math.random()-0.5);
+  function render(){
+    container.innerHTML = "";
+    shuffled.forEach((item,pos)=>{
+      const row = document.createElement("div");
+      row.className = "order-item";
+      row.innerHTML = `<span class="idx">${pos+1}.</span><span>${item.t}</span>
+        <span class="arrows">
+          <button data-dir="up" ${pos===0?"disabled":""}>↑</button>
+          <button data-dir="down" ${pos===shuffled.length-1?"disabled":""}>↓</button>
+        </span>`;
+      row.querySelector('[data-dir="up"]').addEventListener("click", ()=>{
+        [shuffled[pos-1], shuffled[pos]] = [shuffled[pos], shuffled[pos-1]];
+        render();
+      });
+      row.querySelector('[data-dir="down"]').addEventListener("click", ()=>{
+        [shuffled[pos+1], shuffled[pos]] = [shuffled[pos], shuffled[pos+1]];
+        render();
+      });
+      container.appendChild(row);
+    });
+  }
+  render();
+  container._getOrder = ()=>shuffled.map(s=>s.correctIdx);
+}
+buildOrder("order7", [
+  "Відкрити slides.google.com і натиснути «Створити нову презентацію»",
+  "Обрати макет і заповнити титульний слайд (назва теми та автор)",
+  "Додати нові слайди й заповнити їх текстом та зображеннями",
+  "Обрати єдину тему оформлення для всіх слайдів",
+  "Перевірити презентацію та запустити показ, щоб побачити результат"
+]);
+buildOrder("order11", [
+  "Відкрити готову презентацію в Google Презентаціях",
+  "Натиснути кнопку «Показ презентації» у правому верхньому куті",
+  "Перемикати слайди клавішею пробіл або стрілкою «вправо»",
+  "Натиснути клавішу Esc, щоб завершити показ і повернутися до редагування"
+]);
+document.querySelector('[data-check="7"]').addEventListener("click", function(){ checkOrder(this, "order7", "7", "Саме такий порядок дій — логічний шлях від відкриття сервісу до готової й перевіреної презентації."); });
+document.querySelector('[data-check="11"]').addEventListener("click", function(){ checkOrder(this, "order11", "11", "Це стандартна послідовність запуску та завершення показу презентації на весь екран."); });
+
+function checkOrder(btn, containerId, exId, note){
+  const container = document.getElementById(containerId);
+  const order = container._getOrder();
+  const isCorrect = order.every((v,i)=>v===i);
+  const items = container.querySelectorAll(".order-item");
+  items.forEach((el,i)=>{
+    el.classList.add(order[i]===i ? "correct-pos" : "wrong-pos");
+  });
+  setProgress(exId, isCorrect?1:0, 1);
+  const fb = btn.parentElement.querySelector(".feedback");
+  fb.className = "feedback show " + (isCorrect ? "ok" : "bad");
+  fb.textContent = isCorrect ? ("✅ Порядок правильний! " + note) : "❌ Порядок ще не зовсім правильний — зелена рамка означає «на своєму місці», червона — «потрібно пересунути». Спробуй ще раз.";
+  btn.disabled = isCorrect;
+}
+
+/* ============ FILL BLANK ex5 ============ */
+const fill5el = document.getElementById("fill5");
+fill5el.innerHTML = `Коли натискаєш кнопку «+», щоб додати
+  <input class="blank-input" id="b1" placeholder="що?" data-answer="новий слайд">, Google Презентації пропонують обрати
+  <input class="blank-input" id="b2" placeholder="що обрати?" data-answer="макет"> — готове розташування місць для заголовка,
+  тексту чи зображень. Перший слайд презентації зазвичай обирають
+  <input class="blank-input" id="b3" placeholder="який?" data-answer="титульний">, щоб показати назву теми та ім'я автора.`;
+document.querySelector('[data-check="5"]').addEventListener("click", function(){
+  const ex = this.closest(".ex");
+  const exId = ex.dataset.ex;
+  const inputs = ex.querySelectorAll(".blank-input");
+  let correctCount = 0;
+  inputs.forEach(inp=>{
+    const val = inp.value.trim().toLowerCase();
+    const ans = inp.dataset.answer.toLowerCase();
+    if(val === ans){ inp.classList.add("correct"); inp.classList.remove("wrong"); correctCount++; }
+    else { inp.classList.add("wrong"); inp.classList.remove("correct"); }
+  });
+  setProgress(exId, correctCount, inputs.length);
+  const allOk = correctCount === inputs.length;
+  const fb = ex.querySelector(".feedback");
+  fb.className = "feedback show " + (allOk ? "ok" : "bad");
+  fb.textContent = allOk
+    ? "✅ Правильно! Новий слайд додають кнопкою «+», для нього обирають макет, а перший слайд презентації зазвичай робиться титульним."
+    : "❌ Є неточності. Правильні слова: «новий слайд», «макет», «титульний». Порівняй зі своїми відповідями (підсвічено червоним).";
+});
+
+/* ============ DRAG & DROP CATEGORIES ex8 ============ */
+const dragItems8 = [
+  {t:"Використовувати короткі пункти замість суцільного тексту", cat:"good"},
+  {t:"Дотримуватись однієї теми оформлення для всіх слайдів", cat:"good"},
+  {t:"Додавати зображення, які пояснюють зміст слайда", cat:"good"},
+  {t:"Писати суцільний абзац дрібним шрифтом на весь слайд", cat:"bad"},
+  {t:"На кожному слайді використовувати новий, дуже яскравий колір фону", cat:"bad"},
+  {t:"Заповнювати слайд так, щоб текст перекривав зображення", cat:"bad"}
+];
+const src8 = document.getElementById("dragSource8");
+dragItems8.forEach((item,i)=>{
+  const chip = document.createElement("div");
+  chip.className = "drag-chip";
+  chip.textContent = item.t;
+  chip.draggable = true;
+  chip.dataset.cat = item.cat;
+  chip.dataset.i = i;
+  chip.addEventListener("dragstart", e=>{
+    e.dataTransfer.setData("text/plain", i);
+  });
+  src8.appendChild(chip);
+});
+["bucketGood","bucketBad"].forEach(id=>{
+  const bucket = document.getElementById(id);
+  bucket.addEventListener("dragover", e=>{ e.preventDefault(); bucket.classList.add("over"); });
+  bucket.addEventListener("dragleave", ()=> bucket.classList.remove("over"));
+  bucket.addEventListener("drop", e=>{
+    e.preventDefault();
+    bucket.classList.remove("over");
+    const i = e.dataTransfer.getData("text/plain");
+    const chip = src8.querySelector(`.drag-chip[data-i="${i}"]`);
+    if(chip && !chip.classList.contains("placed")){
+      const clone = chip.cloneNode(true);
+      clone.draggable = false;
+      bucket.appendChild(clone);
+      chip.classList.add("placed");
+    }
+  });
+});
+document.querySelector('[data-check="8"]').addEventListener("click", function(){
+  const ex = this.closest(".ex");
+  const exId = ex.dataset.ex;
+  const fb = ex.querySelector(".feedback");
+  let total = dragItems8.length, correct=0, placed=0;
+  ["bucketGood","bucketBad"].forEach(id=>{
+    const bucket = document.getElementById(id);
+    const cat = bucket.dataset.cat;
+    bucket.querySelectorAll(".drag-chip").forEach(chip=>{
+      placed++;
+      if(chip.dataset.cat === cat){ chip.classList.add("right"); correct++; }
+      else { chip.classList.add("wrong"); }
+    });
+  });
+  const allPlaced = placed === total;
+  if(allPlaced) setProgress(exId, correct, total);
+  fb.className = "feedback show " + (correct===total && allPlaced ? "ok" : "bad");
+  fb.textContent = !allPlaced
+    ? `Перетягни всі ${total} карток у кошики перед перевіркою (розміщено: ${placed}).`
+    : (correct===total
+        ? "✅ Усі картки розподілено правильно! Хороший слайд — короткий, в єдиному стилі й з наочними зображеннями, а не переповнений текстом і кольорами."
+        : `Розподілено правильно ${correct} з ${total}. Картки з червоною рамкою — потрібно перенести в інший кошик.`);
+});
+
+/* ============ PRACTICAL TASK ============ */
+function setupPillRadio(id){
+  const box = document.getElementById(id);
+  box.querySelectorAll("button").forEach(b=>{
+    b.addEventListener("click", ()=>{
+      if(box.dataset.locked) return;
+      box.querySelectorAll("button").forEach(x=>x.classList.remove("chosen"));
+      b.classList.add("chosen");
+      box.dataset.picked = b.dataset.v;
+    });
+  });
+}
+setupPillRadio("pStep1");
+setupPillRadio("pStep2");
+
+const rulesItems = [
+  {label:"Використовувати той самий шрифт і схожі кольори на всіх слайдах", correct:true},
+  {label:"Писати на слайді короткі пункти, а не суцільний текст", correct:true},
+  {label:"Використовувати зображення, які точно стосуються теми слайда", correct:true},
+  {label:"Робити текст якомога дрібнішим, щоб помістити більше слів", correct:false},
+  {label:"Перевіряти презентацію перед показом і виправляти помилки", correct:true}
+];
+const checklistEl = document.getElementById("rulesChecklist");
+rulesItems.forEach((item,i)=>{
+  const row = document.createElement("div");
+  row.className = "toggle-row";
+  row.dataset.correct = item.correct ? "yes" : "no";
+  row.innerHTML = `
+    <div class="q">${item.label}</div>
+    <div class="toggle-btns">
+      <button data-v="yes">Так</button>
+      <button data-v="no">Ні</button>
+    </div>
+  `;
+  checklistEl.appendChild(row);
+  row.querySelectorAll(".toggle-btns button").forEach(b=>{
+    b.addEventListener("click", ()=>{
+      if(row.dataset.locked) return;
+      row.querySelectorAll(".toggle-btns button").forEach(x=>x.classList.remove("chosen-yes","chosen-no"));
+      b.classList.add(b.dataset.v === "yes" ? "chosen-yes" : "chosen-no");
+      row.dataset.picked = b.dataset.v;
+    });
+  });
+});
+
+document.getElementById("checkPracticalBtn").addEventListener("click", ()=>{
+  let totalPoints = 0, maxPoints = 0;
+  const resultArea = document.getElementById("practicalResultArea");
+
+  // Step 1 (1 point)
+  const s1 = document.getElementById("pStep1");
+  maxPoints += 1;
+  s1.dataset.locked = "1";
+  const picked1 = s1.dataset.picked;
+  s1.querySelectorAll("button").forEach(b=>{
+    if(b.dataset.v === s1.dataset.correct) b.classList.add("right");
+    else if(b.dataset.v === picked1 && picked1 !== s1.dataset.correct) b.classList.add("wrong");
+  });
+  const step1ok = (picked1 === s1.dataset.correct) ? 1 : 0;
+  totalPoints += step1ok;
+  const fb1 = document.getElementById("fb-step1");
+  fb1.className = "feedback show " + (step1ok===1 ? "ok" : "bad");
+  fb1.textContent = (step1ok===1 ? "✅ Правильно! " : "❌ Неправильно. ") +
+    "Титульний слайд повинен одразу показувати глядачам, про що презентація і хто автор — тому на ньому лише назва теми та ім'я.";
+
+  // Step 2 (1 point)
+  const s2 = document.getElementById("pStep2");
+  maxPoints += 1;
+  s2.dataset.locked = "1";
+  const picked2 = s2.dataset.picked;
+  s2.querySelectorAll("button").forEach(b=>{
+    if(b.dataset.v === s2.dataset.correct) b.classList.add("right");
+    else if(b.dataset.v === picked2 && picked2 !== s2.dataset.correct) b.classList.add("wrong");
+  });
+  const step2ok = (picked2 === s2.dataset.correct) ? 1 : 0;
+  totalPoints += step2ok;
+  const fb2 = document.getElementById("fb-step2");
+  fb2.className = "feedback show " + (step2ok===1 ? "ok" : "bad");
+  fb2.textContent = (step2ok===1 ? "✅ Правильно! " : "❌ Неправильно. ") +
+    "З 5 слайдів (1 титульний) логічно розподілити решту так: кілька слайдів на розкриття теми та один — на короткий підсумок.";
+
+  // Step 3 (5 points)
+  let step3ok = 0;
+  checklistEl.querySelectorAll(".toggle-row").forEach(row=>{
+    row.dataset.locked = "1";
+    const picked = row.dataset.picked;
+    const isRight = picked === row.dataset.correct;
+    row.classList.add(isRight ? "right" : "wrong");
+    if(isRight) step3ok++;
+  });
+  maxPoints += rulesItems.length;
+  totalPoints += step3ok;
+  const fb3 = document.getElementById("fb-step3");
+  fb3.className = "feedback show " + (step3ok===rulesItems.length ? "ok" : "bad");
+  fb3.textContent = `Правильних відповідей у чек-листі: ${step3ok} з ${rulesItems.length}. Зверни увагу: робити текст якомога дрібнішим, щоб «втиснути» більше слів, — це погана порада, вона робить слайд важким для читання.`;
+
+  setProgress("practical", totalPoints, maxPoints);
+
+  const pct = Math.round((totalPoints/maxPoints)*100);
+  resultArea.innerHTML = `
+    <div class="practical-score">
+      <div class="big">${totalPoints} / ${maxPoints}</div>
+      <div style="color:var(--text-dim);">${pct}% правильних рішень у практичному завданні</div>
+    </div>
+  `;
+  document.getElementById("checkPracticalBtn").disabled = true;
+});
+
+/* ============ FINAL TEST ============ */
+const testQuestions = [
+  {q:"Що таке презентація?", opts:["Один аркуш паперу з текстом","Набір слайдів для наочної розповіді про тему","Програма для набору тексту","Файл, який можна лише прослухати"], c:1, e:"Презентація — це набір слайдів, які показують по черзі, щоб наочно розповісти про тему."},
+  {q:"Де в Google Презентаціях створюють нову презентацію?", opts:["На сайті slides.google.com","У поштовій скриньці","У калькуляторі","У блокноті на робочому столі"], c:0, e:"Google Презентації — це онлайн-сервіс, доступний на сайті slides.google.com (або через Google Диск)."},
+  {q:"Що показує панель слайдів зліва у вікні редактора?", opts:["Список усіх шрифтів","Мініатюри всіх слайдів презентації","Список контактів для спільної роботи","Історію змін файлу"], c:1, e:"Панель зліва показує мініатюри всіх слайдів, щоб швидко переходити між ними."},
+  {q:"Що таке макет слайда?", opts:["Колір фону слайда","Готове розташування місць для заголовка, тексту чи зображень на слайді","Назва файлу презентації","Кількість слайдів у презентації"], c:1, e:"Макет — це готовий шаблон розташування елементів (заголовка, тексту, зображень) на слайді."},
+  {q:"Що зазвичай розміщують на титульному (першому) слайді?", opts:["Детальний опис усієї теми","Назву теми та ім'я автора","Список джерел інформації","Підсумки та висновки"], c:1, e:"Титульний слайд має одразу показувати, про що презентація і хто її автор — тому там лише назва теми й ім'я."},
+  {q:"Чому презентації варто дотримуватись однієї теми оформлення на всіх слайдах?", opts:["Бо інакше файл не збережеться","Щоб презентація виглядала охайно й не відволікала глядачів різними стилями","Бо Google Презентації не дозволяють змінювати кольори","Це не має жодного значення"], c:1, e:"Єдина тема оформлення робить презентацію охайною та зрозумілою, тоді як різні стилі на кожному слайді виглядають хаотично."},
+  {q:"Скільки тексту варто розміщувати на одному слайді?", opts:["Якомога більше, щоб не забути жодної деталі","Небагато — короткі пункти чи ключові слова, а деталі розповідати усно","Текст на слайдах взагалі не потрібен","Рівно одне речення, і більше нічого"], c:1, e:"Найкраще працює короткий текст (ключові пункти), а докладну розповідь доповідач додає усно під час виступу."},
+  {q:"Що можна додати на слайд, крім тексту?", opts:["Лише інший текст","Зображення, таблиці, діаграми й відео","Нічого, крім тексту, додати не можна","Тільки музику без візуальних елементів"], c:1, e:"На слайд можна додавати зображення, таблиці, діаграми та навіть відео з YouTube."},
+  {q:"Як запустити показ презентації на весь екран?", opts:["Натиснути кнопку «Показ презентації»","Роздрукувати презентацію на принтері","Закрити вкладку браузера","Перейменувати файл"], c:0, e:"Кнопка «Показ презентації» у верхньому куті запускає перегляд на весь екран."},
+  {q:"Як завершити показ презентації та повернутися до редагування?", opts:["Перезавантажити комп'ютер","Натиснути клавішу Esc","Видалити останній слайд","Змінити мову інтерфейсу"], c:1, e:"Клавіша Esc завершує повноекранний показ і повертає до звичайного режиму редагування."},
+  {q:"Чому презентацію в Google Презентаціях зазвичай не потрібно зберігати вручну?", opts:["Бо зберігати взагалі не можна","Бо зміни автоматично зберігаються на Google Диску під час роботи","Бо файл видаляється сам щодня","Бо презентація не має власного файлу"], c:1, e:"Google Презентації автоматично зберігають усі зміни на Google Диску в реальному часі."},
+  {q:"Як двоє учнів можуть редагувати одну презентацію одночасно з різних пристроїв?", opts:["Це неможливо, презентацію редагує лише один учень","Через спільний доступ за посиланням чи кнопку «Поділитися»","Лише передаючи файл на флешці по черзі","Лише роздрукувавши слайди на папері"], c:1, e:"Завдяки хмарному збереженню можна відкрити спільний доступ до презентації, і кілька людей редагуватимуть її одночасно."}
+];
+let curQ = 0, score = 0;
+const testArea = document.getElementById("testArea");
+const scoreBadge = document.getElementById("scoreBadge");
+const progressFill = document.getElementById("progressFill");
+
+function renderQuestion(){
+  if(curQ >= testQuestions.length){ renderResult(); return; }
+  const item = testQuestions[curQ];
+  scoreBadge.textContent = `Питання ${curQ+1} / ${testQuestions.length} · ${score} балів`;
+  progressFill.style.width = Math.round((curQ/testQuestions.length)*100) + "%";
+  testArea.innerHTML = `
+    <div class="prompt" style="font-size:1.08rem;">${item.q}</div>
+    <div class="opt-list" id="curOpts"></div>
+    <div class="feedback" id="curFb"></div>
+  `;
+  const optsEl = document.getElementById("curOpts");
+  item.opts.forEach((opt,i)=>{
+    const b = document.createElement("button");
+    b.className = "opt";
+    b.textContent = opt;
+    b.addEventListener("click", ()=>{
+      if(optsEl.classList.contains("locked")) return;
+      optsEl.classList.add("locked");
+      const fb = document.getElementById("curFb");
+      optsEl.querySelectorAll(".opt").forEach((x,j)=>{
+        x.classList.add("disabled");
+        if(j===item.c) x.classList.add("correct");
+      });
+      if(i===item.c){
+        b.classList.add("correct");
+        score++;
+        fb.textContent = "✅ Правильно! " + item.e;
+        fb.className = "feedback show ok";
+      } else {
+        b.classList.add("wrong");
+        fb.textContent = "❌ Неправильно. " + item.e;
+        fb.className = "feedback show bad";
+      }
+      const nextBtn = document.createElement("button");
+      nextBtn.className = "btn";
+      nextBtn.textContent = curQ === testQuestions.length-1 ? "Показати результат" : "Наступне питання →";
+      nextBtn.addEventListener("click", ()=>{ curQ++; renderQuestion(); });
+      testArea.appendChild(nextBtn);
+    });
+    optsEl.appendChild(b);
+  });
+}
+
+function renderResult(){
+  progressFill.style.width = "100%";
+  scoreBadge.textContent = `Завершено · ${score} / ${testQuestions.length} балів`;
+  setProgress("final", score, testQuestions.length);
+  const pct = Math.round((score/testQuestions.length)*100);
+  let msg = "";
+  if(pct >= 85) msg = "Чудовий результат! Ти добре зрозумів(-ла), як створювати презентації.";
+  else if(pct >= 60) msg = "Непоганий результат, але варто повторити деякі правила.";
+  else msg = "Варто ще раз переглянути вправи 1–12 та повторити тему.";
+  testArea.innerHTML = `
+    <div class="result-box">
+      <div class="big">${score} / ${testQuestions.length}</div>
+      <div style="color:var(--text-dim); margin-bottom:18px;">${pct}% правильних відповідей — ${msg}</div>
+      <button class="btn" id="retryBtn">Спробувати ще раз</button>
+      <div style="margin-top:8px;"><button class="btn secondary" id="goProgressBtn">Переглянути повний прогрес →</button></div>
+    </div>
+  `;
+  document.getElementById("retryBtn").addEventListener("click", ()=>{
+    curQ = 0; score = 0; renderQuestion();
+  });
+  document.getElementById("goProgressBtn").addEventListener("click", ()=>{
+    document.querySelector('.tab-btn[data-view="vprogress"]').click();
+  });
+}
+renderQuestion();
+
+/* ============ PROGRESS REPORT + EXPORT ============ */
+const EX_COUNT = 12;
+function renderReport(){
+  const area = document.getElementById("progressArea");
+  let rows = "";
+  let sumCorrect = 0, sumTotal = 0;
+  for(let i=1; i<=EX_COUNT; i++){
+    const key = String(i);
+    const exEl = document.querySelector('.ex[data-ex="'+key+'"]');
+    const title = exEl ? exEl.querySelector(".ex-title").textContent : ("Вправа " + key);
+    const level = exEl ? exEl.querySelector(".level-chip").textContent.trim() : "";
+    const p = progress[key];
+    let statusHtml;
+    if(!p || p.total === 0){
+      statusHtml = '<span style="color:var(--text-dim);">ще не виконано</span>';
+    } else {
+      const pct = Math.round((p.correct / p.total) * 100);
+      sumCorrect += p.correct; sumTotal += p.total;
+      const color = pct === 100 ? "var(--green)" : (pct > 0 ? "var(--amber)" : "var(--red)");
+      statusHtml = `<span style="color:${color}; font-weight:600;">${p.correct}/${p.total} (${pct}%)</span>`;
+    }
+    rows += `<tr><td>${i}</td><td>${title}</td><td>${level}</td><td>${statusHtml}</td></tr>`;
+  }
+  const pp = progress["practical"];
+  const practicalHtml = pp
+    ? `${pp.correct}/${pp.total} (${Math.round(pp.correct/pp.total*100)}%)`
+    : '<span style="color:var(--text-dim);">ще не виконано</span>';
+  const fp = progress["final"];
+  const finalHtml = fp
+    ? `${fp.correct}/${fp.total} (${Math.round(fp.correct/fp.total*100)}%)`
+    : '<span style="color:var(--text-dim);">ще не пройдено</span>';
+  const overallPct = sumTotal > 0 ? Math.round((sumCorrect/sumTotal)*100) : 0;
+
+  area.innerHTML = `
+    <div class="report-summary">
+      Учень: <b>${studentInfo.name || "—"}</b>${studentInfo.cls ? " · клас " + studentInfo.cls : ""}<br>
+      Виконано вправ: ${Object.keys(progress).filter(k=>k!=="final" && k!=="practical").length} із ${EX_COUNT} ·
+      Загальний результат по вправах: <b>${sumCorrect}/${sumTotal || 0}</b> (${overallPct}%) ·
+      Практичне завдання: <b>${practicalHtml}</b> ·
+      Фінальний тест: <b>${finalHtml}</b>
+    </div>
+    <table class="report-table">
+      <thead><tr><th>№</th><th>Вправа</th><th>Рівень</th><th>Результат</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div class="report-actions">
+      <button class="btn" id="downloadCsvBtn">Завантажити результати (.csv)</button>
+      <button class="btn secondary" id="copyResultsBtn">Скопіювати результати в буфер</button>
+    </div>
+    <div class="note" style="margin-top:16px;">
+      Порада для вчителя: попроси кожного учня натиснути «Завантажити результати» після завершення уроку й надіслати файл .csv
+      (наприклад, через Google Classroom, електронну пошту або месенджер). Відкривши декілька таких файлів в Excel або Google Таблицях,
+      можна вставити рядки одне під одним і отримати спільну таблицю результатів усього класу.
+    </div>
+  `;
+  document.getElementById("downloadCsvBtn").addEventListener("click", downloadCSV);
+  document.getElementById("copyResultsBtn").addEventListener("click", copyResults);
+}
+
+function buildResultRow(){
+  const header = ["ПІБ учня","Клас","Дата"];
+  for(let i=1;i<=EX_COUNT;i++) header.push("Вправа "+i);
+  header.push("Практичне завдання");
+  header.push("Фінальний тест");
+  const row = [studentInfo.name || "Учень (без імені)", studentInfo.cls || "", new Date().toLocaleString("uk-UA")];
+  for(let i=1;i<=EX_COUNT;i++){
+    const p = progress[String(i)];
+    row.push(p ? (p.correct + "/" + p.total) : "—");
+  }
+  const pp = progress["practical"];
+  row.push(pp ? (pp.correct + "/" + pp.total) : "—");
+  const fp = progress["final"];
+  row.push(fp ? (fp.correct + "/" + fp.total) : "—");
+  return {header, row};
+}
+
+async function downloadCSV(){
+  const {header, row} = buildResultRow();
+  const csv = "﻿" + [header.join(";"), row.join(";")].join("\n");
+  const safeName = (studentInfo.name || "student").replace(/[^\wа-яіїєґА-ЯІЇЄҐ]+/g, "_");
+  const filename = `rezultaty_${safeName}.csv`;
+
+  try{
+    if(window.claude && typeof window.claude.use === "function"){
+      const downloads = await window.claude.use("downloads");
+      if(downloads){
+        await downloads.save({filename, data: csv});
+        return;
+      }
+    }
+  }catch(e){ /* якщо не вдалося — переходимо до звичайного способу нижче */ }
+
+  const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function copyResults(){
+  const {header, row} = buildResultRow();
+  const text = header.join("\t") + "\n" + row.join("\t");
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn = document.getElementById("copyResultsBtn");
+    const old = btn.textContent;
+    btn.textContent = "Скопійовано ✓";
+    setTimeout(()=>{ btn.textContent = old; }, 1800);
+  }).catch(()=>{
+    alert("Не вдалося скопіювати автоматично. Виділи й скопіюй текст вручну:\n\n" + header.join("\t") + "\n" + row.join("\t"));
+  });
+}
+</script>
+<script>window.G6_PAGE="prez6";</script>
+<script>
+/* ===== Оцінювання з урахуванням часу й помилок (доповнення, 6 клас) ===== */
+(function(){
+const PAGE = window.G6_PAGE || "page";
+const G = {
+  t0:null, tEnd:null, frozen:null, attemptNo:1,
+  att:{}, best:{}, errChk:{}, matchErr:{}, inCheck:null,
+  practicalFirst:null, finalFirst:null, finalAttempts:0, confirm:false
+};
+window.G6 = G;
+const NQ = (typeof testQuestions!=="undefined") ? testQuestions.length : 10;
+const NORM = EX_COUNT*70 + 300 + NQ*30;           // норма часу, с
+const FACT = [1, 0.5, 0];                          // зарахування за спробами
+
+/* --- стилі --- */
+const css = document.createElement("style");
+css.textContent = `
+#g6Chip{position:fixed;right:12px;bottom:12px;z-index:50;background:#1f2a44;color:#fff;border-radius:999px;
+  padding:8px 14px;font:600 14px/1.2 system-ui,sans-serif;box-shadow:0 6px 18px rgba(0,0,0,.25);display:none;gap:10px;align-items:center}
+#g6Chip.on{display:flex}#g6Chip .over{color:#ffb4a8}
+.g6-panel{border:2px solid var(--accent,#4f6bed);border-radius:16px;padding:18px;margin:0 0 16px;background:var(--panel,#fff)}
+.g6-top{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.g6-grade{font-size:2.6rem;font-weight:800;line-height:1;min-width:92px;text-align:center}
+.g6-grade small{display:block;font-size:.8rem;font-weight:500;opacity:.7}
+.g6-tbl{width:100%;border-collapse:collapse;margin:12px 0;font-size:.93rem}
+.g6-tbl td{padding:6px 8px;border-bottom:1px solid rgba(127,127,127,.25)}
+.g6-tbl td:last-child{text-align:right;font-weight:600;white-space:nowrap}
+.g6-neg{color:#d64545}.g6-note{font-size:.85rem;opacity:.8;margin:6px 0 0}
+.g6-warn{background:rgba(255,170,0,.15);border-radius:10px;padding:8px 10px;margin-top:8px;font-size:.9rem}
+.g6-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.g6-frozen{display:inline-block;background:rgba(40,170,90,.15);color:#1d8a4a;border-radius:999px;padding:3px 10px;font-size:.8rem;font-weight:700}
+@media (max-width:480px){.g6-grade{font-size:2.1rem;min-width:70px}}
+`;
+document.head.appendChild(css);
+
+/* --- таймер --- */
+const chip = document.createElement("div");
+chip.id = "g6Chip";
+chip.innerHTML = `<span id="g6T">⏱ 0:00</span><span id="g6E">❌ 0</span>`;
+document.body.appendChild(chip);
+function fmt(s){ s=Math.max(0,Math.round(s)); return Math.floor(s/60)+":"+String(s%60).padStart(2,"0"); }
+function elapsed(){ if(!G.t0) return 0; return ((G.tEnd||Date.now())-G.t0)/1000; }
+setInterval(()=>{
+  if(!G.t0 || G.frozen) return;
+  const t=elapsed(), tt=document.getElementById("g6T");
+  tt.textContent="⏱ "+fmt(t)+" / "+fmt(NORM); tt.className = t>NORM?"over":"";
+  document.getElementById("g6E").textContent="❌ "+countErrors();
+},1000);
+document.getElementById("startBtn").addEventListener("click", ()=>{
+  if(G.t0) return;
+  G.t0 = Date.now(); chip.classList.add("on");
+  try{ const k="g6-attempt-"+PAGE; G.attemptNo=(parseInt(localStorage.getItem(k))||0)+1; localStorage.setItem(k,G.attemptNo); }catch(e){}
+});
+
+/* --- які кліки є «перевіркою» --- */
+function isCheckBtn(b){
+  if(!b || b.tagName!=="BUTTON") return false;
+  if([...b.attributes].some(a=>a.name.indexOf("data-check")===0)) return true;
+  return /check/i.test(b.id||"");
+}
+document.addEventListener("click", e=>{
+  const b = e.target.closest("button");
+  if(isCheckBtn(b)){ const ex=b.closest(".ex"); G.inCheck = ex ? ex.dataset.ex : null; setTimeout(()=>{G.inCheck=null;},0); }
+  const m = e.target.closest(".m-item");
+  if(m){ const ex=m.closest(".ex"); setTimeout(()=>{ if(m.classList.contains("linked-wrong") && ex){ const id=ex.dataset.ex; G.matchErr[id]=(G.matchErr[id]||0)+1; } },0); }
+}, true);
+
+/* --- перехоплення прогресу --- */
+const _setProgress = setProgress;
+setProgress = function(exId, correct, total){
+  exId = String(exId);
+  if(exId==="final"){
+    G.finalAttempts++;
+    if(!G.finalFirst) G.finalFirst={correct,total};
+    correct=G.finalFirst.correct; total=G.finalFirst.total;      // у звіті — зарахована (перша) спроба
+  } else if(exId==="practical"){
+    if(!G.practicalFirst) G.practicalFirst={correct,total};
+    correct=G.practicalFirst.correct; total=G.practicalFirst.total;
+  } else if(G.inCheck===exId){
+    const n = G.att[exId] = (G.att[exId]||0)+1;
+    const sc = total ? (correct/total)*(FACT[Math.min(n,3)-1]) : 0;
+    G.best[exId] = Math.max(G.best[exId]||0, sc);
+    G.errChk[exId] = (G.errChk[exId]||0) + (total-correct);
+  }
+  _setProgress(exId, correct, total);
+};
+
+/* --- розрахунки --- */
+function exScore(id){
+  const p = progress[id]; if(!p || !p.total) return 0;
+  if(G.att[id]) return G.best[id]||0;
+  if(G.matchErr[id]!==undefined || document.querySelector('.ex[data-ex="'+id+'"] .m-item')){
+    const w=G.matchErr[id]||0; return (p.correct/p.total)*(p.total/(p.total+w));
+  }
+  return p.correct/p.total;
+}
+function exErrors(id){
+  const p = progress[id]; if(!p || !p.total) return 0;
+  if(G.att[id]) return G.errChk[id]||0;
+  if(document.querySelector('.ex[data-ex="'+id+'"] .m-item')) return G.matchErr[id]||0;
+  const el=document.querySelector('.ex[data-ex="'+id+'"]');
+  let e = el ? el.querySelectorAll(".wrong").length : 0;
+  if(p.total===1 && p.correct===0) e=Math.max(e,1);
+  return e;
+}
+function countErrors(){
+  let e=0; for(let i=1;i<=EX_COUNT;i++) e+=exErrors(String(i));
+  if(G.practicalFirst) e+=G.practicalFirst.total-G.practicalFirst.correct;
+  if(G.finalFirst) e+=G.finalFirst.total-G.finalFirst.correct;
+  return e;
+}
+function compute(){
+  let es=0, done=0; const missing=[];
+  for(let i=1;i<=EX_COUNT;i++){ const id=String(i); es+=exScore(id); if(progress[id]&&progress[id].total) done++; else missing.push(i); }
+  const E=es/EX_COUNT;
+  const Pr=G.practicalFirst ? G.practicalFirst.correct/G.practicalFirst.total : 0;
+  const F=G.finalFirst ? G.finalFirst.correct/G.finalFirst.total : 0;
+  const P=0.5*E+0.25*Pr+0.25*F;
+  const errors=countErrors(), T=elapsed();
+  const errPen=Math.min(3, Math.max(0,errors-2)*0.25);
+  const timePen= T<=NORM ? 0 : (T<=NORM*1.5 ? 1 : 2);
+  let grade=Math.round(12*P - errPen - timePen);
+  grade=Math.max(1, Math.min(12, grade));
+  const elite = P>=0.95 && errors<=2 && T<=NORM;
+  if(grade===12 && !elite) grade=11;
+  return {E,Pr,F,P,errors,T,errPen,timePen,grade,elite,done,missing,
+    tooFast: T>0 && T<NORM*0.3, hasPr:!!G.practicalFirst, hasF:!!G.finalFirst};
+}
+window.G6compute = compute;
+const pc = x=>Math.round(x*100)+"%";
+
+/* старий розрахунок оцінки замінюємо новим */
+computeGrade12 = function(){ const r=G.frozen||compute(); return r.grade; };
+
+function finish(){
+  G.tEnd = Date.now();
+  G.frozen = compute();
+  G.frozen.at = new Date().toLocaleString("uk-UA");
+  chip.querySelector("#g6T").textContent="⏱ "+fmt(G.frozen.T)+" ✓";
+  renderReport();
+}
+
+function panelHtml(){
+  const r = G.frozen || compute();
+  const f = !!G.frozen;
+  const miss=[]; if(r.missing.length) miss.push("вправи "+r.missing.join(", "));
+  if(!r.hasPr) miss.push("практичне завдання"); if(!r.hasF) miss.push("фінальний тест");
+  return `<div class="g6-panel" id="g6Panel">
+   <div class="g6-top">
+     <div class="g6-grade">${r.grade}<small>${f?"оцінка":"зараз було б"}</small></div>
+     <div style="flex:1;min-width:180px">
+       ${f?`<span class="g6-frozen">Результат зафіксовано · спроба №${G.attemptNo}</span>`:`<b>Попередня оцінка</b> — остаточна з'явиться після кнопки «Завершити».`}
+       <div class="g6-note">⏱ ${fmt(r.T)} з норми ${fmt(NORM)} · ❌ помилок: ${r.errors}</div>
+     </div>
+   </div>
+   <table class="g6-tbl">
+     <tr><td>Вправи (1-ша спроба — 100 %, 2-га — 50 %)</td><td>${pc(r.E)} × 0,5</td></tr>
+     <tr><td>Практичне завдання (перша здача)</td><td>${r.hasPr?pc(r.Pr):"—"} × 0,25</td></tr>
+     <tr><td>Фінальний тест (зараховується перша спроба)</td><td>${r.hasF?pc(r.F):"—"} × 0,25</td></tr>
+     <tr><td>Бали: ${pc(r.P)} від 12</td><td>${(12*r.P).toFixed(1).replace(".",",")}</td></tr>
+     <tr><td>Помилки: перші 2 без штрафу, далі −0,25 за кожну (макс. −3)</td><td class="${r.errPen?"g6-neg":""}">${r.errPen?"−"+r.errPen.toFixed(2).replace(".",","):"0"}</td></tr>
+     <tr><td>Час: у межах норми — 0, до 1,5 норми — −1, довше — −2</td><td class="${r.timePen?"g6-neg":""}">${r.timePen?"−"+r.timePen:"0"}</td></tr>
+   </table>
+   <div class="g6-note">12 балів — лише коли набрано ≥95 %, не більше 2 помилок і час у межах норми.</div>
+   ${r.tooFast?`<div class="g6-warn">⚠ Занадто швидко: менше 30 % норми часу. Учитель побачить цю позначку.</div>`:""}
+   ${!f && miss.length?`<div class="g6-warn">Ще не виконано: ${miss.join("; ")}. Невиконане рахується як 0.</div>`:""}
+   ${f?`<div class="g6-note">Після фіксації нові відповіді на оцінку не впливають. Завантажте файл і надішліть учителю.</div>`:
+     (G.confirm && miss.length ? `<div class="g6-row"><button class="btn" id="g6Yes">Так, завершити зараз</button><button class="btn secondary" id="g6No">Повернутися до завдань</button></div>`
+      : `<div class="g6-row"><button class="btn" id="g6Finish">🏁 Завершити й отримати оцінку</button></div>`)}
+  </div>`;
+}
+
+const _renderReport = renderReport;
+renderReport = function(){
+  _renderReport();
+  const area=document.getElementById("progressArea");
+  const old=area.querySelector(".grade-badge"); if(old) old.remove();
+  area.insertAdjacentHTML("afterbegin", panelHtml());
+  const fBtn=document.getElementById("g6Finish");
+  if(fBtn) fBtn.addEventListener("click",()=>{
+    const r=compute();
+    if(r.missing.length || !r.hasPr || !r.hasF){ G.confirm=true; renderReport(); }
+    else finish();
+  });
+  const y=document.getElementById("g6Yes"); if(y) y.addEventListener("click",()=>{ G.confirm=false; finish(); });
+  const n=document.getElementById("g6No"); if(n) n.addEventListener("click",()=>{ G.confirm=false; renderReport(); });
+};
+
+const _buildResultRow = buildResultRow;
+buildResultRow = function(){
+  const {header,row} = _buildResultRow();
+  const gi = header.indexOf("Оцінка (12-бальна)");
+  if(gi>=0){ header.splice(gi,1); row.splice(gi,1); }
+  const r = G.frozen || compute();
+  header.push("Тест: спроб","Час","Норма часу","Помилок","Бали %","Штраф за помилки","Штраф за час","Оцінка (12)","Спроба №","Позначка","Статус");
+  row.push(G.finalAttempts, fmt(r.T), fmt(NORM), r.errors, Math.round(r.P*100), r.errPen.toFixed(2).replace(".",","), r.timePen,
+    r.grade, G.attemptNo, r.tooFast?"занадто швидко":"", G.frozen?"завершено":"НЕ завершено (попередня)");
+  return {header,row};
+};
+})();
+</script>
+</body>
+</html>
+
+<script>
+/* ===== «Надіслати вчителю» (Google Форма журналу) — універсальна кнопка ===== */
+(function(){
+const FORM_PREFILL="https://docs.google.com/forms/d/e/1FAIpQLSeaDGNzqpEMjZyDt4WUwg3k3FAhGGW4pG1E8IcOk8b4LQsBVw/viewform?usp=pp_url&entry.1997531456=test";
+const GRADE=6, TOPIC="Створюємо презентацію";
+const clean=v=>String(v==null?"":v).replace(/[|\n\r]/g," ").trim()||"—";
+const hm=t=>{t=Math.max(0,Math.round(t));return Math.floor(t/60)+" хв "+String(t%60).padStart(2,"0")+" с"};
+function getRow(){
+  try{ if(typeof buildResultRow==="function") return buildResultRow(); }catch(e){}
+  try{ if(typeof resRow==="function") return resRow(); }catch(e){}
+  try{ if(typeof csvLine==="function"){ const p=csvLine().split("\n"); const sp=s=>s.split(";").map(x=>x.replace(/^"|"$/g,"").replace(/""/g,'"'));
+    return {header:sp(p[0]),row:sp(p[1]||"")}; } }catch(e){}
+  return {header:[],row:[]};
+}
+function extra(){
+  try{ if(typeof window.G6compute==="function"){ return (window.G6&&window.G6.frozen)||window.G6compute(); } }catch(e){}
+  return null;
+}
+function getGrade(o,x){
+  if(x&&x.grade!=null) return x.grade;
+  try{ if(typeof computeGrade12==="function"){ const g=computeGrade12(); if(g) return g; } }catch(e){}
+  try{ if(typeof grade==="function"){ const g=grade(); if(g) return g; } }catch(e){}
+  const i=o.header.findIndex(h=>/Оцінка/i.test(h)); return i>=0&&o.row[i]!==""?o.row[i]:"—";
+}
+function line(name,cls){
+  const o=getRow(), x=extra(), g=getGrade(o,x);
+  let ok=0,tot=0; const det=[];
+  o.header.forEach((h,i)=>{ if(i<3&&/ПІБ|Ім'я|Клас|Дата/i.test(h)) return;
+    const v=String(o.row[i]==null?"—":o.row[i]); det.push(clean(h).replace(/[,:]/g," ")+":"+clean(v).replace(/[,]/g,";"));
+    const m=v.match(/^(\d+)\s*\/\s*(\d+)$/); if(m){ok+=+m[1];tot+=+m[2];} });
+  const done=x?!!(window.G6&&window.G6.frozen):(/^\d+$/.test(String(g))&&+g>0);
+  return ["v1",GRADE,TOPIC,clean(cls),clean(name),1,"—",clean(g),tot?ok+" з "+tot:"—","—",
+    x&&x.errors!=null?x.errors:"—", x&&x.T?hm(x.T):"—","—",x&&x.tooFast?"занадто швидко":"",done?"завершено":"не завершено",det.join(",")].join("|");
+}
+const st=document.createElement("style");
+st.textContent=`
+#jFab{position:fixed;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:9998;
+  background:#ffb020;color:#2a1a00;border:0;border-radius:999px;padding:13px 20px;font:800 16px system-ui,"Segoe UI",sans-serif;
+  box-shadow:0 8px 24px rgba(0,0,0,.35);cursor:pointer}
+#jFab:hover{filter:brightness(1.06)} #jFab:focus-visible{outline:3px solid #2f5bea;outline-offset:3px}
+#jPanel{position:fixed;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:9999;
+  width:min(360px,calc(100vw - 32px));background:#fff;color:#1d2433;border-radius:16px;padding:16px;
+  box-shadow:0 16px 40px rgba(0,0,0,.4);font:15px/1.45 system-ui,"Segoe UI",sans-serif;display:flex;flex-direction:column;gap:10px}
+#jPanel b.h{font-size:17px}
+#jPanel input{width:100%;box-sizing:border-box;border:1px solid #c8cfdc;border-radius:10px;padding:10px 12px;font:inherit;color:#1d2433;background:#f7f9fc}
+#jPanel .jrow{display:flex;gap:8px} #jPanel .jrow input:last-child{flex:0 0 110px}
+#jPanel a.jgo{display:block;text-align:center;background:#2f7d4f;color:#fff;text-decoration:none;font-weight:800;border-radius:10px;padding:11px}
+#jPanel .jm{font-size:13px;color:#5b6578} #jPanel .jx{position:absolute;top:8px;right:10px;border:0;background:none;font-size:20px;cursor:pointer;color:#5b6578}`;
+document.head.appendChild(st);
+const fab=document.createElement("button"); fab.id="jFab"; fab.type="button"; fab.textContent="📤 Надіслати вчителю";
+const pn=document.createElement("div"); pn.id="jPanel"; pn.hidden=true;
+pn.innerHTML=`<button class="jx" type="button" aria-label="Закрити">×</button><b class="h">📤 Надіслати результат учителю</b>
+<div class="jm">Надсилай, коли пройдеш усі вправи й тест. Вхід в акаунт не потрібен.</div>
+<div class="jrow"><input id="jName" placeholder="Прізвище та ім'я" autocomplete="off"><input id="jCls" placeholder="Клас, 8-А" maxlength="6" autocomplete="off"></div>
+<a class="jgo" id="jSend" href="#" target="_blank" rel="noopener">Відкрити форму з результатом</a>
+<div class="jm" id="jMsg">Відкриється Google Форма з уже записаним результатом — натисни в ній «Надіслати».</div>`;
+document.body.appendChild(fab); document.body.appendChild(pn);
+const nm=pn.querySelector("#jName"), cl=pn.querySelector("#jCls"), a=pn.querySelector("#jSend"), msg=pn.querySelector("#jMsg");
+fab.addEventListener("click",()=>{ pn.hidden=!pn.hidden; if(pn.hidden) return;
+  const o=getRow(); const n=String(o.row[0]||""), c=String(o.row[1]||"");
+  if(!nm.value&&n&&!/без імені|^—$/.test(n)) nm.value=n; if(!cl.value&&c&&c!=="—"&&!/^\d$/.test(c)) cl.value=c;
+  (nm.value?cl:nm).focus(); });
+pn.querySelector(".jx").addEventListener("click",()=>pn.hidden=true);
+a.addEventListener("click",e=>{
+  if(!nm.value.trim()||!cl.value.trim()){ e.preventDefault(); msg.textContent="Спершу впиши прізвище, ім'я та клас ☝️"; (nm.value.trim()?cl:nm).focus(); return; }
+  a.href=FORM_PREFILL.replace(/(entry\.\d+=)[^&]*/,(m,p)=>p+encodeURIComponent(line(nm.value.trim(),cl.value.trim())));
+  msg.textContent="Форму відкрито в новій вкладці — натисни там «Надіслати» ✔";
+});
+})();
+</script>
+
+</body></html>

@@ -1,0 +1,890 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5">
+<title>Чат-патруль</title>
+<style>
+  :root{
+    --bg:#0e1020; --panel:#171a30; --panel-2:#1f2340; --line:#323765;
+    --text:#eceefb; --dim:#9da3cc; --gold:#ffc857; --teal:#3ecfb2; --violet:#8b7cf6;
+    --red:#ef6a6a; --green:#4fd18c; --r:16px; font-size:17px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(900px 500px at 90% -10%, rgba(139,124,246,.22), transparent 60%),
+      radial-gradient(800px 500px at -10% 110%, rgba(62,207,178,.16), transparent 60%),
+      var(--bg);
+    color:var(--text); font-family:"Segoe UI",Avenir,Arial,sans-serif; line-height:1.5; min-height:100vh;
+  }
+  .wrap{max-width:820px; margin:0 auto; padding:18px 18px 70px;}
+  h1{font-size:clamp(1.5rem,4.5vw,2.2rem); margin:6px 0 4px; letter-spacing:-.01em;}
+  .dim{color:var(--dim);}
+  .btn{
+    background:linear-gradient(135deg,var(--violet),#6d5de0); color:#fff; border:none;
+    padding:11px 22px; border-radius:999px; cursor:pointer; font-size:.95rem; font-weight:700;
+    box-shadow:0 6px 18px rgba(109,93,224,.35); transition:.15s;
+  }
+  .btn:hover{filter:brightness(1.1); transform:translateY(-1px);}
+  .btn:disabled{opacity:.4; cursor:default; transform:none;}
+  .btn.ghost{background:transparent; border:1px solid var(--line); color:var(--dim); box-shadow:none;}
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:var(--r); padding:22px;}
+
+  /* HUD */
+  .hud{display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap; margin-bottom:14px;}
+  .pill{background:var(--panel-2); border:1px solid var(--line); padding:6px 14px; border-radius:999px; font-size:.88rem;}
+  .hearts{letter-spacing:2px; font-size:1.05rem;}
+  .xp b{color:var(--gold);}
+
+  /* name modal */
+  .overlay{position:fixed; inset:0; background:rgba(6,7,16,.88); z-index:50; display:flex; align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(3px);}
+  .overlay .card{max-width:430px; width:100%;}
+  input.t{width:100%; background:var(--panel-2); border:1px solid var(--line); color:var(--text); padding:11px 14px; border-radius:10px; font-size:.97rem; margin:6px 0;}
+
+  /* map */
+  .map{display:flex; flex-direction:column; gap:14px; margin-top:16px; position:relative;}
+  .node{
+    display:flex; align-items:center; gap:16px; background:var(--panel); border:1px solid var(--line);
+    border-radius:var(--r); padding:16px 18px; cursor:pointer; transition:.18s; position:relative;
+  }
+  .node:hover:not(.locked){border-color:var(--violet); transform:translateX(4px);}
+  .node .ico{font-size:2rem; width:56px; height:56px; display:flex; align-items:center; justify-content:center; background:var(--panel-2); border-radius:50%; border:2px solid var(--line); flex:0 0 auto;}
+  .node.current .ico{border-color:var(--gold); box-shadow:0 0 18px rgba(255,200,87,.5); animation:pulse 1.8s infinite;}
+  .node.done .ico{border-color:var(--green);}
+  .node.locked{opacity:.45; cursor:not-allowed;}
+  .node .nm{font-weight:800;}
+  .node .ds{font-size:.85rem; color:var(--dim);}
+  .node .stars{margin-left:auto; font-size:1.2rem; letter-spacing:2px; white-space:nowrap;}
+  .node.boss{border-color:rgba(239,106,106,.5);}
+  @keyframes pulse{0%,100%{box-shadow:0 0 10px rgba(255,200,87,.35);}50%{box-shadow:0 0 24px rgba(255,200,87,.75);}}
+
+  /* play */
+  .dots{display:flex; gap:6px; margin:6px 0 14px;}
+  .dots i{flex:1; height:6px; border-radius:6px; background:var(--panel-2);}
+  .dots i.on{background:var(--teal);} .dots i.cur{background:var(--gold);}
+  .boss-bar{height:14px; background:var(--panel-2); border:1px solid var(--line); border-radius:99px; overflow:hidden; margin-bottom:6px;}
+  .boss-bar div{height:100%; width:100%; background:linear-gradient(90deg,var(--red),#ff9a6a); transition:width .5s;}
+  .boss-row{display:flex; align-items:center; gap:12px; margin-bottom:12px;}
+  .boss-face{font-size:2.4rem;}
+  .q{font-size:1.08rem; font-weight:600; margin:6px 0 16px;}
+  .tag{font-size:.74rem; color:var(--teal); text-transform:uppercase; letter-spacing:.08em;}
+  .opts{display:flex; flex-direction:column; gap:10px;}
+  .opt{
+    text-align:left; background:var(--panel-2); border:1px solid var(--line); color:var(--text);
+    padding:13px 16px; border-radius:12px; cursor:pointer; font-size:.98rem; transition:.12s;
+  }
+  .opt:hover:not(:disabled){border-color:var(--violet);}
+  .opt.sel{border-color:var(--violet); box-shadow:inset 0 0 0 1px var(--violet);}
+  .opt.ok{background:rgba(79,209,140,.16); border-color:var(--green);}
+  .opt.bad{background:rgba(239,106,106,.16); border-color:var(--red); animation:shake .35s;}
+  .opt:disabled{cursor:default;}
+  @keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+  .fb{margin-top:14px; padding:12px 14px; border-radius:12px; font-size:.93rem; display:none;}
+  .fb.show{display:block;}
+  .fb.ok{background:rgba(79,209,140,.12); border:1px solid rgba(79,209,140,.4); color:#d2f1e1;}
+  .fb.bad{background:rgba(239,106,106,.12); border:1px solid rgba(239,106,106,.4); color:#f7d6d6;}
+  .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:14px;}
+  .fill input, .numin{
+    background:var(--bg); border:1px solid var(--violet); color:var(--text); border-radius:8px;
+    padding:8px 12px; font-size:1rem; text-align:center; width:210px; max-width:100%;
+  }
+  .fill input.bad,.numin.bad{border-color:var(--red);} .fill input.ok,.numin.ok{border-color:var(--green);}
+  .chips{display:flex; flex-wrap:wrap; gap:10px; margin-bottom:14px;}
+  .chip{background:var(--panel-2); border:1px solid var(--violet); color:var(--text); padding:9px 14px; border-radius:999px; cursor:pointer; font-size:.9rem;}
+  .chip.sel{background:rgba(139,124,246,.3); box-shadow:0 0 0 2px var(--violet);}
+  .chip.done{opacity:.35; cursor:default; border-color:var(--green);}
+  .chip.bad{animation:shake .35s; border-color:var(--red);}
+  .buckets{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  @media(max-width:560px){.buckets{grid-template-columns:1fr;}}
+  .bucket{min-height:100px; border:2px dashed var(--line); border-radius:12px; padding:10px; cursor:pointer; background:var(--panel-2);}
+  .bucket:hover{border-color:var(--teal);}
+  .bucket h4{margin:0 0 8px; font-size:.86rem; color:var(--teal);}
+  .bucket .chip{cursor:default; border-color:var(--green); margin:0 6px 6px 0; font-size:.82rem;}
+  .target{display:flex; flex-direction:column; gap:8px; min-height:50px; border:2px dashed var(--line); border-radius:12px; padding:10px; margin-bottom:12px;}
+  .target:empty::before{content:"Натискайте картки нижче — вони з'являться тут у вашому порядку"; color:var(--dim); font-size:.85rem;}
+  .step{display:flex; align-items:center; gap:10px; background:var(--panel-2); border:1px solid var(--line); border-radius:10px; padding:9px 12px; font-size:.9rem;}
+  .step.good{border-color:var(--green);} .step.wrongpos{border-color:var(--red);}
+  .step .n{color:var(--gold); font-weight:800; width:20px;}
+  .step button{margin-left:auto; background:var(--panel); border:1px solid var(--line); color:var(--dim); border-radius:8px; width:28px; height:28px; cursor:pointer;}
+  .mcols{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  @media(max-width:560px){.mcols{grid-template-columns:1fr;}}
+  .mi{background:var(--panel-2); border:1px solid var(--line); border-radius:10px; padding:11px 13px; margin-bottom:9px; cursor:pointer; font-size:.9rem;}
+  .mi.sel{border-color:var(--violet); box-shadow:inset 0 0 0 1px var(--violet);}
+  .mi.done{border-color:var(--green); background:rgba(79,209,140,.12); cursor:default;}
+  .mi.bad{animation:shake .35s; border-color:var(--red);}
+
+  .center{text-align:center;}
+  .bigstars{font-size:2.6rem; letter-spacing:6px; margin:6px 0;}
+  .bignum{font-size:2.6rem; font-weight:800; color:var(--gold);}
+  .stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; margin:16px 0;}
+  .stat{background:var(--panel-2); border:1px solid var(--line); border-radius:12px; padding:12px;}
+  .stat b{display:block; font-size:1.3rem; color:var(--gold);}
+  table.res{width:100%; border-collapse:collapse; font-size:.9rem; margin:10px 0;}
+  table.res td,table.res th{padding:8px 6px; border-bottom:1px solid var(--line); text-align:left;}
+
+  .chatbox{background:#10132a;border:1px solid var(--line);border-radius:14px;overflow:hidden;margin:4px 0 14px}
+  .chat-h{background:var(--panel-2);padding:8px 14px;font-size:.82rem;color:var(--dim);display:flex;align-items:center;gap:8px}
+  .chat-h::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--green)}
+  .chat-b{padding:12px;display:flex;flex-direction:column;gap:8px;min-height:60px}
+  .msg{display:flex;gap:8px;align-items:flex-end;animation:msgIn .3s ease-out}
+  .msg .av{width:30px;height:30px;border-radius:50%;flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;color:#10132a}
+  .msg .bb{background:var(--panel-2);border:1px solid var(--line);border-radius:14px 14px 14px 4px;padding:7px 12px;max-width:85%}
+  .msg .nm{font-size:.72rem;color:var(--teal);font-weight:700}
+  .msg .tx{font-size:.95rem}
+  .typing{display:flex;gap:4px;padding:8px 12px;background:var(--panel-2);border-radius:14px;width:max-content;margin-left:38px}
+  .typing i{width:7px;height:7px;border-radius:50%;background:var(--dim);animation:tdot 1s infinite}
+  .typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+  @keyframes tdot{0%,100%{opacity:.3;transform:translateY(0)}50%{opacity:1;transform:translateY(-3px)}}
+  @keyframes msgIn{from{opacity:0;transform:translateY(8px) scale(.96)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion: reduce){.msg,.typing i{animation:none}}
+</style>
+</head>
+<body>
+
+<div class="overlay" id="nameModal">
+  <div class="card">
+    <h2 style="margin-top:0;">🐱 Готові до чат-патруля?</h2>
+    <p class="dim">Напиши ім'я та прізвище — результат гри побачить учитель.</p>
+    <input class="t" id="inName" placeholder="Ім'я та прізвище" autocomplete="off">
+    <input class="t" id="inCls" placeholder="Клас (необов'язково)" autocomplete="off">
+    <div class="row"><button class="btn" id="startBtn">Почати квест</button></div>
+  </div>
+</div>
+
+<div class="wrap" id="app"></div>
+
+<script>
+/* ===================== ДАНІ ГРИ ===================== */
+const LEVELS = [
+  { name:"Вулиця Ввічливості", icon:"🙂", desc:"Як не можна писати в чаті", ch:[
+    {type:"chat", chat:"Чат «Друзі»", msgs:[{from:"Оля", t:"ДАЙ ДОМАШКУ!!! ШВИДКО!!!"}],
+      q:"Що не так із цим повідомленням?",
+      opts:["Великі літери — наче крик","Повідомлення дуже коротке","Немає жодного смайлика тут","Його надіслали ввечері"], c:0,
+      e:"Текст ВЕЛИКИМИ ЛІТЕРАМИ читається як крик, а «дай» без «будь ласка» звучить грубо."},
+    {type:"sort", q:"Що можна робити в чаті, а що — ні? Натисни картку, потім потрібну скриньку.",
+      buckets:["✅ Можна","⛔ Не можна"],
+      items:[["Привітатися",0],["Подякувати",0],["Написати «будь ласка»",0],["Вибачитися за помилку",0],
+             ["Обзивати когось",1],["Писати ВЕЛИКИМИ ЛІТЕРАМИ",1],["Надіслати 50 смайликів поспіль",1],["Переслати чуже фото без дозволу",1]],
+      e:"Ввічливі слова — завжди можна. Образи, «крик», спам і чужі фото без дозволу — не можна."},
+    {type:"fill", q:"Допиши чарівні слова, щоб прохання стало ввічливим: «Скинь, ______, номер завдання з математики».",
+      ok:/^будь[\s-]*ласка/i, show:"будь ласка", e:"«Будь ласка» робить прохання ввічливим і в житті, і в чаті."},
+    {type:"tf", q:"Якщо тебе образили в чаті, треба відповісти ще грубіше.", c:false,
+      e:"Ні. Грубість у відповідь лише розпалює сварку. Краще не відповідати й розповісти дорослому."}
+  ]},
+  { name:"Поштова Скринька", icon:"📩", desc:"Кому можна відповідати?", ch:[
+    {type:"sort", q:"Кому можна відповісти, а кому — ні? Натисни картку, потім скриньку.",
+      buckets:["💬 Можу відповісти","🙅 Не відповідаю, кажу дорослим"],
+      items:[["Мама",0],["Бабуся",0],["Учителька в класному чаті",0],["Однокласник, якого я знаю",0],
+             ["Невідомий номер",1],["«Ти виграв телефон!»",1],["Незнайомець просить фото",1],["Акаунт без імені й фото",1]],
+      e:"Відповідаємо тим, кого знаємо в житті. Незнайомцям не пишемо — показуємо повідомлення дорослим."},
+    {type:"chat", chat:"Особисті повідомлення", msgs:[{from:"Невідомий номер", t:"Привіт! Я твій ровесник 😊"},{from:"Невідомий номер", t:"Давай дружити? Скинь своє фото"}],
+      q:"Що зробиш?",
+      opts:["Не відповідати, сказати дорослим","Надіслати фото — він же ровесник","Спитати ім'я й одразу почати дружити","Скинути йому номер телефону"], c:0,
+      e:"Незнайомець може лише називати себе ровесником. Фото, номер і адресу не надсилаємо — кажемо дорослим."},
+    {type:"chat", chat:"Особисті повідомлення", msgs:[{from:"Приз-бот 🎁", t:"Вітаємо! Ти виграв новий телефон!"},{from:"Приз-бот 🎁", t:"Перейди за посиланням і введи свій пароль 👉"}],
+      q:"Що це за повідомлення?",
+      opts:["Обман, щоб дізнатися пароль","Справжній подарунок для тебе","Повідомлення від учителя","Новина про шкільний конкурс"], c:0,
+      e:"Це шахраї. Справжні подарунки не просять пароль. Посилання не відкриваємо."},
+    {type:"multi", q:"Оберіть ВСІ ознаки того, що пише небезпечний незнайомець.",
+      opts:["Просить нікому не казати про розмову","Просить твоє фото чи адресу","Обіцяє приз за твій пароль","Пише в класному чаті про урок"], c:[0,1,2],
+      e:"Таємниці, прохання фото чи адреси й «приз за пароль» — тривожні знаки. Про урок у класному чаті пише вчитель."}
+  ]},
+  { name:"Скарбничка Секретів", icon:"🔐", desc:"Що не можна розповідати", ch:[
+    {type:"sort", q:"Що можна розповісти в чаті, а що — тільки секрет? Натисни картку, потім скриньку.",
+      buckets:["💬 Можна розповісти","🔒 Тільки секрет"],
+      items:[["Улюблений мультфільм",0],["Улюблений колір",0],["Улюблена гра",0],["Як минула екскурсія",0],
+             ["Домашня адреса",1],["Пароль від гри",1],["Коли батьків немає вдома",1],["Номер маминої картки",1]],
+      e:"Про захоплення говорити можна. Адреса, паролі, гроші й час, коли ти сам удома, — секрет."},
+    {type:"fill", q:"Допиши одне слово: пароль від свого акаунта можна сказати лише ______.",
+      ok:/^(батьк|мам|тат|рідн)/i, show:"батькам", e:"Пароль знаєш ти й батьки. Друзям, навіть найкращим, його не кажемо."},
+    {type:"chat", chat:"Особисті повідомлення", msgs:[{from:"Новий друг Макс", t:"А де ти живеш?"},{from:"Новий друг Макс", t:"Напиши адресу, я прийду в гості 🏠"}],
+      q:"Що зробиш?",
+      opts:["Не писати й розповісти мамі","Написати адресу, він же друг","Надіслати фото свого будинку","Назвати свою школу та клас"], c:0,
+      e:"Адресу, фото будинку чи школу незнайомцям не пишемо. Про таке прохання кажемо дорослим."},
+    {type:"tf", q:"Фото, яке ти надіслав в інтернет, можуть побачити багато людей, і його важко видалити.", c:true,
+      e:"Так. Тому перш ніж надіслати фото, подумай і спитай дозволу в батьків."}
+  ]},
+  { name:"Кнопка Допомоги", icon:"🆘", desc:"Якщо в чаті ображають", ch:[
+    {type:"chat", chat:"Чат класу 4-Б", msgs:[{from:"Тимур", t:"Ха-ха, Петрик знову помилився 🤡🤡🤡"},{from:"Ярина", t:"🤡🤡"}],
+      q:"Як учиниш ти?",
+      opts:["Підтримати Петрика й не сміятися","Додати ще кілька смайликів-клоунів","Переслати це в інший чат","Вийти з чату назавжди"], c:0,
+      e:"Сміятися з когось у чаті — це цькування. Підтримай однокласника і, якщо треба, скажи вчителю."},
+    {type:"order", q:"Тобі пишуть образливі повідомлення. Збудуй правильний порядок дій.",
+      items:["Не відповідати грубістю","Зробити знімок екрана","Заблокувати кривдника","Розповісти дорослому"],
+      e:"Не сваримося → зберігаємо доказ (знімок екрана) → блокуємо → обов'язково кажемо дорослому."},
+    {type:"fill", q:"Кому треба розповісти, якщо тебе ображають у чаті? Напиши, кому саме.",
+      ok:/(дорос|батьк|мам|тат|вчител|учител|бабус|дідус|психолог)/i, show:"дорослому: мамі, татові чи вчителю", e:"Дорослі допоможуть: заблокують, поговорять із батьками кривдника чи вчителем."},
+    {type:"match", q:"З'єднай слово з його значенням: натисни ліву картку, потім праву.",
+      pairs:[["Спам","Купа зайвих повідомлень"],["Кібербулінг","Цькування в інтернеті"],["Скріншот","Знімок екрана"],["Блокування","Заборона писати тобі"]],
+      e:"Тепер ти знаєш головні слова чат-патруля!"}
+  ]},
+  { name:"Барліг Троля-Спамера", icon:"👾", desc:"Фінальна битва з босом", boss:true, ch:[
+    {type:"chat", oneShot:true, chat:"Особисті повідомлення", msgs:[{from:"Невідомий", t:"Не кажи батькам, що ми переписуємося 🤫"},{from:"Невідомий", t:"Це наш секрет"}],
+      q:"Що зробиш?", opts:["Розповісти батькам","Зберегти цей секрет","Відповісти «добре»","Видалити свій чат"], c:0,
+      e:"Якщо незнайомець просить тримати розмову в таємниці — одразу кажемо батькам."},
+    {type:"tf", oneShot:true, q:"Писати повідомлення ВЕЛИКИМИ ЛІТЕРАМИ — це ввічливо.", c:false,
+      e:"Ні. Великі літери в чаті читаються як крик."},
+    {type:"single", oneShot:true, q:"Хто може знати твій пароль?",
+      opts:["Лише ти й батьки","Усі друзі з класу","Будь-хто в чаті","Нові друзі в грі"], c:0,
+      e:"Пароль знаєш тільки ти й батьки."},
+    {type:"chat", oneShot:true, chat:"Особисті повідомлення", msgs:[{from:"Однокласник Денис", t:"Привіт! Що задали з математики?"}],
+      q:"Чи можна відповісти?", opts:["Так, це знайома людина","Ні, нікому не можна писати","Так, і ще дати свій пароль","Ні, спершу треба заблокувати"], c:0,
+      e:"Денис — однокласник, якого ти знаєш. Йому можна відповісти, але пароль — ніколи."},
+    {type:"single", oneShot:true, q:"Що таке спам?",
+      opts:["Купа зайвих повідомлень","Ввічливе вітання зранку","Знімок екрана телефону","Пароль від акаунта в грі"], c:0,
+      e:"Спам — багато непотрібних однакових повідомлень."}
+  ]}
+];
+const MAX_HEARTS = 5, XP_OK = 10, XP_RETRY = 5, XP_BOSS = 20;
+
+/* ===================== СТАН ===================== */
+const S = {name:"", cls:"", unlocked:0, stars:[], xp:0, lvl:0, ch:0, hearts:MAX_HEARTS, lvlMist:0, lvlXp:0,
+           totalMist:0, restarts:0, bossHP:100, tries:0};
+const app = document.getElementById("app");
+const $ = (s,el=document)=>el.querySelector(s);
+function shuf(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
+function maxXP(){ return LEVELS.reduce((s,L)=>s+L.ch.length*(L.boss?XP_BOSS:XP_OK),0); }
+function starStr(n){ return "★".repeat(n)+"☆".repeat(3-n); }
+
+/* ===================== ЕКРАНИ ===================== */
+$("#startBtn").addEventListener("click",()=>{
+  S.name = $("#inName").value.trim() || "Учень (без імені)";
+  S.cls = $("#inCls").value.trim();
+  $("#nameModal").style.display="none";
+  showMap();
+});
+$("#inName").addEventListener("keydown",e=>{ if(e.key==="Enter") $("#startBtn").click(); });
+
+function hud(extra){
+  return `<div class="hud">
+    <span class="pill">🧑‍🚀 <b>${S.name||"—"}</b></span>
+    <span class="pill xp">⭐ XP: <b>${S.xp}</b> / ${maxXP()}</span>
+    ${extra||""}
+  </div>`;
+}
+
+function showMap(){
+  const allDone = S.stars.filter(x=>x>0).length === LEVELS.length;
+  app.innerHTML = `
+    ${hud()}
+    <h1>🐱 Квест «Чат-патруль»</h1>
+    <p class="dim">Кіт Байт кличе в чат-патруль! Пройди 4 локації й перемож Троля-Спамера. Помилка коштує ❤️ — коли серця закінчуються, рівень починається знову. Чим менше помилок, тим більше зірок!</p>
+    <div class="map" id="map"></div>
+    ${allDone ? `<div class="row"><button class="btn" id="finalBtn">🏆 Подивитися підсумок</button></div>` : ""}
+  `;
+  const map = $("#map");
+  LEVELS.forEach((L,i)=>{
+    const locked = i>S.unlocked, done = S.stars[i]>0, cur = i===S.unlocked && !done;
+    const d = document.createElement("div");
+    d.className = "node"+(locked?" locked":"")+(done?" done":"")+(cur?" current":"")+(L.boss?" boss":"");
+    d.innerHTML = `<div class="ico">${locked?"🔒":L.icon}</div>
+      <div><div class="nm">Рівень ${i+1}: ${L.name}</div><div class="ds">${L.desc}</div></div>
+      <div class="stars" style="color:var(--gold)">${done?starStr(S.stars[i]):""}</div>`;
+    if(!locked) d.addEventListener("click",()=>startLevel(i));
+    map.appendChild(d);
+  });
+  const fb = $("#finalBtn"); if(fb) fb.addEventListener("click", showFinal);
+}
+
+function startLevel(i, isRestart){
+  S.lvl=i; S.ch=0; S.hearts=MAX_HEARTS; S.lvlMist=0; S.bossHP=100;
+  if(!isRestart) S.lvlXp=0;
+  showChallenge();
+}
+
+function heartsStr(){ return "❤️".repeat(S.hearts)+"🖤".repeat(MAX_HEARTS-S.hearts); }
+
+function showChallenge(){
+  const L = LEVELS[S.lvl];
+  if(S.ch >= L.ch.length) return finishLevel();
+  const c = L.ch[S.ch]; S.tries = 0;
+  const dots = L.ch.map((_,k)=>`<i class="${k<S.ch?"on":(k===S.ch?"cur":"")}"></i>`).join("");
+  app.innerHTML = `
+    ${hud(`<span class="pill hearts" id="hearts">${heartsStr()}</span>`)}
+    <div class="card">
+      <div class="tag">${L.icon} Рівень ${S.lvl+1} · ${L.name} · завдання ${S.ch+1} з ${L.ch.length}</div>
+      <div class="dots">${dots}</div>
+      ${L.boss ? `<div class="boss-row"><span class="boss-face">👾</span><div style="flex:1"><div class="boss-bar"><div id="bossHP" style="width:${S.bossHP}%"></div></div><div class="dim" style="font-size:.8rem">Троль-Спамер · одна спроба на питання!</div></div></div>`:""}
+      <div class="q">${c.q}</div>
+      <div id="stage"></div>
+      <div class="fb" id="fb"></div>
+      <div class="row" id="nextRow"></div>
+    </div>
+    <div class="row"><button class="btn ghost" id="mapBtn">← На карту</button></div>`;
+  $("#mapBtn").addEventListener("click",()=>{ S.xp -= S.lvlXp; S.lvlXp=0; showMap(); });
+  RENDER[c.type]($("#stage"), c);
+}
+
+/* ---- службові ---- */
+function setHearts(){ const h=$("#hearts"); if(h) h.innerHTML = heartsStr(); }
+function fb(ok,msg){ const f=$("#fb"); f.className="fb show "+(ok?"ok":"bad"); f.textContent=(ok?"✅ ":"❌ ")+msg; }
+function miss(){
+  S.hearts--; S.lvlMist++; S.totalMist++; S.tries++; setHearts();
+  if(S.hearts<=0){ setTimeout(gameOver,650); return false; }
+  return true;
+}
+function solved(c, msg){
+  const gain = c.oneShot ? (S.tries===0?XP_BOSS:0) : (S.tries===0?XP_OK:XP_RETRY);
+  S.xp += gain; S.lvlXp += gain;
+  if(LEVELS[S.lvl].boss && gain>0){ S.bossHP = Math.max(0, S.bossHP - 100/LEVELS[S.lvl].ch.length); const b=$("#bossHP"); if(b) b.style.width=S.bossHP+"%"; }
+  fb(true, msg + (gain?` (+${gain} XP)`:""));
+  nextBtn();
+}
+function nextBtn(){
+  const L=LEVELS[S.lvl], last = S.ch>=L.ch.length-1;
+  const b=document.createElement("button"); b.className="btn"; b.textContent = last ? "Завершити рівень ▶" : "Далі →";
+  b.addEventListener("click",()=>{ S.ch++; showChallenge(); });
+  $("#nextRow").appendChild(b);
+}
+function gameOver(){
+  S.xp -= S.lvlXp; S.lvlXp=0; S.restarts++;
+  app.innerHTML = `<div class="card center"><div style="font-size:3rem">💥</div>
+    <h2>Ой! Серця закінчилися</h2>
+    <p class="dim">Нічого страшного — кіт Байт теж не одразу став патрульним. Спробуй рівень ще раз!</p>
+    <div class="row" style="justify-content:center"><button class="btn" id="retry">🔄 Спробувати знову</button><button class="btn ghost" id="toMap">На карту</button></div></div>`;
+  $("#retry").addEventListener("click",()=>startLevel(S.lvl,true));
+  $("#toMap").addEventListener("click",showMap);
+}
+function finishLevel(){
+  const stars = S.lvlMist===0?3 : (S.lvlMist<=2?2:1);
+  S.stars[S.lvl] = Math.max(S.stars[S.lvl]||0, stars);
+  if(S.lvl===S.unlocked && S.unlocked<LEVELS.length-1) S.unlocked++;
+  const L=LEVELS[S.lvl], last = S.lvl===LEVELS.length-1;
+  app.innerHTML = `<div class="card center">
+    <div style="font-size:3rem">${L.boss?"🏆":"🎉"}</div>
+    <h2>${L.boss?"Троля-Спамера переможено!":"Рівень пройдено!"}</h2>
+    <div class="bigstars" style="color:var(--gold)">${starStr(stars)}</div>
+    <div class="stats">
+      <div class="stat"><b>${S.lvlMist}</b>помилок</div>
+      <div class="stat"><b>+${S.lvlXp}</b>XP за рівень</div>
+      <div class="stat"><b>${S.xp}</b>XP загалом</div>
+    </div>
+    <div class="row" style="justify-content:center">
+      <button class="btn" id="go">${last?"🏆 Підсумок квесту":"🗺️ На карту"}</button>
+      <button class="btn ghost" id="again">Пройти ще раз заради зірок</button>
+    </div></div>`;
+  $("#go").addEventListener("click", last?showFinal:showMap);
+  $("#again").addEventListener("click",()=>{ S.xp -= S.lvlXp; startLevel(S.lvl); });
+}
+
+function rank(){
+  const p = S.xp/maxXP();
+  if(p>=.85) return "🥇 Капітан чат-патруля";
+  if(p>=.6) return "🥈 Помічник патруля";
+  return "🥉 Курсант патруля";
+}
+function showFinal(){
+  const total = S.stars.reduce((a,b)=>a+(b||0),0);
+  const boss = S.stars[LEVELS.length-1]||0;
+  app.innerHTML = `${hud()}
+    <div class="card center">
+      <div style="font-size:3rem">🏆</div>
+      <h2>Квест завершено!</h2>
+      <div class="bignum">${rank()}</div>
+      <div class="stats">
+        <div class="stat"><b>${S.xp} / ${maxXP()}</b>XP</div>
+        <div class="stat"><b>${total} / ${LEVELS.length*3}</b>зірок</div>
+        <div class="stat"><b>${S.totalMist}</b>помилок</div>
+        <div class="stat"><b>${S.restarts}</b>перезапусків</div>
+      </div>
+      <table class="res">${LEVELS.map((L,i)=>`<tr><td>${L.icon} ${L.name}</td><td style="color:var(--gold)">${starStr(S.stars[i]||0)}</td></tr>`).join("")}</table>
+      <p class="dim" style="font-size:.85rem">Натисніть «Завантажити результати» й надішліть файл учителю.</p>
+      <div class="row" style="justify-content:center">
+        <button class="btn" id="dl">Завантажити результати (.csv)</button>
+        <button class="btn ghost" id="cp">Скопіювати в буфер</button>
+        <button class="btn ghost" id="mp">🗺️ На карту</button>
+      </div></div>`;
+  $("#dl").addEventListener("click",downloadCSV);
+  $("#cp").addEventListener("click",copyRes);
+  $("#mp").addEventListener("click",showMap);
+}
+function resRow(){
+  const header=["ПІБ учня","Клас","Дата"]; LEVELS.forEach((L,i)=>header.push("Рівень "+(i+1)+" (зірки)"));
+  header.push("XP","Макс. XP","Помилок","Перезапусків","Звання");
+  const row=[S.name||"Учень (без імені)", S.cls||"", new Date().toLocaleString("uk-UA")];
+  LEVELS.forEach((L,i)=>row.push(S.stars[i]||0));
+  row.push(S.xp, maxXP(), S.totalMist, S.restarts, rank().replace(/^\S+\s/,""));
+  return {header,row};
+}
+async function downloadCSV(){
+  const {header,row}=resRow();
+  const csv="﻿"+[header.join(";"),row.join(";")].join("\n");
+  const safe=(S.name||"student").replace(/[^\wа-яіїєґА-ЯІЇЄҐ]+/g,"_");
+  const filename=`quest_${safe}.csv`;
+  try{
+    if(window.claude && typeof window.claude.use==="function"){
+      const d=await window.claude.use("downloads");
+      if(d){ await d.save({filename,data:csv}); return; }
+    }
+  }catch(e){}
+  const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});
+  const url=URL.createObjectURL(blob); const a=document.createElement("a");
+  a.href=url; a.download=filename; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+function copyRes(){
+  const {header,row}=resRow(); const t=header.join("\t")+"\n"+row.join("\t");
+  navigator.clipboard.writeText(t).then(()=>{ const b=$("#cp"); b.textContent="Скопійовано ✓"; }).catch(()=>alert(t));
+}
+
+/* ===================== ТИПИ ЗАВДАНЬ ===================== */
+const RENDER = {
+  chat(st,c){
+    const box=document.createElement("div"); box.className="chatbox";
+    box.innerHTML=`<div class="chat-h">${c.chat||"Чат"}</div><div class="chat-b"></div>`;
+    const qEl=st.parentElement.querySelector(".q"); qEl.before(box); qEl.style.visibility="hidden";
+    const body=box.querySelector(".chat-b");
+    const cols=["#ffc857","#3ecfb2","#8b7cf6","#ff9a6a","#4fd18c"];
+    const names=[...new Set(c.msgs.map(m=>m.from))];
+    const rm=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let k=0;
+    const add=()=>{
+      if(k>=c.msgs.length){ qEl.style.visibility=""; RENDER.single(st,c); return; }
+      const m=c.msgs[k++];
+      const ty=document.createElement("div"); ty.className="typing"; ty.innerHTML="<i></i><i></i><i></i>";
+      if(!rm) body.appendChild(ty);
+      setTimeout(()=>{ ty.remove();
+        const d=document.createElement("div"); d.className="msg";
+        const col=cols[names.indexOf(m.from)%cols.length];
+        d.innerHTML=`<div class="av" style="background:${col}">${m.from.replace(/[^A-Za-zА-ЯІЇЄҐа-яіїєґ]/g,"").charAt(0)||"?"}</div><div class="bb"><div class="nm"></div><div class="tx"></div></div>`;
+        d.querySelector(".nm").textContent=m.from; d.querySelector(".tx").textContent=m.t;
+        body.appendChild(d); add();
+      }, rm?0:650);
+    };
+    add();
+  },
+  single(st,c){
+    const order = shuf(c.opts.map((_,i)=>i));
+    const box=document.createElement("div"); box.className="opts"; st.appendChild(box);
+    let finished=false;
+    order.forEach(oi=>{
+      const b=document.createElement("button"); b.className="opt"; b.textContent=c.opts[oi];
+      b.addEventListener("click",()=>{
+        if(finished) return;
+        if(oi===c.c){
+          finished=true; b.classList.add("ok"); box.querySelectorAll(".opt").forEach(x=>x.disabled=true);
+          solved(c,c.e);
+        } else {
+          b.classList.add("bad"); b.disabled=true;
+          const alive=miss();
+          if(c.oneShot){
+            finished=true; box.querySelectorAll(".opt").forEach(x=>{x.disabled=true;});
+            [...box.children].forEach(x=>{ if(x.textContent===c.opts[c.c]) x.classList.add("ok"); });
+            fb(false,"Не вдалося. "+c.e); if(alive) nextBtn();
+          } else if(alive) fb(false,"Не зовсім — спробуйте інший варіант (−1 ❤️).");
+        }
+      });
+      box.appendChild(b);
+    });
+  },
+  tf(st,c){
+    const box=document.createElement("div"); box.className="opts"; box.style.flexDirection="row"; st.appendChild(box);
+    let finished=false;
+    [["Так",true],["Ні",false]].forEach(([t,v])=>{
+      const b=document.createElement("button"); b.className="opt"; b.style.flex="1"; b.textContent=t;
+      b.addEventListener("click",()=>{
+        if(finished) return;
+        if(v===c.c){ finished=true; b.classList.add("ok"); box.querySelectorAll(".opt").forEach(x=>x.disabled=true); solved(c,c.e); }
+        else {
+          b.classList.add("bad"); b.disabled=true; const alive=miss();
+          if(c.oneShot){ finished=true; box.querySelectorAll(".opt").forEach(x=>{ x.disabled=true; if((x.textContent==="Так")===c.c) x.classList.add("ok"); }); fb(false,"Не вдалося. "+c.e); if(alive) nextBtn(); }
+          else if(alive) fb(false,"Подумайте ще раз (−1 ❤️).");
+        }
+      });
+      box.appendChild(b);
+    });
+  },
+  multi(st,c){
+    const order=shuf(c.opts.map((_,i)=>i));
+    const box=document.createElement("div"); box.className="opts"; st.appendChild(box);
+    const btns=order.map(oi=>{
+      const b=document.createElement("button"); b.className="opt"; b.textContent=c.opts[oi]; b.dataset.oi=oi;
+      b.addEventListener("click",()=>b.classList.toggle("sel")); box.appendChild(b); return b;
+    });
+    const row=document.createElement("div"); row.className="row"; st.appendChild(row);
+    const chk=document.createElement("button"); chk.className="btn"; chk.textContent="Перевірити"; row.appendChild(chk);
+    chk.addEventListener("click",()=>{
+      const picked=btns.filter(b=>b.classList.contains("sel")).map(b=>+b.dataset.oi).sort().join(",");
+      const need=c.c.slice().sort().join(",");
+      if(picked===need){ btns.forEach(b=>{b.disabled=true; if(c.c.includes(+b.dataset.oi)) b.classList.add("ok");}); chk.disabled=true; solved(c,c.e); }
+      else { btns.forEach(b=>{ if(b.classList.contains("sel")){ b.classList.add("bad"); setTimeout(()=>b.classList.remove("bad","sel"),500);} }); if(miss()) fb(false,"Не зовсім: перевірте кожне твердження (−1 ❤️)."); }
+    });
+  },
+  fill(st,c){
+    const w=document.createElement("div"); w.className="fill"; st.appendChild(w);
+    const inp=document.createElement("input"); inp.placeholder="Ваша відповідь"; w.appendChild(inp);
+    const row=document.createElement("div"); row.className="row"; st.appendChild(row);
+    const chk=document.createElement("button"); chk.className="btn"; chk.textContent="Перевірити"; row.appendChild(chk);
+    const go=()=>{
+      if(chk.disabled) return;
+      if(c.ok.test(inp.value.trim())){ inp.classList.add("ok"); inp.disabled=true; chk.disabled=true; solved(c,c.e+` Відповідь: «${c.show}».`); }
+      else { inp.classList.add("bad"); setTimeout(()=>inp.classList.remove("bad"),500); if(miss()) fb(false,"Не те слово. Згадайте текст підручника (−1 ❤️)."); }
+    };
+    chk.addEventListener("click",go); inp.addEventListener("keydown",e=>{ if(e.key==="Enter") go(); });
+  },
+  numeric(st,c){
+    const row=document.createElement("div"); row.className="row"; row.style.marginTop="0"; st.appendChild(row);
+    const inp=document.createElement("input"); inp.type="number"; inp.className="numin"; inp.placeholder="Впишіть число"; row.appendChild(inp);
+    const chk=document.createElement("button"); chk.className="btn"; chk.textContent="Перевірити"; row.appendChild(chk);
+    const go=()=>{
+      if(chk.disabled) return;
+      if(parseFloat(inp.value)===c.a){ inp.classList.add("ok"); inp.disabled=true; chk.disabled=true; solved(c,c.e); }
+      else { inp.classList.add("bad"); setTimeout(()=>inp.classList.remove("bad"),500); if(miss()) fb(false,"Не збігається. Підказка: "+c.hint+" (−1 ❤️)"); }
+    };
+    chk.addEventListener("click",go); inp.addEventListener("keydown",e=>{ if(e.key==="Enter") go(); });
+  },
+  order(st,c){
+    const items=shuf(c.items.map((t,i)=>({t,i})));
+    let built=[]; let locked=false;
+    const bank=document.createElement("div"); bank.className="chips";
+    const target=document.createElement("div"); target.className="target";
+    const row=document.createElement("div"); row.className="row";
+    const chk=document.createElement("button"); chk.className="btn"; chk.textContent="Перевірити порядок"; row.appendChild(chk);
+    st.appendChild(target); st.appendChild(bank); st.appendChild(row);
+    function draw(){
+      bank.innerHTML=""; target.innerHTML="";
+      items.filter(x=>!built.includes(x)).forEach(x=>{
+        const b=document.createElement("button"); b.className="chip"; b.textContent=x.t;
+        b.addEventListener("click",()=>{ if(locked) return; built.push(x); draw(); }); bank.appendChild(b);
+      });
+      built.forEach((x,p)=>{
+        const d=document.createElement("div"); d.className="step"; d.innerHTML=`<span class="n">${p+1}.</span><span>${x.t}</span>`;
+        if(!locked){ const r=document.createElement("button"); r.textContent="✕"; r.addEventListener("click",()=>{ built.splice(p,1); draw(); }); d.appendChild(r); }
+        target.appendChild(d);
+      });
+    }
+    draw();
+    chk.addEventListener("click",()=>{
+      if(built.length<items.length){ fb(false,`Спершу додайте всі ${items.length} елементи (зараз ${built.length}).`); return; }
+      const rows=[...target.querySelectorAll(".step")]; let good=0;
+      built.forEach((x,p)=>{ const ok=x.i===p; if(ok) good++; rows[p].classList.add(ok?"good":"wrongpos"); });
+      if(good===items.length){ locked=true; draw(); [...target.querySelectorAll(".step")].forEach(r=>r.classList.add("good")); chk.disabled=true; solved(c,c.e); }
+      else if(miss()) fb(false,`На місці ${good} з ${items.length}. Натисніть ✕, щоб повернути картку й виправити (−1 ❤️).`);
+    });
+  },
+  match(st,c){
+    const L=c.pairs.map((p,i)=>({t:p[0],i})), R=shuf(c.pairs.map((p,i)=>({t:p[1],i})));
+    const cols=document.createElement("div"); cols.className="mcols"; st.appendChild(cols);
+    const lc=document.createElement("div"), rc=document.createElement("div"); cols.appendChild(lc); cols.appendChild(rc);
+    let sel=null, done=0;
+    const mk=(x,col,side)=>{
+      const d=document.createElement("div"); d.className="mi"; d.textContent=x.t; d.dataset.i=x.i; col.appendChild(d);
+      d.addEventListener("click",()=>{
+        if(d.classList.contains("done")) return;
+        if(side==="L"){ lc.querySelectorAll(".mi").forEach(e=>e.classList.remove("sel")); d.classList.add("sel"); sel=d; return; }
+        if(!sel){ fb(false,"Спершу оберіть картку ліворуч."); return; }
+        if(sel.dataset.i===d.dataset.i){
+          sel.classList.remove("sel"); sel.classList.add("done"); d.classList.add("done"); sel=null; done++;
+          if(done===c.pairs.length) solved(c,c.e);
+        } else {
+          d.classList.add("bad"); sel.classList.add("bad"); const s=sel; sel=null;
+          setTimeout(()=>{ d.classList.remove("bad"); s.classList.remove("bad","sel"); },500);
+          if(miss()) fb(false,"Ця пара не підходить (−1 ❤️).");
+        }
+      });
+    };
+    L.forEach(x=>mk(x,lc,"L")); R.forEach(x=>mk(x,rc,"R"));
+  },
+  sort(st,c){
+    const items=shuf(c.items.map((x,i)=>({t:x[0],cat:x[1],i})));
+    const chips=document.createElement("div"); chips.className="chips"; st.appendChild(chips);
+    const bk=document.createElement("div"); bk.className="buckets"; st.appendChild(bk);
+    let sel=null, placed=0;
+    const bucketEls=c.buckets.map((name,bi)=>{
+      const b=document.createElement("div"); b.className="bucket"; b.innerHTML=`<h4>${name}</h4>`; bk.appendChild(b);
+      b.addEventListener("click",()=>{
+        if(!sel) { fb(false,"Спершу натисніть картку, потім скриню."); return; }
+        const chip=sel.el, it=sel.it;
+        if(it.cat===bi){
+          chip.classList.remove("sel"); chip.classList.add("done"); const cl=document.createElement("span"); cl.className="chip"; cl.textContent=it.t; b.appendChild(cl);
+          chip.remove(); sel=null; placed++;
+          if(placed===items.length) solved(c,c.e);
+        } else {
+          chip.classList.add("bad"); setTimeout(()=>chip.classList.remove("bad"),500);
+          if(miss()) fb(false,"Не та скриня (−1 ❤️)."); }
+      });
+      return b;
+    });
+    items.forEach(it=>{
+      const ch=document.createElement("button"); ch.className="chip"; ch.textContent=it.t;
+      ch.addEventListener("click",()=>{ chips.querySelectorAll(".chip").forEach(x=>x.classList.remove("sel")); ch.classList.add("sel"); sel={el:ch,it}; });
+      chips.appendChild(ch);
+    });
+  }
+};
+
+/* старт */
+document.getElementById("inName").focus();
+</script>
+<script>window.G6_PAGE="q4chat";</script>
+<script>
+/* ===== Квест: час, помилки, 12-бальна оцінка й анімації (доповнення, 6 клас) ===== */
+(function(){
+const PAGE = window.G6_PAGE || "quest";
+const SEC_PER = 45;                                   // норма, с на одне завдання
+const RM = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+const Q = { t0:null, tDone:null, lvlT0:null, lvlTime:[], first:[], firstXP:[], errDone:null,
+            frozen:null, attemptNo:1, streak:0, lastNode:0 };
+window.G6Q = Q;
+const lvlNorm = i => LEVELS[i].ch.length*SEC_PER;
+const NORM = LEVELS.reduce((s,L,i)=>s+lvlNorm(i),0);
+function fmt(s){ s=Math.max(0,Math.round(s)); return Math.floor(s/60)+":"+String(s%60).padStart(2,"0"); }
+function elapsed(){ return Q.t0 ? ((Q.tDone||Date.now())-Q.t0)/1000 : 0; }
+
+/* ---------- стилі й анімації ---------- */
+const css=document.createElement("style");
+css.textContent=`
+.card{animation:qIn .35s ease-out}
+@keyframes qIn{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
+.q-float{position:fixed;z-index:80;pointer-events:none;font-weight:800;font-size:1.25rem;color:var(--gold);
+  text-shadow:0 2px 8px rgba(0,0,0,.5);animation:qFloat 1.1s ease-out forwards}
+@keyframes qFloat{0%{opacity:0;transform:translate(-50%,0) scale(.6)}15%{opacity:1;transform:translate(-50%,-8px) scale(1.15)}100%{opacity:0;transform:translate(-50%,-70px) scale(1)}}
+.q-heart{position:fixed;z-index:80;pointer-events:none;font-size:1.6rem;animation:qHeart .9s ease-in forwards}
+@keyframes qHeart{0%{transform:translate(-50%,0) scale(1.3)}30%{transform:translate(-50%,-10px) rotate(-15deg) scale(1.1)}100%{opacity:0;transform:translate(-50%,60px) rotate(25deg) scale(.6)}}
+.card.q-hurt{animation:qHurt .4s}
+@keyframes qHurt{0%,100%{transform:none}20%{transform:translateX(-8px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(3px)}}
+.hearts.q-beat{animation:qBeat .5s}
+@keyframes qBeat{0%,100%{transform:scale(1)}40%{transform:scale(1.25);filter:hue-rotate(-20deg)}}
+.boss-face{display:inline-block;transition:transform .2s}
+.boss-face.q-hit{animation:qHit .55s}
+@keyframes qHit{0%{transform:scale(1)}25%{transform:scale(1.35) rotate(-12deg);filter:brightness(2) drop-shadow(0 0 10px #f66)}50%{transform:scale(.85) rotate(10deg)}100%{transform:scale(1)}}
+.boss-face.q-idle{animation:qIdle 2.4s ease-in-out infinite}
+@keyframes qIdle{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.q-toast{position:fixed;left:50%;top:18%;z-index:90;transform:translateX(-50%);background:linear-gradient(135deg,#ff8a3d,#ffc857);
+  color:#2a1500;font-weight:800;padding:10px 20px;border-radius:999px;box-shadow:0 10px 30px rgba(0,0,0,.4);animation:qToast 1.4s ease-out forwards;pointer-events:none}
+@keyframes qToast{0%{opacity:0;transform:translate(-50%,10px) scale(.7)}20%{opacity:1;transform:translate(-50%,0) scale(1.08)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-20px)}}
+.q-conf{position:fixed;top:-12px;z-index:85;width:9px;height:14px;border-radius:2px;pointer-events:none;animation:qConf linear forwards}
+@keyframes qConf{to{transform:translateY(105vh) rotate(720deg)}}
+.bigstars .qs{display:inline-block;opacity:0;animation:qStar .45s cubic-bezier(.3,1.6,.5,1) forwards}
+@keyframes qStar{from{opacity:0;transform:scale(0) rotate(-90deg)}to{opacity:1;transform:none}}
+.map .q-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;overflow:visible}
+.map .node{z-index:1}
+.q-path-done{stroke-dasharray:var(--len);stroke-dashoffset:var(--len);animation:qDraw 1.1s ease-out .15s forwards}
+@keyframes qDraw{to{stroke-dashoffset:0}}
+.q-rover{position:absolute;z-index:3;font-size:1.7rem;left:0;top:0;transition:transform 1.1s cubic-bezier(.5,0,.3,1);pointer-events:none;filter:drop-shadow(0 4px 6px rgba(0,0,0,.5))}
+.q-rover span{display:inline-block;animation:qIdle 1.6s ease-in-out infinite}
+.q-timer.over{color:var(--red)}
+.q-grade{margin:16px auto 6px;max-width:520px;text-align:left;background:var(--panel-2);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.q-grade .g{white-space:nowrap;font-size:2.4rem;font-weight:800;color:var(--gold);line-height:1}
+.q-grade table{width:100%;border-collapse:collapse;font-size:.9rem;margin-top:8px}
+.q-grade td{padding:5px 4px;border-bottom:1px solid var(--line)} .q-grade td:last-child{text-align:right;font-weight:700;white-space:nowrap}
+.q-neg{color:var(--red)} .q-warn{background:rgba(255,200,87,.14);border-radius:10px;padding:8px 10px;margin-top:8px;font-size:.88rem}
+.q-boom{display:inline-block;animation:qBoom .7s ease-out}
+@keyframes qBoom{0%{transform:scale(.2);opacity:0}60%{transform:scale(1.4);opacity:1}100%{transform:scale(1)}}
+.q-trophy{display:inline-block;animation:qTrophy 1.2s ease-out}
+@keyframes qTrophy{0%{transform:translateY(-60px) scale(.4);opacity:0}60%{transform:translateY(6px) scale(1.15);opacity:1}100%{transform:none}}
+@media (prefers-reduced-motion: reduce){
+  .card,.q-float,.q-heart,.card.q-hurt,.boss-face.q-hit,.boss-face.q-idle,.q-toast,.bigstars .qs,.q-path-done,.q-rover span,.q-boom,.q-trophy,.hearts.q-beat{animation:none!important}
+  .bigstars .qs{opacity:1}.q-path-done{stroke-dashoffset:0}.q-rover{transition:none}
+}`;
+document.head.appendChild(css);
+
+/* ---------- службові ефекти ---------- */
+function floatAt(el, text, cls){
+  if(!el) return; const r=el.getBoundingClientRect();
+  const d=document.createElement("div"); d.className=cls||"q-float"; d.textContent=text;
+  d.style.left=(r.left+r.width/2)+"px"; d.style.top=(r.top+4)+"px";
+  document.body.appendChild(d); setTimeout(()=>d.remove(),1200);
+}
+function toast(t){ if(RM) return; const d=document.createElement("div"); d.className="q-toast"; d.textContent=t; document.body.appendChild(d); setTimeout(()=>d.remove(),1500); }
+function confetti(n){
+  if(RM) return; const cols=["#ffc857","#3ecfb2","#8b7cf6","#ef6a6a","#4fd18c","#fff"];
+  for(let i=0;i<n;i++){ const c=document.createElement("i"); c.className="q-conf";
+    c.style.left=Math.random()*100+"vw"; c.style.background=cols[i%cols.length];
+    c.style.animationDuration=(1.6+Math.random()*1.6)+"s"; c.style.animationDelay=(Math.random()*.5)+"s";
+    c.style.transform="rotate("+(Math.random()*360)+"deg)";
+    document.body.appendChild(c); setTimeout(()=>c.remove(),4000); }
+}
+function retrigger(el, cls){ if(!el) return; el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
+
+/* ---------- старт, таймер ---------- */
+document.getElementById("startBtn").addEventListener("click",()=>{
+  if(Q.t0) return; Q.t0=Date.now();
+  try{ const k="g6q-attempt-"+PAGE; Q.attemptNo=(parseInt(localStorage.getItem(k))||0)+1; localStorage.setItem(k,Q.attemptNo); }catch(e){}
+}, true);
+const _hud=hud;
+hud=function(extra){
+  const t=elapsed();
+  return _hud((extra||"")+`<span class="pill q-timer${t>NORM&&!Q.tDone?" over":""}" id="qTimer">⏱ ${fmt(t)}</span>`);
+};
+setInterval(()=>{ const el=document.getElementById("qTimer"); if(!el||!Q.t0) return;
+  const t=elapsed(); el.textContent="⏱ "+fmt(t)+(Q.tDone?" ✓":""); el.classList.toggle("over", t>NORM && !Q.tDone); },1000);
+
+/* ---------- рівні ---------- */
+const _startLevel=startLevel;
+startLevel=function(i,isRestart){ if(!isRestart) Q.lvlT0=Date.now(); else if(!Q.lvlT0) Q.lvlT0=Date.now(); Q.streak=0; _startLevel(i,isRestart); };
+
+const _showChallenge=showChallenge;
+showChallenge=function(){ _showChallenge(); const f=document.querySelector(".boss-face"); if(f) f.classList.add("q-idle"); };
+
+const _miss=miss;
+miss=function(){
+  const hEl=document.getElementById("hearts");
+  const r=_miss(); Q.streak=0;
+  if(!RM){ floatAt(hEl,"💔","q-heart"); retrigger(document.querySelector(".card"),"q-hurt"); retrigger(document.getElementById("hearts"),"q-beat"); }
+  return r;
+};
+
+const _solved=solved;
+solved=function(c,msg){
+  const first = S.tries===0, xp0=S.xp;
+  _solved(c,msg);
+  const gain=S.xp-xp0;
+  if(gain>0) floatAt(document.getElementById("fb"),"+"+gain+" XP");
+  if(LEVELS[S.lvl].boss && gain>0){ const f=document.querySelector(".boss-face"); if(f){ f.classList.remove("q-idle"); retrigger(f,"q-hit"); floatAt(f,"−"+Math.round(100/LEVELS[S.lvl].ch.length)+" HP"); } }
+  if(first){ Q.streak++; if(Q.streak===3||Q.streak===5||Q.streak===8) toast("🔥 Серія ×"+Q.streak+" без помилок!"); }
+};
+
+const _gameOver=gameOver;
+gameOver=function(){ _gameOver(); const b=document.querySelector(".card.center > div"); if(b) b.classList.add("q-boom"); };
+
+const _finishLevel=finishLevel;
+finishLevel=function(){
+  const i=S.lvl, prev=S.stars[i]||0, mist=S.lvlMist;
+  const t=(Date.now()-(Q.lvlT0||Date.now()))/1000;
+  let stars = mist===0?3 : (mist<=2?2:1);
+  const slow = t>lvlNorm(i);
+  if(slow) stars=Math.max(1,stars-1);
+  _finishLevel();
+  S.stars[i]=Math.max(prev,stars);
+  if(!Q.first[i]){ Q.first[i]=true; Q.firstXP[i]=S.lvlXp; Q.lvlTime[i]=t; }
+  if(!Q.tDone && LEVELS.every((_,k)=>Q.first[k])){ Q.tDone=Date.now(); Q.errDone=S.totalMist; Q.frozen=compute(); }
+  const bs=document.querySelector(".bigstars");
+  if(bs){ bs.innerHTML=[0,1,2].map(k=>`<span class="qs" style="animation-delay:${.15+k*.22}s">${k<stars?"★":"☆"}</span>`).join(""); }
+  const st=document.querySelector(".stats");
+  if(st){ st.insertAdjacentHTML("beforeend",`<div class="stat"><b>${fmt(t)}</b>час (норма ${fmt(lvlNorm(i))})</div>`); }
+  if(slow && st) st.insertAdjacentHTML("afterend",`<p class="dim" style="font-size:.85rem">⏱ Довше за норму — мінус одна зірка. Спробуйте швидше!</p>`);
+  const ic=document.querySelector(".card.center > div"); if(ic) ic.classList.add("q-trophy");
+  confetti(stars===3?90:45);
+};
+
+/* ---------- карта: шлях і персонаж ---------- */
+const _showMap=showMap;
+showMap=function(){
+  _showMap();
+  const map=document.getElementById("map"); if(!map) return;
+  requestAnimationFrame(()=>{
+    const nodes=[...map.querySelectorAll(".node .ico")]; if(nodes.length<2) return;
+    const mr=map.getBoundingClientRect();
+    const pts=nodes.map(n=>{const r=n.getBoundingClientRect(); return [r.left-mr.left+r.width/2, r.top-mr.top+r.height/2];});
+    const doneCount=S.stars.filter(x=>x>0).length;
+    const cur=Math.min(S.unlocked, nodes.length-1);
+    const d=(arr)=>arr.map((p,k)=>(k?"L":"M")+p[0].toFixed(1)+" "+p[1].toFixed(1)).join(" ");
+    const donePts=pts.slice(0,cur+1);
+    let len=0; for(let k=1;k<donePts.length;k++) len+=Math.hypot(donePts[k][0]-donePts[k-1][0],donePts[k][1]-donePts[k-1][1]);
+    const svg=`<svg class="q-svg" viewBox="0 0 ${mr.width} ${mr.height}" preserveAspectRatio="none">
+      <path d="${d(pts)}" fill="none" stroke="var(--line)" stroke-width="4" stroke-dasharray="2 9" stroke-linecap="round"/>
+      ${donePts.length>1?`<path class="q-path-done" style="--len:${len.toFixed(0)}" d="${d(donePts)}" fill="none" stroke="var(--teal)" stroke-width="4" stroke-linecap="round"/>`:""}
+    </svg>`;
+    map.insertAdjacentHTML("afterbegin",svg);
+    const rover=document.createElement("div"); rover.className="q-rover"; rover.innerHTML="<span>🐱</span>";
+    const place=k=>`translate(${(pts[k][0]-50).toFixed(0)}px,${(pts[k][1]-48).toFixed(0)}px)`;
+    rover.style.transform=place(Math.min(Q.lastNode,cur)); map.appendChild(rover);
+    if(Q.lastNode!==cur){ requestAnimationFrame(()=>requestAnimationFrame(()=>{ rover.style.transform=place(cur); })); }
+    Q.lastNode=cur;
+    void doneCount;
+  });
+};
+
+/* ---------- оцінка ---------- */
+function compute(){
+  const xp=Q.firstXP.reduce((a,b)=>a+(b||0),0), mx=maxXP();
+  const P=mx?xp/mx:0;
+  const errors = Q.errDone!==null ? Q.errDone : S.totalMist;
+  const T = elapsed();
+  const errPen=Math.min(3, Math.max(0,errors-2)*0.25);
+  const timePen= T<=NORM?0:(T<=NORM*1.5?1:2);
+  let grade=Math.max(1,Math.min(12,Math.round(12*P-errPen-timePen)));
+  const elite=P>=0.95 && errors<=2 && T<=NORM;
+  if(grade===12 && !elite) grade=11;
+  return {xp,mx,P,errors,T,errPen,timePen,grade,tooFast:T>0&&T<NORM*0.3,restarts:S.restarts};
+}
+window.G6Qcompute=compute;
+
+const _showFinal=showFinal;
+showFinal=function(){
+  _showFinal();
+  const r=Q.frozen||compute();
+  const card=document.querySelector(".card.center");
+  const ic=card && card.firstElementChild; if(ic) ic.classList.add("q-trophy");
+  const tbl=card && card.querySelector("table.res");
+  const html=`<div class="q-grade">
+    <div style="display:flex;gap:14px;align-items:center"><div class="g">${r.grade}<span style="font-size:1rem;color:var(--dim)"> / 12</span></div>
+      <div style="font-size:.9rem">Оцінка за <b>перше проходження</b> всіх рівнів · спроба №${Q.attemptNo}<br><span class="dim">⏱ ${fmt(r.T)} з норми ${fmt(NORM)} · ❌ ${r.errors} помилок</span></div></div>
+    <table>
+      <tr><td>XP з першого проходження: ${r.xp} з ${r.mx}</td><td>${(12*r.P).toFixed(1).replace(".",",")}</td></tr>
+      <tr><td>Помилки: перші 2 без штрафу, далі −0,25 (макс. −3)</td><td class="${r.errPen?"q-neg":""}">${r.errPen?"−"+r.errPen.toFixed(2).replace(".",","):"0"}</td></tr>
+      <tr><td>Час: до норми 0, до 1,5 норми −1, довше −2</td><td class="${r.timePen?"q-neg":""}">${r.timePen?"−"+r.timePen:"0"}</td></tr>
+    </table>
+    <div class="dim" style="font-size:.8rem;margin-top:6px">12 — лише за ≥95 % XP, не більше 2 помилок і час у межах норми. Повторні проходження додають зірки, але оцінку не змінюють.</div>
+    ${r.tooFast?`<div class="q-warn">⚠ Занадто швидко: менше 30 % норми часу.</div>`:""}
+  </div>`;
+  if(tbl) tbl.insertAdjacentHTML("afterend",html);
+  confetti(140);
+};
+
+const _resRow=resRow;
+resRow=function(){
+  const {header,row}=_resRow(); const r=Q.frozen||compute();
+  LEVELS.forEach((L,i)=>{ header.push("Рівень "+(i+1)+" (час)"); row.push(Q.lvlTime[i]!=null?fmt(Q.lvlTime[i]):"—"); });
+  header.push("Час","Норма часу","Помилок (до 1-го проходження)","Бали %","Штраф за помилки","Штраф за час","Оцінка (12)","Спроба №","Позначка");
+  row.push(fmt(r.T),fmt(NORM),r.errors,Math.round(r.P*100),r.errPen.toFixed(2).replace(".",","),r.timePen,r.grade,Q.attemptNo,r.tooFast?"занадто швидко":"");
+  return {header,row};
+};
+})();
+</script>
+</body>
+</html>
+
+<script>
+/* ===== Журнал учителя: результат кожного завдання + «Надіслати вчителю» (Google Форма) ===== */
+(function(){
+const FORM_PREFILL="https://docs.google.com/forms/d/e/1FAIpQLSeaDGNzqpEMjZyDt4WUwg3k3FAhGGW4pG1E8IcOk8b4LQsBVw/viewform?usp=pp_url&entry.1997531456=test";
+const TOPIC="Чат-патруль: безпечне спілкування в чатах", GRADE=4;
+const Q=window.G6Q||{};
+const ERR={}, DONE={};
+const key=()=>(S.lvl+1)+"."+(S.ch+1);
+const firstPass=()=>!(Q.first&&Q.first[S.lvl]);
+const _m=miss; miss=function(){ if(firstPass()){const k=key();ERR[k]=(ERR[k]||0)+1;} return _m.apply(this,arguments); };
+const _s=solved; solved=function(){ if(firstPass()) DONE[key()]=true; return _s.apply(this,arguments); };
+// число = помилок у завданні під час першого проходження (0 — з першої спроби), «н» — не виконано
+function taskStr(){ const a=[]; LEVELS.forEach((L,i)=>L.ch.forEach((c,j)=>{const k=(i+1)+"."+(j+1); a.push(k+":"+(DONE[k]?(ERR[k]||0):(ERR[k]?ERR[k]+"н":"н")));})); return a.join(","); }
+const hm=t=>{t=Math.max(0,Math.round(t));return Math.floor(t/60)+" хв "+String(t%60).padStart(2,"0")+" с"};
+const clean=v=>String(v||"").replace(/[|\n\r]/g," ").trim()||"—";
+function sendLine(name,cls){ const r=Q.frozen||(window.G6Qcompute?window.G6Qcompute():{});
+  return ["v1",GRADE,TOPIC,clean(cls),clean(name),Q.attemptNo||1,"—",r.grade,r.xp+" з "+r.mx+" XP","—",r.errors,hm(r.T||0),hm(window.G6Qnorm||0),r.tooFast?"занадто швидко":"",Q.frozen?"завершено":"не завершено",taskStr()].join("|"); }
+window.G6Jline=sendLine;
+const _sf=showFinal;
+showFinal=function(){
+  _sf.apply(this,arguments);
+  const card=document.querySelector(".card.center"); if(!card) return;
+  const box=document.createElement("div"); box.className="sendbox";
+  box.innerHTML=`<div class="sendh">📤 Надіслати результат учителю</div>
+    <div class="sendf"><input id="jName" placeholder="Прізвище та ім'я" autocomplete="off"><input id="jCls" placeholder="Клас, напр. 4-А" autocomplete="off" maxlength="6"></div>
+    <div class="row" style="justify-content:center"><a class="btn" id="jSend" href="#" target="_blank" rel="noopener">📤 Надіслати вчителю</a></div>
+    <div class="dim" id="jMsg" style="font-size:.85rem">Відкриється Google Форма з уже записаним результатом — натисни в ній «Надіслати».</div>`;
+  const anchor=card.querySelector(".q-grade")||card.querySelector("table.res");
+  (anchor||card.lastElementChild).after(box);
+  const nm=box.querySelector("#jName"), cl=box.querySelector("#jCls"), a=box.querySelector("#jSend"), msg=box.querySelector("#jMsg");
+  nm.value=(S.name&&S.name!=="Учень (без імені)")?S.name:""; cl.value=S.cls||"";
+  a.addEventListener("click",e=>{
+    if(!nm.value.trim()||!cl.value.trim()){ e.preventDefault(); msg.textContent="Спершу впиши прізвище, ім'я та клас ☝️"; (nm.value.trim()?cl:nm).focus(); return; }
+    S.name=nm.value.trim(); S.cls=cl.value.trim();
+    a.href=FORM_PREFILL.replace(/(entry\.\d+=)[^&]*/,(m,p)=>p+encodeURIComponent(sendLine(S.name,S.cls)));
+    msg.textContent="Форму відкрито в новій вкладці — натисни там «Надіслати» ✔";
+  });
+};
+const st=document.createElement("style");
+st.textContent=`.sendbox{margin:14px 0 4px;padding:12px;border:2px dashed var(--gold);border-radius:14px;display:flex;flex-direction:column;gap:8px}
+.sendh{font-weight:800;color:var(--gold)}
+.sendf{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.sendf input{flex:1 1 160px;min-width:0;background:var(--panel-2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:9px 10px;font:inherit}
+.sendf input#jCls{flex:0 1 120px}
+a.btn{text-decoration:none;display:inline-block}`;
+document.head.appendChild(st);
+})();
+</script>
+
+</body></html>

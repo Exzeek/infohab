@@ -1,0 +1,476 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Розумна поличка мікрозелені</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700;800&family=Nunito:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: одна колонка-«лоток» з вкладками-бирками; кожна вправа — окрема картка-горщик */
+:root{
+  --bg:#EEF3EC; --surface:#FFFFFF; --surface2:#E3EBDF; --fg:#1E2A20; --muted:#5B6B5D;
+  --leaf:#2F6B3A; --sprout:#86B83A; --soil:#6B4F3A; --data:#2B6CB0; --line:#C9D6C5;
+  --ok:#2E7D32; --okbg:#E3F3E4; --bad:#B3261E; --badbg:#FBE7E5; --warn:#B26A00;
+  --f-display:"Rubik",system-ui,sans-serif; --f-body:"Nunito",system-ui,sans-serif; --f-mono:"JetBrains Mono",ui-monospace,monospace;
+  --r:12px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141B15; --surface:#1D261E; --surface2:#263127; --fg:#E6EEE4; --muted:#9FB09F;
+  --leaf:#7FC48A; --sprout:#A9D65C; --soil:#C9A07E; --data:#7FB2EA; --line:#33433A;
+  --ok:#7FD283; --okbg:#1F3522; --bad:#FF8A80; --badbg:#3A1F1D; --warn:#F2B54C; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141B15; --surface:#1D261E; --surface2:#263127; --fg:#E6EEE4; --muted:#9FB09F;
+  --leaf:#7FC48A; --sprout:#A9D65C; --soil:#C9A07E; --data:#7FB2EA; --line:#33433A;
+  --ok:#7FD283; --okbg:#1F3522; --bad:#FF8A80; --badbg:#3A1F1D; --warn:#F2B54C; color-scheme:dark}
+[hidden]{display:none!important}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:16px;line-height:1.5;margin:0}
+.wrap{max-width:860px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0}
+h1{font-size:clamp(1.6rem,4.5vw,2.3rem);font-weight:800;color:var(--leaf);line-height:1.15}
+h2{font-size:1.3rem;font-weight:700}
+h3{font-size:1.05rem;font-weight:700}
+.eyebrow{font-family:var(--f-mono);font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--soil)}
+header{display:grid;gap:10px;margin-bottom:16px}
+.story{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;display:flex;gap:12px;align-items:flex-start}
+.story svg{flex:0 0 56px}
+.story p{margin:0;min-width:0}
+.hud{display:flex;flex-wrap:wrap;gap:8px;font-family:var(--f-mono);font-size:.85rem}
+.hud span{background:var(--surface2);border-radius:999px;padding:4px 10px}
+nav.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:5;padding-top:6px}
+nav.tabs button{flex:0 0 auto;font-family:var(--f-display);font-weight:700;font-size:.95rem;border:1px solid var(--line);background:var(--surface);color:var(--fg);padding:8px 14px;border-radius:10px 10px 4px 4px;cursor:pointer}
+nav.tabs button[aria-selected="true"]{background:var(--leaf);border-color:var(--leaf);color:var(--bg)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid var(--data);outline-offset:2px}
+section.panel{display:grid;gap:14px;margin-top:12px}
+.lvlbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;color:var(--muted);font-size:.9rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:grid;gap:12px;min-width:0}
+.card.done{border-color:var(--ok)}
+.qhead{display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap}
+.lvl{font-family:var(--f-mono);font-size:.78rem;padding:2px 8px;border-radius:999px;background:var(--surface2);white-space:nowrap}
+.q{font-weight:700;margin:0}
+.opts{display:grid;gap:8px}
+.opt{text-align:left;font:inherit;background:var(--surface2);border:2px solid transparent;color:var(--fg);border-radius:10px;padding:10px 12px;cursor:pointer}
+.opt[aria-pressed="true"]{border-color:var(--data)}
+.row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;align-items:center;padding:8px 0;border-bottom:1px dashed var(--line)}
+.row:last-child{border-bottom:0}
+@media (max-width:560px){.row{grid-template-columns:1fr}}
+select,input[type=text]{font:inherit;color:var(--fg);background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%;min-width:0}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-size:.9rem;background:var(--surface2);color:var(--fg);border:2px solid transparent;border-radius:999px;padding:5px 12px;cursor:pointer}
+.chip[aria-pressed="true"]{border-color:var(--leaf);background:var(--okbg)}
+.order li{display:flex;gap:8px;align-items:center;background:var(--surface2);border-radius:8px;padding:8px 10px;margin-bottom:6px}
+.order ol{margin:0;padding:0;list-style:none;counter-reset:s}
+.order li::before{counter-increment:s;content:counter(s);font-family:var(--f-mono);color:var(--soil);min-width:1.2em}
+.order li span{flex:1;min-width:0}
+.mini{font:inherit;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:6px;width:34px;height:34px;cursor:pointer}
+table.err{border-collapse:collapse;width:100%;font-size:.95rem}
+.tblwrap{overflow-x:auto}
+table.err th,table.err td{border:1px solid var(--line);padding:8px;text-align:left}
+table.err th{background:var(--surface2);font-family:var(--f-display)}
+table.err tr.pick td{background:var(--badbg)}
+table.err tbody tr{cursor:pointer}
+.actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{font-family:var(--f-display);font-weight:700;font-size:.95rem;border:0;border-radius:10px;padding:10px 16px;cursor:pointer;background:var(--leaf);color:var(--bg)}
+.btn.ghost{background:var(--surface2);color:var(--fg)}
+.btn:disabled{opacity:.5;cursor:default}
+.fb{border-radius:8px;padding:8px 12px;font-size:.95rem}
+.fb.ok{background:var(--okbg);color:var(--ok)}
+.fb.bad{background:var(--badbg);color:var(--bad)}
+/* Quest */
+.map{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.loc{background:var(--surface);border:2px solid var(--line);border-radius:10px;padding:8px 4px;text-align:center;font-size:.8rem;min-width:0}
+.loc b{display:block;font-size:1.4rem}
+.loc.cur{border-color:var(--data)}
+.loc.won{border-color:var(--ok);background:var(--okbg)}
+.hearts{font-size:1.2rem;letter-spacing:2px}
+/* Cards */
+.flash{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.fc{font:inherit;color:var(--fg);min-height:120px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;cursor:pointer;text-align:left;display:grid;align-content:center;gap:6px}
+.fc .t{font-family:var(--f-display);font-weight:700;font-size:1.05rem;color:var(--leaf)}
+.fc.open{background:var(--surface2)}
+.fc .d{font-size:.92rem}
+/* Lab */
+.labgrid{display:grid;gap:8px}
+.labrow{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) minmax(0,1fr);gap:8px;align-items:center;padding:8px;border-radius:8px;background:var(--surface2)}
+.labrow.okr{outline:2px solid var(--ok)} .labrow.badr{outline:2px solid var(--bad)}
+@media (max-width:600px){.labrow{grid-template-columns:1fr 1fr}.labrow .nm{grid-column:1/-1}}
+.flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-family:var(--f-mono);font-size:.85rem}
+.flow span.s{background:var(--surface2);padding:6px 10px;border-radius:8px;border:2px solid transparent;transition:border-color .3s, background .3s}
+.flow span.s.on{border-color:var(--sprout);background:var(--okbg)}
+.big{font-family:var(--f-display);font-size:3rem;font-weight:800;color:var(--leaf);line-height:1}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.stat{background:var(--surface2);border-radius:10px;padding:10px 12px;font-variant-numeric:tabular-nums}
+.stat small{display:block;color:var(--muted)}
+table.rank{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+table.rank td,table.rank th{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left}
+textarea{width:100%;font-family:var(--f-mono);font-size:.8rem;background:var(--surface2);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:8px;min-height:70px}
+.muted{color:var(--muted);font-size:.9rem}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">Інформатика · 6 клас · Розділ 2 · Тема 1</div>
+  <h1>Розумна поличка мікрозелені</h1>
+  <div class="story">
+    <svg viewBox="0 0 56 56" aria-hidden="true"><rect x="6" y="36" width="44" height="12" rx="3" fill="var(--soil)"/><path d="M18 36 C18 26 12 22 8 22 C12 30 16 32 18 36Z" fill="var(--sprout)"/><path d="M28 36 C28 22 34 16 42 16 C38 26 32 30 28 36Z" fill="var(--leaf)"/><path d="M38 36 C38 30 44 28 48 28 C46 33 42 35 38 36Z" fill="var(--sprout)"/><circle cx="28" cy="10" r="3" fill="var(--data)"/><path d="M28 13 V20" stroke="var(--data)" stroke-width="2"/></svg>
+    <p><b>Епізод 1.</b> Наш клас вирощує мікрозелень. Щоб вона не засохла, ми будуємо <b>інформаційну систему</b>: датчики збирають дані, плата Micro:bit їх опрацьовує, застосунок показує графік, а журнал поливу зберігає історію. Розберімо, з чого вона складається!</p>
+  </div>
+  <div class="hud" aria-live="polite"><span id="hudEx">Вправи: 0/14</span><span id="hudStar">⭐ 0</span><span id="hudXp">XP 0</span></div>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button role="tab" data-t="ex" aria-selected="true">Вправи</button>
+  <button role="tab" data-t="quest" aria-selected="false">Квест</button>
+  <button role="tab" data-t="cards" aria-selected="false">Картки</button>
+  <button role="tab" data-t="lab" aria-selected="false">Конструктор</button>
+  <button role="tab" data-t="res" aria-selected="false">Результат</button>
+</nav>
+
+<section class="panel" id="p-ex">
+  <div class="lvlbar">🟢 базовий · 🟡 середній · 🔴 складний. З першої спроби — 1 бал, з повторної — 0,5.</div>
+  <div id="exList" class="panel" style="margin-top:0"></div>
+</section>
+
+<section class="panel" id="p-quest" hidden>
+  <div class="card">
+    <div class="qhead"><h2>Квест «Подорож мікрофермою»</h2><span class="hearts" id="hearts">❤️❤️❤️</span></div>
+    <div class="map" id="qmap"></div>
+    <div id="qbox"></div>
+  </div>
+</section>
+
+<section class="panel" id="p-cards" hidden>
+  <p class="muted" style="margin:0">Натисни на картку, щоб побачити пояснення. Спершу спробуй пригадати сам.</p>
+  <div class="flash" id="flash"></div>
+</section>
+
+<section class="panel" id="p-lab" hidden>
+  <div class="card">
+    <h2>Конструктор: збираємо ІС полички</h2>
+    <p class="muted" style="margin:0">Для кожного елемента вкажи, що він робить із даними і до якої складової належить. Потім визнач тип системи й натисни «Перевірити».</p>
+    <div class="labgrid" id="labgrid"></div>
+    <div class="row" style="border:0">
+      <label for="labType"><b>Учні дивляться графік у застосунку й самі вирішують, коли поливати. Яка це система?</b></label>
+      <select id="labType"><option value="">— обери —</option><option>Ручна</option><option>Автоматизована</option><option>Автоматична</option></select>
+    </div>
+    <div class="actions"><button class="btn" id="labCheck">Перевірити</button><button class="btn ghost" id="labRun" disabled>Запустити систему</button><span id="labScore" class="muted"></span></div>
+    <div id="labFb"></div>
+    <div class="flow" id="flow" aria-live="polite"></div>
+  </div>
+</section>
+
+<section class="panel" id="p-res" hidden>
+  <div class="card">
+    <h2>Мій результат</h2>
+    <div class="stats">
+      <div class="stat"><small>Оцінка</small><span class="big" id="grade">—</span><small>з 12</small></div>
+      <div class="stat"><small>Вправи</small><b id="rEx">0 з 14</b></div>
+      <div class="stat"><small>Конструктор</small><b id="rLab">0%</b></div>
+      <div class="stat"><small>Квест</small><b id="rQ">⭐ 0 · XP 0</b></div>
+    </div>
+    <p class="muted" style="margin:0">Оцінка — середнє вправ і конструктора. Квест дає зірки й XP для рейтингу.</p>
+    <div class="row" style="border:0"><label for="stName">Прізвище та ім'я (лише для вчителя)</label><input type="text" id="stName" autocomplete="off"></div>
+    <div class="actions"><button class="btn" id="copyRes">Скопіювати для вчителя</button><span id="copyMsg" class="muted"></span></div>
+    <textarea id="csv" readonly aria-label="Рядок CSV для вчителя"></textarea>
+  </div>
+  <div class="card">
+    <h2>Рейтинг класу</h2>
+    <p class="muted" style="margin:0">Введи нікнейм або код від учителя (не прізвище) і збережи свої зірки та XP.</p>
+    <div class="actions"><input type="text" id="nick" maxlength="16" placeholder="Напр. Паросток7" style="max-width:220px"><button class="btn" id="saveRank">Зберегти в рейтинг</button><span id="rankMsg" class="muted"></span></div>
+    <div class="tblwrap"><table class="rank"><thead><tr><th>#</th><th>Нікнейм</th><th>⭐</th><th>XP</th><th>Оцінка</th></tr></thead><tbody id="rankBody"><tr><td colspan="5" class="muted">Рейтинг завантажується…</td></tr></tbody></table></div>
+  </div>
+</section>
+</div>
+
+<script>
+// ---------- ДАНІ ----------
+const LV={1:"🟢 базовий",2:"🟡 середній",3:"🔴 складний"};
+const EX=[
+ {id:1,lv:1,type:"choice",q:"Що таке інформаційна система?",
+  o:["Об'єкти, що разом збирають, передають, опрацьовують і зберігають дані","Лише комп'ютери та смартфони, під'єднані зараз до мережі інтернет","Будь-який набір програм, установлених на шкільному комп'ютері класу","Пристрої, які тільки показують відео та картинки на великому екрані класу"],a:0},
+ {id:2,lv:1,type:"input",q:"Як на комп'ютерному сленгу називають апаратне забезпечення? Впиши одне слово.",a:["залізо"],hint:"Підказка: це слово про метал 🔩"},
+ {id:3,lv:1,type:"chips",q:"Розсортуй: це апаратна чи програмна складова?",cats:["Апаратна","Програмна"],
+  rows:[["Процесор",0],["Датчик вологості",0],["Google Chrome",1],["Клавіатура",0],["Tinkercad",1],["Плата Micro:bit",0],["Застосунок для графіків",1],["Принтер чеків",0]]},
+ {id:4,lv:1,type:"choice",q:"Чи обов'язкова комп'ютерна техніка, щоб існувала інформаційна система?",
+  o:["Так, без комп'ютера жодна система не працюватиме","Ні, ІС може складатися з людей, паперу та правил","Так, але тільки коли в системі понад десять людей","Ні, але тоді в системі мають бути лише датчики"],a:1},
+ {id:5,lv:1,type:"select",q:"З'єднай тип ІС із прикладом з нашої мікроферми.",
+  opts:["Біологічна","Технічна","Соціальна","Ручна","Автоматична"],
+  rows:[["Паросток соняшнику вбирає воду й тягнеться до світла",0],["Плата з датчиками та програмою на поличці",1],["Клас і вчителька домовляються, хто чергує",2],["Чергові записують полив ручкою в зошит",3],["Датчик сам вмикає лампу, коли темно",4]]},
+ {id:6,lv:2,type:"order",q:"Шкільний ярмарок: покупець платить карткою за мікрозелень. Розстав кроки в правильному порядку.",
+  items:["Касир вводить суму покупки в термінал","Покупець підносить картку до термінала","Програма термінала зчитує сигнал і перетворює його на команди","Процесор термінала виконує ці команди","На екрані з'являються дії, які треба виконати","Термінал друкує чек — оплату завершено"]},
+ {id:7,lv:2,type:"input",q:"Скільки головних характеристик має інформаційна система? Впиши число.",a:["4","чотири"],hint:"Згадай: призначення, користувачі, …"},
+ {id:8,lv:2,type:"chips",q:"Опиши ІС нашої полички: до якої характеристики належить кожен рядок?",cats:["Призначення","Користувачі","Складові","Технології"],
+  rows:[["Стежити, щоб мікрозелень вчасно поливали",0],["Учні 6 класу та вчителька",1],["Датчики, плата, телефон, застосунок",2],["Wi-Fi та хмарне сховище",3],["Чергові, які поливають лоток",1],["Збирати дані про вологість і світло",0]]},
+ {id:9,lv:2,type:"choice",q:"Що таке вбудоване програмне забезпечення (прошивка)?",
+  o:["Деталь корпусу, яка захищає плату від пилу і вологи","Програма в пам'яті пристрою, яка керує його роботою","Інструкція на папері, яку кладуть у коробку пристрою","Кабель, яким пристрій під'єднують до мережі живлення"],a:1},
+ {id:10,lv:2,type:"input",q:"У якому році заснували бібліотеку Львівського університету — найдавнішу ІС України? Впиши рік.",a:["1608"],hint:"Це початок XVII століття."},
+ {id:11,lv:3,type:"errors",q:"Учень заповнив таблицю складових полички, але зробив 3 помилки. Натисни на рядки з помилками.",
+  head:["Елемент","Складова"],rows:[["Датчик освітлення","Апаратна",0],["Програма, що порівнює вологість з нормою","Апаратна",1],["Модуль Wi-Fi","Апаратна",0],["Застосунок «Поливайко»","Програмна",0],["Лампа для підсвічування","Програмна",1],["Таблиця-журнал на Google Диску","Програмна",0],["Помпа для поливу","Програмна",1]]},
+ {id:12,lv:3,type:"choice",q:"Учень натискає кнопку на поличці, і лампи світять рівно 8 годин, а потім самі вимикаються. Яка це система?",
+  o:["Ручна: усе робить тільки людина","Автоматична: техніка без людини","Автоматизована: людина й техніка","Біологічна: працюють лише клітини"],a:2},
+ {id:13,lv:3,type:"chips",q:"Розсортуй ситуації за участю людини.",cats:["Ручна","Автоматизована","Автоматична"],
+  rows:[["Учень міряє лінійкою паростки й записує в зошит",0],["Учень вводить висоту паростків у таблицю, вона будує графік",1],["Датчик вологості сам вмикає помпу, коли ґрунт сухий",2],["Вчителька рахує врожай на калькуляторі й записує в журнал",1],["Таймер щоранку сам вмикає вентилятор",2],["Чергові пишуть на дошці, хто поливав",0]]},
+ {id:14,lv:3,type:"select",q:"Склади опис ІС «Банкомат біля школи»: обери правильне для кожної характеристики.",
+  rowsOpts:true,
+  rows:[["Призначення",["видавати готівку з картки","вирощувати мікрозелень","друкувати шкільні підручники","вимірювати вологість"],0],
+        ["Користувачі",["рослини на поличці","власники банківських карток","лише вчителі шкільної інформатики","датчики в класі"],1],
+        ["Апаратне забезпечення",["програма для перевірки PIN-коду картки","застосунок «Поливайко»","екран, клавіатура, лоток для купюр","таблиця на Google Диску"],2],
+        ["Програмне забезпечення",["корпус, замок і дверцята сейфа","лоток для купюр","кабель живлення","програма перевірки PIN-коду"],3]]}
+];
+const QUEST=[
+ {n:"Лабораторія насіння",i:"🌱",qs:[
+   {type:"choice",q:"Мікрозелень росте: клітини вбирають воду й світло. Яка це ІС?",o:["Соціальна","Біологічна","Технічна","Автоматична"],a:1},
+   {type:"input",q:"ІС збирає, передає, опрацьовує і … дані. Впиши пропущене дієслово.",a:["зберігає"]}]},
+ {n:"Поличка з датчиками",i:"📡",qs:[
+   {type:"choice",q:"Датчик вологості ґрунту — це яка складова ІС?",o:["Програмна складова","Соціальна складова","Апаратна складова","Біологічна складова"],a:2},
+   {type:"input",q:"Як на сленгу називають програмне забезпечення? Одне слово.",a:["софт"]}]},
+ {n:"Табло поливу",i:"💧",qs:[
+   {type:"choice",q:"Датчик сам вмикає полив, коли ґрунт сухий. Тип системи?",o:["Ручна: усе робить людина","Автоматична: без людини","Автоматизована: разом","Соціальна: лише люди"],a:1},
+   {type:"choice",q:"Клас веде паперовий журнал поливу ручкою. Тип системи?",o:["Автоматична","Автоматизована","Ручна","Технічна"],a:2}]},
+ {n:"Каса ярмарку",i:"💳",qs:[
+   {type:"input",q:"Хто першим вводить суму покупки в термінал? Одне слово.",a:["касир","продавець","продавчиня","касирка"]},
+   {type:"choice",q:"Хто в терміналі виконує команди програми?",o:["Динамік термінала","Процесор термінала","Клавіатура термінала","Платіжна картка"],a:1}]},
+ {n:"Бос: Збій системи",i:"👾",boss:true,qs:[
+   {type:"input",q:"Рік заснування бібліотеки Львівського університету?",a:["1608"]},
+   {type:"choice",q:"Що з переліку НЕ є головною характеристикою ІС?",o:["Призначення","Ціна","Користувачі","Технології"],a:1},
+   {type:"choice",q:"Терміналу оплати потрібна програма і ще…",o:["паперовий журнал","хмарне сховище даних","апаратне забезпечення","соціальна мережа класу"],a:2}]}
+];
+const CARDS=[
+ ["Інформаційна система","Об'єкти, пов'язані між собою, які збирають, передають, опрацьовують і зберігають дані."],
+ ["Апаратне забезпечення","Усі технічні пристрої системи: корпус, плати, мікросхеми, датчики. На сленгу — «залізо»."],
+ ["Програмне забезпечення","Програми, потрібні для роботи пристроїв і всієї системи. На сленгу — «софт»."],
+ ["Вбудоване ПЗ (прошивка)","Програма, записана в пам'ять пристрою, яка керує ним: у терміналі, пральній машині, Micro:bit."],
+ ["Датчик","Пристрій, що вимірює щось у довкіллі (вологість, світло, температуру) і передає дані."],
+ ["Біологічна ІС","Існує завдяки клітинам і живим організмам. Приклад: рослина, яка тягнеться до світла."],
+ ["Технічна ІС","Набір датчиків, пристроїв і програм для отримання, обробки й передачі даних."],
+ ["Соціальна ІС","Система, яка не може існувати без людей і їхнього оточення: клас, родина, бібліотека."],
+ ["Ручна система","Працює лише людина: паперовий журнал, рахунок на пальцях."],
+ ["Автоматизована система","Частину дій виконує техніка, частину — людина: учень вводить дані, програма будує графік."],
+ ["Автоматична система","Працює без участі людини: датчик сам вмикає полив."],
+ ["Підсистема","Менша система всередині великої. Велика ІС може складатися з підсистем різних типів."],
+ ["Головні характеристики ІС","Призначення, користувачі, складові, технології."]
+];
+const LAB=[
+ ["Датчик вологості ґрунту","Збирання","Апаратна"],
+ ["Датчик освітлення","Збирання","Апаратна"],
+ ["Модуль Wi-Fi на платі","Передавання","Апаратна"],
+ ["Мікроконтролер Micro:bit","Опрацювання","Апаратна"],
+ ["Прошивка, що порівнює вологість з нормою","Опрацювання","Програмна"],
+ ["Застосунок «Поливайко», що будує графік","Опрацювання","Програмна"],
+ ["Карта пам'яті на платі","Зберігання","Апаратна"],
+ ["Таблиця-журнал поливу на Google Диску","Зберігання","Програмна"]
+];
+const PROC=["Збирання","Передавання","Опрацювання","Зберігання"];
+window.EX=EX;window.QUEST=QUEST;
+
+// ---------- СТАН ----------
+const S={ex:{},xp:0,stars:0,lab:0,q:{loc:0,step:0,hearts:3,won:[]}};
+function seeded(n){let x=n*9301+49297;return()=>{x=(x*9301+49297)%233280;return x/233280}}
+function shuffle(arr,seed){const r=seeded(seed),a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+const norm=s=>String(s).toLowerCase().replace(/[’ʼ`]/g,"'").replace(/[«»"“”.!]/g,"").replace(/\s+/g," ").trim();
+const $=s=>document.querySelector(s);
+function el(tag,attrs={},...kids){const e=document.createElement(tag);for(const k in attrs){if(k==="class")e.className=attrs[k];else if(k.startsWith("on"))e.addEventListener(k.slice(2),attrs[k]);else e.setAttribute(k,attrs[k])}for(const c of kids){if(c==null)continue;e.append(c.nodeType?c:document.createTextNode(c))}return e}
+
+// ---------- ВКЛАДКИ ----------
+document.querySelectorAll("nav.tabs button").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll("nav.tabs button").forEach(x=>x.setAttribute("aria-selected",x===b));
+  document.querySelectorAll("section.panel[id^=p-]").forEach(p=>p.hidden=p.id!=="p-"+b.dataset.t);
+  if(b.dataset.t==="res")renderRes();
+}));
+
+// ---------- ВПРАВИ ----------
+function renderEx(){
+  const list=$("#exList");list.innerHTML="";
+  EX.forEach(ex=>{
+    const st=S.ex[ex.id]||(S.ex[ex.id]={tries:0,done:false,pts:0});
+    const card=el("div",{class:"card"+(st.done?" done":""),id:"ex"+ex.id});
+    card.append(el("div",{class:"qhead"},el("h3",{},"Вправа "+ex.id),el("span",{class:"lvl"},LV[ex.lv])),el("p",{class:"q"},ex.q));
+    const body=el("div");let get;
+    if(ex.type==="choice"){
+      let sel=null;const box=el("div",{class:"opts"});
+      ex.o.forEach((t,i)=>{const b=el("button",{class:"opt","aria-pressed":"false",onclick:()=>{sel=i;box.querySelectorAll(".opt").forEach((x,j)=>x.setAttribute("aria-pressed",j===i))}},t);box.append(b)});
+      body.append(box);get=()=>sel===ex.a;
+    }else if(ex.type==="input"){
+      const inp=el("input",{type:"text",id:"in"+ex.id,autocomplete:"off","aria-label":"Відповідь"});body.append(inp);
+      get=()=>ex.a.includes(norm(inp.value));
+    }else if(ex.type==="chips"){
+      const pick={};
+      ex.rows.forEach((r,ri)=>{const ch=el("div",{class:"chips"});ex.cats.forEach((c,ci)=>ch.append(el("button",{class:"chip","aria-pressed":"false",onclick:()=>{pick[ri]=ci;ch.querySelectorAll(".chip").forEach((x,j)=>x.setAttribute("aria-pressed",j===ci))}},c)));body.append(el("div",{class:"row"},el("span",{},r[0]),ch))});
+      get=()=>ex.rows.every((r,ri)=>pick[ri]===r[1]);
+    }else if(ex.type==="select"){
+      const sels=[];
+      ex.rows.forEach((r,ri)=>{const opts=ex.rowsOpts?r[1]:ex.opts;const s=el("select",{id:"s"+ex.id+"_"+ri,"aria-label":r[0]},el("option",{value:""},"— обери —"));
+        shuffle(opts.map((o,i)=>[o,i]),ex.id*7+ri).forEach(([o,i])=>s.append(el("option",{value:i},o)));sels.push(s);body.append(el("div",{class:"row"},el("span",{},r[0]),s))});
+      get=()=>ex.rows.every((r,ri)=>sels[ri].value!==""&&+sels[ri].value===(ex.rowsOpts?r[2]:r[1]));
+    }else if(ex.type==="order"){
+      let cur=shuffle(ex.items.map((t,i)=>i),ex.id*13);const wrap=el("div",{class:"order"});
+      const draw=()=>{wrap.innerHTML="";const ol=el("ol");cur.forEach((idx,pos)=>{ol.append(el("li",{},el("span",{},ex.items[idx]),
+        el("button",{class:"mini","aria-label":"Вгору",onclick:()=>{if(pos>0){[cur[pos-1],cur[pos]]=[cur[pos],cur[pos-1]];draw()}}},"↑"),
+        el("button",{class:"mini","aria-label":"Вниз",onclick:()=>{if(pos<cur.length-1){[cur[pos+1],cur[pos]]=[cur[pos],cur[pos+1]];draw()}}},"↓")))});wrap.append(ol)};
+      draw();body.append(wrap);get=()=>cur.every((v,i)=>v===i);
+    }else if(ex.type==="errors"){
+      const picked=new Set();const tb=el("tbody");
+      ex.rows.forEach((r,ri)=>{const tr=el("tr",{tabindex:"0",onclick:()=>{picked.has(ri)?picked.delete(ri):picked.add(ri);tr.classList.toggle("pick")},onkeydown:e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();tr.click()}}},el("td",{},r[0]),el("td",{},r[1]));tb.append(tr)});
+      body.append(el("div",{class:"tblwrap"},el("table",{class:"err"},el("thead",{},el("tr",{},...ex.head.map(h=>el("th",{},h)))),tb)));
+      get=()=>ex.rows.every((r,ri)=>picked.has(ri)===!!r[2]);
+    }
+    card.append(body);
+    const fb=el("div");
+    const btn=el("button",{class:"btn",onclick:()=>{
+      if(st.done)return;
+      if(get()){st.done=true;st.pts=st.tries===0?1:0.5;S.xp+=st.tries===0?10:5;fb.className="fb ok";fb.textContent="Правильно! +"+(st.pts===1?"1 бал":"0,5 бала");card.classList.add("done");btn.disabled=true;hud()}
+      else{st.tries++;fb.className="fb bad";fb.textContent="Ще не так. Спробуй ще раз — за правильну відповідь буде 0,5 бала."+(ex.hint?" "+ex.hint:"")}
+    }},"Перевірити");
+    if(st.done){btn.disabled=true;fb.className="fb ok";fb.textContent="Виконано: "+(st.pts===1?"1 бал":"0,5 бала")}
+    card.append(el("div",{class:"actions"},btn),fb);list.append(card);
+  });
+}
+
+// ---------- КВЕСТ ----------
+function renderMap(){const m=$("#qmap");m.innerHTML="";QUEST.forEach((l,i)=>m.append(el("div",{class:"loc"+(S.q.won.includes(i)?" won":"")+(i===S.q.loc&&!S.q.won.includes(i)?" cur":"")},el("b",{},l.i),l.n)));$("#hearts").textContent="❤️".repeat(S.q.hearts)+"🤍".repeat(3-S.q.hearts)}
+function renderQuest(){
+  renderMap();const box=$("#qbox");box.innerHTML="";
+  if(S.q.won.length===QUEST.length){box.append(el("div",{class:"fb ok"},"🏆 Ти полагодив систему мікроферми! Зірок: "+S.stars+", XP: "+S.xp+". Перейди у «Результат» і збережи рейтинг."));return}
+  const L=QUEST[S.q.loc],Q=L.qs[S.q.step];
+  box.append(el("h3",{},L.i+" "+L.n+" · питання "+(S.q.step+1)+" з "+L.qs.length),el("p",{class:"q"},Q.q));
+  let get;
+  if(Q.type==="choice"){let sel=null;const o=el("div",{class:"opts"});Q.o.forEach((t,i)=>o.append(el("button",{class:"opt","aria-pressed":"false",onclick:()=>{sel=i;o.querySelectorAll(".opt").forEach((x,j)=>x.setAttribute("aria-pressed",j===i))}},t)));box.append(o);get=()=>sel===Q.a}
+  else{const inp=el("input",{type:"text",id:"qin",autocomplete:"off","aria-label":"Відповідь"});box.append(inp);get=()=>Q.a.includes(norm(inp.value))}
+  const fb=el("div");
+  box.append(el("div",{class:"actions"},el("button",{class:"btn",onclick:()=>{
+    if(get()){S.xp+=L.boss?20:10;S.q.step++;
+      if(S.q.step>=L.qs.length){S.q.won.push(S.q.loc);S.stars+=L.boss?2:1;S.q.loc++;S.q.step=0;S.q.hearts=3}
+      hud();renderQuest();
+    }else{S.q.hearts--;
+      if(S.q.hearts<=0){S.q.hearts=3;S.q.step=0;fb.className="fb bad";fb.textContent="Серця скінчилися! Локацію почато заново.";setTimeout(renderQuest,1400);renderMap()}
+      else{fb.className="fb bad";fb.textContent="Неправильно, −1 ❤️. Подумай ще.";renderMap()}}
+  }},"Відповісти")),fb);
+}
+
+// ---------- КАРТКИ ----------
+function renderCards(){const f=$("#flash");CARDS.forEach(([t,d])=>{const c=el("button",{class:"fc","aria-expanded":"false"},el("span",{class:"t"},t),el("span",{class:"d",hidden:""},d));c.addEventListener("click",()=>{const o=c.classList.toggle("open");c.querySelector(".d").hidden=!o;c.setAttribute("aria-expanded",o)});f.append(c)})}
+
+// ---------- КОНСТРУКТОР ----------
+let labBest=0;
+function renderLab(){const g=$("#labgrid");LAB.forEach((r,i)=>{
+  const p=el("select",{id:"lp"+i,"aria-label":"Що робить: "+r[0]},el("option",{value:""},"Що робить?"),...PROC.map(x=>el("option",{},x)));
+  const s=el("select",{id:"ls"+i,"aria-label":"Складова: "+r[0]},el("option",{value:""},"Складова?"),el("option",{},"Апаратна"),el("option",{},"Програмна"));
+  g.append(el("div",{class:"labrow",id:"lr"+i},el("span",{class:"nm"},el("b",{},r[0])),p,s))});
+  const flow=$("#flow");["📡 Датчики","→","📶 Wi-Fi","→","🧠 Micro:bit + прошивка","→","📱 Застосунок","→","🗂️ Журнал на Диску"].forEach(t=>flow.append(t==="→"?el("span",{},"→"):el("span",{class:"s"},t)));
+}
+$("#labCheck").addEventListener("click",()=>{
+  let ok=0;LAB.forEach((r,i)=>{const a=$("#lp"+i).value===r[1],b=$("#ls"+i).value===r[2];ok+=a+b;const row=$("#lr"+i);row.classList.toggle("okr",a&&b);row.classList.toggle("badr",!(a&&b))});
+  const t=$("#labType").value==="Автоматизована";ok+=t;
+  const pct=Math.round(ok/17*100);labBest=Math.max(labBest,pct);S.lab=labBest;
+  $("#labScore").textContent="Правильно "+ok+" з 17 ("+pct+"%). Найкращий результат: "+labBest+"%";
+  const fb=$("#labFb");
+  if(ok===17){fb.className="fb ok";fb.textContent="Систему зібрано правильно! Натисни «Запустити систему».";$("#labRun").disabled=false;S.xp+=30;hud()}
+  else{fb.className="fb bad";fb.textContent="Червоні рядки мають помилку."+(t?"":" Перевір також тип системи: хто ухвалює рішення про полив?")}
+});
+$("#labRun").addEventListener("click",()=>{const s=[...document.querySelectorAll("#flow .s")];s.forEach(x=>x.classList.remove("on"));s.forEach((x,i)=>setTimeout(()=>x.classList.add("on"),i*450));setTimeout(()=>{$("#labFb").textContent="Дані пройшли весь шлях: зібрано → передано → опрацьовано → збережено. Мікрозелень політо вчасно 🌱"},s.length*450)});
+
+// ---------- РЕЗУЛЬТАТ ----------
+function exPts(){return Object.values(S.ex).reduce((a,b)=>a+b.pts,0)}
+function grade(){const e=exPts()/EX.length,l=S.lab/100;if(e===0&&l===0)return 0;return Math.max(1,Math.round(12*(e+l)/2))}
+function hud(){const d=Object.values(S.ex).filter(x=>x.done).length;$("#hudEx").textContent="Вправи: "+d+"/14";$("#hudStar").textContent="⭐ "+S.stars;$("#hudXp").textContent="XP "+S.xp}
+function csvLine(){const f=v=>'"'+String(v).replace(/"/g,'""')+'"';return ["Ім'я","Клас","Тема","Вправи (з 14)","Конструктор %","Зірки","XP","Оцінка"].join(";")+"\n"+[f($("#stName").value||"—"),6,f("ІС: апаратна і програмна складові"),String(exPts()).replace(".",","),S.lab,S.stars,S.xp,grade()||"—"].join(";")}
+function renderRes(){const g=grade();$("#grade").textContent=g||"—";$("#rEx").textContent=String(exPts()).replace(".",",")+" з 14";$("#rLab").textContent=S.lab+"%";$("#rQ").textContent="⭐ "+S.stars+" · XP "+S.xp;$("#csv").value=csvLine()}
+$("#stName").addEventListener("input",()=>$("#csv").value=csvLine());
+$("#copyRes").addEventListener("click",()=>{const t=csvLine();$("#csv").value=t;const done=()=>$("#copyMsg").textContent="Скопійовано";
+  try{navigator.clipboard.writeText(t).then(done,()=>{$("#csv").select();$("#copyMsg").textContent="Виділено — натисни Ctrl+C"})}catch(e){$("#csv").select();$("#copyMsg").textContent="Виділено — натисни Ctrl+C"}});
+
+// ---------- РЕЙТИНГ (спільне сховище) ----------
+let DB=null,ME=null;
+function drawRank(docs){const tb=$("#rankBody");tb.innerHTML="";
+  const rows=docs.map(d=>d.data()).filter(Boolean).sort((a,b)=>(b.stars-a.stars)||(b.xp-a.xp)).slice(0,40);
+  if(!rows.length){tb.append(el("tr",{},el("td",{colspan:"5",class:"muted"},"Поки порожньо. Будь першим — збережи свій результат!")));return}
+  rows.forEach((r,i)=>tb.append(el("tr",{},el("td",{},String(i+1)),el("td",{},String(r.nick||"?")),el("td",{},String(r.stars|0)),el("td",{},String(r.xp|0)),el("td",{},String(r.grade||"—")))))}
+(async()=>{
+  try{
+    if(!window.claude||!claude.use)throw 0;
+    const [db,user]=await Promise.all([claude.use("db"),claude.use("user")]);
+    if(!db||!user)throw 0;DB=db;ME=await user.id();
+    db.collection("rating").onSnapshot(s=>drawRank(s.docs),()=>{$("#rankBody").innerHTML='<tr><td colspan="5" class="muted">Рейтинг зараз недоступний.</td></tr>'});
+  }catch(e){$("#rankBody").innerHTML='<tr><td colspan="5" class="muted">Рейтинг працює, коли сторінку відкрито з увійденим акаунтом.</td></tr>';$("#saveRank").disabled=true}
+})();
+$("#saveRank").addEventListener("click",async()=>{
+  const nick=$("#nick").value.trim().slice(0,16);if(!nick){$("#rankMsg").textContent="Введи нікнейм.";return}
+  if(!DB||!ME){$("#rankMsg").textContent="Рейтинг недоступний.";return}
+  try{await DB.collection("rating").doc(ME).set({nick,stars:S.stars,xp:S.xp,grade:grade()||0,at:new Date().toISOString()});$("#rankMsg").textContent="Збережено!"}
+  catch(e){$("#rankMsg").textContent="Не вдалося зберегти. Спробуй ще раз пізніше."}
+});
+
+renderEx();renderQuest();renderCards();renderLab();hud();
+</script>
+
+<script>
+/* ===== «Надіслати вчителю» (Google Форма журналу) — універсальна кнопка ===== */
+(function(){
+const FORM_PREFILL="https://docs.google.com/forms/d/e/1FAIpQLSeaDGNzqpEMjZyDt4WUwg3k3FAhGGW4pG1E8IcOk8b4LQsBVw/viewform?usp=pp_url&entry.1997531456=test";
+const GRADE=6, TOPIC="Апаратна і програмна складові ІС";
+const clean=v=>String(v==null?"":v).replace(/[|\n\r]/g," ").trim()||"—";
+const hm=t=>{t=Math.max(0,Math.round(t));return Math.floor(t/60)+" хв "+String(t%60).padStart(2,"0")+" с"};
+function getRow(){
+  try{ if(typeof buildResultRow==="function") return buildResultRow(); }catch(e){}
+  try{ if(typeof resRow==="function") return resRow(); }catch(e){}
+  try{ if(typeof csvLine==="function"){ const p=csvLine().split("\n"); const sp=s=>s.split(";").map(x=>x.replace(/^"|"$/g,"").replace(/""/g,'"'));
+    return {header:sp(p[0]),row:sp(p[1]||"")}; } }catch(e){}
+  return {header:[],row:[]};
+}
+function extra(){
+  try{ if(typeof window.G6compute==="function"){ return (window.G6&&window.G6.frozen)||window.G6compute(); } }catch(e){}
+  return null;
+}
+function getGrade(o,x){
+  if(x&&x.grade!=null) return x.grade;
+  try{ if(typeof computeGrade12==="function"){ const g=computeGrade12(); if(g) return g; } }catch(e){}
+  try{ if(typeof grade==="function"){ const g=grade(); if(g) return g; } }catch(e){}
+  const i=o.header.findIndex(h=>/Оцінка/i.test(h)); return i>=0&&o.row[i]!==""?o.row[i]:"—";
+}
+function line(name,cls){
+  const o=getRow(), x=extra(), g=getGrade(o,x);
+  let ok=0,tot=0; const det=[];
+  o.header.forEach((h,i)=>{ if(i<3&&/ПІБ|Ім'я|Клас|Дата/i.test(h)) return;
+    const v=String(o.row[i]==null?"—":o.row[i]); det.push(clean(h).replace(/[,:]/g," ")+":"+clean(v).replace(/[,]/g,";"));
+    const m=v.match(/^(\d+)\s*\/\s*(\d+)$/); if(m){ok+=+m[1];tot+=+m[2];} });
+  const done=x?!!(window.G6&&window.G6.frozen):(/^\d+$/.test(String(g))&&+g>0);
+  return ["v1",GRADE,TOPIC,clean(cls),clean(name),1,"—",clean(g),tot?ok+" з "+tot:"—","—",
+    x&&x.errors!=null?x.errors:"—", x&&x.T?hm(x.T):"—","—",x&&x.tooFast?"занадто швидко":"",done?"завершено":"не завершено",det.join(",")].join("|");
+}
+const st=document.createElement("style");
+st.textContent=`
+#jFab{position:fixed;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:9998;
+  background:#ffb020;color:#2a1a00;border:0;border-radius:999px;padding:13px 20px;font:800 16px system-ui,"Segoe UI",sans-serif;
+  box-shadow:0 8px 24px rgba(0,0,0,.35);cursor:pointer}
+#jFab:hover{filter:brightness(1.06)} #jFab:focus-visible{outline:3px solid #2f5bea;outline-offset:3px}
+#jPanel{position:fixed;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:9999;
+  width:min(360px,calc(100vw - 32px));background:#fff;color:#1d2433;border-radius:16px;padding:16px;
+  box-shadow:0 16px 40px rgba(0,0,0,.4);font:15px/1.45 system-ui,"Segoe UI",sans-serif;display:flex;flex-direction:column;gap:10px}
+#jPanel b.h{font-size:17px}
+#jPanel input{width:100%;box-sizing:border-box;border:1px solid #c8cfdc;border-radius:10px;padding:10px 12px;font:inherit;color:#1d2433;background:#f7f9fc}
+#jPanel .jrow{display:flex;gap:8px} #jPanel .jrow input:last-child{flex:0 0 110px}
+#jPanel a.jgo{display:block;text-align:center;background:#2f7d4f;color:#fff;text-decoration:none;font-weight:800;border-radius:10px;padding:11px}
+#jPanel .jm{font-size:13px;color:#5b6578} #jPanel .jx{position:absolute;top:8px;right:10px;border:0;background:none;font-size:20px;cursor:pointer;color:#5b6578}`;
+document.head.appendChild(st);
+const fab=document.createElement("button"); fab.id="jFab"; fab.type="button"; fab.textContent="📤 Надіслати вчителю";
+const pn=document.createElement("div"); pn.id="jPanel"; pn.hidden=true;
+pn.innerHTML=`<button class="jx" type="button" aria-label="Закрити">×</button><b class="h">📤 Надіслати результат учителю</b>
+<div class="jm">Надсилай, коли пройдеш усі вправи й тест. Вхід в акаунт не потрібен.</div>
+<div class="jrow"><input id="jName" placeholder="Прізвище та ім'я" autocomplete="off"><input id="jCls" placeholder="Клас, 8-А" maxlength="6" autocomplete="off"></div>
+<a class="jgo" id="jSend" href="#" target="_blank" rel="noopener">Відкрити форму з результатом</a>
+<div class="jm" id="jMsg">Відкриється Google Форма з уже записаним результатом — натисни в ній «Надіслати».</div>`;
+document.body.appendChild(fab); document.body.appendChild(pn);
+const nm=pn.querySelector("#jName"), cl=pn.querySelector("#jCls"), a=pn.querySelector("#jSend"), msg=pn.querySelector("#jMsg");
+fab.addEventListener("click",()=>{ pn.hidden=!pn.hidden; if(pn.hidden) return;
+  const o=getRow(); const n=String(o.row[0]||""), c=String(o.row[1]||"");
+  if(!nm.value&&n&&!/без імені|^—$/.test(n)) nm.value=n; if(!cl.value&&c&&c!=="—"&&!/^\d$/.test(c)) cl.value=c;
+  (nm.value?cl:nm).focus(); });
+pn.querySelector(".jx").addEventListener("click",()=>pn.hidden=true);
+a.addEventListener("click",e=>{
+  if(!nm.value.trim()||!cl.value.trim()){ e.preventDefault(); msg.textContent="Спершу впиши прізвище, ім'я та клас ☝️"; (nm.value.trim()?cl:nm).focus(); return; }
+  a.href=FORM_PREFILL.replace(/(entry\.\d+=)[^&]*/,(m,p)=>p+encodeURIComponent(line(nm.value.trim(),cl.value.trim())));
+  msg.textContent="Форму відкрито в новій вкладці — натисни там «Надіслати» ✔";
+});
+})();
+</script>
+
+</body></html>

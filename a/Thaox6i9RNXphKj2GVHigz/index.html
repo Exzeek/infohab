@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Розумна кавомашина · 9 клас</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;800&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f6fb;--surface:#fff;--surface-2:#e9edf5;--ink:#18202f;--muted:#5b6578;--line:#dfe4ee;--accent:#2f5bea;--class-5:#c2255c;--ok:#2e7d32;--ok-bg:#e3f3e4;--bad:#b3261e;--bad-bg:#fbe7e5;--warn:#b45309;--send:#ffb020;--send-ink:#2a1a00;
+--sea1:#4fb3e8;--sea2:#2b86c8;--fd:"Unbounded","Arial Black",system-ui,sans-serif;--fb:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;--fm:"JetBrains Mono",ui-monospace,Consolas,monospace;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#11141b;--surface:#1a1f2a;--surface-2:#232a38;--ink:#e8ecf4;--muted:#9aa4b6;--line:#2b3242;--accent:#7d9bff;--class-5:#f06595;--ok:#7fd283;--ok-bg:#1f3522;--bad:#ff8a80;--bad-bg:#3a1f1d;--warn:#f2b46b;--sea1:#2a6f9e;--sea2:#173f63;color-scheme:dark}}
+:root[data-theme=dark]{--bg:#11141b;--surface:#1a1f2a;--surface-2:#232a38;--ink:#e8ecf4;--muted:#9aa4b6;--line:#2b3242;--accent:#7d9bff;--class-5:#f06595;--ok:#7fd283;--ok-bg:#1f3522;--bad:#ff8a80;--bad-bg:#3a1f1d;--warn:#f2b46b;--sea1:#2a6f9e;--sea2:#173f63;color-scheme:dark}
+[hidden]{display:none!important}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.45 var(--fb)}
+.wrap{max-width:860px;margin:0 auto;padding:16px 14px 110px}
+.eyebrow{font:800 12px/1.3 var(--fb);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font:800 clamp(26px,6vw,40px)/1.1 var(--fd);color:var(--cls);margin:6px 0 12px}
+h2{font:700 20px/1.25 var(--fd);margin:0 0 8px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;position:relative;overflow:hidden}
+.card.top::before{content:"";position:absolute;left:0;right:0;top:0;height:5px;background:var(--cls)}
+.story{display:flex;gap:12px;align-items:center}
+.story svg{flex:0 0 96px;height:96px}
+.story p{margin:0}
+.hud{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.hud span{background:var(--surface-2);border-radius:999px;padding:5px 12px;font-weight:800;font-size:15px}
+.tabs{position:sticky;top:0;z-index:20;background:var(--bg);display:flex;gap:6px;padding:8px 0;margin-bottom:8px;overflow-x:auto}
+.tabs button{flex:1 0 auto;border:0;border-radius:999px;padding:9px 14px;font:800 15px var(--fb);background:var(--surface-2);color:var(--ink);cursor:pointer;position:relative}
+.tabs button[aria-selected=true]{background:var(--cls);color:#fff}
+.dot{position:absolute;top:4px;right:6px;width:9px;height:9px;border-radius:50%;background:var(--send);animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.2}}
+button{font-family:var(--fb)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btn{border:0;border-radius:12px;padding:10px 16px;font:800 16px var(--fb);cursor:pointer;background:var(--cls);color:#fff}
+.btn.ghost{background:var(--surface-2);color:var(--ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.muted{color:var(--muted)}
+.msg{border-radius:12px;padding:10px 12px;margin-top:10px;font-weight:700;border:2px solid}
+.msg.ok{background:var(--ok-bg);color:var(--ok);border-color:var(--ok)}
+.msg.bad{background:var(--bad-bg);color:var(--bad);border-color:var(--bad)}
+.badge{display:inline-block;background:var(--cls);color:#fff;border-radius:999px;padding:2px 10px;font:800 13px var(--fb)}
+/* маршрут */
+.route{width:100%;height:auto;display:block;margin:4px 0 10px}
+.route .node{cursor:pointer}
+.route .node circle{stroke:var(--surface);stroke-width:3}
+.route .cur circle{animation:pulse 1.4s infinite;transform-box:fill-box;transform-origin:center}
+@keyframes pulse{50%{transform:scale(1.18)}}
+/* море */
+.seaTabs{display:flex;gap:6px;margin:8px 0}
+.seaTabs button{border:2px solid var(--line);background:var(--surface-2);color:var(--ink);border-radius:999px;padding:4px 12px;font:800 14px var(--fb);cursor:pointer}
+.seaTabs button.on{border-color:var(--cls)}
+.seaTabs button.done{background:var(--ok-bg);color:var(--ok);border-color:var(--ok)}
+.board{width:100%;max-width:420px;display:block;margin:0 auto;border-radius:14px;touch-action:manipulation}
+.boat{transition:transform .26s ease-in-out}
+.shake{animation:shake .45s}
+@keyframes shake{20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.tapcell{cursor:pointer}
+.tapcell:hover{fill:rgba(255,255,255,.25)}
+.coin{transition:opacity .3s,transform .3s}
+/* редактор */
+.ed{display:grid;gap:10px;margin-top:12px}
+@media(min-width:760px){.ed{grid-template-columns:200px 1fr}}
+.pal{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
+.pal button{border:2px solid var(--line);background:var(--surface-2);color:var(--ink);border-radius:10px;padding:8px 10px;font:800 15px var(--fb);cursor:pointer}
+.pal button.ctl{border-color:var(--cls)}
+.prog{background:var(--surface-2);border-radius:14px;padding:10px;min-height:90px}
+.blk{background:var(--surface);border:2px solid var(--line);border-left:6px solid #2b86c8;border-radius:10px;padding:6px 8px;margin:5px 0;display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-weight:800}
+.blk.c{border-left-color:#e0a21b;display:block}
+.blk.i{border-left-color:#8e44c9;display:block}
+.blk .hd{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.blk.run{box-shadow:0 0 0 3px var(--cls)}
+.blk.picked{box-shadow:0 0 0 3px var(--warn)}
+.chip{border:2px solid var(--line);background:var(--surface-2);color:var(--ink);border-radius:8px;padding:2px 8px;font:800 15px var(--fb);cursor:pointer;min-width:34px}
+.chip.num{font-family:var(--fm)}
+.x{margin-left:auto;border:0;background:none;color:var(--muted);font-size:18px;cursor:pointer;padding:2px 6px}
+.body{margin:4px 0 2px 2px;padding-left:6px;border-left:3px dashed var(--line)}
+.lab{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:4px}
+.slot{border:2px dashed var(--line);border-radius:10px;padding:6px;color:var(--muted);font-weight:800;font-size:14px;cursor:pointer;text-align:center;margin-top:4px;background:none;width:100%}
+.slot.on{border-color:var(--cls);color:var(--cls)}
+.cnt{font-weight:800}
+.cnt.over{color:var(--bad)}
+.hp{height:16px;background:var(--surface-2);border-radius:999px;overflow:hidden;margin:8px 0}
+.hp i{display:block;height:100%;background:linear-gradient(90deg,#7b2ff7,var(--cls));transition:width .6s}
+.stars{font-size:34px;letter-spacing:6px;text-align:center;min-height:44px}
+.stars span{display:inline-block;animation:pop .45s both}
+@keyframes pop{from{transform:scale(0) rotate(-30deg)}to{transform:scale(1)}}
+.fx{position:fixed;font:800 22px var(--fd);color:var(--cls);pointer-events:none;animation:up 1.1s forwards;z-index:60}
+@keyframes up{to{transform:translateY(-70px);opacity:0}}
+#conf{position:fixed;inset:0;pointer-events:none;z-index:50}
+/* картки */
+.banner{background:var(--cls);color:#fff;border-radius:16px;padding:14px 16px;margin-bottom:12px}
+.banner b.big{display:block;font:800 19px/1.25 var(--fd);margin:4px 0 8px}
+.banner ul{margin:0;padding-left:20px;font-weight:800;text-transform:uppercase;font-size:14px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+.fc{perspective:800px;height:150px;border:0;background:none;padding:0;cursor:pointer;font:inherit;color:inherit}
+.fc .in{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d}
+.fc.flip .in{transform:rotateY(180deg)}
+.fc .f,.fc .b{position:absolute;inset:0;backface-visibility:hidden;border-radius:14px;padding:10px;display:flex;align-items:center;justify-content:center;text-align:center;border:1px solid var(--line)}
+.fc .f{background:var(--surface);font:800 17px/1.2 var(--fd);border-top:5px solid var(--cls)}
+.fc .b{background:var(--surface-2);transform:rotateY(180deg);font-size:15px;font-weight:700}
+.bar{height:10px;background:var(--surface-2);border-radius:999px;overflow:hidden;margin:6px 0 12px}
+.bar i{display:block;height:100%;background:var(--cls);transition:width .4s}
+/* результат */
+.big{font:800 64px/1 var(--fd);color:var(--cls);text-align:center}
+.lvl{text-align:center;font-weight:800;margin-bottom:10px}
+table{width:100%;border-collapse:collapse;font-size:15px}
+td,th{padding:6px 4px;border-bottom:1px solid var(--line);text-align:left}
+input[type=text]{font:700 16px var(--fb);padding:9px 12px;border-radius:10px;border:2px solid var(--line);background:var(--surface-2);color:var(--ink);width:100%}
+.warnTxt{color:var(--warn);font-weight:800}
+.fab{position:fixed;right:14px;bottom:14px;z-index:40;background:var(--send);color:var(--send-ink);border:0;border-radius:999px;padding:12px 18px;font:800 16px var(--fb);box-shadow:0 8px 24px rgba(0,0,0,.25);cursor:pointer}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:70;display:flex;align-items:center;justify-content:center;padding:14px}
+.modal .card{max-width:420px;width:100%}
+.sendBtn{background:var(--send);color:var(--send-ink)}
+.theme{position:absolute;right:14px;top:14px;border:0;background:var(--surface-2);color:var(--ink);border-radius:999px;width:40px;height:40px;font-size:18px;cursor:pointer}
+.head{position:relative}.head h1,.head .eyebrow{padding-right:48px}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:14px;color:var(--muted);justify-content:center;margin-top:6px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+:root{--cls:var(--cls-l,#c2255c)}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--cls:var(--cls-d,#f06595)}}
+:root[data-theme=dark]{--cls:var(--cls-d,#f06595)}
+.steps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;margin:4px 0 12px}
+.stp{border:0;background:var(--surface-2);color:var(--ink);border-radius:12px;padding:6px 2px;font:700 12px/1.2 var(--fb);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
+.stp b{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--surface);font:800 14px var(--fb)}
+.stp.on{outline:3px solid var(--cls)}.stp.on b{animation:pulse 1.4s infinite}
+.stp.done b{background:var(--cls);color:#fff}
+.stp:disabled{opacity:.45;cursor:not-allowed}
+.rule{display:flex;flex-wrap:wrap;gap:10px;align-items:center;background:var(--surface-2);border-radius:14px;padding:10px;margin-bottom:10px}
+.rule>div{display:flex;flex-direction:column;align-items:center;font-weight:800;font-size:13px}
+.rule p{margin:0;flex:1 1 200px}
+.grid12{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.bcard{border:3px solid var(--line);background:var(--surface);color:var(--ink);border-radius:14px;padding:6px 4px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;font:inherit}
+.bcard.static{cursor:default}
+.bcard.marked{border-color:var(--warn);box-shadow:0 0 0 3px var(--warn) inset}
+.bcard.wrong{border-color:var(--bad);background:var(--bad-bg);animation:shake .45s}
+.bcard.right{border-color:var(--ok);background:var(--ok-bg)}
+.lb{font:800 12px var(--fb);border-radius:999px;padding:2px 8px;background:var(--surface-2)}
+.chip.sel{background:var(--cls);color:#fff;border-color:var(--cls)}
+.plot{width:100%;max-width:440px;display:block;margin:6px auto}
+.rg{animation:fadeIn .4s both}
+@keyframes fadeIn{from{opacity:0}}
+.qcard{background:var(--surface-2);border-radius:14px;padding:10px 12px;margin:10px 0}
+.qcard p{margin:0 0 8px}
+.opts{display:grid;gap:6px}
+.opt{border:2px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:9px 12px;font:700 16px var(--fb);text-align:left;cursor:pointer}
+.opt.right{border-color:var(--ok);background:var(--ok-bg);color:var(--ok)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-bg);color:var(--bad)}
+.opt:disabled{cursor:default}
+
+.heroE{font-size:48px;line-height:1;flex:0 0 auto}.steps{grid-template-columns:repeat(4,minmax(0,1fr))}.stp span{overflow-wrap:anywhere;font-size:12px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.grid1{display:grid;gap:6px}
+.dv{border:2px solid var(--line);background:var(--surface);color:var(--ink);border-radius:12px;padding:8px;font:700 15px var(--fb);cursor:pointer;display:flex;flex-direction:column;gap:3px;text-align:left}
+.dv small{font-size:12px;color:var(--muted)}.dv.s,.dv.c{border-color:var(--cls);background:var(--surface-2)}.dv.a,.dv.o{border-color:#e0661b;background:var(--surface-2)}
+.ordL{font-weight:700}
+.code{background:#11141b;color:#cfe3ff;font:500 14px/1.5 var(--fm);padding:10px;border-radius:12px;overflow-x:auto}.code b{color:#ffd23f}
+.ti{width:64px;text-align:center;font-size:17px;padding:4px;border-radius:8px;border:2px solid var(--line);background:var(--surface-2);color:var(--ink)}
+.chart{display:block;margin:8px auto;width:100%;max-width:440px;background:var(--surface-2);border-radius:12px}
+</style>
+</head>
+<body>
+<canvas id="conf"></canvas>
+<div class="wrap">
+ <header class="head">
+  <button class="theme" id="themeBtn" aria-label="Змінити тему">🌓</button>
+  <div class="eyebrow" id="eyebrow">Інформатика · Тиждень ШІ · 5–7 клас</div>
+  <h1>Розумна кавомашина</h1>
+  <div class="card top story"><div class="heroE" aria-hidden="true">☕🤖</div><p><b>Кав'ярня «Байт» збирає власну розумну кавомашину!</b> Усередині — мікроконтролер, датчики й нагрівач. Розберись у деталях, у типах систем керування і запрограмуй контролер так, щоб еспресо завжди був ідеальним.</p></div>
+  <div class="hud" aria-live="polite"><span id="hLv">☕ 0/4</span><span id="hXp">XP 0</span><span id="hTm">⏱ 0:00</span></div>
+ </header>
+ <nav class="tabs" role="tablist">
+  <button role="tab" aria-selected="true" data-tab="map">☕ Етапи</button>
+  <button role="tab" aria-selected="false" data-tab="cards">🃏 Картки<i class="dot" id="cardDot"></i></button>
+  <button role="tab" aria-selected="false" data-tab="res">🏆 Результат</button>
+ </nav>
+ <section id="tab-map">
+  <div class="steps" id="steps"></div>
+  <div class="card top" id="stage"></div>
+ </section>
+ <section id="tab-cards" hidden>
+  <div class="banner">⚡ Стоп! Прочитай це першим
+   <b class="big">КАРТКИ — ТВОЯ ЗАКОННА ШПАРГАЛКА!</b>
+   <ul><li>Усі відповіді тут</li><li>Менше помилок — вища оцінка</li><li>Спершу пригадай — потім відкрий</li><li>+2 XP за картку, +10 XP за всі</li></ul>
+   <p style="margin:8px 0 0">Датчик, виконавчий механізм, замкнений контур і гістерезис — ключ до всіх етапів.</p>
+  </div>
+  <div class="row"><b id="cardCnt">Відкрито 0 з 12</b></div>
+  <div class="bar"><i id="cardBar" style="width:0"></i></div>
+  <div class="cards" id="cards"></div>
+ </section>
+ <section id="tab-res" hidden>
+  <div class="card top">
+   <h2>Твій результат</h2>
+   <div class="big" id="rGrade">—</div><div class="lvl" id="rLvl"></div>
+   <table id="rTable"></table>
+   <div class="row" style="margin-top:12px"><button class="btn" id="finishBtn">Завершити й отримати оцінку</button><button class="btn ghost" id="againBtn">Пройти знову</button></div>
+  </div>
+  <div class="card" style="margin-top:12px">
+   <h2>📤 Надіслати вчителю</h2>
+   <p class="muted" style="margin-top:0">Впиши прізвище, ім'я та клас. Потім натисни «Відкрити форму» і в ній — «Надіслати».</p>
+   <div style="display:grid;gap:8px"><input type="text" id="sName" placeholder="Прізвище та ім'я" autocomplete="off"><input type="text" id="sCls" placeholder="Клас, напр. 9-А" autocomplete="off"></div>
+   <div class="row" style="margin-top:10px"><button class="btn sendBtn" id="sendBtn">Надіслати вчителю</button></div>
+   <div id="sendMsg"></div>
+  </div>
+  <div class="card" style="margin-top:12px">
+   <h2>🏅 Рейтинг класу</h2>
+   <p class="muted" style="margin-top:0">Лише нікнейм, без прізвища.</p>
+   <div class="row"><input type="text" id="nick" placeholder="Нікнейм" maxlength="18" style="flex:1"><button class="btn" id="rankSave">Зберегти</button></div>
+   <div id="rankMsg" class="muted"></div>
+   <table><thead><tr><th>#</th><th>Нікнейм</th><th>XP</th><th>Етапи</th></tr></thead><tbody id="rankBody"><tr><td colspan="4" class="muted">Завантаження…</td></tr></tbody></table>
+  </div>
+ </section>
+</div>
+<button class="fab" id="fab">📤 Надіслати вчителю</button>
+<div class="modal" id="modal" hidden><div class="card top"><h2>📤 Надіслати вчителю</h2>
+ <div style="display:grid;gap:8px"><input type="text" id="mName" placeholder="Прізвище та ім'я"><input type="text" id="mCls" placeholder="Клас, напр. 9-А"></div>
+ <div class="row" style="margin-top:10px"><button class="btn sendBtn" id="mSend">Надіслати</button><button class="btn ghost" id="mClose">Закрити</button></div><div id="mMsg"></div></div></div>
+
+<script>"use strict";
+const NORM=18*60;
+const TITLE="Розумна кавомашина (9 кл, Р1 Т1–2, гра)";
+const FORM="https://docs.google.com/forms/d/e/1FAIpQLSeaDGNzqpEMjZyDt4WUwg3k3FAhGGW4pG1E8IcOk8b4LQsBVw/viewform?usp=pp_url&entry.1997531456=";
+const KEY="g9-mcu-coffee";const GR=9;
+document.documentElement.style.setProperty("--cls-l","#0f8a8a");document.documentElement.style.setProperty("--cls-d","#3cc0bf");
+document.getElementById("eyebrow").textContent="Інформатика · 9 клас · Розділ 1 · Теми 1–2 · Гра";
+const CARDS=[["Мікроконтролер","Маленький комп'ютер на одній мікросхемі, що керує пристроєм"],["Датчик","Вимірює фізичну величину: температуру, рух, світло"],["Виконавчий механізм","Робить дію: гріє, крутить, світить"],["Система керування","Компоненти, що разом керують процесом"],["Відкритий контур","Результат НЕ впливає на керування: таймер"],["Замкнений контур","Датчик повертає результат — система сама підлаштовується"],["Зворотний зв'язок","Інформація з виходу, що повертається на вхід"],["Поріг","Значення, при якому контролер змінює дію"],["Гістерезис","Два пороги (увімк/вимк), щоб пристрій не «клацав» постійно"],["Цикл контролера","Зчитати → порівняти → діяти → повторити"],["IoT","Інтернет речей: пристрої з датчиками, підключені до мережі"],["Перерегулювання","Величина «проскакує» поріг через інерцію"]];
+const DEV=[["🌡️ Датчик температури","s"],["🔥 Нагрівач","a"],["👋 Датчик руху","s"],["💧 Насос","a"],["💡 LED-індикатор","a"],["☀️ Датчик освітленості","s"],["⚙️ Сервопривід","a"],["💦 Датчик рівня води","s"]];
+const SYS=[["🧺 Пральна машина пере рівно 60 хв за таймером","o"],["❄️ Кондиціонер тримає 22 °C за датчиком","c"],["🍞 Тостер смажить 2 хвилини за таймером","o"],["☕ Кавомашина гріє воду, поки датчик не покаже 92 °C","c"]];
+const LOOP=["Зчитати датчик температури","Порівняти з порогами","Увімкнути або вимкнути нагрівач","Почекати 1 секунду","Повторити з початку"];
+const BAND=[88,98];
+const LV=[
+ {name:"Датчик чи механізм",concept:"Апаратні засоби",story:"Кав'ярня «Байт» збирає розумну кавомашину на мікроконтролері. Розсортуй деталі: натискай на картку, щоб перемкнути її між «Датчик» і «Виконавчий механізм».",hint:"Датчик ВИМІРЮЄ, механізм РОБИТЬ."},
+ {name:"Відкритий чи замкнений",concept:"Системи керування",story:"Яка система має зворотний зв'язок? Натискай, щоб обрати: відкритий чи замкнений контур.",hint:"Є датчик, що повертає результат на керування → замкнений."},
+ {name:"Цикл контролера",concept:"Алгоритм керування",story:"Мікроконтролер виконує свою програму по колу тисячі разів. Розстав кроки циклу в правильному порядку.",hint:"Спершу дізнатися, що відбувається, потім вирішити, потім діяти."},
+ {name:"Пороги нагріву",concept:"Програмуємо контролер",story:"Еспресо смакує, коли вода 88–98 °C. Задай два пороги: нижче якого нагрівач <b>вмикається</b> і вище якого <b>вимикається</b>. Запусти симуляцію: після розігріву температура має лишатися в зеленій смузі.",hint:"Нагрівач має інерцію: після вимкнення температура ще трохи росте. Спробуй 90 і 95."}
+];
+const $=s=>document.querySelector(s);
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const hm=s=>{s=Math.max(0,Math.round(s));return Math.floor(s/60)+" хв "+String(s%60).padStart(2,"0")+" с"};
+const clean=v=>String(v==null?"":v).replace(/[|\r\n]+/g," ").trim();
+const dec=n=>String(Math.round(n*100)/100).replace(".",",");
+function store(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+function load(k,d){try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}}
+const STAGES=LV.map((l,i)=>["Л"+(i+1),l.name]);
+function fresh(){return {st:LV.map(()=>({done:false,tries:0,err:0,pts:0})),cur:0,xp:0,t0:null,t1:null,frozen:false,cards:[],cardsBonus:false,dev:DEV.map(()=>""),sys:SYS.map(()=>""),ord:[],th:["",""]}}
+let S=load(KEY,null)||fresh();let attempt=load(KEY+"-attempt",1);
+function save(){store(KEY,S)}
+function touch(){if(!S.t0&&!S.frozen){S.t0=Date.now();save()}}
+function elapsed(){if(!S.t0)return 0;return ((S.t1||Date.now())-S.t0)/1000}
+function share(){return S.st.reduce((a,s)=>a+s.pts,0)/S.st.length}
+function errs(){return S.st.reduce((a,s)=>a+s.err,0)}
+function grade(){const sh=share(),e=errs(),T=elapsed();const base=12*sh;const ePen=Math.min(3,Math.max(0,(e-2)*0.25));const tPen=T<=NORM?0:(T<=1.5*NORM?1:2);
+ let g=Math.round(base-ePen-tPen);if(!(sh>=0.95&&e<=2&&T<=NORM))g=Math.min(g,11);return {g:Math.max(1,g),base,ePen,tPen,T,sh,e,tooFast:T<0.3*NORM}}
+function hud(){const d=S.st.filter(s=>s.done).length;$("#hLv").textContent="☕ "+d+"/"+LV.length;$("#hXp").textContent="XP "+S.xp;const T=elapsed();$("#hTm").textContent="⏱ "+Math.floor(T/60)+":"+String(Math.floor(T%60)).padStart(2,"0");$("#hTm").style.color=T>NORM?"var(--warn)":""}
+setInterval(hud,1000);
+function floatTxt(txt,el){const r=(el||document.body).getBoundingClientRect();const d=document.createElement("div");d.className="fx";d.textContent=txt;d.style.left=(r.left+r.width/2-30)+"px";d.style.top=Math.max(60,r.top+20)+"px";document.body.appendChild(d);setTimeout(()=>d.remove(),1200)}
+function confetti(){if(reduce)return;const c=$("#conf"),x=c.getContext("2d");c.width=innerWidth;c.height=innerHeight;const cols=["#0f8a8a","#ffb020","#c2255c","#2b86c8","#f5c518"];
+ const P=Array.from({length:110},()=>({x:Math.random()*c.width,y:-20-Math.random()*c.height*.5,v:2+Math.random()*4,a:Math.random()*6,s:5+Math.random()*6,c:cols[Math.random()*5|0]}));let f=0;
+ (function tick(){x.clearRect(0,0,c.width,c.height);P.forEach(p=>{p.y+=p.v;p.a+=.1;x.fillStyle=p.c;x.save();x.translate(p.x+Math.sin(p.a)*8,p.y);x.rotate(p.a);x.fillRect(-p.s/2,-p.s/2,p.s,p.s*.6);x.restore()});if(++f<150)requestAnimationFrame(tick);else x.clearRect(0,0,c.width,c.height)})()}
+// ===== Симуляція =====
+function simulate(lo,hi){let T=20,on=false;const pts=[];for(let t=0;t<=150;t++){if(T<lo)on=true;else if(T>hi)on=false;pts.push([t,T,on]);T=T+(on?2.5:0)-(T-20)*0.015}return pts}
+function simOk(pts){return pts.filter(p=>p[0]>=60).every(p=>p[1]>=BAND[0]&&p[1]<=BAND[1])}
+
+let ordSh=null,anim=null;
+function drawSteps(){const box=$("#steps");box.innerHTML=STAGES.map((s,i)=>{const st=S.st[i];const open=i===0||S.st[i-1].done;
+ return `<button class="stp${i===S.cur?" on":""}${st.done?" done":""}" data-i="${i}" ${open?"":"disabled"}><b>${st.done?"✓":i+1}</b><span>${s[1]}</span></button>`}).join("");
+ box.querySelectorAll(".stp").forEach(b=>b.onclick=()=>{S.cur=+b.dataset.i;save();render()})}
+function fb(cls,t){$("#fb").innerHTML=`<div class="msg ${cls}" role="status">${t}</div>`}
+const tp=t=>t===0?1:t===1?0.5:0;
+function win(msg){const st=S.st[S.cur];st.done=true;st.pts=tp(st.tries);const gain=10+Math.round(st.pts*10);S.xp+=gain;save();floatTxt("+"+gain+" XP",$("#stage"));confetti();fb("ok",msg);$("#nextRow").hidden=false;$("#chk").disabled=true;drawSteps();hud()}
+function fail(n,msg){const st=S.st[S.cur];st.tries++;st.err+=n||1;save();fb("bad",msg);$("#stage").classList.add("shake");setTimeout(()=>$("#stage").classList.remove("shake"),450);$("#skip").hidden=!(st.tries>=3);hud()}
+function drawChart(pts,upto){const c=$("#ch");if(!c)return;const W=c.width,H=c.height,x=c.getContext("2d");const X=t=>30+t/150*(W-40),Y=v=>H-20-(v-10)/100*(H-30);
+ x.clearRect(0,0,W,H);x.fillStyle="rgba(46,157,74,.18)";x.fillRect(X(0),Y(BAND[1]),W-40,Y(BAND[0])-Y(BAND[1]));
+ x.fillStyle=getComputedStyle(document.body).color;x.font="11px Nunito";[20,50,90,110].forEach(v=>{x.fillText(v+"°",2,Y(v)+4);x.strokeStyle="rgba(128,128,128,.25)";x.beginPath();x.moveTo(30,Y(v));x.lineTo(W-10,Y(v));x.stroke()});
+ x.fillText("0 с",30,H-4);x.fillText("150 с",W-44,H-4);x.strokeStyle="rgba(128,128,128,.6)";x.setLineDash([4,4]);x.beginPath();x.moveTo(X(60),12);x.lineTo(X(60),H-20);x.stroke();x.setLineDash([]);
+ x.lineWidth=2.5;x.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue("--cls").trim()||"#0f8a8a";x.beginPath();pts.slice(0,upto).forEach((p,i)=>i?x.lineTo(X(p[0]),Y(p[1])):x.moveTo(X(p[0]),Y(p[1])));x.stroke();
+ pts.slice(0,upto).forEach(p=>{if(p[2]){x.fillStyle="rgba(224,102,27,.5)";x.fillRect(X(p[0]),H-18,2,6)}});
+ const l=pts[Math.max(0,upto-1)];if(l){$("#live").innerHTML=`🌡️ <b>${l[1].toFixed(1)} °C</b> · нагрівач ${l[2]?"🔥 увімк":"⚪ вимк"} · ${l[0]} с`}}
+function render(){if(anim){clearInterval(anim);anim=null}drawSteps();hud();const L=LV[S.cur],st=S.st[S.cur];let body="";
+ if(S.cur===0)body=`<div class="grid2">${DEV.map((d,i)=>`<button class="dv ${S.dev[i]}" data-i="${i}">${d[0]}<small>${S.dev[i]==="s"?"📡 Датчик":S.dev[i]==="a"?"⚙️ Механізм":"натисни"}</small></button>`).join("")}</div>`;
+ else if(S.cur===1)body=`<div class="grid1">${SYS.map((d,i)=>`<button class="dv ${S.sys[i]}" data-j="${i}">${d[0]}<small>${S.sys[i]==="o"?"↦ Відкритий контур":S.sys[i]==="c"?"🔁 Замкнений контур":"натисни"}</small></button>`).join("")}</div>`;
+ else if(S.cur===2){ordSh=ordSh||LOOP.map((_,i)=>i).sort(()=>Math.random()-.5);body=`<div class="grid1">${ordSh.map(i=>`<button class="opt ob" data-o="${i}" ${S.ord.includes(i)||st.done?"disabled":""}>${LOOP[i]}</button>`).join("")}</div><ol class="ordL">${(st.done?LOOP.map((_,i)=>i):S.ord).map(i=>`<li>${LOOP[i]}</li>`).join("")}</ol><button class="btn ghost" id="ordReset">↺ Почати знову</button>`}
+ else body=`<pre class="code">поки True:
+    t = датчик.температура()
+    якщо t &lt; <b id="cLo">[${S.th[0]||" ? "}]</b>:  нагрівач.увімкнути()
+    якщо t &gt; <b id="cHi">[${S.th[1]||" ? "}]</b>:  нагрівач.вимкнути()
+    чекати(1)</pre>
+  <div class="row"><label>Увімкнути нижче <input class="ti mono" id="lo" inputmode="numeric" value="${S.th[0]}"> °C</label><label>Вимкнути вище <input class="ti mono" id="hi" inputmode="numeric" value="${S.th[1]}"> °C</label></div>
+  <canvas id="ch" width="360" height="200" class="chart" aria-label="Графік температури"></canvas><div id="live" class="muted" style="text-align:center">Натисни «Перевірити», щоб запустити симуляцію</div>`;
+ $("#stage").innerHTML=`<div class="row" style="justify-content:space-between"><h2 style="margin:0">${S.cur+1}. ${L.name}</h2><span class="badge">${L.concept}</span></div><p>${L.story}</p>${body}
+ <div class="row" style="margin-top:10px"><button class="btn" id="chk">${S.cur===3?"▶ Запустити й перевірити":"Перевірити"}</button><button class="btn ghost" id="hintB">💡 Підказка</button><button class="btn ghost" id="skip" hidden>Пропустити (0 балів)</button></div><div id="hint" class="muted" hidden></div><div id="fb"></div>
+ <div class="row" id="nextRow" hidden style="margin-top:10px"><button class="btn" id="nextBtn">${S.cur<LV.length-1?"Далі →":"До результату 🏆"}</button></div>`;
+ bind(L,st);if(S.cur===3&&S.th[0]&&S.th[1])drawChart(simulate(+S.th[0],+S.th[1]),st.done?151:0);if(st.done){$("#nextRow").hidden=false;$("#chk").disabled=true;fb("ok","Виконано! ✅")}$("#skip").hidden=!(st.tries>=3&&!st.done)}
+function bind(L,st){const D=st.done;
+ document.querySelectorAll("[data-i].dv").forEach(b=>b.onclick=()=>{if(D)return;touch();const i=+b.dataset.i;S.dev[i]=S.dev[i]==="s"?"a":"s";save();render()});
+ document.querySelectorAll("[data-j].dv").forEach(b=>b.onclick=()=>{if(D)return;touch();const i=+b.dataset.j;S.sys[i]=S.sys[i]==="o"?"c":"o";save();render()});
+ document.querySelectorAll(".ob").forEach(b=>b.onclick=()=>{touch();S.ord.push(+b.dataset.o);save();render()});const orr=$("#ordReset");if(orr)orr.onclick=()=>{S.ord=[];save();render()};
+ ["lo","hi"].forEach((id,i)=>{const e=$("#"+id);if(e)e.oninput=()=>{touch();S.th[i]=e.value.trim();save();$(i?"#cHi":"#cLo").textContent="["+(S.th[i]||" ? ")+"]"}});
+ $("#hintB").onclick=()=>{touch();$("#hint").hidden=false;$("#hint").textContent="💡 "+L.hint};
+ $("#skip").onclick=()=>{st.done=true;st.pts=0;save();render()};
+ $("#nextBtn").onclick=()=>{if(S.cur<LV.length-1){S.cur++;save();render();scrollTo({top:$("#steps").offsetTop-60,behavior:reduce?"auto":"smooth"})}else showTab("res")};
+ $("#chk").onclick=()=>{if(D)return;touch();
+  if(S.cur===0){if(S.dev.some(x=>!x))return fb("bad","Розсортуй усі 8 деталей.");const w=DEV.filter((d,i)=>S.dev[i]!==d[1]).length;w?fail(w,"Неправильно: "+w+". Вимірює чи робить?"):win("Усі деталі на місці: 4 датчики й 4 виконавчі механізми.")}
+  else if(S.cur===1){if(S.sys.some(x=>!x))return fb("bad","Обери тип для всіх 4 систем.");const w=SYS.filter((d,i)=>S.sys[i]!==d[1]).length;w?fail(w,"Неправильно: "+w+". Чи є там датчик, що повертає результат?"):win("Так! Таймер — відкритий контур; датчик зі зворотним зв'язком — замкнений.")}
+  else if(S.cur===2){if(S.ord.length<LOOP.length)return fb("bad","Натисни всі кроки по черзі.");S.ord.every((v,i)=>v===i)?win("Саме так працює програма будь-якого контролера: зчитати → порівняти → діяти → повторити."):(S.ord=[],save(),fail(1,"Порядок не той. Чи можна порівняти, ще не зчитавши датчик?"),setTimeout(render,1400))}
+  else{const lo=+S.th[0],hi=+S.th[1];if(!S.th[0]||!S.th[1]||isNaN(lo)||isNaN(hi))return fb("bad","Впиши обидва пороги числами.");if(lo>=hi)return fail(1,"Поріг увімкнення має бути НИЖЧИМ за поріг вимкнення — інакше нагрівач «клацатиме» без кінця.");
+   const pts=simulate(lo,hi);let k=0;$("#chk").disabled=true;anim=setInterval(()=>{k+=reduce?151:3;drawChart(pts,Math.min(151,k));if(k>=151){clearInterval(anim);anim=null;$("#chk").disabled=false;
+    const after=pts.filter(p=>p[0]>=60).map(p=>p[1]);simOk(pts)?win("Ідеально! Після розігріву вода тримається між "+Math.min(...after).toFixed(1)+" і "+Math.max(...after).toFixed(1)+" °C. Це і є замкнений контур."):fail(1,"Температура виходить за смугу: від "+Math.min(...after).toFixed(1)+" до "+Math.max(...after).toFixed(1)+" °C. Пам'ятай про інерцію нагрівача.")}},30)}}}
+
+// ===== Картки =====
+function drawCards(){const box=$("#cards");box.innerHTML="";CARDS.forEach((c,i)=>{const b=document.createElement("button");b.className="fc"+(S.cards.includes(i)?" flip":"");b.setAttribute("aria-label","Картка: "+c[0]);
+ b.innerHTML=`<div class="in"><div class="f">${c[0]}</div><div class="b">${c[1]}</div></div>`;
+ b.onclick=()=>{touch();b.classList.toggle("flip");if(!S.cards.includes(i)){S.cards.push(i);S.xp+=2;floatTxt("+2 XP",b);if(S.cards.length===CARDS.length&&!S.cardsBonus){S.cardsBonus=true;S.xp+=10;confetti()}save();cardStat();hud()}};box.append(b)});cardStat()}
+function cardStat(){const n=S.cards.length;$("#cardCnt").textContent="Відкрито "+n+" з "+CARDS.length;$("#cardBar").style.width=(n/CARDS.length*100)+"%";$("#cardDot").hidden=n>=CARDS.length}
+
+// ===== Результат і надсилання =====
+function drawRes(){const r=grade();$("#rGrade").textContent=S.frozen?r.g:"—";
+ $("#rLvl").textContent=S.frozen?(r.g>=10?"Високий рівень":r.g>=7?"Достатній рівень":r.g>=4?"Середній рівень":"Початковий рівень"):"Попередньо: "+r.g+" з 12 · натисни «Завершити», щоб зафіксувати";
+ const rows=STAGES.map((s,i)=>[s[0]+" "+s[1],S.st[i].done?Math.round(S.st[i].pts*100)+" %":"не виконано"]).concat([["Місія разом",Math.round(r.sh*100)+" %"],["Помилок",String(r.e)],["Час проти норми",hm(r.T)+" / "+hm(NORM)],["Штраф за помилки","−"+dec(r.ePen)],["Штраф за час","−"+r.tPen],["Спроба",String(attempt)]]);
+ $("#rTable").innerHTML=rows.map(x=>`<tr><td>${x[0]}</td><td><b>${x[1]}</b></td></tr>`).join("")+(r.tooFast&&S.frozen?`<tr><td colspan="2" class="warnTxt">⚠ занадто швидко</td></tr>`:"");$("#finishBtn").disabled=S.frozen}
+function taskStr(){return S.st.map((s,i)=>"Л"+(i+1)+":"+s.err+(s.done&&!(s.pts===0&&s.tries>=3)?"":"н")).join(",")}
+function rowStr(n,c){const r=grade();return ["v1",GR,TITLE,c,n,attempt,"гра",S.frozen?r.g:"—",dec(r.sh*12)+" з 12",Math.round(r.sh*100),r.e,hm(r.T),hm(NORM),r.tooFast?"занадто швидко":"",S.frozen?"завершено":"не завершено",taskStr()].map(clean).join("|")}
+function send(nE,cE,mE){const n=nE.value.trim(),c=cE.value.trim();if(!n||!c){mE.innerHTML=`<div class="msg bad">Впиши прізвище, ім'я та клас.</div>`;return}store(KEY+"-who",[n,c]);
+ mE.innerHTML=`<div class="msg ok">Натисни кнопку — відкриється форма, у ній натисни «Надіслати».${S.frozen?"":" Порада: спершу заверши всі етапи."}</div><p><a class="btn sendBtn" style="display:inline-block;text-decoration:none" target="_blank" rel="noopener" href="${FORM+encodeURIComponent(rowStr(n,c))}">Відкрити форму →</a></p>`}
+let againArm=false;
+function again(){const bt=$("#againBtn");if(!againArm){againArm=true;bt.textContent="Точно скинути? Натисни ще раз";setTimeout(()=>{againArm=false;bt.textContent="Пройти знову"},4000);return}againArm=false;bt.textContent="Пройти знову";
+ attempt++;store(KEY+"-attempt",attempt);S=fresh();save();render();drawCards();drawRes();showTab("map")}
+let DB=null,ME=null;
+function drawRank(docs){const rows=docs.map(d=>d.data()).filter(Boolean).sort((a,b)=>(b.xp-a.xp)||(b.st-a.st)).slice(0,40);
+ $("#rankBody").innerHTML=rows.length?rows.map((r,i)=>`<tr><td>${i+1}</td><td>${String(r.nick||"?").replace(/[<>&"]/g,"")}</td><td>${+r.xp||0}</td><td>${+r.st||0}/4</td></tr>`).join(""):'<tr><td colspan="4" class="muted">Поки порожньо — будь першим!</td></tr>'}
+(async()=>{const na=()=>{$("#rankBody").innerHTML='<tr><td colspan="4" class="muted">Рейтинг зараз недоступний.</td></tr>'};const tm=setTimeout(()=>{if(!DB)na()},10000);
+ try{if(!window.claude||!claude.use)throw 0;const [db,user]=await Promise.all([claude.use("db"),claude.use("user")]);if(!db||!user)throw 0;DB=db;ME=await user.id();clearTimeout(tm);db.collection("board").onSnapshot(s=>drawRank(s.docs),na)}catch(e){clearTimeout(tm);na()}})();
+$("#rankSave").onclick=async()=>{const nick=$("#nick").value.trim().slice(0,18);if(!nick){$("#rankMsg").textContent="Впиши нікнейм.";return}if(!DB||!ME){$("#rankMsg").textContent="Рейтинг зараз недоступний.";return}
+ try{await DB.collection("board").doc(ME).set({nick,xp:S.xp,st:S.st.filter(s=>s.done).length,cls:GR,at:new Date().toISOString()});$("#rankMsg").textContent="Збережено! ⭐"}catch(e){$("#rankMsg").textContent="Не вдалося зберегти."}};
+function showTab(t){document.querySelectorAll(".tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===t));["map","cards","res"].forEach(x=>$("#tab-"+x).hidden=x!==t);if(t==="res")drawRes()}
+document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+$("#themeBtn").onclick=()=>{const cur=document.documentElement.dataset.theme||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");const nx=cur==="dark"?"light":"dark";document.documentElement.dataset.theme=nx;store("infohab-theme",nx)};
+const th=load("infohab-theme",null);if(th)document.documentElement.dataset.theme=th;
+$("#finishBtn").onclick=()=>{if(S.frozen)return;touch();S.t1=Date.now();S.frozen=true;save();drawRes();confetti()};$("#againBtn").onclick=again;
+const who=load(KEY+"-who",null);if(who){$("#sName").value=$("#mName").value=who[0];$("#sCls").value=$("#mCls").value=who[1]}
+$("#sendBtn").onclick=()=>send($("#sName"),$("#sCls"),$("#sendMsg"));
+$("#fab").onclick=()=>{$("#modal").hidden=false;$("#mName").focus()};$("#mClose").onclick=()=>{$("#modal").hidden=true};$("#modal").onclick=e=>{if(e.target.id==="modal")$("#modal").hidden=true};
+$("#mSend").onclick=()=>send($("#mName"),$("#mCls"),$("#mMsg"));
+render();drawCards();drawRes();
+</script>
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Картки-білети · 8 клас · Розділ 4</title>
+<style>
+:root{--cl:#e8590c;--bg:#f5f6fa;--card:#fff;--ink:#1f2433;--muted:#5b6275;--line:#e3e6ee;--ok:#2b8a3e;--r:16px}
+@media (prefers-color-scheme:dark){:root{--cl:#ff922b;--bg:#151821;--card:#1f2330;--ink:#eef0f6;--muted:#a3aabb;--line:#2e3344}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Nunito","Segoe UI",system-ui,sans-serif;font-size:16px;line-height:1.45}
+header{background:var(--cl);color:#fff;padding:14px 18px}
+header small{opacity:.85;display:block}header h1{margin:2px 0 0;font-size:1.35rem}
+main{max-width:1100px;margin:0 auto;padding:14px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 14px;position:sticky;top:0;background:var(--bg);padding:6px 0;z-index:5}
+.tabs button,.btn{border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 14px;font:inherit;font-weight:800;cursor:pointer}
+.tabs button[aria-selected=true],.btn.main{background:var(--cl);border-color:var(--cl);color:#fff}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:8px 0}
+input,select{font:inherit;padding:7px 10px;border:2px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
+.lead{color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
+.tk{background:var(--card);border-radius:var(--r);border:2px solid var(--line);padding:12px 14px;break-inside:avoid}
+.tk h3{margin:0 0 6px;color:var(--cl);display:flex;justify-content:space-between}
+.cd{border-top:1px dashed var(--line);padding:8px 0}
+.cd .lv{font-weight:900;font-size:.85rem}
+.cd .q{font-weight:700;white-space:pre-wrap}
+.cd ul{margin:4px 0 0;padding-left:18px}.cd li{white-space:pre-wrap}
+.cd .src{font-size:.75rem;color:var(--muted)}
+.ans{display:none;background:#e6f4ea;color:#1b5e20;border-radius:8px;padding:4px 8px;margin-top:4px;font-size:.92rem}
+@media (prefers-color-scheme:dark){.ans{background:#1d3a26;color:#b7f0c3}}
+body.show .ans{display:block}
+table{border-collapse:collapse;width:100%;background:var(--card);border-radius:var(--r);overflow:hidden}
+th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left}
+td input{width:100%}td select{width:100%}
+.tot{font-weight:900;color:var(--cl);font-size:1.1rem}
+.topic h2{color:var(--cl);margin:18px 0 6px}
+[hidden]{display:none!important}
+@media print{header,.tabs,.noprint{display:none!important}body{background:#fff;color:#000}.tk{border:1px solid #999;page-break-inside:avoid}.grid{display:block}.tk{margin-bottom:10px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header><small id="eb"></small><h1 id="ht"></h1></header>
+<main>
+<div class="tabs" role="tablist">
+ <button role="tab" aria-selected="true" data-t="t1">🎫 Білети</button>
+ <button role="tab" aria-selected="false" data-t="t2">📚 Усі картки</button>
+ <button role="tab" aria-selected="false" data-t="t3">📝 Журнал</button>
+</div>
+<section id="t1">
+ <p class="lead">Кожен білет = 🟢 базова (3 б) + 🟡 середня (4 б) + 🔴 складна (5 б) з трьох різних тем = <b>12 балів</b>. Номер серії дає ті самі білети знову (зручно для паралельних класів).</p>
+ <div class="row noprint"><label>Білетів: <input id="n" type="number" min="1" max="40" value="20" style="width:80px"></label>
+  <label>Серія: <input id="seed" type="number" value="1" style="width:90px"></label>
+  <button class="btn main" id="gen">🎲 Скласти білети</button>
+  <label><input type="checkbox" id="sa"> Показати відповіді</label>
+  <button class="btn" id="pr">🖨️ Друк</button></div>
+ <div class="grid" id="tickets"></div>
+</section>
+<section id="t2" hidden><p class="lead">По 4 картки на тему. Можна давати усно або на дошці. Відповіді — зеленим (увімкни «Показати відповіді» на вкладці «Білети» або тут).</p>
+ <div class="row noprint"><label><input type="checkbox" id="sa2"> Показати відповіді</label></div><div id="all"></div></section>
+<section id="t3" hidden>
+ <p class="lead">Впиши учнів і бали за кожну картку білета. Підсумок рахується сам. Дані зберігаються лише на цьому комп'ютері.</p>
+ <table><thead><tr><th>Учень</th><th>Білет №</th><th>🟢 /3</th><th>🟡 /4</th><th>🔴 /5</th><th>Разом</th></tr></thead><tbody id="jb"></tbody></table>
+ <div class="row noprint"><button class="btn" id="add">+ Рядок</button><button class="btn main" id="csv">⬇️ CSV для журналу</button><button class="btn" id="copy">📋 Скопіювати таблицю</button><span id="msg" class="lead"></span></div>
+</section>
+</main>
+<script>
+const D={"grade": 8, "sec": 4, "secName": "Проєктування графічних інтерфейсів", "saga": "Ліга класу", "topics": [{"n": 1, "title": "Графічний інтерфейс. UI/UX-дизайн", "cards": [{"q": "Що таке GUI?", "body": ["А) Мова програмування", "Б) Графічний інтерфейс користувача", "В) Формат файлів", "Г) Тип процесора"], "ans": "Б) Графічний інтерфейс користувача", "lv": 1, "pts": 3}, {"q": "З'єднай термін із поясненням.", "body": ["1) UI", "2) UX", "3) HUD", "4) Адаптивність", "—", "А) Ігрові дані поверх екрана", "Б) Вигляд: кольори, шрифти, кнопки", "В) Дизайн підлаштовується під екран", "Г) Зручність користування"], "ans": "1–Б, 2–Г, 3–А, 4–В", "lv": 1, "pts": 3}, {"q": "Назви 2 засоби інклюзивного дизайну для людей зі слабким зором.", "body": [], "ans": "Будь-які 2: екранна лупа (збільшення тексту), висока контрастність, альтернативний текст, читач екрана", "lv": 2, "pts": 4}, {"q": "Дизайнер описав головний екран застосунку ліги. Знайди 3 помилки. Запиши номери рядків і як виправити.", "body": ["1) Шрифти  ⟶  7 різних декоративних", "2) Меню  ⟶  Звичні іконки з підписами", "3) Кнопка «Записатися»  ⟶  Сіра на сірому тлі", "4) Відступи  ⟶  Є між блоками", "5) Версія для телефона  ⟶  Та сама, що для ПК, дрібна", "6) Фото  ⟶  Має альтернативний текст"], "ans": "Рядки 1, 3, 5. Потрібно 2–3 простих шрифти; контрастна кнопка; адаптивний макет під телефон", "lv": 3, "pts": 5}]}, {"n": 2, "title": "Векторний графічний редактор", "cards": [{"q": "Яке зображення не втрачає якість при масштабуванні?", "body": ["А) Растрове", "Б) Сканована копія", "В) Векторне", "Г) Фотографія JPEG"], "ans": "В) Векторне", "lv": 1, "pts": 3}, {"q": "З'єднай формат з особливістю.", "body": ["1) JPEG", "2) PNG", "3) GIF", "4) SVG", "—", "А) Анімація, лише 256 кольорів", "Б) Векторна графіка для вебу", "В) Фото зі стисненням і втратами", "Г) Прозорий фон, без втрат"], "ans": "1–В, 2–Г, 3–А, 4–Б", "lv": 1, "pts": 3}, {"q": "Скільки точок має зберегти векторний редактор, щоб задати пряму лінію? Чому растру треба більше?", "body": [], "ans": "2 точки (початок і кінець); растр зберігає колір кожного пікселя лінії", "lv": 2, "pts": 4}, {"q": "Учень склав пам'ятку про графіку. Знайди 3 помилки. Запиши номери рядків і як виправити.", "body": ["1) Вектор  ⟶  Масштабується без втрат", "2) GIF  ⟶  Мільйони кольорів", "3) JPEG  ⟶  Стискає з втратою якості", "4) Логотип для банера  ⟶  Зберігати в BMP", "5) Inkscape  ⟶  Безплатний, відкритий код", "6) SVG  ⟶  Растровий формат для фото"], "ans": "Рядки 2, 4, 6. GIF — лише 256 кольорів; логотип — у SVG (вектор); SVG — векторний формат", "lv": 3, "pts": 5}]}, {"n": 3, "title": "Графічні примітиви", "cards": [{"q": "Що таке контур фігури?", "body": ["А) Колір усередині фігури", "Б) Лінія по краю фігури", "В) Рамка-сторінка макета", "Г) Тип шрифту"], "ans": "Б) Лінія по краю фігури", "lv": 1, "pts": 3}, {"q": "З'єднай термін із поясненням.", "body": ["1) Фрейм", "2) Шар", "3) Вузол", "4) Градієнт", "—", "А) Плавний перехід кольорів", "Б) Окремий елемент зображення", "В) Рамка-сторінка (артборд)", "Г) Точка, що змінює форму контуру"], "ans": "1–В, 2–Б, 3–Г, 4–А", "lv": 1, "pts": 3}, {"q": "Прямокутник: X = 40, ширина 120. Яка X-координата його центру? Покажи обчислення.", "body": [], "ans": "100 (40 + 120 : 2)", "lv": 2, "pts": 4}, {"q": "Учень записав, як збирав емблему. Знайди 3 помилки. Запиши номери рядків і як виправити.", "body": ["1) Ідеальне коло  ⟶  Тримав Shift", "2) Рамка навколо щита  ⟶  Змінив заливку", "3) Плавна дуга  ⟶  Олівцем по лінійці", "4) Фон не зсувати  ⟶  Заблокував шар", "5) Рівні відступи між кнопками  ⟶  Вирівняв по лівому краю", "6) Перехід кольорів  ⟶  Лінійний градієнт"], "ans": "Рядки 2, 3, 5. Рамка — це контур; дуга — Перо (криві Безьє); рівні відступи — розподілити", "lv": 3, "pts": 5}]}, {"n": 4, "title": "Типографіка. Ефекти та фільтри", "cards": [{"q": "Скільки шрифтів радять використовувати в одному макеті?", "body": ["А) 7–8", "Б) Лише 1", "В) Скільки завгодно", "Г) 2–3"], "ans": "Г) 2–3", "lv": 1, "pts": 3}, {"q": "З'єднай параметр з поясненням.", "body": ["1) Кегль", "2) Інтерліньяж", "3) Кернінг", "4) Вирівнювання", "—", "А) Відстань між рядками", "Б) Ліворуч, по центру, по ширині", "В) Розмір шрифту", "Г) Відстань між парою літер"], "ans": "1–В, 2–А, 3–Г, 4–Б", "lv": 1, "pts": 3}, {"q": "Заголовок 48 px, основний текст удвічі менший, інтерліньяж тексту в 1,5 раза більший за кегль. Знайди кегль і інтерліньяж тексту.", "body": [], "ans": "24 px і 36 px", "lv": 2, "pts": 4}, {"q": "Афіша фіналу має 3 помилки типографіки. Запиши номери рядків і як виправити.", "body": ["1) Заголовок  ⟶  Montserrat, 44 px, жирний", "2) Основний текст  ⟶  Декоративний рукописний", "3) Дата  ⟶  Помаранчева на темному тлі", "4) Шрифтів  ⟶  Сім різних", "5) Підпис  ⟶  14 px, звичайний", "6) Літери заголовка  ⟶  Злипаються"], "ans": "Рядки 2, 4, 6. Основний текст — простий шрифт; 2–3 шрифти; збільшити кернінг", "lv": 3, "pts": 5}]}, {"n": 5, "title": "Композиція та макет", "cards": [{"q": "Головний елемент дизайну помітний одразу — це правило…", "body": ["А) Акценту", "Б) Ритму", "В) Балансу", "Г) Кернінгу"], "ans": "А) Акценту", "lv": 1, "pts": 3}, {"q": "З'єднай частину сайту з вмістом.", "body": ["1) Шапка", "2) Основний контент", "3) Підвал", "4) Бічне меню", "—", "А) Контакти й авторські права", "Б) Додаткові розділи збоку", "В) Логотип і навігаційне меню", "Г) Текст, фото, відео"], "ans": "1–В, 2–Г, 3–А, 4–Б", "lv": 1, "pts": 3}, {"q": "Фрейм 320 px, поля по 20, 4 колонки з 3 проміжками по 20. Яка ширина колонки? Покажи обчислення.", "body": [], "ans": "55 px: (320 − 2·20 − 3·20) : 4", "lv": 2, "pts": 4}, {"q": "Чернетка сайту ліги порушує правила розміщення. Запиши номери рядків і як виправити.", "body": ["1) Таблиця й графік  ⟶  Поруч в одному блоці", "2) Текст новини  ⟶  Впритул до краю", "3) Між блоками  ⟶  Без відступів", "4) Головна новина  ⟶  Велика, помітна", "5) Меню  ⟶  Внизу під контактами", "6) Блоки  ⟶  По сітці"], "ans": "Рядки 2, 3, 5. Текст — далі від країв; відступи між блоками; меню — у шапці", "lv": 3, "pts": 5}]}, {"n": 6, "title": "Прототип. Документація", "cards": [{"q": "Що таке прототип?", "body": ["А) Готовий код", "Б) Макет, що імітує роботу", "В) Логотип у SVG", "Г) Посібник користувача"], "ans": "Б) Макет, що імітує роботу", "lv": 1, "pts": 3}, {"q": "З'єднай тригер чи дію з поясненням.", "body": ["1) On click", "2) After delay", "3) Open overlay", "4) Back", "—", "А) Повернутися на минулий екран", "Б) Коли клацнули елемент", "В) Вікно поверх екрана", "Г) Через деякий час"], "ans": "1–Б, 2–Г, 3–В, 4–А", "lv": 1, "pts": 3}, {"q": "Назви 2 документи технічної документації і 2 — для користувача.", "body": [], "ans": "Технічна: специфікації, вимоги до системи, архітектура, схеми БД, інструкції зі встановлення. Для користувача: посібник, FAQ, онлайн-довідка, навчальні матеріали", "lv": 2, "pts": 4}, {"q": "Учень налаштував прототип застосунку ліги. Знайди 3 помилки. Запиши номери рядків і як виправити.", "body": ["1) Сплеш-екран зникає через 2 с  ⟶  On click", "2) Кнопка «Розклад»  ⟶  On click → Navigate to", "3) Картка гравця поверх таблиці  ⟶  Navigate to", "4) Кнопка «‹»  ⟶  Back", "5) Прогорнути до таблиці  ⟶  Open overlay", "6) Перегляд прототипу  ⟶  Кнопка Flow"], "ans": "Рядки 1, 3, 5. Сплеш — After delay; картка — Open overlay; прогорнути — Scroll to", "lv": 3, "pts": 5}]}]};
+</script>
+<script>
+"use strict";
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+$("#eb").textContent="Інформатика · "+D.grade+" клас · Розділ "+D.sec+" · для вчителя";
+$("#ht").textContent="Картки-білети: "+D.secName;
+document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{document.querySelectorAll(".tabs button").forEach(x=>x.setAttribute("aria-selected",x===b));["t1","t2","t3"].forEach(id=>$("#"+id).hidden=id!==b.dataset.t)});
+const LV={1:"🟢 Базовий · 3 б",2:"🟡 Середній · 4 б",3:"🔴 Складний · 5 б"};
+const cardHTML=(c,t)=>`<div class="cd"><div class="lv">${LV[c.lv]}</div><div class="q">${esc(c.q)}</div>${c.body&&c.body.length?"<ul>"+c.body.map(x=>"<li>"+esc(x)+"</li>").join("")+"</ul>":"<p style=\"margin:4px 0\">Відповідь: ____________</p>"}<div class="ans">✓ ${esc(c.ans)}</div><div class="src">Тема ${t.n}. ${esc(t.title)}</div></div>`;
+$("#all").innerHTML=D.topics.map(t=>`<div class="topic"><h2>Тема ${t.n}. ${esc(t.title)}</h2><div class="grid">${t.cards.map(c=>`<div class="tk">${cardHTML(c,t)}</div>`).join("")}</div></div>`).join("");
+function rng(seed){let a=seed>>>0||1;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function gen(){const n=Math.max(1,Math.min(40,+$("#n").value||20)),R=rng(+$("#seed").value||1);
+ const pool=lv=>D.topics.flatMap(t=>t.cards.filter(c=>c.lv===lv).map(c=>({c,t})));
+ const P={1:pool(1),2:pool(2),3:pool(3)};const used={1:[],2:[],3:[]};
+ const take=(lv,avoid)=>{let cand=P[lv].filter(x=>!avoid.includes(x.t.n)&&!used[lv].includes(x));if(!cand.length){used[lv]=[];cand=P[lv].filter(x=>!avoid.includes(x.t.n));}if(!cand.length)cand=P[lv];const x=cand[Math.floor(R()*cand.length)];used[lv].push(x);return x};
+ let h="";for(let i=1;i<=n;i++){const a=take(1,[]),b=take(2,[a.t.n]),c=take(3,[a.t.n,b.t.n]);
+  h+=`<div class="tk"><h3><span>Білет № ${i}</span><span>12 б</span></h3>${cardHTML(a.c,a.t)}${cardHTML(b.c,b.t)}${cardHTML(c.c,c.t)}</div>`;}
+ $("#tickets").innerHTML=h;}
+$("#gen").onclick=gen;gen();
+const sync=v=>{document.body.classList.toggle("show",v);$("#sa").checked=v;$("#sa2").checked=v};
+$("#sa").onchange=e=>sync(e.target.checked);$("#sa2").onchange=e=>sync(e.target.checked);
+$("#pr").onclick=()=>window.print();
+// журнал
+const KEY="tickets-"+D.grade+"-"+D.sec;let J=[];try{J=JSON.parse(localStorage.getItem(KEY)||"[]")}catch(e){}
+if(!J.length)J=Array.from({length:5},()=>({n:"",t:"",a:0,b:0,c:0}));
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(J))}catch(e){}};
+const opts=m=>Array.from({length:m+1},(_,i)=>`<option>${i}</option>`).join("");
+function draw(){$("#jb").innerHTML=J.map((r,i)=>`<tr><td><input data-i="${i}" data-k="n" value="${esc(r.n)}" aria-label="Учень"></td><td><input data-i="${i}" data-k="t" value="${esc(r.t)}" style="width:70px" aria-label="Білет"></td>
+ <td><select data-i="${i}" data-k="a">${opts(3)}</select></td><td><select data-i="${i}" data-k="b">${opts(4)}</select></td><td><select data-i="${i}" data-k="c">${opts(5)}</select></td><td class="tot">${(+r.a)+(+r.b)+(+r.c)}</td></tr>`).join("");
+ $("#jb").querySelectorAll("select").forEach(s=>s.value=J[s.dataset.i][s.dataset.k]);
+ $("#jb").querySelectorAll("input,select").forEach(el=>el.oninput=el.onchange=()=>{J[el.dataset.i][el.dataset.k]=el.value;save();if(el.tagName==="SELECT")draw()});}
+draw();$("#add").onclick=()=>{J.push({n:"",t:"",a:0,b:0,c:0});save();draw()};
+const csv=()=>"Учень;Білет;Базова;Середня;Складна;Разом\n"+J.filter(r=>r.n).map(r=>[r.n,r.t,r.a,r.b,r.c,(+r.a)+(+r.b)+(+r.c)].join(";")).join("\n");
+$("#csv").onclick=()=>{try{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["﻿"+csv()],{type:"text/csv"}));a.download="bilety-"+D.grade+"-"+D.sec+".csv";a.click();$("#msg").textContent="Файл збережено."}catch(e){$("#msg").textContent="Не вдалося — скористайся «Скопіювати таблицю»."}};
+$("#copy").onclick=async()=>{try{await navigator.clipboard.writeText(csv().replace(/;/g,"\t"));$("#msg").textContent="Скопійовано — встав у Google Таблицю."}catch(e){$("#msg").textContent="Браузер не дав скопіювати."}};
+</script>
+</body>
+</html>

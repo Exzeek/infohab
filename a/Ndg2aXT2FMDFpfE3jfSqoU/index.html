@@ -1,0 +1,785 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Комп'ютер мікроферми</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700;800&family=Nunito:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+:root{
+  --bg:#EEF3EC; --surface:#FFFFFF; --surface2:#E3EBDF; --fg:#1E2A20; --muted:#5B6B5D;
+  --leaf:#2F6B3A; --sprout:#86B83A; --soil:#6B4F3A; --data:#2B6CB0; --line:#C9D6C5;
+  --ok:#2E7D32; --okbg:#E3F3E4; --bad:#B3261E; --badbg:#FBE7E5; --warn:#B26A00; --warnbg:#FFF3DC; --gold:#E0A100;
+  --f-display:"Rubik",system-ui,sans-serif; --f-body:"Nunito",system-ui,sans-serif; --f-mono:"JetBrains Mono",ui-monospace,monospace;
+  --r:12px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141B15; --surface:#1D261E; --surface2:#263127; --fg:#E6EEE4; --muted:#9FB09F;
+  --leaf:#7FC48A; --sprout:#A9D65C; --soil:#C9A07E; --data:#7FB2EA; --line:#33433A;
+  --ok:#7FD283; --okbg:#1F3522; --bad:#FF8A80; --badbg:#3A1F1D; --warn:#F2B54C; --warnbg:#3A2E14; --gold:#F2C14C; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141B15; --surface:#1D261E; --surface2:#263127; --fg:#E6EEE4; --muted:#9FB09F;
+  --leaf:#7FC48A; --sprout:#A9D65C; --soil:#C9A07E; --data:#7FB2EA; --line:#33433A;
+  --ok:#7FD283; --okbg:#1F3522; --bad:#FF8A80; --badbg:#3A1F1D; --warn:#F2B54C; --warnbg:#3A2E14; --gold:#F2C14C; color-scheme:dark}
+[hidden]{display:none!important}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:16px;line-height:1.5;margin:0}
+.wrap{max-width:860px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0}
+h1{font-size:clamp(1.6rem,4.5vw,2.3rem);font-weight:800;color:var(--leaf);line-height:1.15}
+h2{font-size:1.3rem;font-weight:700}
+h3{font-size:1.05rem;font-weight:700}
+.eyebrow{font-family:var(--f-mono);font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--soil)}
+header{display:grid;gap:10px;margin-bottom:16px}
+.story{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;display:flex;gap:12px;align-items:flex-start}
+.story svg{flex:0 0 56px}
+.story p{margin:0;min-width:0}
+.hud{display:flex;flex-wrap:wrap;gap:8px;font-family:var(--f-mono);font-size:.85rem}
+.hud span{background:var(--surface2);border-radius:999px;padding:4px 10px}
+.hud .over{background:var(--badbg);color:var(--bad)}
+nav.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:5;padding-top:6px}
+nav.tabs button{flex:0 0 auto;font-family:var(--f-display);font-weight:700;font-size:.95rem;border:1px solid var(--line);background:var(--surface);color:var(--fg);padding:8px 14px;border-radius:10px 10px 4px 4px;cursor:pointer}
+nav.tabs button[aria-selected="true"]{background:var(--leaf);border-color:var(--leaf);color:var(--bg)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid var(--data);outline-offset:2px}
+section.panel{display:grid;gap:14px;margin-top:12px}
+.lvlbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;color:var(--muted);font-size:.9rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:grid;gap:12px;min-width:0}
+.card.done{border-color:var(--ok)}
+.qhead{display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap}
+.lvl{font-family:var(--f-mono);font-size:.78rem;padding:2px 8px;border-radius:999px;background:var(--surface2);white-space:nowrap}
+.q{font-weight:700;margin:0}
+.opts{display:grid;gap:8px}
+.opt{text-align:left;font:inherit;background:var(--surface2);border:2px solid transparent;color:var(--fg);border-radius:10px;padding:10px 12px;cursor:pointer}
+.opt[aria-pressed="true"]{border-color:var(--data)}
+.row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;align-items:center;padding:8px 0;border-bottom:1px dashed var(--line)}
+.row:last-child{border-bottom:0}
+@media (max-width:560px){.row{grid-template-columns:1fr}}
+select,input[type=text]{font:inherit;color:var(--fg);background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%;min-width:0}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-size:.9rem;background:var(--surface2);color:var(--fg);border:2px solid transparent;border-radius:999px;padding:5px 12px;cursor:pointer}
+.chip[aria-pressed="true"]{border-color:var(--leaf);background:var(--okbg)}
+.order ol{margin:0;padding:0;list-style:none;counter-reset:s}
+.order li{display:flex;gap:8px;align-items:center;background:var(--surface2);border-radius:8px;padding:8px 10px;margin-bottom:6px}
+.order li::before{counter-increment:s;content:counter(s);font-family:var(--f-mono);color:var(--soil);min-width:1.2em}
+.order li span{flex:1;min-width:0}
+.mini{font:inherit;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:6px;width:34px;height:34px;cursor:pointer;flex:0 0 auto}
+table.err{border-collapse:collapse;width:100%;font-size:.95rem}
+.tblwrap{overflow-x:auto}
+table.err th,table.err td{border:1px solid var(--line);padding:8px;text-align:left}
+table.err th{background:var(--surface2);font-family:var(--f-display)}
+table.err tr.pick td{background:var(--badbg)}
+table.err tbody tr{cursor:pointer}
+.actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+a.btn{display:inline-block;text-decoration:none}
+.btn.off{opacity:.55;cursor:not-allowed}
+.btn{font-family:var(--f-display);font-weight:700;font-size:.95rem;border:0;border-radius:10px;padding:10px 16px;cursor:pointer;background:var(--leaf);color:var(--bg)}
+.btn.ghost{background:var(--surface2);color:var(--fg)}
+.btn.warn{background:var(--warn);color:#1a1200}
+.btn:disabled{opacity:.5;cursor:default}
+.fb{border-radius:8px;padding:8px 12px;font-size:.95rem}
+.fb.ok{background:var(--okbg);color:var(--ok)}
+.fb.bad{background:var(--badbg);color:var(--bad)}
+.fb.warn{background:var(--warnbg);color:var(--warn)}
+.muted{color:var(--muted);font-size:.9rem}
+/* ---- Квест ---- */
+.qmapwrap{position:relative;padding:8px 0 4px}
+.qmap{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;position:relative;z-index:1}
+.qsvg{position:absolute;left:0;top:0;width:100%;height:100%;z-index:0;pointer-events:none;overflow:visible}
+.loc{background:var(--surface);border:2px solid var(--line);border-radius:12px;padding:8px 4px;text-align:center;font-size:.78rem;min-width:0;line-height:1.2;position:relative}
+.loc b{display:block;font-size:1.5rem;line-height:1.3}
+.loc{overflow-wrap:anywhere;hyphens:auto}
+@media (max-width:480px){.loc{font-size:.66rem;padding:6px 2px}.loc b{font-size:1.25rem}}
+.qcard .opt,.qcard input[type=text]{background:var(--surface)}
+.loc .st{display:block;color:var(--gold);letter-spacing:1px;min-height:1em}
+.loc.cur{border-color:var(--data);animation:pulse 1.6s ease-in-out infinite}
+.loc.won{border-color:var(--ok);background:var(--okbg)}
+.loc.lock{opacity:.5}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(43,108,176,.0)}50%{box-shadow:0 0 0 6px rgba(43,108,176,.25)}}
+.sprout{position:absolute;z-index:2;font-size:1.6rem;top:-22px;left:0;transition:transform 1s cubic-bezier(.5,0,.3,1);pointer-events:none}
+.sprout span{display:inline-block;animation:bob 1.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.qpath{fill:none;stroke:var(--line);stroke-width:4;stroke-dasharray:3 8;stroke-linecap:round}
+.qdone{fill:none;stroke:var(--sprout);stroke-width:5;stroke-linecap:round;transition:stroke-dashoffset 1.1s ease-out}
+.hearts{font-size:1.2rem;letter-spacing:2px}
+.qcard{background:var(--surface2);border-radius:12px;padding:14px;display:grid;gap:10px;transition:background .3s}
+.qcard.flash{animation:flashok .6s}
+@keyframes flashok{0%{box-shadow:0 0 0 0 rgba(46,125,50,.6)}100%{box-shadow:0 0 0 14px rgba(46,125,50,0)}}
+.qcard.shake{animation:shake .4s}
+@keyframes shake{0%,100%{transform:none}20%{transform:translateX(-8px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(3px)}}
+.float{position:fixed;z-index:60;pointer-events:none;font-family:var(--f-display);font-weight:800;font-size:1.3rem;color:var(--gold);text-shadow:0 2px 6px rgba(0,0,0,.25);animation:floatup 1.1s ease-out forwards}
+@keyframes floatup{0%{opacity:0;transform:translate(-50%,0) scale(.6)}15%{opacity:1;transform:translate(-50%,-6px) scale(1.15)}100%{opacity:0;transform:translate(-50%,-70px)}}
+.heartfx{position:fixed;z-index:60;pointer-events:none;font-size:1.6rem;animation:heartfx .9s ease-in forwards}
+@keyframes heartfx{0%{transform:translate(-50%,0) scale(1.3)}35%{transform:translate(-50%,-10px) rotate(-15deg)}100%{opacity:0;transform:translate(-50%,50px) rotate(25deg) scale(.6)}}
+.bossrow{display:flex;gap:10px;align-items:center}
+.bossface{font-size:2.4rem;display:inline-block}
+.bossface.hit{animation:hit .5s}
+@keyframes hit{0%,100%{transform:none}30%{transform:scale(1.3) rotate(-12deg);filter:brightness(1.8)}60%{transform:scale(.85) rotate(10deg)}}
+.bossface.dead{animation:dead 1s forwards}
+@keyframes dead{to{transform:rotate(540deg) scale(0);opacity:0}}
+.hpbar{flex:1;height:14px;background:var(--surface);border:1px solid var(--line);border-radius:99px;overflow:hidden}
+.hpbar div{height:100%;background:linear-gradient(90deg,var(--bad),#ff9a6a);transition:width .6s ease}
+.win{text-align:center;display:grid;gap:6px;justify-items:center}
+.win .stars{font-size:2.4rem;color:var(--gold);letter-spacing:4px}
+.win .stars span{display:inline-block;opacity:0;animation:starin .45s cubic-bezier(.3,1.6,.5,1) forwards}
+@keyframes starin{from{opacity:0;transform:scale(0) rotate(-90deg)}to{opacity:1;transform:none}}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:55}
+/* ---- Картки ---- */
+.flash{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.fc{font:inherit;color:var(--fg);min-height:120px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;cursor:pointer;text-align:left;display:grid;align-content:center;gap:6px}
+.fc .t{font-family:var(--f-display);font-weight:700;font-size:1.05rem;color:var(--leaf)}
+.fc.open{background:var(--surface2)}
+.fc .d{font-size:.92rem}
+/* ---- Лабораторія ---- */
+.win98{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+.wtitle{background:var(--surface2);padding:7px 12px;font-family:var(--f-display);font-weight:700;font-size:.9rem;display:flex;justify-content:space-between;gap:8px;align-items:center}
+.wbody{padding:10px 12px;display:grid;gap:8px}
+.dev-cat{font-weight:700;font-size:.92rem;margin-top:4px}
+.dev{display:flex;align-items:center;gap:8px;padding:6px 8px 6px 22px;border-radius:8px;cursor:pointer;font-size:.92rem;position:relative}
+.dev:hover{background:var(--surface2)}
+.dev.off{opacity:.55}
+.dev .ic{width:1.3em;text-align:center}
+.ctx{position:absolute;left:30px;top:100%;z-index:4;background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.18);display:grid;min-width:210px}
+.ctx button{font:inherit;font-size:.9rem;text-align:left;background:none;border:0;color:var(--fg);padding:8px 12px;cursor:pointer}
+.ctx button:hover{background:var(--surface2)}
+.ctx hr{border:0;border-top:1px solid var(--line);margin:2px 0}
+.src{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.srcb{font:inherit;text-align:left;background:var(--surface2);color:var(--fg);border:2px solid transparent;border-radius:10px;padding:10px 12px;cursor:pointer}
+.srcb small{display:block;color:var(--muted)}
+.lic{height:130px;overflow:auto;background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-family:var(--f-mono);font-size:.78rem;line-height:1.5}
+.prog{height:10px;background:var(--surface2);border-radius:99px;overflow:hidden}
+.prog div{height:100%;width:0;background:var(--sprout);transition:width 1.2s linear}
+.toggle{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;background:var(--surface2);border-radius:8px}
+.sw{width:48px;height:26px;border-radius:99px;background:var(--line);border:0;position:relative;cursor:pointer;flex:0 0 auto}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .2s}
+.sw[aria-checked="true"]{background:var(--ok)}
+.sw[aria-checked="true"]::after{left:25px}
+.req{display:grid;gap:6px;margin:0;padding:0;list-style:none;counter-reset:r}
+.req li{display:flex;gap:8px;align-items:flex-start;font-size:.93rem;background:var(--surface2);border-radius:8px;padding:7px 10px}
+.req li::before{counter-increment:r;content:counter(r);font-family:var(--f-mono);color:var(--soil);min-width:1.2em}
+.req li.ok{background:var(--okbg);color:var(--ok)} .req li.no{background:var(--badbg);color:var(--bad)}
+/* ---- Результат ---- */
+.big{font-family:var(--f-display);font-size:3rem;font-weight:800;color:var(--leaf);line-height:1}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.stat{background:var(--surface2);border-radius:10px;padding:10px 12px;font-variant-numeric:tabular-nums}
+.stat small{display:block;color:var(--muted)}
+table.brk{width:100%;border-collapse:collapse;font-size:.93rem;font-variant-numeric:tabular-nums}
+table.brk td{padding:6px 8px;border-bottom:1px solid var(--line)}
+table.brk td:last-child{text-align:right;font-weight:700;white-space:nowrap}
+table.brk .neg{color:var(--bad)}
+table.rank{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+table.rank td,table.rank th{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left}
+textarea{width:100%;font-family:var(--f-mono);font-size:.8rem;background:var(--surface2);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:8px;min-height:70px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.win .stars span{opacity:1}}
+</style>
+
+<canvas id="confetti" aria-hidden="true"></canvas>
+<div class="wrap">
+<header>
+  <div class="eyebrow">Інформатика · 6 клас · Розділ 2 · Тема 2</div>
+  <h1>Комп'ютер мікроферми</h1>
+  <div class="story">
+    <svg viewBox="0 0 56 56" aria-hidden="true"><rect x="8" y="10" width="40" height="26" rx="3" fill="var(--data)"/><rect x="11" y="13" width="34" height="20" rx="2" fill="var(--surface2)"/><rect x="4" y="38" width="48" height="5" rx="2" fill="var(--soil)"/><path d="M24 32 C24 25 20 22 16 22 C19 28 21 30 24 32Z" fill="var(--sprout)"/><path d="M30 32 C30 23 35 19 41 19 C38 26 34 29 30 32Z" fill="var(--leaf)"/><rect x="22" y="44" width="12" height="4" rx="1" fill="var(--soil)"/></svg>
+    <p><b>Епізод 2.</b> Школа передала нашій мікрофермі старенький ноутбук. На ньому треба запустити USB-камеру для таймлапсу росту паростків, встановити програму для графіків, увімкнути захист і розібратися, які програми безкоштовні, а за які доведеться платити. Без правильного <b>програмного забезпечення</b> ноутбук — просто «залізо»!</p>
+  </div>
+  <div class="hud" aria-live="polite">
+    <span id="hudTime">⏱ 0:00 / 20:00</span><span id="hudEx">Вправи: 0/14</span><span id="hudErr">❌ 0</span><span id="hudStar">⭐ 0</span><span id="hudXp">XP 0</span>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button role="tab" data-t="ex" aria-selected="true">Вправи</button>
+  <button role="tab" data-t="quest" aria-selected="false">Квест</button>
+  <button role="tab" data-t="cards" aria-selected="false">Картки</button>
+  <button role="tab" data-t="lab" aria-selected="false">Лабораторія</button>
+  <button role="tab" data-t="res" aria-selected="false">Результат</button>
+</nav>
+
+<section class="panel" id="p-ex">
+  <div class="lvlbar">🟢 базовий · 🟡 середній · 🔴 складний. З першої спроби — 1 бал, з другої — 0,5, далі — 0. Кожна неправильна спроба — помилка. Таймер стартує з першої дії.</div>
+  <div id="exList" class="panel" style="margin-top:0"></div>
+</section>
+
+<section class="panel" id="p-quest" hidden>
+  <div class="card">
+    <div class="qhead"><h2>Квест «Перезапуск ноутбука»</h2><span class="hearts" id="hearts">❤️❤️❤️</span></div>
+    <p class="muted" style="margin:0">Паросток іде мапою від локації до локації. ⭐⭐⭐ — без помилок і вчасно. Квест дає зірки й XP для рейтингу, на оцінку не впливає.</p>
+    <div class="qmapwrap" id="qmapwrap"><svg class="qsvg" id="qsvg"></svg><div class="qmap" id="qmap"></div></div>
+    <div id="qbox"></div>
+  </div>
+</section>
+
+<section class="panel" id="p-cards" hidden>
+  <p class="muted" style="margin:0">Натисни на картку, щоб побачити пояснення. Спершу спробуй пригадати сам.</p>
+  <div class="flash" id="flash"></div>
+</section>
+
+<section class="panel" id="p-lab" hidden>
+  <div class="card">
+    <h2>Лабораторія: налаштуй ноутбук мікроферми</h2>
+    <p class="muted" style="margin:0">Виконай усі вимоги, потім натисни «Здати лабораторію». Здати можна двічі; друга здача — бал × 0,8. Кожна невиконана вимога під час здачі — помилка.</p>
+    <ol class="req" id="reqList"></ol>
+  </div>
+
+  <div class="win98">
+    <div class="wtitle"><span>🖥️ Диспетчер пристроїв</span><button class="btn ghost" id="scanHw" style="padding:4px 10px;font-size:.8rem">🔄 Оновити конфігурацію</button></div>
+    <div class="wbody" id="devTree"></div>
+    <div class="wbody" style="padding-top:0"><div id="devMsg" class="muted">Натисни на пристрій, щоб відкрити меню.</div></div>
+  </div>
+
+  <div class="win98">
+    <div class="wtitle"><span>📥 Встановлення програми для графіків росту</span></div>
+    <div class="wbody" id="instBox"></div>
+  </div>
+
+  <div class="win98">
+    <div class="wtitle"><span>🗂️ Розклади програми ноутбука за видами ПЗ</span></div>
+    <div class="wbody" id="sortBox"></div>
+  </div>
+
+  <div class="win98">
+    <div class="wtitle"><span>📜 Ліцензії для класу</span></div>
+    <div class="wbody" id="licBox"></div>
+  </div>
+
+  <div class="win98">
+    <div class="wtitle"><span>🛡️ Безпека Windows</span></div>
+    <div class="wbody" id="secBox"></div>
+  </div>
+
+  <div class="card">
+    <div class="actions"><button class="btn" id="labSubmit">Здати лабораторію</button><span id="labScore" class="muted"></span></div>
+    <div id="labFb"></div>
+  </div>
+</section>
+
+<section class="panel" id="p-res" hidden>
+  <div class="card">
+    <h2>Мій результат</h2>
+    <div class="stats">
+      <div class="stat"><small id="gradeLbl">Оцінка зараз була б</small><span class="big" id="grade">—</span><small>з 12</small></div>
+      <div class="stat"><small>Вправи</small><b id="rEx">0 з 14</b></div>
+      <div class="stat"><small>Лабораторія</small><b id="rLab">не здано</b></div>
+      <div class="stat"><small>Час</small><b id="rTime">0:00</b></div>
+      <div class="stat"><small>Помилки</small><b id="rErr">0</b></div>
+    </div>
+    <div class="tblwrap"><table class="brk" id="brk"></table></div>
+    <p class="muted" style="margin:0">12 балів — лише коли набрано щонайменше 95 % балів, не більше 2 помилок і час у межах норми. Квест дає зірки й XP для рейтингу.</p>
+    <div id="finWarn"></div>
+    <div class="actions" id="finActions"></div>
+  </div>
+  <div class="card">
+    <h2>Для вчителя</h2>
+    <div class="row" style="border:0"><label for="stName">Прізвище та ім'я</label><input type="text" id="stName" autocomplete="off"></div>
+    <div class="row" style="border:0"><label for="stClass">Клас (напр. 6-А)</label><input type="text" id="stClass" autocomplete="off" maxlength="6" style="max-width:120px"></div>
+    <div class="actions" id="sendRow" hidden><a class="btn" id="sendRes" href="#" target="_blank" rel="noopener">📤 Надіслати вчителю</a><span id="sendMsg" class="muted"></span></div>
+    <p class="muted" id="sendHelp" hidden style="margin:0">Відкриється Google Форма з уже заповненим результатом — натисни в ній «Надіслати».</p>
+    <div class="actions"><button class="btn ghost" id="copyRes">Скопіювати рядок для вчителя</button><span id="copyMsg" class="muted"></span></div>
+    <textarea id="csv" readonly aria-label="Рядок CSV для вчителя"></textarea>
+  </div>
+  <div class="card">
+    <h2>Рейтинг класу</h2>
+    <p class="muted" style="margin:0">Введи нікнейм або код від учителя (не прізвище) і збережи свої зірки, XP та оцінку.</p>
+    <div class="actions"><input type="text" id="nick" maxlength="16" placeholder="Напр. Паросток7" style="max-width:220px"><button class="btn" id="saveRank">Зберегти в рейтинг</button><span id="rankMsg" class="muted"></span></div>
+    <div class="tblwrap"><table class="rank"><thead><tr><th>#</th><th>Нікнейм</th><th>⭐</th><th>XP</th><th>Оцінка</th></tr></thead><tbody id="rankBody"><tr><td colspan="5" class="muted">Рейтинг завантажується…</td></tr></tbody></table></div>
+  </div>
+</section>
+</div>
+<script>
+// ---------- НАЛАШТУВАННЯ ДЛЯ ВЧИТЕЛЯ ----------
+const NORM_EX_MIN = 12, NORM_LAB_MIN = 8, NORM_TOTAL_MIN = 20;   // норми часу, хв
+const QUEST_SEC_PER_Q = 45;                                         // норма етапу квесту, с на питання
+const TOPIC = "Програмне забезпечення";
+const GRADE_CLASS = 6;
+// Попередньо заповнене посилання Google Форми «Результати учнів» (одне питання-абзац). Порожньо — кнопка «Надіслати вчителю» прихована.
+const FORM_PREFILL = "https://docs.google.com/forms/d/e/1FAIpQLSeaDGNzqpEMjZyDt4WUwg3k3FAhGGW4pG1E8IcOk8b4LQsBVw/viewform?usp=pp_url&entry.1997531456=test";
+
+// ---------- ДАНІ ----------
+const LV={1:"🟢 базовий",2:"🟡 середній",3:"🔴 складний"};
+const EX=[
+ {id:1,lv:1,type:"choice",q:"Що таке драйвер?",
+  o:["Програма, що «підружує» пристрій з ОС","Деталь, яку вставляють у системний блок","Кабель для під'єднання камери до ПК","Вікно з умовами ліцензійної угоди"],a:0},
+ {id:2,lv:1,type:"input",q:"Англійське driver перекладається як «водій» або «…». Впиши друге слово.",a:["візник"],hint:"Підказка: так колись називали того, хто керує возом 🐴"},
+ {id:3,lv:1,type:"chips",q:"Для якого пристрою ця операційна система?",cats:["ПК / ноутбук","Смартфон","Smart TV","Годинник"],
+  rows:[["Windows 11",0],["macOS",0],["ChromeOS",0],["Android",1],["iOS",1],["webOS",2],["tvOS",2],["watchOS",3]]},
+ {id:4,lv:1,type:"choice",q:"Як відкрити Диспетчер пристроїв у Windows?",
+  o:["Правою кнопкою на «Пуск» → Диспетчер пристроїв","Лівою кнопкою на годиннику → Налаштування","Двічі клацнути на значку кошика на робочому столі","Натиснути Ctrl+P у будь-якій відкритій програмі"],a:0},
+ {id:5,lv:1,type:"select",q:"Яка програма системного ПЗ виконує цю роботу?",
+  opts:["Антивірус","Архіватор","Утиліта диска","Драйвер","Операційна система"],
+  rows:[["Перевіряє файли на віруси",0],["Стискає 20 фото в один файл",1],["Оптимізує диск, щоб ПК швидше працював",2],["Допомагає ОС працювати з новою камерою",3],["Керує всім комп'ютером і його налаштуваннями",4]]},
+ {id:6,lv:2,type:"order",q:"Розстав кроки безпечного встановлення програми.",
+  items:["Знайти програму на офіційному сайті розробника","Завантажити файл встановлення","Запустити файл встановлення","Прочитати ліцензійну угоду, прокрутивши повзунок","Натиснути «Згоден»","Дочекатися завершення встановлення"]},
+ {id:7,lv:2,type:"input",q:"Хмарний диск для фото мікроферми коштує 45 грн на місяць. Скільки гривень коштуватиме підписка на рік? Впиши число.",a:["540"],hint:"Помнож ціну за місяць на 12."},
+ {id:8,lv:2,type:"chips",q:"Розсортуй програми за видами ПЗ.",cats:["Системне","Прикладне","Інструментальне"],
+  rows:[["Антивірус",0],["Драйвер камери",0],["Архіватор",0],["Табличний процесор",1],["Месенджер",1],["Відеоредактор",1],["Scratch",2],["Середовище програмування",2]]},
+ {id:9,lv:2,type:"choice",q:"Біля пристрою в Диспетчері пристроїв стоїть знак оклику. Що це означає?",
+  o:["Не встановлено драйвер пристрою","Пристрій працює найшвидше з усіх","Пристрій новий, його щойно купили","Пристрій треба негайно викинути"],a:0},
+ {id:10,lv:2,type:"select",q:"З'єднай умову з видом ліцензії.",
+  opts:["Commercial","Subscription","Trial","Freeware","Adware","Freemium"],
+  rows:[["Платиш один раз — користуєшся скільки завгодно",0],["Платиш щомісяця, поки потрібна програма",1],["30 днів безкоштовно, потім треба купити",2],["Повністю безкоштовна назавжди",3],["Безкоштовна, але показує рекламу",4],["Базові функції безкоштовні, решта — за плату",5]]},
+ {id:11,lv:3,type:"errors",q:"Учень розклав програми ноутбука, але зробив 3 помилки. Натисни на рядки з помилками.",
+  head:["Програма","Вид ПЗ"],rows:[["Windows 11","Системне",0],["Scratch","Прикладне",1],["Архіватор","Системне",0],["Месенджер","Системне",1],["Відеоредактор","Прикладне",0],["Антивірус","Прикладне",1],["Браузер","Прикладне",0]]},
+ {id:12,lv:3,type:"choice",q:"Друг скинув посилання: «Завантаж платну гру безкоштовно, без ліцензії!» Як учинити?",
+  o:["Відмовитися: це піратство і ризик вірусу","Завантажити, бо друг уже перевірив посилання","Завантажити, але одразу вимкнути антивірус","Завантажити й переслати всьому класу"],a:0},
+ {id:13,lv:3,type:"chips",q:"Клас купив власницьку програму для однієї копії. Що можна робити, а що — ні?",cats:["Можна","Не можна"],
+  rows:[["Працювати зі своєю копією",0],["Встановити її на ноутбук мікроферми",0],["Оновлювати з сайту розробника",0],["Продати копії однокласникам",1],["Викласти файл програми в інтернет",1],["Роздати копію друзям",1]]},
+ {id:14,lv:3,type:"select",q:"Склади план для ноутбука мікроферми: що встановити для кожного завдання?",rowsOpts:true,
+  rows:[["Щоб запрацювала USB-камера",["драйвер камери","нову відеогру з крамниці","месенджер для класу","архіватор файлів"],0],
+        ["Щоб будувати графік росту",["месенджер для класу","табличний процесор","архіватор файлів","драйвер принтера"],1],
+        ["Щоб стиснути 300 фото й надіслати",["антивірус","відеогру","архіватор","драйвер миші"],2],
+        ["Щоб безкоштовно захиститися від вірусів",["другий старий ноутбук","піратський антивірус з форуму","вбудований Windows Defender","Scratch"],2]]}
+];
+const QUEST=[
+ {n:"Країна ОС",i:"🖥️",qs:[
+   {type:"choice",q:"Яка операційна система — для смарт-годинника?",o:["watchOS","Windows 11","macOS","ChromeOS"],a:0},
+   {type:"input",q:"Програма, яка «підружує» новий пристрій з операційною системою, — це… (одне слово)",a:["драйвер","драйвери"]}]},
+ {n:"Драйвери",i:"🔌",qs:[
+   {type:"choice",q:"Яке сповіщення з'являється, коли Windows налаштувала новий пристрій?",o:["«Пристрій готовий до роботи»","«Оновіть операційну систему зараз»","«Купіть новий комп'ютер»","«Вимкніть антивірус зараз»"],a:0},
+   {type:"input",q:"Диспетчер пристроїв відкривається комбінацією клавіш … + X. Впиши назву клавіші.",a:["win","windows","віндовс"]}]},
+ {n:"Захист",i:"🛡️",qs:[
+   {type:"choice",q:"Як називається вбудований захист у Windows?",o:["Windows Defender","Windows Safety Shield","Microsoft Guard","Zillya! Pro"],a:0},
+   {type:"input",q:"Програма, що стискає файли й об'єднує кілька в один, — … (одне слово)",a:["архіватор","архіватори"]}]},
+ {n:"Ліцензії",i:"📜",qs:[
+   {type:"choice",q:"Програма безкоштовна 30 днів, а потім її треба купити. Це…",o:["Trial","Freeware","Open-source","Adware"],a:0},
+   {type:"input",q:"Підписка коштує 30 грн на місяць. Скільки гривень за пів року? Впиши число.",a:["180"]}]},
+ {n:"Бос: Шпигун",i:"👾",boss:true,qs:[
+   {type:"choice",q:"Де безпечно завантажити застосунок для Android?",o:["Google Play","Сайт із рекламою","Посилання з чату","Невідомий форум"],a:0},
+   {type:"choice",q:"Як називають набір програм для створення інших програм?",o:["Інструментальне ПЗ","Системне ПЗ для ОС","Прикладне ПЗ користувача","Вбудоване ПЗ пристрою"],a:0},
+   {type:"input",q:"Як називають програму для смартфона, планшета чи Smart TV? (одне слово)",a:["застосунок","застосунки"]}]}
+];
+const CARDS=[
+ ["Операційна система","Головна програма пристрою: допомагає людині взаємодіяти з комп'ютером і керує його налаштуваннями."],
+ ["Драйвер","Програма, яка «підружує» нове обладнання з операційною системою. Driver — «водій», «візник»."],
+ ["Диспетчер пристроїв","Вікно Windows з усіма внутрішніми й зовнішніми пристроями. Відкривається через Win+X або правою кнопкою на «Пуск»."],
+ ["Знак оклику ⚠️","Позначка в Диспетчері пристроїв: для цього пристрою не встановлено драйвер."],
+ ["Системне ПЗ","Програми, які допомагають взаємодіяти з комп'ютером: ОС, драйвери, утиліти, антивіруси, архіватори."],
+ ["Утиліти","Програми для обслуговування дисків і мережі, наприклад оптимізація диска."],
+ ["Антивірус","Програма, що стежить за вірусною безпекою. У Windows вбудовано Windows Defender."],
+ ["Архіватор","Програма, яка щільно стискає дані й об'єднує кілька файлів в один."],
+ ["Прикладне ПЗ","Програми, за допомогою яких користувач розв'язує свої задачі: редактори, браузери, месенджери, ігри."],
+ ["Інструментальне ПЗ","Інструменти для розробки інших програм: середовища програмування, Scratch."],
+ ["Застосунок","Так називають програму для смартфона, планшета чи Smart TV."],
+ ["Інсталяція","Послідовність дій, яка встановлює програму на комп'ютер або смартфон."],
+ ["Ліцензія","Правила користування програмою. Власницьке ПЗ — платне, вільне та відкрите — переважно безкоштовне."]
+];
+// ---------- ВАРІАНТ УЧНЯ (у кожного свій порядок відповідей і свої числа) ----------
+const SEED=(()=>{try{return 10000+crypto.getRandomValues(new Uint32Array(1))[0]%90000}catch(e){return 10000+Math.floor(Math.random()*90000)}})();
+function vpick(arr,salt){let h=(SEED*2654435761+salt*40503)>>>0;h=(h^(h>>>15))>>>0;h=Math.imul(h,2246822507)>>>0;h=(h^(h>>>13))>>>0;return arr[h%arr.length]}
+// Вправа 7: ціна підписки на місяць
+const P7=vpick([35,40,45,50,55,60,65],1);
+EX[6].q="Хмарний диск для фото мікроферми коштує "+P7+" грн на місяць. Скільки гривень коштуватиме підписка на рік? Впиши число.";
+EX[6].a=[String(P7*12)];
+// Лабораторія: інша ціна, ніж у вправі 7
+const LAB_PRICE=vpick([25,30,40,45,55,70].filter(p=>p!==P7),2);
+const LAB_YEAR=String(LAB_PRICE*12);
+// Квест: підписка на 3 або 6 місяців
+const QP=vpick([20,25,30,35,40],3), QM=vpick([3,6],4);
+QUEST[3].qs[1].q="Підписка коштує "+QP+" грн на місяць. Скільки гривень за "+(QM===6?"пів року":"3 місяці")+"? Впиши число.";
+QUEST[3].qs[1].a=[String(QP*QM)];
+// ---------- СТАН ----------
+const RM = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+const G={t0:null,tEx:0,tLab:0,last:0,tab:"ex",fin:null,attempt:1,confirm:false,
+  ex:{}, lab:{submits:0,score:0,errs:0,scores:[]},
+  q:{loc:0,step:0,hearts:3,won:[],stars:[],stageT0:null,stageErr:0,showWin:null,qerr:{}}, xp:0};
+try{const k="g6t7-attempt";G.attempt=(parseInt(localStorage.getItem(k))||0)+1;localStorage.setItem(k,G.attempt)}catch(e){}
+function seeded(n){let x=n*9301+49297;return()=>{x=(x*9301+49297)%233280;return x/233280}}
+function shuffle(arr,seed){const r=seeded(seed),a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+// рядки в таблицях-вправах теж перемішуються для кожного учня
+function shuffleInPlace(arr,seed){const b=shuffle(arr,seed);arr.splice(0,arr.length,...b)}
+EX.forEach(ex=>{ if(ex.type==="chips"||ex.type==="errors"||ex.type==="select") shuffleInPlace(ex.rows,SEED+ex.id*5); });
+const norm=s=>String(s).toLowerCase().replace(/[’ʼ`]/g,"'").replace(/[«»"“”.!]/g,"").replace(/\s+/g," ").trim();
+const $=s=>document.querySelector(s);
+function el(tag,attrs={},...kids){const e=document.createElement(tag);for(const k in attrs){if(k==="class")e.className=attrs[k];else if(k.startsWith("on"))e.addEventListener(k.slice(2),attrs[k]);else e.setAttribute(k,attrs[k])}for(const c of kids){if(c==null)continue;e.append(c.nodeType?c:document.createTextNode(c))}return e}
+const fmt=s=>{s=Math.max(0,Math.round(s));return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")};
+const dec=(x,n=1)=>x.toFixed(n).replace(".",",");
+
+// ---------- ТАЙМЕР ----------
+function startTimer(){ if(G.t0||G.fin) return; G.t0=Date.now(); G.last=G.t0; }
+document.addEventListener("pointerdown",e=>{ if(!e.target.closest("nav.tabs")) startTimer(); },true);
+document.addEventListener("keydown",e=>{ if(e.target.matches("input,select,textarea")) startTimer(); },true);
+function tickTime(){
+  if(!G.t0||G.fin) return; const now=Date.now(), d=(now-G.last)/1000; G.last=now;
+  if(G.tab==="ex") G.tEx+=d; else if(G.tab==="lab") G.tLab+=d;
+}
+function totalT(){ if(G.fin) return G.fin.T; return G.t0?(Date.now()-G.t0)/1000:0; }
+setInterval(()=>{tickTime();hud()},1000);
+
+// ---------- ВКЛАДКИ ----------
+document.querySelectorAll("nav.tabs button").forEach(b=>b.addEventListener("click",()=>{
+  tickTime(); G.tab=b.dataset.t;
+  document.querySelectorAll("nav.tabs button").forEach(x=>x.setAttribute("aria-selected",x===b));
+  document.querySelectorAll("section.panel[id^=p-]").forEach(p=>p.hidden=p.id!=="p-"+b.dataset.t);
+  if(b.dataset.t==="res")renderRes();
+  if(b.dataset.t==="quest")requestAnimationFrame(drawPath);
+}));
+
+// ---------- ВПРАВИ ----------
+function renderEx(){
+  const list=$("#exList");list.innerHTML="";
+  EX.forEach(ex=>{
+    const st=G.ex[ex.id]||(G.ex[ex.id]={tries:0,done:false,pts:0,errs:0});
+    const card=el("div",{class:"card"+(st.done?" done":""),id:"ex"+ex.id});
+    card.append(el("div",{class:"qhead"},el("h3",{},"Вправа "+ex.id),el("span",{class:"lvl"},LV[ex.lv])),el("p",{class:"q"},ex.q));
+    const body=el("div");let get;
+    if(ex.type==="choice"){
+      let sel=null;const box=el("div",{class:"opts"});
+      shuffle(ex.o.map((t,i)=>[t,i]),SEED+ex.id*31).forEach(([t,i])=>{box.append(el("button",{class:"opt","aria-pressed":"false","data-i":i,onclick:e=>{sel=i;box.querySelectorAll(".opt").forEach(x=>x.setAttribute("aria-pressed",x===e.currentTarget))}},t))});
+      body.append(box);get=()=>sel===ex.a;
+    }else if(ex.type==="input"){
+      const inp=el("input",{type:"text",id:"in"+ex.id,autocomplete:"off","aria-label":"Відповідь"});body.append(inp);
+      get=()=>ex.a.includes(norm(inp.value));
+    }else if(ex.type==="chips"){
+      const pick={};
+      ex.rows.forEach((r,ri)=>{const ch=el("div",{class:"chips"});ex.cats.forEach((c,ci)=>ch.append(el("button",{class:"chip","aria-pressed":"false",onclick:()=>{pick[ri]=ci;ch.querySelectorAll(".chip").forEach((x,j)=>x.setAttribute("aria-pressed",j===ci))}},c)));body.append(el("div",{class:"row"},el("span",{},r[0]),ch))});
+      get=()=>ex.rows.every((r,ri)=>pick[ri]===r[1]);
+    }else if(ex.type==="select"){
+      const sels=[];
+      ex.rows.forEach((r,ri)=>{const opts=ex.rowsOpts?r[1]:ex.opts;const s=el("select",{id:"s"+ex.id+"_"+ri,"aria-label":r[0]},el("option",{value:""},"— обери —"));
+        shuffle(opts.map((o,i)=>[o,i]),SEED+ex.id*7+ri).forEach(([o,i])=>s.append(el("option",{value:i},o)));sels.push(s);body.append(el("div",{class:"row"},el("span",{},r[0]),s))});
+      get=()=>ex.rows.every((r,ri)=>sels[ri].value!==""&&+sels[ri].value===(ex.rowsOpts?r[2]:r[1]));
+    }else if(ex.type==="order"){
+      let cur=shuffle(ex.items.map((t,i)=>i),SEED+ex.id*13); if(cur.every((v,i)=>v===i)) cur.reverse();const wrap=el("div",{class:"order"});
+      const draw=()=>{wrap.innerHTML="";const ol=el("ol");cur.forEach((idx,pos)=>{ol.append(el("li",{},el("span",{},ex.items[idx]),
+        el("button",{class:"mini","aria-label":"Вгору",onclick:()=>{if(pos>0){[cur[pos-1],cur[pos]]=[cur[pos],cur[pos-1]];draw()}}},"↑"),
+        el("button",{class:"mini","aria-label":"Вниз",onclick:()=>{if(pos<cur.length-1){[cur[pos+1],cur[pos]]=[cur[pos],cur[pos+1]];draw()}}},"↓")))});wrap.append(ol)};
+      draw();body.append(wrap);get=()=>cur.every((v,i)=>v===i);
+    }else if(ex.type==="errors"){
+      const picked=new Set();const tb=el("tbody");
+      ex.rows.forEach((r,ri)=>{const tr=el("tr",{tabindex:"0",onclick:()=>{picked.has(ri)?picked.delete(ri):picked.add(ri);tr.classList.toggle("pick")},onkeydown:e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();tr.click()}}},el("td",{},r[0]),el("td",{},r[1]));tb.append(tr)});
+      body.append(el("div",{class:"tblwrap"},el("table",{class:"err"},el("thead",{},el("tr",{},...ex.head.map(h=>el("th",{},h)))),tb)));
+      get=()=>ex.rows.every((r,ri)=>picked.has(ri)===!!r[2]);
+    }
+    card.append(body);
+    const fb=el("div");
+    const btn=el("button",{class:"btn",onclick:()=>{
+      if(st.done||G.fin)return; startTimer();
+      if(get()){st.done=true;st.pts=st.tries===0?1:(st.tries===1?0.5:0);G.xp+=st.tries===0?10:(st.tries===1?5:0);
+        fb.className="fb ok";fb.textContent="Правильно! "+(st.pts===1?"+1 бал":st.pts?"+0,5 бала":"Зараховано без балів (третя спроба й далі).");card.classList.add("done");btn.disabled=true}
+      else{st.tries++;st.errs++;fb.className="fb bad";fb.textContent="Ще не так (помилка). "+(st.tries===1?"Друга спроба дасть 0,5 бала.":"Наступні спроби — без балів, але розібратися варто.")+(ex.hint?" "+ex.hint:"")}
+      hud();
+    }},"Перевірити");
+    card.append(el("div",{class:"actions"},btn),fb);list.append(card);
+  });
+}
+
+// ---------- КАРТКИ ----------
+function renderCards(){const f=$("#flash");CARDS.forEach(([t,d])=>{const c=el("button",{class:"fc","aria-expanded":"false"},el("span",{class:"t"},t),el("span",{class:"d",hidden:""},d));c.addEventListener("click",()=>{const o=c.classList.toggle("open");c.querySelector(".d").hidden=!o;c.setAttribute("aria-expanded",o)});f.append(c)})}
+// ---------- ЛАБОРАТОРІЯ ----------
+const REQS=[
+ "Знайди в Диспетчері пристроїв пристрій зі знаком ⚠️ і онови йому драйвер.",
+ "Не залиш жодного вимкненого чи видаленого пристрою.",
+ "Встанови програму «ГрафікРосту» з безпечного джерела.",
+ "Перед згодою прочитай ліцензійну угоду до кінця (прокрути текст донизу).",
+ "Розклади всі 7 програм ноутбука за видами ПЗ.",
+ "Визнач вид ліцензії для кожної з 4 програм.",
+ "Порахуй, скільки гривень коштуватиме хмарний диск за рік.",
+ "Увімкни вбудований антивірус Windows."
+];
+const DEVS=[
+ {cat:"Аудіовходи й аудіовиходи",items:[{id:"spk",n:"Динаміки (Realtek Audio)",ic:"🔊"}]},
+ {cat:"Bluetooth",items:[{id:"bt",n:"Адаптер Bluetooth",ic:"📶"}]},
+ {cat:"Камери",items:[{id:"cam",n:"USB-камера таймлапсу",ic:"📷",nodrv:true}]},
+ {cat:"Клавіатури",items:[{id:"kb",n:"Стандартна клавіатура",ic:"⌨️"}]},
+ {cat:"Миша та інші вказівні пристрої",items:[{id:"ms",n:"USB-миша",ic:"🖱️"}]},
+ {cat:"Мережеві адаптери",items:[{id:"wifi",n:"Адаптер Wi-Fi",ic:"🌐"}]},
+ {cat:"Дисплейні адаптери",items:[{id:"gpu",n:"Відеоадаптер",ic:"🖼️"}]}
+];
+const DS={}; DEVS.forEach(c=>c.items.forEach(d=>DS[d.id]={drv:!d.nodrv,off:false,removed:false,d}));
+const SRC=[
+ {id:"official",t:"🌐 Офіційний сайт розробника",s:"growchart.example — сторінка «Завантажити»"},
+ {id:"crack",t:"⚠️ free-soft-crack.xyz",s:"«Усі платні програми безкоштовно!»"},
+ {id:"banner",t:"📢 Рекламний банер",s:"«Завантаж за 1 клік, без реєстрації!»"}
+];
+const SORTP=[["Антивірус Zillya!","Системне"],["Архіватор","Системне"],["Драйвер камери","Системне"],["Табличний процесор","Прикладне"],["Графічний редактор","Прикладне"],["Месенджер","Прикладне"],["Scratch","Інструментальне"]];
+const LICP=[["Фоторедактор: 30 днів безкоштовно, потім купити","Trial"],["Хмарний диск: "+LAB_PRICE+" грн щомісяця","Subscription"],["Гра-тренажер: безкоштовна, але з рекламою","Adware"],["Редактор схем: безкоштовний, код відкритий","Open-source"]];
+shuffleInPlace(SORTP,SEED+101); shuffleInPlace(LICP,SEED+202);
+const LICOPTS=["Commercial","Subscription","Trial","Freeware","Adware","Open-source"];
+const INST={src:null,scrolled:false,readFirst:false,installed:false,stage:"src"};
+const SEC={def:false,upd:true,tips:true};
+let openMenu=null;
+
+function renderReqs(status){const ol=$("#reqList");ol.innerHTML="";REQS.forEach((r,i)=>ol.append(el("li",{class:status?(status[i]?"ok":"no"):""},(status?(status[i]?"✓ ":"✗ "):"")+r)))}
+function devMsg(t){$("#devMsg").textContent=t}
+function renderDevs(){
+  const box=$("#devTree");box.innerHTML="";
+  DEVS.forEach(c=>{
+    const items=c.items.filter(d=>!DS[d.id].removed); if(!items.length) return;
+    box.append(el("div",{class:"dev-cat"},"▾ "+c.cat));
+    items.forEach(d=>{const s=DS[d.id];
+      const row=el("div",{class:"dev"+(s.off?" off":""),tabindex:"0",role:"button","data-id":d.id},
+        el("span",{class:"ic"},d.ic), el("span",{},d.n+(s.off?" (вимкнено)":"")), (!s.drv&&!s.off)?el("span",{title:"Немає драйвера"},"⚠️"):null);
+      row.addEventListener("click",e=>{e.stopPropagation();showMenu(row,d.id)});
+      row.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();showMenu(row,d.id)}});
+      box.append(row);
+    });
+  });
+}
+function closeMenu(){if(openMenu){openMenu.remove();openMenu=null}}
+document.addEventListener("click",closeMenu);
+function showMenu(row,id){
+  closeMenu(); if(G.fin) return; const s=DS[id];
+  const m=el("div",{class:"ctx",role:"menu"},
+    el("button",{onclick:e=>{e.stopPropagation();closeMenu();updDrv(id)}},"Оновити драйвер"),
+    el("button",{onclick:e=>{e.stopPropagation();closeMenu();s.off=!s.off;devMsg(s.off?"Пристрій «"+s.d.n+"» вимкнено.":"Пристрій «"+s.d.n+"» знову увімкнено.");renderDevs()}},s.off?"Увімкнути пристрій":"Вимкнути пристрій"),
+    el("button",{onclick:e=>{e.stopPropagation();closeMenu();s.removed=true;devMsg("Пристрій «"+s.d.n+"» видалено. Щоб повернути, натисни «Оновити конфігурацію».");renderDevs()}},"Видалити пристрій"),
+    el("hr"),
+    el("button",{onclick:e=>{e.stopPropagation();closeMenu();devMsg("Властивості «"+s.d.n+"»: "+(s.off?"пристрій вимкнено.":s.drv?"пристрій працює нормально.":"драйвер для цього пристрою не встановлено."))}},"Властивості"));
+  row.append(m); openMenu=m;
+}
+function updDrv(id){const s=DS[id];
+  if(s.drv){devMsg("Найкращий драйвер для «"+s.d.n+"» уже встановлено.");return}
+  devMsg("🔎 Пошук драйвера для «"+s.d.n+"»…");
+  setTimeout(()=>{s.drv=true;devMsg("✓ Драйвер оновлено. «"+s.d.n+"»: пристрій готовий до роботи.");renderDevs()},900);
+}
+$("#scanHw").addEventListener("click",()=>{if(G.fin)return;Object.values(DS).forEach(s=>s.removed=false);devMsg("Конфігурацію оновлено: Windows знайшла всі під'єднані пристрої.");renderDevs()});
+
+const LICTEXT=["ЛІЦЕНЗІЙНА УГОДА КОРИСТУВАЧА «ГрафікРосту» 2.1","1. Програма є інтелектуальною власністю розробника і захищена законом про авторське право.","2. Ви можете встановити програму на один комп'ютер і користуватися нею для навчання.","3. Заборонено продавати, роздавати чи викладати копії програми в інтернет.","4. Програма може збирати анонімну статистику помилок, щоб розробник їх виправляв.","5. Розробник надає оновлення безкоштовно протягом одного року.","6. Натискаючи «Згоден», ви погоджуєтеся з усіма пунктами цієї угоди.","7. Якщо ви не згодні, натисніть «Скасувати» — програму не буде встановлено.","— Кінець угоди —"];
+function renderInst(){
+  const b=$("#instBox");b.innerHTML="";
+  if(INST.installed){
+    b.append(el("div",{class:"fb ok"},"✓ «ГрафікРосту» встановлено. Джерело: "+SRC.find(s=>s.id===INST.src).t.replace(/^\S+\s/,"")+"."),
+      el("div",{class:"actions"},el("button",{class:"btn ghost",onclick:()=>{if(G.fin)return;Object.assign(INST,{src:null,scrolled:false,readFirst:false,installed:false,stage:"src"});renderInst()}},"Видалити програму")));
+    return;
+  }
+  if(INST.stage==="src"){
+    b.append(el("p",{class:"muted",style:"margin:0"},"Звідки завантажити програму «ГрафікРосту»?"));
+    const g=el("div",{class:"src"});
+    SRC.forEach(s=>g.append(el("button",{class:"srcb",onclick:()=>{if(G.fin)return;INST.src=s.id;INST.stage="lic";INST.scrolled=false;renderInst()}},s.t,el("small",{},s.s))));
+    b.append(g);return;
+  }
+  if(INST.stage==="lic"){
+    const lic=el("div",{class:"lic",tabindex:"0"},...LICTEXT.map(t=>el("p",{style:"margin:0 0 8px"},t)));
+    lic.addEventListener("scroll",()=>{if(lic.scrollTop+lic.clientHeight>=lic.scrollHeight-6)INST.scrolled=true});
+    b.append(el("b",{},"Ліцензійна угода"),lic,
+      el("div",{class:"actions"},
+        el("button",{class:"btn",onclick:()=>{INST.readFirst=INST.scrolled;INST.stage="prog";renderInst()}},"Згоден"),
+        el("button",{class:"btn ghost",onclick:()=>{INST.stage="src";renderInst()}},"Скасувати")));
+    return;
+  }
+  if(INST.stage==="prog"){
+    const p=el("div",{class:"prog"},el("div"));b.append(el("span",{class:"muted"},"Встановлення…"),p);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>p.firstChild.style.width="100%"));
+    setTimeout(()=>{INST.installed=true;renderInst()},RM?50:1300);
+  }
+}
+function renderSort(){const b=$("#sortBox");SORTP.forEach((p,i)=>{const s=el("select",{id:"sp"+i,"aria-label":p[0]},el("option",{value:""},"Вид ПЗ?"),...["Системне","Прикладне","Інструментальне"].map(o=>el("option",{},o)));b.append(el("div",{class:"row"},el("span",{},p[0]),s))})}
+function renderLic(){const b=$("#licBox");LICP.forEach((p,i)=>{const s=el("select",{id:"lc"+i,"aria-label":p[0]},el("option",{value:""},"Ліцензія?"),...LICOPTS.map(o=>el("option",{},o)));b.append(el("div",{class:"row"},el("span",{},p[0]),s))});
+  b.append(el("div",{class:"row"},el("label",{for:"yearCost"},el("b",{},"Скільки коштуватиме хмарний диск за рік, грн?")),el("input",{type:"text",id:"yearCost",inputmode:"numeric",autocomplete:"off"})))}
+function renderSec(){const b=$("#secBox");b.innerHTML="";
+  [["def","Захисник Windows (вбудований антивірус)"],["upd","Автоматичні оновлення Windows"],["tips","Показувати поради на екрані блокування"]].forEach(([k,t])=>{
+    const sw=el("button",{class:"sw",role:"switch","aria-checked":String(SEC[k]),"aria-label":t,onclick:()=>{if(G.fin)return;SEC[k]=!SEC[k];renderSec()}});
+    b.append(el("div",{class:"toggle"},el("span",{},t+": "+(SEC[k]?"увімкнено":"вимкнено")),sw))})}
+function labChecks(){
+  const c=DS.cam;
+  return [
+    c.drv&&!c.off&&!c.removed,
+    Object.values(DS).every(s=>!s.off&&!s.removed),
+    INST.installed&&INST.src==="official",
+    INST.installed&&INST.readFirst,
+    SORTP.every((p,i)=>$("#sp"+i).value===p[1]),
+    LICP.every((p,i)=>$("#lc"+i).value===p[1]),
+    norm($("#yearCost").value).replace(/\s|грн/g,"")===LAB_YEAR,
+    SEC.def
+  ];
+}
+$("#labSubmit").addEventListener("click",()=>{
+  if(G.fin||G.lab.submits>=2) return; startTimer();
+  const ch=labChecks(), met=ch.filter(Boolean).length, n=ch.length;
+  const k=G.lab.submits===0?1:0.8, sc=met/n*k;
+  G.lab.submits++; G.lab.scores.push(sc); G.lab.score=Math.max(...G.lab.scores); G.lab.errs+=n-met; G.lab.last=ch;
+  renderReqs(ch);
+  const fb=$("#labFb");
+  if(met===n){fb.className="fb ok";fb.textContent="Усі "+n+" вимог виконано! Ноутбук мікроферми готовий: камера знімає таймлапс, графіки будуються 🌱";$("#labSubmit").disabled=true;G.xp+=30;confetti()}
+  else if(G.lab.submits<2){fb.className="fb warn";fb.textContent="Виконано "+met+" з "+n+". Невиконаних вимог: "+(n-met)+" (кожна — помилка), вони позначені червоним. Можна виправити й здати ще раз — бал × 0,8."}
+  else{fb.className="fb bad";fb.textContent="Друга здача: виконано "+met+" з "+n+". Лабораторію закрито.";$("#labSubmit").disabled=true}
+  $("#labScore").textContent="Здач: "+G.lab.submits+" з 2 · бал лабораторії: "+Math.round(G.lab.score*100)+"%";
+  hud();
+});
+// ---------- ЕФЕКТИ ----------
+function floatAt(target,text,cls){ if(!target) return; const r=target.getBoundingClientRect();
+  const d=el("div",{class:cls||"float"},text); d.style.left=(r.left+r.width/2)+"px"; d.style.top=(r.top)+"px";
+  document.body.append(d); setTimeout(()=>d.remove(),1200); }
+function retrigger(n,c){ if(!n) return; n.classList.remove(c); void n.offsetWidth; n.classList.add(c); }
+function confetti(){
+  if(RM) return; const cv=$("#confetti"), ctx=cv.getContext("2d"); cv.width=innerWidth; cv.height=innerHeight;
+  const cols=["#86B83A","#2F6B3A","#E0A100","#2B6CB0","#B3261E","#ffffff"];
+  const P=Array.from({length:120},()=>({x:Math.random()*cv.width,y:-20-Math.random()*cv.height*.4,vx:(Math.random()-.5)*3,vy:2+Math.random()*3,r:Math.random()*6.28,vr:(Math.random()-.5)*.3,c:cols[Math.random()*cols.length|0],w:6+Math.random()*5,h:9+Math.random()*6}));
+  const t0=performance.now();
+  (function f(t){ ctx.clearRect(0,0,cv.width,cv.height);
+    P.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.04;p.r+=p.vr;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.r);ctx.fillStyle=p.c;ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);ctx.restore()});
+    if(t-t0<2600) requestAnimationFrame(f); else ctx.clearRect(0,0,cv.width,cv.height); })(t0);
+}
+
+// ---------- КВЕСТ ----------
+let lastDone=0;
+function heartsTxt(){return "❤️".repeat(G.q.hearts)+"🤍".repeat(3-G.q.hearts)}
+function renderMap(){
+  const m=$("#qmap");m.innerHTML="";
+  QUEST.forEach((l,i)=>{const won=G.q.won.includes(i), cur=i===G.q.loc&&!won;
+    m.append(el("div",{class:"loc"+(won?" won":"")+(cur?" cur":"")+(i>G.q.loc?" lock":"")},el("b",{},i>G.q.loc?"🔒":l.i),l.n,el("span",{class:"st"},won?"★".repeat(G.q.stars[i])+"☆".repeat(3-G.q.stars[i]):"")))});
+  $("#hearts").textContent=heartsTxt();
+  requestAnimationFrame(drawPath);
+}
+function drawPath(){
+  const wrap=$("#qmapwrap"), svg=$("#qsvg"); if(!wrap||wrap.offsetParent===null) return;
+  const wr=wrap.getBoundingClientRect(), locs=[...document.querySelectorAll("#qmap .loc")]; if(!locs.length) return;
+  const pts=locs.map(l=>{const r=l.getBoundingClientRect();return [r.left-wr.left+r.width/2, r.top-wr.top+r.height/2]});
+  const cur=Math.min(G.q.loc,QUEST.length-1), doneTo=Math.min(G.q.won.length,QUEST.length-1);
+  const d=a=>a.map((p,k)=>(k?"L":"M")+p[0].toFixed(1)+" "+p[1].toFixed(1)).join(" ");
+  const seg=pts.slice(0,doneTo+1); let len=0; for(let k=1;k<seg.length;k++) len+=Math.hypot(seg[k][0]-seg[k-1][0],seg[k][1]-seg[k-1][1]);
+  let prevLen=0; const pseg=pts.slice(0,Math.min(lastDone,doneTo)+1); for(let k=1;k<pseg.length;k++) prevLen+=Math.hypot(pseg[k][0]-pseg[k-1][0],pseg[k][1]-pseg[k-1][1]);
+  svg.setAttribute("viewBox","0 0 "+wr.width+" "+wr.height);
+  svg.innerHTML='<path class="qpath" d="'+d(pts)+'"/>'+(seg.length>1?'<path class="qdone" id="qdone" d="'+d(seg)+'" style="stroke-dasharray:'+len+';stroke-dashoffset:'+(len-prevLen)+'"/>':'');
+  const pd=$("#qdone"); if(pd){ requestAnimationFrame(()=>requestAnimationFrame(()=>{pd.style.strokeDashoffset="0"})); }
+  lastDone=doneTo;
+  let sp=$("#sprout"); if(!sp){ sp=el("div",{class:"sprout",id:"sprout"},el("span",{},"🌱")); wrap.append(sp); }
+  sp.style.transform="translateX("+(pts[cur][0]-14).toFixed(0)+"px)";
+}
+function stageNorm(i){return QUEST[i].qs.length*QUEST_SEC_PER_Q}
+function renderQuest(){
+  renderMap();const box=$("#qbox");box.innerHTML="";
+  if(G.q.showWin){ const w=G.q.showWin; G.q.showWin=null;
+    box.append(el("div",{class:"qcard win"},el("div",{style:"font-size:2.4rem"},w.boss?"🏆":"🎉"),el("h3",{},w.boss?"Вірус-шпигуна переможено!":"Локацію пройдено!"),
+      el("div",{class:"stars"},...[0,1,2].map(k=>{const s=el("span",{},k<w.stars?"★":"☆");s.style.animationDelay=(.15+k*.25)+"s";return s})),
+      el("span",{class:"muted"},"Помилок: "+w.err+" · час "+fmt(w.t)+" з норми "+fmt(w.norm)+(w.over?" (довше за норму)":"")),
+      el("button",{class:"btn",onclick:renderQuest},G.q.won.length===QUEST.length?"До підсумку 🏁":"Далі на мапу →")));
+    confetti(); return;
+  }
+  if(G.q.won.length===QUEST.length){const tot=G.q.stars.reduce((a,b)=>a+b,0);
+    box.append(el("div",{class:"fb ok"},"🏆 Ноутбук мікроферми врятовано! Зірок: "+tot+" з "+QUEST.length*3+", XP: "+G.xp+". Перейди у «Результат» і збережи рейтинг."));return}
+  const i=G.q.loc,L=QUEST[i],Q=L.qs[G.q.step];
+  if(G.q.stageT0===null){G.q.stageT0=Date.now();G.q.stageErr=0;startTimer()}
+  const card=el("div",{class:"qcard",id:"qcard"});
+  card.append(el("h3",{},L.i+" "+L.n+" · питання "+(G.q.step+1)+" з "+L.qs.length));
+  if(L.boss){const hp=Math.round(100*(1-G.q.step/L.qs.length));
+    card.append(el("div",{class:"bossrow"},el("span",{class:"bossface",id:"bossface"},"👾"),el("div",{class:"hpbar"},el("div",{id:"hp",style:"width:"+hp+"%"}))))}
+  card.append(el("p",{class:"q"},Q.q));
+  let get;
+  if(Q.type==="choice"){let sel=null;const o=el("div",{class:"opts"});shuffle(Q.o.map((t,k)=>[t,k]),SEED+i*17+G.q.step).forEach(([t,k])=>o.append(el("button",{class:"opt","aria-pressed":"false",onclick:e=>{sel=k;o.querySelectorAll(".opt").forEach(x=>x.setAttribute("aria-pressed",x===e.currentTarget))}},t)));card.append(o);get=()=>sel===Q.a}
+  else{const inp=el("input",{type:"text",id:"qin",autocomplete:"off","aria-label":"Відповідь"});card.append(inp);get=()=>Q.a.includes(norm(inp.value))}
+  const fb=el("div");
+  const btn=el("button",{class:"btn",onclick:()=>{
+    if(get()){const gain=L.boss?20:10;G.xp+=gain;floatAt(btn,"+"+gain+" XP");retrigger(card,"flash");
+      G.q.step++;
+      if(L.boss){const f=$("#bossface");retrigger(f,"hit");const h=$("#hp");if(h)h.style.width=Math.round(100*(1-G.q.step/L.qs.length))+"%"}
+      if(G.q.step>=L.qs.length){
+        const t=(Date.now()-G.q.stageT0)/1000, nm=stageNorm(i), over=t>nm, e=G.q.stageErr;
+        const stars=(e===0&&!over)?3:((e===0&&over)||(e===1&&!over))?2:1;
+        G.q.won.push(i);G.q.stars[i]=stars;G.q.loc++;G.q.step=0;G.q.hearts=3;G.q.stageT0=null;
+        G.q.showWin={stars,err:e,t,norm:nm,over,boss:!!L.boss};
+        if(L.boss&&!RM){const f=$("#bossface");if(f)f.classList.add("dead");setTimeout(renderQuest,900)}else setTimeout(renderQuest,450);
+      } else setTimeout(renderQuest,450);
+      hud();
+    }else{
+      G.q.hearts--;G.q.stageErr++;const qk=i+"_"+G.q.step;G.q.qerr[qk]=(G.q.qerr[qk]||0)+1;floatAt($("#hearts"),"💔","heartfx");retrigger(card,"shake");
+      if(G.q.hearts<=0){G.q.hearts=3;G.q.step=0;fb.className="fb bad";fb.textContent="Серця скінчилися! Локацію почато заново (час і помилки рахуються далі).";btn.disabled=true;setTimeout(renderQuest,1500)}
+      else{fb.className="fb bad";fb.textContent="Неправильно, −1 ❤️. Подумай ще."}
+      $("#hearts").textContent=heartsTxt();
+    }
+  }},"Відповісти");
+  card.append(el("div",{class:"actions"},btn),fb);box.append(card);
+}
+addEventListener("resize",()=>requestAnimationFrame(drawPath));
+// ---------- ОЦІНКА ----------
+const NORM_TOTAL=NORM_TOTAL_MIN*60;
+function exPts(){return Object.values(G.ex).reduce((a,b)=>a+b.pts,0)}
+function exErrs(){return Object.values(G.ex).reduce((a,b)=>a+b.errs,0)}
+function compute(){
+  if(G.fin) return G.fin;
+  const E=exPts()/EX.length, L=G.lab.score, P=0.6*E+0.4*L;
+  const errors=exErrs()+G.lab.errs, T=totalT();
+  const errPen=Math.min(3,Math.max(0,errors-2)*0.25);
+  const timePen=T<=NORM_TOTAL?0:(T<=NORM_TOTAL*1.5?1:2);
+  let grade=Math.max(1,Math.round(12*P-errPen-timePen));
+  const elite=P>=0.95&&errors<=2&&T<=NORM_TOTAL; if(grade>=12&&!elite) grade=11; grade=Math.min(12,grade);
+  const done=Object.values(G.ex).filter(x=>x.done).length;
+  return {E,L,P,errors,T,tEx:G.tEx,tLab:G.tLab,errPen,timePen,grade,done,tooFast:T>0&&T<NORM_TOTAL*0.3,labSub:G.lab.submits};
+}
+function hud(){
+  const r=compute(), T=totalT();
+  const ht=$("#hudTime"); ht.textContent="⏱ "+fmt(T)+" / "+fmt(NORM_TOTAL)+(G.fin?" ✓":""); ht.classList.toggle("over",T>NORM_TOTAL&&!G.fin);
+  $("#hudEx").textContent="Вправи: "+r.done+"/14"; $("#hudErr").textContent="❌ "+r.errors;
+  $("#hudStar").textContent="⭐ "+G.q.stars.reduce((a,b)=>a+(b||0),0); $("#hudXp").textContent="XP "+G.xp;
+}
+function finish(){ tickTime(); const r=compute(); r.T=totalT(); r.at=new Date().toLocaleString("uk-UA"); G.fin=r; G.confirm=false; hud(); renderRes(); confetti(); }
+function renderRes(){
+  const r=compute(), f=!!G.fin;
+  $("#gradeLbl").textContent=f?"Оцінка (зафіксовано)":"Оцінка зараз була б";
+  $("#grade").textContent=r.grade;
+  $("#rEx").textContent=dec(exPts(),1).replace(",0","")+" з 14";
+  $("#rLab").textContent=G.lab.submits?Math.round(G.lab.score*100)+"% ("+G.lab.submits+" здач.)":"не здано";
+  $("#rTime").textContent=fmt(r.T)+" / "+fmt(NORM_TOTAL);
+  $("#rErr").textContent=r.errors;
+  const tb=$("#brk"); tb.innerHTML="";
+  const row=(a,b,neg)=>tb.append(el("tr",{},el("td",{},a),el("td",{class:neg?"neg":""},b)));
+  row("Вправи: "+dec(exPts(),1).replace(",0","")+" з 14 балів ("+Math.round(r.E*100)+"%) × 0,6", dec(12*0.6*r.E));
+  row("Лабораторія: "+Math.round(r.L*100)+"% × 0,4", dec(12*0.4*r.L));
+  row("Основа (з 12)", dec(12*r.P));
+  row("Помилки: "+r.errors+" (перші 2 без штрафу, далі −0,25, макс. −3)", r.errPen?"−"+dec(r.errPen,2):"0", r.errPen>0);
+  row("Час: "+fmt(r.T)+" з норми "+fmt(NORM_TOTAL)+" (вправи "+fmt(r.tEx)+", лабораторія "+fmt(r.tLab)+")", r.timePen?"−"+r.timePen:"0", r.timePen>0);
+  row("Спроба №", String(G.attempt));
+  row("Варіант №", String(SEED));
+  const w=$("#finWarn"); w.innerHTML="";
+  if(r.tooFast) w.append(el("div",{class:"fb warn"},"⚠ Занадто швидко: менше 30 % норми часу. Учитель побачить цю позначку."));
+  const a=$("#finActions"); a.innerHTML="";
+  if(f){ a.append(el("div",{class:"fb ok"},"Результат зафіксовано ("+G.fin.at+"). Скопіюй рядок для вчителя й збережи рейтинг."),
+      el("button",{class:"btn ghost",onclick:()=>location.reload()},"Пройти знову (спроба №"+(G.attempt+1)+")")); }
+  else{
+    const miss=[]; if(r.done<14) miss.push("вправ виконано "+r.done+" з 14"); if(!G.lab.submits) miss.push("лабораторію не здано");
+    if(G.confirm&&miss.length){ a.append(el("div",{class:"fb warn"},"Ще не все: "+miss.join("; ")+". Невиконане рахується як 0. Завершити?"),
+        el("button",{class:"btn warn",onclick:finish},"Так, завершити"),el("button",{class:"btn ghost",onclick:()=>{G.confirm=false;renderRes()}},"Повернутися"));}
+    else a.append(el("button",{class:"btn",onclick:()=>{ if(miss.length){G.confirm=true;renderRes()} else finish(); }},"🏁 Завершити й отримати оцінку"));
+  }
+  $("#csv").value=csvLine(); updSend();
+}
+function csvLine(){const r=compute(),q=v=>'"'+String(v).replace(/"/g,'""')+'"';
+  const H=["Ім'я","Клас","Тема","Спроба","Вправи (бали з 14)","Лабораторія %","Здач лабораторії","Помилок","Час вправи","Час лабораторія","Час разом","Норма","Основа","Штраф помилки","Штраф час","Оцінка","Позначка","Статус","Зірки квесту","XP","Варіант","Завдання (помилок; н — не виконано)"];
+  const V=[q($("#stName").value||"—"),q($("#stClass").value||GRADE_CLASS),q(TOPIC),G.attempt,dec(exPts(),1),Math.round(r.L*100),G.lab.submits,r.errors,fmt(r.tEx),fmt(r.tLab),fmt(r.T),fmt(NORM_TOTAL),dec(12*r.P),dec(r.errPen,2),r.timePen,r.grade,r.tooFast?"занадто швидко":"",G.fin?"завершено":"не завершено",G.q.stars.reduce((a,b)=>a+(b||0),0),G.xp,SEED,q(taskStr())];
+  return H.join(";")+"\n"+V.join(";")}
+// ---------- ЖУРНАЛ: деталі по кожному завданню ----------
+// число = скільки помилок у завданні (0 — з першої спроби), «н» — не виконано
+function taskStr(){const a=[];
+  EX.forEach(ex=>{const st=G.ex[ex.id];a.push("В"+ex.id+":"+(st&&st.done?st.errs:(st&&st.errs?st.errs+"н":"н")))});
+  let k=0;QUEST.forEach((L,i)=>L.qs.forEach((qq,j)=>{k++;const e=G.q.qerr[i+"_"+j]||0;const ok=G.q.won.includes(i)||(i===G.q.loc&&j<G.q.step);a.push("К"+k+":"+(ok?e:(e?e+"н":"н")))}));
+  REQS.forEach((r,i)=>a.push("Л"+(i+1)+":"+(G.lab.last?(G.lab.last[i]?0:1):"н")));
+  return a.join(",")}
+const hm=t=>{t=Math.max(0,Math.round(t));return Math.floor(t/60)+" хв "+String(t%60).padStart(2,"0")+" с"};
+const clean=v=>String(v).replace(/[|\n\r]/g," ").trim();
+function sendLine(){const r=compute();
+  return ["v1",GRADE_CLASS,TOPIC,clean($("#stClass").value||"—"),clean($("#stName").value||"—"),G.attempt,SEED,r.grade,dec(exPts(),1),Math.round(r.L*100),r.errors,hm(r.T),hm(NORM_TOTAL),r.tooFast?"занадто швидко":"",G.fin?"завершено":"не завершено",taskStr()].join("|")}
+function updSend(){
+  const on=!!FORM_PREFILL; $("#sendRow").hidden=!on; $("#sendHelp").hidden=!on; if(!on) return;
+  const a=$("#sendRes"), nm=$("#stName").value.trim(), cl=$("#stClass").value.trim();
+  const ready=nm&&cl&&G.fin;
+  a.setAttribute("aria-disabled",String(!ready)); a.classList.toggle("off",!ready);
+  $("#sendMsg").textContent=!G.fin?"Спершу натисни «Завершити й отримати оцінку».":(!nm||!cl)?"Впиши прізвище, ім'я та клас.":"";
+  const u=FORM_PREFILL.replace(/(entry\.\d+=)[^&]*/,(m,p)=>p+encodeURIComponent(sendLine()));
+  a.href=ready?u:"#";
+}
+$("#sendRes").addEventListener("click",e=>{ if($("#sendRes").getAttribute("aria-disabled")==="true"){e.preventDefault();updSend();return} $("#sendMsg").textContent="Форму відкрито в новій вкладці — натисни там «Надіслати» ✔"; });
+["#stName","#stClass"].forEach(id=>$(id).addEventListener("input",()=>{$("#csv").value=csvLine();updSend()}));
+$("#copyRes").addEventListener("click",()=>{const t=csvLine();$("#csv").value=t;const sel=()=>{$("#csv").select();$("#copyMsg").textContent="Виділено — натисни Ctrl+C"};
+  try{navigator.clipboard.writeText(t).then(()=>$("#copyMsg").textContent="Скопійовано",sel)}catch(e){sel()}});
+
+// ---------- РЕЙТИНГ ----------
+let DB=null,ME=null;
+function drawRank(docs){const tb=$("#rankBody");tb.innerHTML="";
+  const rows=docs.map(d=>d.data()).filter(Boolean).sort((a,b)=>(b.grade-a.grade)||(b.stars-a.stars)||(b.xp-a.xp)).slice(0,40);
+  if(!rows.length){tb.append(el("tr",{},el("td",{colspan:"5",class:"muted"},"Поки порожньо. Будь першим — збережи свій результат!")));return}
+  rows.forEach((r,i)=>tb.append(el("tr",{},el("td",{},String(i+1)),el("td",{},String(r.nick||"?")),el("td",{},String(r.stars|0)),el("td",{},String(r.xp|0)),el("td",{},r.grade?String(r.grade):"—"))))}
+(async()=>{
+  try{ if(!window.claude||!claude.use)throw 0;
+    const [db,user]=await Promise.all([claude.use("db"),claude.use("user")]); if(!db||!user)throw 0; DB=db; ME=await user.id();
+    db.collection("rating").onSnapshot(s=>drawRank(s.docs),()=>{$("#rankBody").innerHTML='<tr><td colspan="5" class="muted">Рейтинг зараз недоступний.</td></tr>'});
+  }catch(e){$("#rankBody").innerHTML='<tr><td colspan="5" class="muted">Рейтинг працює, коли сторінку відкрито з увійденим акаунтом.</td></tr>';$("#saveRank").disabled=true}
+})();
+$("#saveRank").addEventListener("click",async()=>{
+  const nick=$("#nick").value.trim().slice(0,16); if(!nick){$("#rankMsg").textContent="Введи нікнейм.";return}
+  if(!DB||!ME){$("#rankMsg").textContent="Рейтинг недоступний.";return}
+  try{await DB.collection("rating").doc(ME).set({nick,stars:G.q.stars.reduce((a,b)=>a+(b||0),0),xp:G.xp,grade:G.fin?G.fin.grade:0,at:new Date().toISOString()});
+    $("#rankMsg").textContent=G.fin?"Збережено!":"Збережено. Оцінка з'явиться в рейтингу після «Завершити»."}
+  catch(e){$("#rankMsg").textContent="Не вдалося зберегти. Спробуй ще раз пізніше."}
+});
+
+renderEx();renderCards();renderReqs();renderDevs();renderInst();renderSort();renderLic();renderSec();renderQuest();hud();
+window.__G=G; window.__compute=compute;
+</script>
+
+</body></html>

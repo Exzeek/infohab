@@ -1,0 +1,108 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Пульт гравця</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700;800&display=swap">
+<style>
+:root{--bg:#14301C;--card:#1F4229;--fg:#F2F7EF;--muted:#A9C2A8;--y:#FFC93C;
+  --a:#E21B3C;--b:#1368CE;--c:#D89E00;--d:#26890C;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:Rubik,system-ui,sans-serif;min-height:100vh;min-height:100dvh}
+.wrap{max-width:520px;margin:0 auto;padding-block:16px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));min-height:100dvh;display:flex;flex-direction:column;gap:14px}
+h1{margin:4px 0 0;font-size:1.6rem;font-weight:800}
+.muted{color:var(--muted);font-size:.95rem}
+label{display:block;font-weight:700;margin:10px 0 6px}
+input{width:100%;font:inherit;font-size:1.3rem;padding:12px 14px;border-radius:12px;border:2px solid #3B6447;background:#0E2214;color:var(--fg)}
+input:focus-visible,button:focus-visible{outline:3px solid var(--y);outline-offset:2px}
+#pin{letter-spacing:.4em;text-align:center;font-weight:800}
+.btn{display:block;text-align:center;text-decoration:none;box-sizing:border-box;font:inherit;font-weight:800;font-size:1.2rem;border:0;border-radius:14px;padding:14px 18px;background:var(--y);color:#1B1B1B;cursor:pointer;width:100%}
+.btn.ghost{background:transparent;color:var(--fg);border:2px solid #3B6447;font-size:1rem;padding:10px}
+.err{color:#FF9B8F;min-height:1.3em}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:700}
+.qn{display:flex;align-items:center;gap:8px}
+.qn button{font:inherit;font-size:1.3rem;width:44px;height:44px;border-radius:10px;border:2px solid #3B6447;background:transparent;color:var(--fg);cursor:pointer}
+.qn b{font-size:1.25rem;min-width:7.5em;text-align:center}
+.grid{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:12px;min-height:320px}
+.grid.tf{grid-template-columns:1fr}
+.sh{border:0;text-decoration:none;color:#fff;border-radius:18px;cursor:pointer;display:grid;place-items:center;box-shadow:0 6px 0 rgba(0,0,0,.35);transition:transform .08s}
+.sh:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(0,0,0,.35)}
+.sh svg{width:42%;max-width:110px;height:auto}
+.s0{background:var(--a)}.s1{background:var(--b)}.s2{background:var(--c)}.s3{background:var(--d)}
+.wait{flex:1;display:grid;place-items:center;text-align:center;gap:10px;align-content:center}
+.big{font-size:4rem;line-height:1}
+.pulse{animation:p 1.4s ease-in-out infinite}
+@keyframes p{50%{transform:scale(1.12)}}
+.tab{font-size:.9rem;color:var(--muted);text-align:center}
+.tab a{color:var(--y)}
+@media (prefers-reduced-motion:reduce){.pulse{animation:none}}
+</style>
+
+<div class="wrap" id="app"></div>
+
+<script>
+const FORM="https://docs.google.com/forms/d/e/1FAIpQLSeaDGNzqpEMjZyDt4WUwg3k3FAhGGW4pG1E8IcOk8b4LQsBVw/formResponse";
+const ENTRY="entry.1997531456";
+const NQ=14;            // кількість питань у грі
+const TF=[3,10];        // питання «Правда/Неправда» (індекси з 0)
+const SHAPES=['<svg viewBox="0 0 100 100"><polygon points="50,8 95,90 5,90" fill="#fff"/></svg>',
+  '<svg viewBox="0 0 100 100"><polygon points="50,5 95,50 50,95 5,50" fill="#fff"/></svg>',
+  '<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="#fff"/></svg>',
+  '<svg viewBox="0 0 100 100"><rect x="10" y="10" width="80" height="80" fill="#fff"/></svg>'];
+const S={name:"",pin:"",q:0,sent:{}};
+const app=document.getElementById("app");
+const clean=s=>String(s).replace(/[|\n\r]/g," ").replace(/\s+/g," ").trim().slice(0,18);
+function urlFor(line){return FORM+"?"+ENTRY+"="+encodeURIComponent(line)+"&submit=Submit"}
+const nonce=()=>Math.random().toString(36).slice(2,7);
+
+function join(){
+  app.innerHTML=`<div><div class="muted">Інформатика · 6 клас · Живий режим</div><h1>🌱 Розумна поличка: гра</h1></div>
+  <div><label for="pin">PIN гри з великого екрана</label><input id="pin" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="0000">
+  <label for="nm">Ім'я та перша літера прізвища</label><input id="nm" maxlength="18" autocomplete="off" placeholder="Напр. Марко Т."></div>
+  <div class="err" id="err" role="alert"></div>
+  <a class="btn" id="go" href="#" target="_blank" rel="noopener">Увійти в гру</a>
+  <p class="muted">Як це працює: після кожного натискання відкривається вкладка «Відповідь записано». Закрий її (✕) — і ти знову тут.</p>
+  <p class="muted">Питання — на великому екрані. Тут натискай фігуру того ж кольору, що й відповідь. Швидша правильна відповідь = більше балів!</p>`;
+  const pin=document.getElementById("pin"),nm=document.getElementById("nm"),go=document.getElementById("go");
+  pin.value=S.pin;nm.value=S.name;
+  const upd=()=>{const p=pin.value.replace(/\D/g,""),n=clean(nm.value);
+    go.href=(p.length===4&&n.length>=2)?urlFor(["live",p,"join","-",n,nonce()].join("|")):"#"};
+  pin.oninput=upd;nm.oninput=upd;upd();
+  go.onclick=e=>{
+    const p=pin.value.replace(/\D/g,""),n=clean(nm.value);
+    if(p.length!==4){e.preventDefault();document.getElementById("err").textContent="PIN — це 4 цифри з екрана.";return}
+    if(n.length<2){e.preventDefault();document.getElementById("err").textContent="Напиши своє ім'я.";return}
+    S.pin=p;S.name=n;S.q=0;setTimeout(lobby,60);
+  };
+}
+function lobby(){
+  app.innerHTML=`<div class="wait"><div class="big pulse">✅</div><h1>Ти в грі, ${esc(S.name)}!</h1>
+  <p class="muted">Знайди своє ім'я на великому екрані (з'являється за кілька секунд). Коли з'явиться перше питання — натискай «Почати».</p>
+  <button class="btn" id="st">Почати</button>
+  <p class="tab">Імені немає за 15 секунд? <a href="#" id="again" target="_blank" rel="noopener">Надішли вхід ще раз</a> або <a href="#" id="back">виправ PIN</a></p></div>`;
+  document.getElementById("st").onclick=pad;
+  document.getElementById("again").href=urlFor(["live",S.pin,"join","-",S.name,nonce()].join("|"));
+  document.getElementById("back").onclick=e=>{e.preventDefault();join()};
+}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function pad(){
+  if(S.q>=NQ){app.innerHTML=`<div class="wait"><div class="big">🏁</div><h1>Гру завершено!</h1><p class="muted">Дивись рейтинг на великому екрані.</p><button class="btn ghost" id="bk">Назад до питань</button></div>`;
+    document.getElementById("bk").onclick=()=>{S.q=NQ-1;pad()};return}
+  const tf=TF.includes(S.q), done=S.sent[S.q]!=null;
+  app.innerHTML=`<div class="top"><span>${esc(S.name)}</span><span class="muted">PIN ${S.pin}</span></div>
+  <div class="qn" style="justify-content:center"><button id="pv" aria-label="Попереднє питання">‹</button><b>Питання ${S.q+1} з ${NQ}</b><button id="nx" aria-label="Наступне питання">›</button></div>
+  ${done?`<div class="wait"><div class="big">📨</div><h1>Відповідь надіслано</h1><p class="muted">Чекай наступного питання на екрані.</p><button class="btn" id="nq">До питання ${S.q+2>NQ?"—":S.q+2}</button></div>`
+  :`<div class="grid${tf?" tf":""}">${(tf?[0,1]:[0,1,2,3]).map(i=>`<a class="sh s${tf?(i===0?1:0):i}" data-i="${i}" target="_blank" rel="noopener" href="${urlFor(["live",S.pin,S.q,i,S.name,nonce()].join("|"))}" aria-label="${tf?(i===0?"Правда":"Неправда"):"Фігура "+(i+1)}">${tf?`<span style="font-size:2rem;font-weight:800">${i===0?"◆ Правда":"▲ Неправда"}</span>`:SHAPES[i]}</a>`).join("")}</div>
+   <p class="muted" style="text-align:center;margin:0">Номер питання має збігатися з екраном. Якщо ні — гортай ‹ ›</p>`}`;
+  document.getElementById("pv").onclick=()=>{if(S.q>0){S.q--;pad()}};
+  document.getElementById("nx").onclick=()=>{S.q++;pad()};
+  const nq=document.getElementById("nq");if(nq)nq.onclick=()=>{S.q++;pad()};
+  app.querySelectorAll(".sh").forEach(b=>b.onclick=()=>{
+    S.sent[S.q]=+b.dataset.i;
+    if(navigator.vibrate)try{navigator.vibrate(40)}catch(e){}
+    setTimeout(pad,80);
+  });
+}
+join();
+</script>
+
+</body></html>

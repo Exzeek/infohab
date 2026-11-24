@@ -1,0 +1,565 @@
+<!DOCTYPE html><html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Острови чисел</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;800&family=Nunito:wght@600;700;800;900&display=swap">
+<style>
+/* VOICE: гра-пригода для 1–5 класу, великий екран і телефон.
+   IDEA: острови чисел, на кожному живе монстр; правильна відповідь — удар, помилка — розбір.
+   PICTURE: арена з монстром і смугою життя над завданням.
+   COLOUR and TYPE: морська бірюза + сонячний жовтий акцент; Unbounded заголовки, Nunito тексти й цифри.
+   LAYOUT: шапка → клас і складність → острови → арена; колекція й вчительське — нижче. */
+:root{color-scheme:light dark;
+ --bg:light-dark(#eefaf8,#0d1b1e);--surface:light-dark(#ffffff,#132a2e);--surface-2:light-dark(#e2f4f1,#1b383d);--ink:light-dark(#10302f,#e6f6f3);--muted:light-dark(#4f6f6c,#94b8b3);--line:light-dark(#cde8e3,#24474c);
+ --sea:light-dark(#0b8f87,#3fd1c6);--sun:#ffb020;--ok:light-dark(#1f7a3a,#7fd283);--ok-bg:light-dark(#e1f5e6,#1d3a25);--bad:light-dark(#b3261e,#ff8a80);--bad-bg:light-dark(#fbe7e5,#3a1f1d);--warn:light-dark(#a65d00,#f2b46b);
+ --t1:#7a4fd8;--t2:#f76707;--send:#ffb020;--send-ink:#2a1a00;
+ --fd:"Unbounded","Arial Black",system-ui,sans-serif;--fb:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+[hidden]{display:none!important}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:19px/1.45 var(--fb);overflow-x:clip}
+.wrap{max-width:1000px;margin:0 auto;padding:18px max(16px,env(safe-area-inset-left,0px)) 110px;display:grid;gap:16px}
+.eyebrow{font-size:14px;font-weight:800;color:var(--muted)}
+h1{font-family:var(--fd);font-weight:800;font-size:clamp(30px,6vw,46px);line-height:1.05;color:var(--sea);margin:4px 0 0;text-wrap:balance}
+.story{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px 16px;display:flex;gap:14px;align-items:center}
+.story .hero{font-size:52px;line-height:1;flex:none}.story p{margin:0;font-weight:700}
+.bar2{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.bar2 .lbl{font-weight:900;color:var(--muted);font-size:16px;margin-right:2px}
+.chip{font:inherit;font-weight:900;font-size:18px;border:2px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:8px 16px;cursor:pointer;min-height:44px}
+.chip.on{background:var(--sea);border-color:var(--sea);color:#fff}
+.chip.d1.on{background:#2f9e44;border-color:#2f9e44}.chip.d2.on{background:#f08c00;border-color:#f08c00}.chip.d3.on{background:#e03131;border-color:#e03131}
+.hud{display:flex;flex-wrap:wrap;gap:8px;font-weight:900;font-size:17px}
+.hud span{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px 14px}
+.isl{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,150px),1fr));gap:12px}
+.is{font:inherit;text-align:left;background:var(--surface);border:2px solid var(--line);border-radius:20px;padding:12px;cursor:pointer;color:var(--ink);display:grid;gap:6px;position:relative;overflow:hidden}
+.is::before{content:"";position:absolute;inset:auto -20% -40% -20%;height:55%;background:radial-gradient(closest-side,color-mix(in srgb,var(--sea) 22%,transparent),transparent);pointer-events:none}
+.is .top{display:flex;justify-content:space-between;align-items:center}
+.is .ic{font-size:34px;line-height:1}.is .mo{font-size:30px;line-height:1}
+.is b{font-size:18px;line-height:1.2}
+.is .ss{height:10px;border-radius:999px;background:var(--surface-2);overflow:hidden}.is .ss i{display:block;height:100%;background:linear-gradient(90deg,var(--sea),var(--sun))}
+.is small{color:var(--muted);font-weight:800;font-size:14px}
+.is .st{font-size:15px;letter-spacing:1px}
+.is.on{border-color:var(--sea);box-shadow:0 0 0 3px color-mix(in srgb,var(--sea) 30%,transparent)}
+.arena{background:var(--surface);border:1px solid var(--line);border-top:6px solid var(--sea);border-radius:20px;padding:16px;display:grid;gap:14px;justify-items:center;text-align:center;scroll-margin-top:10px}
+.fight{width:100%;display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center}
+.mon{font-size:clamp(56px,13vw,92px);line-height:1;display:inline-block;transition:transform .2s}
+.mon.hit{animation:hit .45s}.mon.atk{animation:atk .5s}
+@keyframes hit{20%{transform:translateX(10px) rotate(8deg);filter:brightness(2)}60%{transform:translateX(-6px)}}
+@keyframes atk{40%{transform:scale(1.25) translateY(10px)}}
+.hp{height:18px;border-radius:999px;background:var(--surface-2);overflow:hidden;border:2px solid var(--line)}
+.hp i{display:block;height:100%;background:linear-gradient(90deg,#e03131,#f08c00);transition:width .4s}
+.mname{font-weight:900;font-size:16px;color:var(--muted);text-align:left}
+.me{font-size:26px;letter-spacing:2px;white-space:nowrap}.me .lost{filter:grayscale(1);opacity:.3}
+.meta{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;font-weight:900;font-size:16px}
+.meta span{background:var(--surface-2);border-radius:999px;padding:4px 12px}
+.meta .fire{color:#f76707}
+.teams{display:flex;gap:10px;justify-content:center;font-weight:900}
+.teams span{border-radius:999px;padding:6px 14px;border:3px solid transparent;background:var(--surface-2)}
+.teams .a{color:var(--t1)}.teams .b{color:var(--t2)}.teams .on.a{border-color:var(--t1)}.teams .on.b{border-color:var(--t2)}
+.q{font-weight:800;font-size:clamp(20px,4.6vw,26px);max-width:760px;margin:0}
+.q .big{font-family:var(--fb);font-weight:900;font-size:clamp(34px,8.5vw,56px);display:block;line-height:1.15;letter-spacing:.02em}
+.q small{display:block;font-size:15px;color:var(--muted)}
+.viz{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:100%}
+.tf{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;max-width:300px;font-size:30px;line-height:1.1}
+.tfs{display:grid;gap:6px}.tfr{display:grid;grid-template-columns:repeat(5,34px);gap:3px;border:3px solid var(--sea);border-radius:10px;padding:3px}
+.tfr span{height:34px;display:flex;align-items:center;justify-content:center;font-size:24px;background:var(--surface-2);border-radius:6px}
+.two{display:flex;align-items:center;gap:14px}.two .vs{font-size:36px;font-weight:900;color:var(--muted)}
+.blk{display:flex;gap:6px;align-items:flex-end;flex-wrap:wrap;justify-content:center}
+.blk i{display:block;background:var(--sea);border-radius:3px}
+.blk .ten{width:12px;height:100px;background:repeating-linear-gradient(var(--sea) 0 9px,color-mix(in srgb,var(--sea) 40%,#fff) 9px 10px)}
+.blk .hun{width:60px;height:60px;background:repeating-linear-gradient(90deg,var(--sun) 0 5px,#e09400 5px 6px)}
+.blk .ones{display:grid;grid-template-columns:repeat(2,12px);gap:3px}.blk .one{width:12px;height:12px}
+.arr{display:grid;gap:4px;font-size:24px;line-height:1}
+.clk{width:min(200px,60vw)}.clk circle{fill:var(--surface-2);stroke:var(--ink);stroke-width:3}.clk text{font:800 9px var(--fb);fill:var(--ink);text-anchor:middle}
+.clk .hh{stroke:var(--ink);stroke-width:4.5;stroke-linecap:round}.clk .mh{stroke:#e03131;stroke-width:2.8;stroke-linecap:round}.clk .c0{fill:var(--ink);stroke:none}
+.geo{width:min(320px,80vw)}.geo rect,.geo polygon{fill:color-mix(in srgb,var(--sea) 18%,transparent);stroke:var(--sea);stroke-width:3}
+.geo text{font:900 14px var(--fb);fill:var(--ink);text-anchor:middle}
+.geo.ang path{fill:none;stroke:var(--ink);stroke-width:4;stroke-linecap:round}.geo.ang .arc{stroke:#e03131;stroke-width:3}
+.bal{width:min(340px,85vw)}.bal path{fill:none;stroke:var(--ink);stroke-width:4;stroke-linecap:round}.bal .pan{fill:color-mix(in srgb,var(--sun) 35%,transparent)}
+.bal text{font:900 16px var(--fb);fill:var(--ink);text-anchor:middle}.bal .lb{fill:var(--surface);stroke:var(--sea);stroke-width:2}
+.barm{width:min(520px,92vw);display:grid;gap:4px}.bpart{display:flex;gap:3px}
+.bpart span{background:color-mix(in srgb,var(--sea) 25%,var(--surface));border:2px solid var(--sea);border-radius:6px;padding:6px 2px;font-weight:900;font-size:15px;line-height:1.1;overflow-wrap:anywhere;min-width:2.2em}
+.btot{border-top:3px solid var(--ink);padding-top:2px;font-weight:900}
+.shp{width:84px;height:84px}.shp *{fill:color-mix(in srgb,var(--sea) 25%,transparent);stroke:var(--sea);stroke-width:5}
+.piz{width:min(220px,62vw);cursor:pointer}.piz .sl{fill:#ffe8b0;stroke:#b5651d;stroke-width:1.5}.piz .sl.on{fill:#e8590c}
+.ans{display:grid;gap:12px;justify-items:center;width:100%}
+.disp{min-width:200px;min-height:70px;border:3px solid var(--sea);border-radius:16px;background:var(--surface-2);font:900 clamp(36px,8vw,52px)/1.2 var(--fb);padding:2px 18px;display:flex;align-items:center;justify-content:center;letter-spacing:.04em}
+.disp:empty::before{content:"?";color:var(--muted)}
+.pad{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;width:min(100%,380px)}
+.pad button{font:900 28px var(--fb);min-height:60px;border:0;border-radius:14px;background:var(--surface-2);color:var(--ink);cursor:pointer;box-shadow:0 4px 0 var(--line)}
+.pad button:active{transform:translateY(3px);box-shadow:none}
+.pad .ok{background:var(--sea);color:#fff;grid-row:span 2;box-shadow:0 4px 0 color-mix(in srgb,var(--sea) 60%,#000)}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,130px),1fr));gap:10px;width:min(100%,640px)}
+.opt{font:900 clamp(24px,5.5vw,34px) var(--fb);min-height:72px;border:3px solid transparent;border-radius:16px;background:var(--surface-2);color:var(--ink);cursor:pointer;padding:6px;display:flex;align-items:center;justify-content:center}
+.opt:hover{border-color:var(--sea)}.opt.ok{background:var(--ok-bg);border-color:var(--ok)}.opt.no{background:var(--bad-bg);border-color:var(--bad);animation:shake .35s}
+.opt.hint{border:3px dashed var(--warn)}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.line{width:min(100%,760px);display:grid;gap:4px}
+.ticks{display:flex;justify-content:space-between;border-top:4px solid var(--ink);padding-top:0;position:relative}
+.ticks button{flex:1;font:800 13px var(--fb);color:var(--muted);background:none;border:0;padding:12px 0 4px;cursor:pointer;position:relative;min-width:0}
+.ticks button::before{content:"";position:absolute;top:-4px;left:50%;width:3px;height:14px;background:var(--ink);transform:translateX(-50%)}
+.ticks button:hover::after,.ticks button.sel::after{content:"";position:absolute;top:-16px;left:50%;width:22px;height:22px;border-radius:50%;background:var(--sun);transform:translateX(-50%)}
+.ticks button.ok::after{background:var(--ok)}.ticks button.no::after{background:var(--bad)}
+.coins{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.coin{width:70px;height:70px;border-radius:50%;border:4px solid #c08a00;background:radial-gradient(circle at 35% 30%,#fff3bf,#fcc419);font:900 20px var(--fb);color:#5c3c00;cursor:pointer}
+.coin.note{width:96px;border-radius:10px;border-color:#2b8a3e;background:linear-gradient(135deg,#d3f9d8,#8ce99a);color:#1b4d26}
+.wallet{min-height:80px;width:min(100%,560px);border:3px dashed var(--line);border-radius:16px;display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center;padding:8px}
+.wallet .coin{width:52px;height:52px;font-size:16px}.wallet .coin.note{width:72px}
+.sum{font-weight:900;font-size:22px}
+.row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.btn{font:900 19px var(--fb);border:0;border-radius:14px;padding:13px 22px;cursor:pointer;background:var(--sea);color:#fff;min-height:48px}
+.btn.ghost{background:var(--surface-2);color:var(--ink)}
+.fb{font-weight:900;font-size:20px;border-radius:12px;padding:8px 16px}.fb.ok{background:var(--ok-bg);color:var(--ok)}.fb.bad{background:var(--bad-bg);color:var(--bad)}
+.ex{background:color-mix(in srgb,var(--sun) 18%,var(--surface));border:2px solid var(--sun);border-radius:16px;padding:12px 16px;text-align:left;font-weight:800;max-width:720px;display:grid;gap:8px}
+.ex b{font-family:var(--fd);font-size:15px}
+.tip{color:var(--muted);font-weight:700;font-size:16px;margin:0}
+.col{display:flex;flex-wrap:wrap;gap:8px}
+.card3{width:74px;height:94px;border-radius:12px;background:var(--surface);border:3px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:34px;line-height:1}
+.card3 small{font:800 10px var(--fb);color:var(--muted);text-align:center;padding:2px}
+.card3.d1{border-color:#2f9e44}.card3.d2{border-color:#f08c00}.card3.d3{border-color:#e03131;box-shadow:0 0 12px #e0313155}
+.card3.no{filter:grayscale(1);opacity:.25}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px 16px;display:grid;gap:10px}
+.panel h2{font-family:var(--fd);font-size:18px;margin:0}
+details.panel summary{font-weight:900;cursor:pointer}
+.blitzbig{font:900 clamp(44px,11vw,72px) var(--fb)}
+.timer{font:900 26px var(--fb);color:#e03131}
+.float{position:fixed;z-index:50;pointer-events:none;font-weight:900;font-size:30px;color:var(--sea);animation:up 1s ease-out forwards}
+@keyframes up{from{opacity:1;transform:translate(-50%,0)}to{opacity:0;transform:translate(-50%,-70px)}}
+.sendbox{border:2px dashed var(--send);border-radius:16px;padding:14px;display:grid;gap:10px;width:100%;text-align:left}
+.sendbox .f{display:flex;flex-wrap:wrap;gap:8px}
+.sendbox input{font:inherit;color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;flex:1 1 200px;font-size:16px}
+.sendbox input.cls{flex:0 1 120px}
+a.sendgo{display:inline-block;text-align:center;background:var(--send);color:var(--send-ink);text-decoration:none;font-weight:900;border-radius:999px;padding:12px 22px}
+#jFab{position:fixed;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:30;background:var(--send);color:var(--send-ink);border:0;border-radius:999px;padding:13px 20px;font:900 17px var(--fb);box-shadow:0 8px 24px rgba(0,0,0,.35);cursor:pointer}
+#cf{position:fixed;inset:0;pointer-events:none;z-index:40;width:100%;height:100%}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+@media(max-width:600px){body{font-size:17px}.isl{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.is{padding:10px}.is b{font-size:16px}.card3{width:56px;height:74px;font-size:26px}.fight{grid-template-columns:auto 1fr}.me{grid-column:1/-1;justify-self:center}.pad button{min-height:54px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.week{margin:8px 0}
+.weekbtn{display:flex;gap:10px;align-items:center;width:100%;text-align:left;border:2px solid #ffb020;background:linear-gradient(90deg,rgba(255,176,32,.18),transparent);color:inherit;border-radius:14px;padding:8px 12px;cursor:pointer;font:inherit}
+.weekbtn .wi{font-size:28px}.weekbtn b{display:block}.weekbtn small{opacity:.85}
+.weekbtn.done{border-style:dashed;opacity:.85}
+</style></head><body>
+<canvas id="cf" hidden></canvas>
+<div class="wrap">
+ <header><div class="eyebrow">Математика · 1–5 клас · гра</div><h1>Острови чисел</h1></header>
+ <div class="story"><div class="hero" aria-hidden="true">🏝️</div><p>На кожному острові живе монстр. Правильна відповідь — удар по ньому 💥, кілька поспіль — 🔥 супер-удар. Помилка — не біда: Сова-підказка покаже, як розв'язати. Перемагай монстрів і збирай їх у колекцію!</p></div>
+ <div class="bar2" id="clsBar" role="group" aria-label="Клас"><span class="lbl">Клас:</span></div>
+ <div class="bar2" id="dBar" role="group" aria-label="Складність"><span class="lbl">Складність:</span></div>
+ <div class="bar2" role="group" aria-label="Режими"><span class="lbl">Режим:</span><button class="chip" id="teamBtn" type="button" aria-pressed="false">👥 Команди</button><button class="chip" id="blitzBtn" type="button">⚡ Бліц 60 с</button><button class="chip" id="placeBtn" type="button">🧭 Визнач мій рівень</button></div>
+ <div class="week" id="week"></div>
+ <div class="hud" aria-live="polite"><span id="hGems">💎 0</span><span id="hWins">🏆 0</span><span id="hMis">🎯 Місія дня: 0/3</span><span id="hCol">🃏 0</span></div>
+ <div class="isl" id="isl"></div>
+ <section class="arena" id="arena" aria-live="polite"><p class="q">👆 Обери острів — і в бій!</p></section>
+ <section class="panel"><h2 id="colH">🃏 Колекція монстрів</h2><div class="col" id="col"></div><p class="tip">Кожен монстр має 3 картки: 🟢 легку, 🟡 середню й 🔴 складну. Перемкни клас угорі, щоб побачити інші колекції.</p></section>
+ <details class="panel"><summary>Для вчителя</summary>
+  <p>Гра для 1–5 класу на основі найкращих прийомів світових математичних застосунків: бій з монстрами й колекція (як у Prodigy), розбір кожної помилки та «рівень володіння» SmartScore 0–100, що підлаштовує складність (як в IXL), наочні моделі — десяткові рамки, блоки, масиви, терези, стрічкові схеми (як у DragonBox, SplashLearn і сингапурській методиці), бліц на швидкість фактів (як у Times Tables Rock Stars), місія дня й режим «Команди» для великого екрана.</p>
+  <p>Складність: 🟢 легко, 🟡 середньо, 🔴 складно. Після трьох правильних поспіль приходить трохи складніше завдання («хвиля»), після помилки — знову базове. Монстр має 8/10/12 життів, гравець — 3 серця. Завдання генеруються щоразу нові. Відповіді вводяться з екранної клавіатури або з клавіатури комп'ютера. Оцінок немає; «Надіслати вчителю» передає перемоги, рівень володіння й помилки за островами.</p>
+ </details>
+</div>
+<button id="jFab" type="button">📤 Надіслати вчителю</button>
+<script>
+/* ===== ГЕНЕРАТОРИ ЗАВДАНЬ (L = 1…6: складність 🟢 1–2, 🟡 3–4, 🔴 5–6; +1, коли учень на хвилі) ===== */
+const R=(a,b)=>a+Math.floor(Math.random()*(b-a+1)), pk=a=>a[Math.floor(Math.random()*a.length)];
+const sh=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const fm=n=>String(n).replace(/\B(?=(\d{3})+(?!\d))/g," ");
+const dc=x=>String(Math.round(x*1000)/1000).replace(".",",");
+const opts4=(a,spread,min=0)=>{const s=new Set([a]);let g=0;while(s.size<4&&g++<200){const v=a+pk([-1,1])*R(1,spread);if(v>=min)s.add(v)}let k=1;while(s.size<4)s.add(a+spread+k++);return sh([...s]).map(String)};
+const EM=["🍎","⭐","🐟","🎈","🐞","🌸","🍓","⚽","🚗","🧁"];
+/* --- малюнки --- */
+const V={
+ dots:(n,e)=>{let h='<div class="tf">';for(let i=0;i<n;i++)h+=`<span>${e}</span>`;return h+'</div>'},
+ frames:(n,e)=>{let h='<div class="tfs">';for(let f=0;f<Math.ceil(n/10);f++){h+='<div class="tfr">';for(let i=0;i<10;i++){const k=f*10+i;h+=`<span>${k<n?e:""}</span>`}h+='</div>'}return h+'</div>'},
+ two:(a,b,e)=>`<div class="two"><div>${V.dots(a,e)}</div><div class="vs">?</div><div>${V.dots(b,e)}</div></div>`,
+ blocks:(t,o)=>`<div class="blk">${'<i class="ten"></i>'.repeat(t)}<span class="ones">${'<i class="one"></i>'.repeat(o)}</span></div>`,
+ hund:(h,t,o)=>`<div class="blk">${'<i class="hun"></i>'.repeat(h)}${'<i class="ten"></i>'.repeat(t)}<span class="ones">${'<i class="one"></i>'.repeat(o)}</span></div>`,
+ arr:(r,c,e)=>`<div class="arr" style="grid-template-columns:repeat(${c},auto)">${`<span>${e||"●"}</span>`.repeat(r*c)}</div>`,
+ clock:(h,m)=>{const ha=((h%12)+m/60)*30,ma=m*6;let t="";for(let i=1;i<=12;i++){const a=i*30*Math.PI/180;t+=`<text x="${50+38*Math.sin(a)}" y="${54-38*Math.cos(a)}">${i}</text>`}
+   return `<svg class="clk" viewBox="0 0 100 100" role="img" aria-label="Годинник"><circle cx="50" cy="50" r="47"/>${t}<line x1="50" y1="50" x2="${50+24*Math.sin(ha*Math.PI/180)}" y2="${50-24*Math.cos(ha*Math.PI/180)}" class="hh"/><line x1="50" y1="50" x2="${50+34*Math.sin(ma*Math.PI/180)}" y2="${50-34*Math.cos(ma*Math.PI/180)}" class="mh"/><circle cx="50" cy="50" r="3" class="c0"/></svg>`},
+ rect:(w,h,lw,lh)=>{const k=Math.min(150/w,90/h,14),W=w*k,H=h*k;return `<svg class="geo" viewBox="0 0 ${W+70} ${H+50}"><rect x="35" y="15" width="${W}" height="${H}"/><text x="${35+W/2}" y="10">${lw}</text><text x="${W+40}" y="${15+H/2+4}" text-anchor="start">${lh}</text></svg>`},
+ tri:(a,b,c)=>`<svg class="geo" viewBox="0 0 200 130"><polygon points="20,110 180,110 90,20"/><text x="100" y="128">${a}</text><text x="150" y="60" text-anchor="start">${b}</text><text x="40" y="60" text-anchor="end">${c}</text></svg>`,
+ lshape:(a,b,c,d)=>`<svg class="geo" viewBox="0 0 200 140"><polygon points="20,20 90,20 90,70 180,70 180,120 20,120"/><text x="55" y="14">${a}</text><text x="10" y="74" text-anchor="end">${b}</text><text x="135" y="64">${c}</text><text x="186" y="100" text-anchor="start">${d}</text></svg>`,
+ bar:(parts,total)=>`<div class="barm"><div class="bpart">${parts.map(p=>`<span style="flex:${p[1]}">${p[0]}</span>`).join("")}</div><div class="btot">${total}</div></div>`,
+ balance:(l,r)=>`<svg class="bal" viewBox="0 0 280 130"><path d="M140 22v88M100 112h80M40 26h200"/><path d="M60 26v34M220 26v34"/><path class="pan" d="M10 62h100l-12 14H22zM170 62h100l-12 14H182z"/><rect class="lb" x="12" y="30" width="96" height="28" rx="8"/><rect class="lb" x="172" y="30" width="96" height="28" rx="8"/><text x="60" y="50">${l}</text><text x="220" y="50">${r}</text></svg>`,
+ angle:d=>{const a=d*Math.PI/180;return `<svg class="geo ang" viewBox="0 0 200 120"><path d="M100 100H185M100 100L${100+85*Math.cos(a)} ${100-85*Math.sin(a)}"/><path d="M125 100A25 25 0 0 0 ${100+25*Math.cos(a)} ${100-25*Math.sin(a)}" class="arc"/></svg>`},
+ shape:n=>({"коло":'<circle cx="50" cy="50" r="38"/>',"трикутник":'<polygon points="50,10 92,88 8,88"/>',"квадрат":'<rect x="14" y="14" width="72" height="72"/>',"прямокутник":'<rect x="4" y="26" width="92" height="50"/>',"овал":'<ellipse cx="50" cy="50" rx="44" ry="28"/>',"п\'ятикутник":'<polygon points="50,8 92,40 76,90 24,90 8,40"/>'}[n]),
+ shp:n=>`<svg class="shp" viewBox="0 0 100 100">${V.shape(n)}</svg>`
+};
+const SHAPES=["коло","трикутник","квадрат","прямокутник","овал","п'ятикутник"];
+const ANG=[["гострий",[30,45,60,70]],["прямий",[90]],["тупий",[120,135,150]],["розгорнутий",[180]]];
+/* --- теми за класами --- */
+const TOPICS={
+1:[
+ {id:"lich",ic:"🍎",n:"Лічба",mon:["🐞","Рахунчик"],g:L=>{const mx=[5,10,10,20,20,20][L-1],n=R(L<3?1:4,mx),e=pk(EM);return{kind:"num",q:"Скільки тут "+e+"?",viz:L>=3?V.frames(n,e):V.dots(n,e),a:n,ex:"Рахуй по одному: торкайся кожного пальцем. Повний ряд рамки — це 10."}}},
+ {id:"cmp",ic:"⚖️",n:"Більше чи менше",mon:["🐊","Порівнюк"],g:L=>{if(L<=2){const a=R(1,9),b=R(1,9),e=pk(EM);return{kind:"cmp",q:"Де більше? Порівняй групи.",viz:V.two(a,b,e),a:a>b?">":a<b?"<":"=",ex:`Зліва ${a}, справа ${b}. Знак «дзьобом» дивиться на менше.`}}
+   if(L<=4){const a=R(1,20),b=pk([a,R(1,20)]);return{kind:"cmp",q:`<b class="big">${a} ○ ${b}</b>`,a:a>b?">":a<b?"<":"=",ex:`${a} ${a>b?"більше за":a<b?"менше за":"дорівнює"} ${b}: подумай, яке число на числовому промені правіше.`}}
+   const a=R(1,9),b=R(1,9),c=R(2,18);return{kind:"cmp",q:`<b class="big">${a} + ${b} ○ ${c}</b>`,a:a+b>c?">":a+b<c?"<":"=",ex:`Спершу обчисли: ${a} + ${b} = ${a+b}. Тепер порівняй ${a+b} і ${c}.`}}},
+ {id:"add",ic:"➕",n:"Додавання",mon:["🐲","Плюсозавр"],g:L=>{let a,b,q,ans,ex;const e=pk(EM);
+   if(L===1){a=R(1,3);b=R(1,5-a)}else if(L===2){a=R(1,6);b=R(1,10-a)}
+   if(L<=2)return{kind:"num",q:`<b class="big">${a} + ${b} = ?</b>`,viz:V.frames(a,e)+V.frames(b,e),a:a+b,ex:`Від ${a} відлічи вперед ${b}: ${Array.from({length:b},(_,i)=>a+i+1).join(", ")}.`};
+   if(L===3){a=R(1,8);ans=R(a+1,10);return{kind:"num",q:`<b class="big">${a} + □ = ${ans}</b>`,a:ans-a,ex:`Скільки бракує від ${a} до ${ans}? ${ans} − ${a} = ${ans-a}.`}}
+   if(L===4){a=R(11,15);b=R(1,19-a);return{kind:"num",q:`<b class="big">${a} + ${b} = ?</b>`,a:a+b,ex:`${a} — це 10 і ${a-10}. ${a-10} + ${b} = ${a-10+b}, і ще 10 → ${a+b}.`}}
+   if(L===5){a=R(6,9);b=R(11-a,9);return{kind:"num",q:`<b class="big">${a} + ${b} = ?</b>`,viz:V.frames(a,e)+V.frames(b,"🔵"),a:a+b,ex:`Добери до 10: ${a} + ${10-a} = 10, ще ${b-(10-a)} → ${a+b}.`}}
+   a=R(2,7);b=R(2,6);const c=R(1,20-a-b);return{kind:"num",q:`<b class="big">${a} + ${b} + ${c} = ?</b>`,a:a+b+c,ex:`Додавай по черзі: ${a} + ${b} = ${a+b}, потім ${a+b} + ${c} = ${a+b+c}.`}}},
+ {id:"sub",ic:"➖",n:"Віднімання",mon:["🦂","Мінусяка"],g:L=>{let a,b;const e=pk(EM);
+   if(L<=2){a=R(2,L===1?5:10);b=R(1,a-1);return{kind:"num",q:`<b class="big">${a} − ${b} = ?</b>`,viz:V.dots(a,e),a:a-b,ex:`Було ${a}, забрали ${b}. Відлічи назад: ${Array.from({length:b},(_,i)=>a-i-1).join(", ")}.`}}
+   if(L===3){a=R(5,10);const r=R(1,a-1);return{kind:"num",q:`<b class="big">${a} − □ = ${r}</b>`,a:a-r,ex:`Скільки треба забрати від ${a}, щоб лишилося ${r}? ${a} − ${r} = ${a-r}.`}}
+   if(L===4){a=R(12,19);b=R(1,a-10);return{kind:"num",q:`<b class="big">${a} − ${b} = ?</b>`,a:a-b,ex:`${a} — це 10 і ${a-10}. ${a-10} − ${b} = ${a-10-b}, і ще 10 → ${a-b}.`}}
+   a=R(11,18);b=R(a-9,9);return{kind:"num",q:`<b class="big">${a} − ${b} = ?</b>`,viz:L===5?V.frames(a,e):"",a:a-b,ex:`Спершу до 10: ${a} − ${a-10} = 10, потім ще − ${b-(a-10)} → ${a-b}.`}}},
+ {id:"line",ic:"📏",n:"Числовий промінь",mon:["🐍","Промінчик"],g:L=>{const mx=L<=2?10:20;
+   if(L<=4){const n=R(1,mx-1);return{kind:"line",min:0,max:mx,q:`Натисни на промені число <b>${n}</b>`,a:n,ex:`Від 0 відлічи праворуч ${n} кроків.`}}
+   const a=R(2,14),d=R(1,5),up=L===5;const n=up?a+d:a-d;if(n<0||n>20)return TOPICS[1][4].g(4);return{kind:"line",min:0,max:20,q:`Натисни на число, яке на <b>${d} ${up?"більше":"менше"}</b> за <b>${a}</b>`,a:n,ex:`Знайди ${a} і зроби ${d} ${d<5?"кроки":"кроків"} ${up?"праворуч":"ліворуч"}: ${n}.`}}},
+ {id:"fig",ic:"🔺",n:"Фігури",mon:["🦀","Кутастик"],g:L=>{if(L<=3){const n=pk(SHAPES.slice(0,L<=2?4:6));return{kind:"pic",q:`Натисни на <b>${n}</b>`,opts:sh([n,...sh(SHAPES.filter(x=>x!==n)).slice(0,3)]),pic:V.shp,a:n,ex:"Коло — кругле, без кутів; трикутник має 3 кути; квадрат — 4 однакові сторони; прямокутник — 4 прямі кути."}}
+   if(L===4){const n=pk([["трикутник",3],["квадрат",4],["прямокутник",4],["п'ятикутник",5]]);return{kind:"num",q:`Скільки кутів у фігури?`,viz:V.shp(n[0]),a:n[1],ex:`Порахуй вершини (гострі «носики») фігури: ${n[1]}.`}}
+   const t=R(2,5),o=R(2,6);const list=sh([..."🔺".repeat(1).split(""),...Array(t-1).fill("🔺"),...Array(o).fill(pk(["🟦","🟢","🟨"]))]);return{kind:"num",q:"Скільки тут трикутників 🔺?",viz:`<div class="tf">${list.map(x=>`<span>${x}</span>`).join("")}</div>`,a:t,ex:"Рахуй лише 🔺, інші фігури пропускай."}}}
+],
+2:[
+ {id:"dec",ic:"🔟",n:"Десятки й одиниці",mon:["🐙","Десятиног"],g:L=>{const t=R(1,9),o=R(0,9),n=t*10+o;
+   if(L===1)return{kind:"num",q:`${t} ${t===1?"десяток":t<5?"десятки":"десятків"} і ${o} ${o===1?"одиниця":o>=2&&o<=4?"одиниці":"одиниць"} — яке число?`,viz:V.blocks(t,o),a:n,ex:`${t} десятків = ${t*10}, ще ${o} → ${n}.`};
+   if(L===2)return{kind:"num",q:`Скільки <b>десятків</b> у числі <b class="big">${n}</b>?`,a:t,ex:`Перша цифра числа ${n} — десятки: ${t}.`};
+   if(L<=4){const m=pk([n,R(10,99),R(10,99)]);return{kind:"cmp",q:`<b class="big">${n} ○ ${m}</b>`,a:n>m?">":n<m?"<":"=",ex:"Спершу порівнюй десятки, а якщо вони рівні — одиниці."}}
+   if(L===5){const k=R(1,9)*10;return{kind:"line",min:0,max:100,step:10,q:`Натисни на число <b>${k}</b>`,a:k,ex:`Кожна поділка — 10. ${k} — це ${k/10}-та поділка від нуля.`}}
+   const s=new Set();while(s.size<4)s.add(R(10,99));return{kind:"order",q:"Натискай числа від <b>найменшого</b> до найбільшого",items:[...s],a:[...s].sort((x,y)=>x-y).join(" "),ex:"Порівнюй десятки; якщо однакові — одиниці."}}},
+ {id:"as100",ic:"➕",n:"Додавання й віднімання до 100",mon:["🐲","Сотнезавр"],g:L=>{let a,b;
+   if(L===1){a=R(1,5)*10;b=R(1,9-a/10)*10;return{kind:"num",q:`<b class="big">${a} + ${b} = ?</b>`,a:a+b,ex:`${a/10} дес. + ${b/10} дес. = ${(a+b)/10} дес. = ${a+b}.`}}
+   if(L===2){a=R(2,8)*10+R(0,4);b=R(1,5);return{kind:"num",q:`<b class="big">${a} + ${b} = ?</b>`,viz:V.blocks(Math.floor(a/10),a%10),a:a+b,ex:`Додай одиниці: ${a%10} + ${b} = ${a%10+b}. Десятки ті самі → ${a+b}.`}}
+   if(L===3){a=R(2,6)*10+R(0,4);b=R(1,3)*10+R(0,5);return{kind:"num",q:`<b class="big">${a} + ${b} = ?</b>`,a:a+b,ex:`Десятки окремо, одиниці окремо: ${Math.floor(a/10)*10}+${Math.floor(b/10)*10} і ${a%10}+${b%10} → ${a+b}.`}}
+   if(L===4){a=R(1,6)*10+R(5,9);b=R(1,2)*10+R(10-a%10,9);return{kind:"num",q:`<b class="big">${a} + ${b} = ?</b>`,a:a+b,ex:`Одиниці: ${a%10} + ${b%10} = ${a%10+b%10} — це 1 десяток і ${(a%10+b%10)-10}. Разом ${a+b}.`}}
+   if(L===5){a=R(3,9)*10+R(0,4);b=R(1,Math.floor(a/10)-1)*10+R(a%10+1,9);return{kind:"num",q:`<b class="big">${a} − ${b} = ?</b>`,a:a-b,ex:`Розбий: ${a} − ${Math.floor(b/10)*10} = ${a-Math.floor(b/10)*10}, потім − ${b%10} = ${a-b}.`}}
+   const x=R(20,60),y=R(11,30);return{kind:"num",q:`<b class="big">□ − ${y} = ${x}</b>`,a:x+y,ex:`Невідоме зменшуване = різниця + від'ємник: ${x} + ${y} = ${x+y}.`}}},
+ {id:"mul",ic:"✖️",n:"Множення",mon:["🐉","Множиклоп"],g:L=>{const e=pk(EM);let a,b;
+   if(L<=4){b=[2,3,pk([4,5]),R(2,5),0,0][L-1];a=R(2,L<=2?5:9);return{kind:"num",q:`<b class="big">${a} × ${b} = ?</b>`,viz:L<=3?V.arr(b,a,e):"",a:a*b,ex:`${a} × ${b} — це ${b} рази по ${a}: ${Array(b).fill(a).join(" + ")} = ${a*b}.`}}
+   if(L===5){a=R(2,5);b=R(2,9);return{kind:"num",q:`<b class="big">${a} × □ = ${a*b}</b>`,a:b,ex:`Скільки разів по ${a} буде ${a*b}? Рахуй: ${Array.from({length:b},(_,i)=>a*(i+1)).join(", ")} → ${b}.`}}
+   a=R(3,5);b=R(2,9);const it=pk([["коробках","олівців"],["пакетах","яблук"],["вазах","квітів"]]);return{kind:"num",q:`У ${a} ${it[0]} по ${b} ${it[1]}. Скільки ${it[1]} усього?`,viz:V.bar(Array.from({length:a},()=>[b,1]),"?"),a:a*b,ex:`Однакові групи — множення: ${b} × ${a} = ${a*b}.`}}},
+ {id:"clk",ic:"🕐",n:"Годинник",mon:["🦉","Годинник Сова"],g:L=>{const h=R(1,12);let m=[0,0,30,pk([15,45]),R(1,11)*5,0][L-1];
+   const f=(h,m)=>String(h).padStart(2,"0")+":"+String(m).padStart(2,"0");if(L===6){const d=R(1,3),m2=pk([0,30]);const h2=(h+d-1)%12+1;return{kind:"choice",q:`Зараз (див. годинник). Котра буде через <b>${d} ${d===1?"годину":"години"}</b>?`,viz:V.clock(h,m2),opts:(()=>{const o=new Set([f(h2,m2),f(h,m2)]);while(o.size<4)o.add(f(R(1,12),m2));return sh([...o])})(),a:f(h2,m2),ex:`Додай ${d} до годинної стрілки: ${h} + ${d} → ${h2}.`}}
+   const a=f(h,m),set=new Set([a]);while(set.size<4)set.add(f(R(1,12),pk(L<=2?[0]:L===3?[0,30]:L===4?[15,30,45]:[m,(m+5)%60,(m+55)%60,R(0,11)*5])));
+   return{kind:"choice",q:"Котра година на годиннику?",viz:V.clock(h,m),opts:sh([...set]),a,ex:"Коротка стрілка — години, довга — хвилини. Кожна цифра для довгої стрілки — 5 хвилин."}}},
+ {id:"money",ic:"🪙",n:"Гроші",mon:["🐷","Скарбничок"],g:L=>{if(L<=4){const mx=[10,20,40,50][L-1],a=R(3,mx),coins=L===1?[1,2,5]:L===2?[1,2,5,10]:[1,2,5,10,20];return{kind:"coins",coins,q:`Поклади в гаманець рівно <b>${a} грн</b>`,a,ex:"Почни з найбільшої монети, яка не більша за потрібну суму, потім добирай меншими."}}
+   const p=R(11,L===5?40:90),g=L===5?50:100;return{kind:"num",q:`Ціна іграшки ${p} грн. Дали ${g} грн. Скільки решти?`,viz:V.bar([[p+" грн",p],["решта ?",g-p]],g+" грн"),a:g-p,ex:`Решта = дали − ціна: ${g} − ${p} = ${g-p}.`}}},
+ {id:"len",ic:"📏",n:"Довжина",mon:["🦒","Сантиметрик"],g:L=>{const a=R(2,9),b=R(1,9);
+   return[{kind:"num",q:"1 дм = □ см",a:10,ex:"1 дециметр — це 10 сантиметрів."},{kind:"num",q:`${a} дм = □ см`,a:a*10,ex:`1 дм = 10 см, тож ${a} дм = ${a*10} см.`},
+     {kind:"num",q:`${a} дм ${b} см = □ см`,a:a*10+b,ex:`${a} дм = ${a*10} см, ще ${b} см → ${a*10+b} см.`},{kind:"num",q:`${a*10} см = □ дм`,a:a,ex:`10 см = 1 дм, тож ${a*10} см = ${a} дм.`},
+     (()=>{const x=R(20,99),y=R(2,9);return{kind:"cmp",q:`<b class="big">${x} см ○ ${y} дм</b>`,a:x>y*10?">":x<y*10?"<":"=",ex:`${y} дм = ${y*10} см. Порівняй ${x} і ${y*10}.`}})(),
+     (()=>{const x=R(12,40),y=R(5,30);return{kind:"num",q:`Стрічка ${x} см, другу відрізали на ${y} см довшою. Яка довжина другої стрічки?`,viz:V.bar([[x+" см",x],["+"+y,y]],"?"),a:x+y,ex:`«Довша на» — додаємо: ${x} + ${y} = ${x+y} см.`}})()][L-1]}}
+],
+3:[
+ {id:"tab",ic:"✖️",n:"Таблиця множення",mon:["🐉","Табличний дракон"],g:L=>{const A=[[2,5],[6,9],[2,9],[2,9],[6,9],[2,9]][L-1],a=R(A[0],A[1]),b=R(2,9);
+   if(L<=3)return{kind:"num",q:`<b class="big">${a} × ${b} = ?</b>`,viz:L===1?V.arr(a,b):"",a:a*b,ex:`${b} × ${a}: ${Array(a).fill(b).join(" + ")} = ${a*b}. Порада: ${a}×${b} = ${b}×${a}.`};
+   if(L<=5)return{kind:"num",q:`<b class="big">□ × ${b} = ${a*b}</b>`,a:a,ex:`Шукаємо множник: ${a*b} : ${b} = ${a}.`};
+   const c=R(2,3);return{kind:"num",q:`<b class="big">${a} × ${b} × ${c} = ?</b>`,a:a*b*c,ex:`По черзі: ${a}×${b} = ${a*b}, потім ×${c} = ${a*b*c}.`}}},
+ {id:"div",ic:"➗",n:"Ділення",mon:["🦈","Ділитель"],g:L=>{const b=L===1?R(2,5):R(2,9),a=R(2,9);
+   if(L<=3)return{kind:"num",q:`<b class="big">${a*b} : ${b} = ?</b>`,a:a,ex:`Яке число треба помножити на ${b}, щоб вийшло ${a*b}? ${a} × ${b} = ${a*b}.`};
+   if(L===4){const it=pk([["цукерок","дітей"],["олівців","коробок"],["яблук","кошиків"]]);return{kind:"num",q:`${a*b} ${it[0]} розклали порівну в ${b} ${it[1]}. Скільки в кожній?`,viz:V.bar(Array.from({length:b},()=>["?",1]),a*b),a:a,ex:`Ділимо порівну: ${a*b} : ${b} = ${a}.`}}
+   if(L===5){const r=R(1,b-1);return{kind:"num",q:`<b class="big">${a*b+r} : ${b} = ${a} (ост. □)</b>`,a:r,ex:`${a} × ${b} = ${a*b}. Залишок: ${a*b+r} − ${a*b} = ${r} (він менший за ${b}).`}}
+   return{kind:"num",q:`<b class="big">□ : ${b} = ${a}</b>`,a:a*b,ex:`Невідоме ділене = частка × дільник: ${a} × ${b} = ${a*b}.`}}},
+ {id:"k1000",ic:"🔢",n:"Числа до 1000",mon:["🦕","Тисячник"],g:L=>{const h=R(1,9),t=R(0,9),o=R(0,9),n=h*100+t*10+o;
+   return[{kind:"num",q:`${h} сот. ${t} дес. ${o} од. — яке число?`,viz:V.hund(h,t,o),a:n,ex:`${h*100} + ${t*10} + ${o} = ${n}.`},
+     {kind:"num",q:`Скільки <b>сотень</b> у числі <b class="big">${n}</b>?`,a:h,ex:`Перша цифра тризначного числа — сотні: ${h}.`},
+     (()=>{const m=pk([n,R(100,999)]);return{kind:"cmp",q:`<b class="big">${n} ○ ${m}</b>`,a:n>m?">":n<m?"<":"=",ex:"Порівнюй сотні, потім десятки, потім одиниці."}})(),
+     {kind:"num",q:`Округли <b>${n}</b> до десятків`,a:Math.round(n/10)*10,ex:`Дивимося на одиниці: ${o} ${o>=5?"≥ 5 — округлюємо вгору":"< 5 — округлюємо вниз"} → ${Math.round(n/10)*10}.`},
+     (()=>{const a=R(120,499),b=R(110,480);return{kind:"num",q:`<b class="big">${a} + ${b} = ?</b>`,a:a+b,ex:"Додавай стовпчиком: одиниці, десятки, сотні — не забувай про перенесення."}})(),
+     (()=>{const a=R(400,999),b=R(110,a-50);return{kind:"num",q:`<b class="big">${a} − ${b} = ?</b>`,a:a-b,ex:"Віднімай стовпчиком; якщо одиниць замало — займи 1 десяток."}})()][L-1]}},
+ {id:"ord",ic:"🧮",n:"Порядок дій",mon:["🤖","Робот Порядок"],g:L=>{const a=R(2,9),b=R(2,9),c=R(2,9),d=R(2,6);
+   return[{kind:"num",q:`<b class="big">${a+10} + ${b} − ${c} = ?</b>`,a:a+10+b-c,ex:"Лише + і − — виконуємо зліва направо."},
+     {kind:"num",q:`<b class="big">${a} + ${b} × ${c} = ?</b>`,a:a+b*c,ex:`Спершу множення: ${b}×${c} = ${b*c}, потім ${a} + ${b*c} = ${a+b*c}.`},
+     {kind:"num",q:`<b class="big">(${a} + ${b}) × ${c} = ?</b>`,a:(a+b)*c,ex:`Спершу дужки: ${a}+${b} = ${a+b}, потім × ${c} = ${(a+b)*c}.`},
+     {kind:"num",q:`<b class="big">${a} × ${b} + ${c} × ${d} = ?</b>`,a:a*b+c*d,ex:`Два множення: ${a*b} і ${c*d}, потім додаємо: ${a*b+c*d}.`},
+     {kind:"num",q:`<b class="big">${a*b} : ${b} + ${c} × ${d} = ?</b>`,a:a+c*d,ex:`Ділення й множення спершу: ${a} і ${c*d}. Разом ${a+c*d}.`},
+     {kind:"num",q:`<b class="big">(${a} + ${b}) × ${d} − ${Math.min(c,(a+b)*d-1)} = ?</b>`,a:(a+b)*d-Math.min(c,(a+b)*d-1),ex:`Дужки → ${a+b}, × ${d} → ${(a+b)*d}, − ${Math.min(c,(a+b)*d-1)} → ${(a+b)*d-Math.min(c,(a+b)*d-1)}.`}][L-1]}},
+ {id:"per",ic:"⬛",n:"Периметр і площа",mon:["🐢","Периметрус"],g:L=>{const a=R(2,12),b=R(2,9);
+   return[{kind:"num",q:"Знайди периметр квадрата (см)",viz:V.rect(a,a,a+" см",a+" см"),a:4*a,ex:`У квадрата 4 однакові сторони: ${a} × 4 = ${4*a} см.`},
+     {kind:"num",q:"Знайди периметр прямокутника (см)",viz:V.rect(a,b,a+" см",b+" см"),a:2*(a+b),ex:`(${a} + ${b}) × 2 = ${2*(a+b)} см.`},
+     (()=>{const c=R(3,9);return{kind:"num",q:"Знайди периметр трикутника (см)",viz:V.tri(a+" см",b+" см",c+" см"),a:a+b+c,ex:`Додай усі сторони: ${a} + ${b} + ${c} = ${a+b+c} см.`}})(),
+     {kind:"num",q:`Периметр квадрата <b>${4*a} см</b>. Яка його сторона?`,a:a,ex:`${4*a} : 4 = ${a} см.`},
+     {kind:"num",q:`Периметр прямокутника <b>${2*(a+b)} см</b>, одна сторона ${a} см. Знайди другу.`,viz:V.rect(a,b,a+" см","?"),a:b,ex:`Половина периметра: ${a+b} см. ${a+b} − ${a} = ${b} см.`},
+     {kind:"num",q:"Знайди площу прямокутника (см²)",viz:V.rect(a,b,a+" см",b+" см"),a:a*b,ex:`Площа = довжина × ширина: ${a} × ${b} = ${a*b} см².`}][L-1]}},
+ {id:"zad",ic:"🧩",n:"Задачі",mon:["🦊","Хитролис"],g:L=>{const a=R(12,40),b=R(5,20),c=R(2,6);
+   return[{kind:"num",q:`У Марти ${a} наліпок, у Олега на ${b} більше. Скільки наліпок в Олега?`,viz:V.bar([[a,a],["+"+b,b]],"?"),a:a+b,ex:`«На ${b} більше» — додаємо: ${a} + ${b} = ${a+b}.`},
+     {kind:"num",q:`На полиці ${a+b} книжок. ${b} взяли. Скільки залишилось?`,viz:V.bar([["?",a],[b,b]],a+b),a:a,ex:`${a+b} − ${b} = ${a}.`},
+     {kind:"num",q:`${c} пачки по ${b} зошитів. Скільки зошитів?`,viz:V.bar(Array.from({length:c},()=>[b,1]),"?"),a:b*c,ex:`${b} × ${c} = ${b*c}.`},
+     (()=>{const all=R(20,32),boys=R(5,Math.floor(all/2)-1);return{kind:"num",q:`У класі ${all} учнів, з них ${boys} хлопців. На скільки дівчат більше, ніж хлопців?`,viz:V.bar([[boys+" хл.",boys],["дівчата ?",all-boys]],all),a:all-2*boys,ex:`Дівчат: ${all} − ${boys} = ${all-boys}. Різниця: ${all-boys} − ${boys} = ${all-2*boys}.`}})(),
+     {kind:"num",q:`Купили ${c} ручки по ${b} грн і зошит за ${a} грн. Скільки заплатили?`,a:c*b+a,ex:`Ручки: ${b} × ${c} = ${b*c} грн. Разом: ${b*c} + ${a} = ${b*c+a} грн.`},
+     {kind:"num",q:`Було ${c*b*2} цукерок. Половину роздали, решту поділили між ${c} дітьми порівну. Скільки в кожного?`,a:b,ex:`Половина: ${c*b*2} : 2 = ${c*b}. Потім ${c*b} : ${c} = ${b}.`}][L-1]}}
+],
+4:[
+ {id:"big",ic:"🔢",n:"Багатоцифрові числа",mon:["🐋","Мільйонник"],g:L=>{const n=R(10000,99999);
+   return[{kind:"num",q:`Скільки <b>тисяч</b> у числі <b class="big">${fm(n)}</b>?`,a:Math.floor(n/1000),ex:`Ліворуч від останніх трьох цифр — тисячі: ${Math.floor(n/1000)}.`},
+     (()=>{const m=pk([n+R(1,9)*10,n-R(1,9)*1000,R(10000,99999)]);return{kind:"cmp",q:`<b class="big">${fm(n)} ○ ${fm(m)}</b>`,a:n>m?">":n<m?"<":"=",ex:"Порівнюй розряди зліва направо: десятки тисяч, тисячі…"}})(),
+     {kind:"num",q:`Округли <b>${fm(n)}</b> до тисяч`,a:Math.round(n/1000)*1000,ex:`Дивимося на сотні: ${Math.floor(n/100)%10} ${Math.floor(n/100)%10>=5?"≥ 5 — вгору":"< 5 — вниз"}.`},
+     (()=>{const a=R(1200,4999),b=R(1100,4999);return{kind:"num",q:`<b class="big">${fm(a)} + ${fm(b)} = ?</b>`,a:a+b,ex:"Стовпчиком, розряд під розрядом."}})(),
+     (()=>{const a=R(30000,90000),b=R(10000,a-1000);return{kind:"num",q:`<b class="big">${fm(a)} − ${fm(b)} = ?</b>`,a:a-b,ex:"Стовпчиком; позичай 1 у старшого розряду, коли треба."}})(),
+     {kind:"num",q:`Яке число на <b>1 000</b> більше за <b>${fm(n)}</b>?`,a:n+1000,ex:"Змінюється лише розряд тисяч: +1."}][L-1]}},
+ {id:"mul4",ic:"✖️",n:"Письмове множення",mon:["🦖","Множорекс"],g:L=>{const a=R(12,99),b=R(2,9),c=R(102,999),d=R(11,39);
+   return[{kind:"num",q:`<b class="big">${a} × ${b} = ?</b>`,a:a*b,ex:`${Math.floor(a/10)*10}×${b} = ${Math.floor(a/10)*10*b}, ${a%10}×${b} = ${a%10*b}. Разом ${a*b}.`},
+     {kind:"num",q:`<b class="big">${c} × ${b} = ?</b>`,a:c*b,ex:"Множ стовпчиком справа наліво, переносячи десятки."},
+     (()=>{const k=pk([10,100]);return{kind:"num",q:`<b class="big">${a} × ${k} = ?</b>`,a:a*k,ex:`Помножити на ${k} — дописати ${k===10?"один нуль":"два нулі"}.`}})(),
+     (()=>{const x=R(11,25),y=R(11,19);return{kind:"num",q:`<b class="big">${x} × ${y} = ?</b>`,a:x*y,ex:`${x}×${y} = ${x}×10 + ${x}×${y-10} = ${x*10} + ${x*(y-10)} = ${x*y}.`}})(),
+     {kind:"num",q:`<b class="big">${a} × ${d} = ?</b>`,a:a*d,ex:"Стовпчиком: спершу на одиниці, потім на десятки (зі зсувом), потім додай."},
+     (()=>{const p=R(25,95);return{kind:"num",q:`Квиток коштує ${p} грн. Скільки коштують ${d} квитків?`,a:p*d,ex:`${p} × ${d} = ${p*d} грн.`}})()][L-1]}},
+ {id:"div4",ic:"➗",n:"Письмове ділення",mon:["🦑","Ділокальмар"],g:L=>{const b=R(2,9),q=[R(11,19),R(21,99),pk([102,103,104,105,106,107,108,109,201,302,405,506]),0,R(101,999),R(12,40)][L-1];
+   if(L===4){const k=pk([10,100]),x=R(2,90)*k;return{kind:"num",q:`<b class="big">${fm(x)} : ${k} = ?</b>`,a:x/k,ex:`Поділити на ${k} — закреслити ${k===10?"один нуль":"два нулі"}.`}}
+   if(L===6)return{kind:"num",q:`${q*b} км проїхали за ${b} дні порівну. Скільки км за день?`,a:q,ex:`${q*b} : ${b} = ${q}.`};
+   return{kind:"num",q:`<b class="big">${fm(q*b)} : ${b} = ?</b>`,a:q,ex:`Ділимо куточком від старшого розряду. Перевірка: ${q} × ${b} = ${q*b}.`}}},
+ {id:"fr4",ic:"🍕",n:"Дроби",mon:["🐼","Піцоїд"],g:L=>{const n=pk([2,3,4,6,8]),k=R(1,n-1);
+   if(L===1)return{kind:"frac",n:pk([2,3,4]),k:1,q:"",a:1,ex:"Знаменник — на скільки частин поділили, чисельник — скільки взяли."};
+   if(L===2)return{kind:"frac",n,k,q:"",a:k,ex:`Розфарбуй ${k} з ${n} частин.`};
+   if(L===3){const s=new Set([k+"/"+n]);while(s.size<4){const nn=pk([2,3,4,6,8]);s.add(R(1,nn-1)+"/"+nn)}return{kind:"choice",q:"Яку частину піци розфарбовано?",viz:pizza(n,k),opts:sh([...s]),a:k+"/"+n,ex:`Частин ${n}, розфарбовано ${k} → ${k}/${n}.`}}
+   const m=pk([2,4,5,10]),w=m*R(2,9);
+   if(L===4)return{kind:"num",q:`Знайди <b>1/${m}</b> від <b>${w}</b>`,a:w/m,ex:`1/${m} — поділи на ${m}: ${w} : ${m} = ${w/m}.`};
+   if(L===5){const kk=R(2,m-1>1?m-1:2);const mm=kk>=m?m+1:m,ww=mm*R(2,9);return{kind:"num",q:`Знайди <b>${kk}/${mm}</b> від <b>${ww}</b>`,a:ww/mm*kk,ex:`Спершу 1/${mm}: ${ww} : ${mm} = ${ww/mm}, потім × ${kk} = ${ww/mm*kk}.`}}
+   const d=pk([5,7,8,9]),x=R(1,d-1),y=R(1,d-1);return{kind:"cmp",q:`<b class="big">${x}/${d} ○ ${y}/${d}</b>`,a:x>y?">":x<y?"<":"=",ex:"Знаменники однакові — більший той дріб, у якого більший чисельник."}}},
+ {id:"area4",ic:"📐",n:"Площа",mon:["🐘","Квадратон"],g:L=>{const a=R(3,12),b=R(2,9);
+   return[{kind:"num",q:"Площа прямокутника (см²)?",viz:V.rect(a,b,a+" см",b+" см"),a:a*b,ex:`${a} × ${b} = ${a*b} см².`},
+     {kind:"num",q:"Площа квадрата (см²)?",viz:V.rect(a,a,a+" см",a+" см"),a:a*a,ex:`${a} × ${a} = ${a*a} см².`},
+     {kind:"num",q:`Площа прямокутника <b>${a*b} см²</b>, довжина ${a} см. Яка ширина?`,viz:V.rect(a,b,a+" см","?"),a:b,ex:`${a*b} : ${a} = ${b} см.`},
+     {kind:"num",q:"1 дм² = □ см²",a:100,ex:"1 дм = 10 см, тому 1 дм² = 10 × 10 = 100 см²."},
+     (()=>{const A=R(4,7),B=R(2,3),C=R(3,5),D=R(2,3);return{kind:"num",q:"Площа фігури (см²)? Розріж її на два прямокутники.",viz:V.lshape(A+" см",(B+D)+" см",C+" см",D+" см"),a:A*(B+D)+C*D,ex:`Лівий: ${A}×${B+D} = ${A*(B+D)}, правий: ${C}×${D} = ${C*D}. Разом ${A*(B+D)+C*D} см².`}})(),
+     {kind:"num",q:`Площа квадрата <b>${a*a} см²</b>. Знайди його периметр.`,a:4*a,ex:`Сторона: ${a} см (бо ${a}×${a} = ${a*a}). Периметр: ${a}×4 = ${4*a} см.`}][L-1]}},
+ {id:"mot",ic:"🚲",n:"Рух",mon:["🐆","Швидкогепард"],g:L=>{const v=R(3,18)*(L>=3?5:1),t=R(2,6),s=v*t;
+   const tr=pk(["велосипедист","автобус","потяг","човен"]);
+   if(L<=2)return{kind:"num",q:`${tr[0].toUpperCase()+tr.slice(1)} рухався ${t} год зі швидкістю ${v} км/год. Яку відстань подолав?`,viz:V.bar(Array.from({length:t},()=>[v,1]),"? км"),a:s,ex:`s = v · t = ${v} × ${t} = ${s} км.`};
+   if(L<=4)return{kind:"num",q:`За ${t} год ${tr} подолав ${s} км. Яка швидкість (км/год)?`,a:v,ex:`v = s : t = ${s} : ${t} = ${v} км/год.`};
+   return{kind:"num",q:`${tr[0].toUpperCase()+tr.slice(1)} проїхав ${s} км зі швидкістю ${v} км/год. Скільки годин був у дорозі?`,a:t,ex:`t = s : v = ${s} : ${v} = ${t} год.`}}}
+],
+5:[
+ {id:"nat",ic:"🔢",n:"Натуральні числа",mon:["🐺","Степенюк"],g:L=>{const a=R(12,60),b=R(3,9),c=R(2,9),n=R(2,12);
+   return[{kind:"num",q:`<b class="big">${a*b} : ${b} + ${c} × ${b} = ?</b>`,a:a+c*b,ex:`Ділення: ${a}; множення: ${c*b}; разом ${a+c*b}.`},
+     {kind:"num",q:`<b class="big">${n}² = ?</b>`,a:n*n,ex:`Квадрат числа — число, помножене саме на себе: ${n}×${n} = ${n*n}.`},
+     (()=>{const k=R(2,6);return{kind:"num",q:`<b class="big">${k}³ = ?</b>`,a:k**3,ex:`${k}×${k}×${k} = ${k**3}.`}})(),
+     (()=>{const x=R(1000,99999);return{kind:"num",q:`Округли <b>${fm(x)}</b> до сотень`,a:Math.round(x/100)*100,ex:`Дивимося на десятки: ${Math.floor(x/10)%10}.`}})(),
+     (()=>{const p=R(2,3),q=R(2,4);return{kind:"num",q:`<b class="big">${p}³ + ${q}² = ?</b>`,a:p**3+q*q,ex:`${p}³ = ${p**3}, ${q}² = ${q*q}, разом ${p**3+q*q}.`}})(),
+     (()=>{const x=R(2,9),y=R(2,9),z=R(2,5);return{kind:"num",q:`<b class="big">(${x*10} − ${y}) × ${z} + ${z}² = ?</b>`,a:(x*10-y)*z+z*z,ex:`Дужки → ${x*10-y}, × ${z} → ${(x*10-y)*z}, + ${z*z} → ${(x*10-y)*z+z*z}.`}})()][L-1]}},
+ {id:"eq",ic:"⚖️",n:"Рівняння",mon:["🦁","Ікс-лев"],g:L=>{const x=R(2,30),a=R(2,20),k=R(2,9);
+   return[{kind:"num",q:`<b class="big">x + ${a} = ${x+a}</b>`,viz:V.balance(`x + ${a}`,x+a),a:x,ex:`Терези рівні. Забери ${a} з обох боків: x = ${x+a} − ${a} = ${x}.`},
+     {kind:"num",q:`<b class="big">x − ${a} = ${x}</b>`,viz:V.balance(`x − ${a}`,x),a:x+a,ex:`Додай ${a} до обох боків: x = ${x} + ${a} = ${x+a}.`},
+     {kind:"num",q:`<b class="big">${k} · x = ${k*x}</b>`,viz:V.balance(`${k} · x`,k*x),a:x,ex:`Поділи обидва боки на ${k}: x = ${k*x} : ${k} = ${x}.`},
+     {kind:"num",q:`<b class="big">x : ${k} = ${x}</b>`,a:k*x,ex:`x = ${x} · ${k} = ${k*x}.`},
+     {kind:"num",q:`<b class="big">${k} · x + ${a} = ${k*x+a}</b>`,viz:V.balance(`${k}x + ${a}`,k*x+a),a:x,ex:`Спершу − ${a}: ${k}x = ${k*x}. Потім : ${k} → x = ${x}.`},
+     {kind:"num",q:`<b class="big">${k} · (x − ${a}) = ${k*x}</b>`,a:x+a,ex:`Поділи на ${k}: x − ${a} = ${x}. Потім x = ${x+a}.`}][L-1]}},
+ {id:"fr5",ic:"🍰",n:"Звичайні дроби",mon:["🦄","Дроборіг"],g:L=>{const d=pk([5,7,8,9,11,12]),x=R(1,d-2),y=R(1,d-1-x);
+   return[{kind:"cmp",q:`<b class="big">${x}/${d} ○ ${y}/${d}</b>`,a:x>y?">":x<y?"<":"=",ex:"Однакові знаменники — порівнюй чисельники."},
+     {kind:"num",fr:1,q:`<b class="big">${x}/${d} + ${y}/${d} = ?</b> <small>(впиши дріб, напр. 3/7)</small>`,a:(x+y)+"/"+d,ex:`Знаменник лишається, чисельники додаємо: ${x}+${y} = ${x+y} → ${x+y}/${d}.`},
+     {kind:"num",fr:1,q:`<b class="big">${x+y}/${d} − ${y}/${d} = ?</b> <small>(впиши дріб)</small>`,a:x+"/"+d,ex:`${x+y} − ${y} = ${x} → ${x}/${d}.`},
+     (()=>{const dd=R(2,6),w=R(1,4),r=R(1,dd-1);return{kind:"num",q:`Виділи цілу частину: <b class="big">${w*dd+r}/${dd}</b>. Скільки цілих?`,a:w,ex:`${w*dd+r} : ${dd} = ${w} (ост. ${r}) → ${w} цілих ${r}/${dd}.`}})(),
+     (()=>{const m=pk([3,4,5]),kk=R(2,m-1),ww=m*R(3,12);return{kind:"num",q:`Знайди <b>${kk}/${m}</b> від <b>${ww}</b>`,a:ww/m*kk,ex:`${ww} : ${m} × ${kk} = ${ww/m*kk}.`}})(),
+     (()=>{const nu=R(1,4),p=R(3,9),q=pk([p+1,p+2,p-1>nu?p-1:p+3]);return{kind:"cmp",q:`<b class="big">${nu}/${p} ○ ${nu}/${q}</b>`,a:nu/p>nu/q?">":nu/p<nu/q?"<":"=",ex:"Однакові чисельники — більший той дріб, у якого знаменник менший (шматки більші)."}})()][L-1]}},
+ {id:"dc5",ic:"🔣",n:"Десяткові дроби",mon:["🐬","Комочка"],g:L=>{const a=R(11,99)/10,b=R(11,59)/10;
+   return[(()=>{const c=pk([a,R(11,99)/10,Math.round(a*10+1)/10]);return{kind:"cmp",q:`<b class="big">${dc(a)} ○ ${dc(c)}</b>`,a:a>c?">":a<c?"<":"=",ex:"Порівнюй цілі, потім десяті, потім соті."}})(),
+     {kind:"num",q:`<b class="big">${dc(a)} + ${dc(b)} = ?</b>`,a:dc(Math.round((a+b)*10)/10),ex:"Кома під комою, додавай розряди: десяті з десятими."},
+     (()=>{const x=Math.max(a,b),y=Math.min(a,b);return{kind:"num",q:`<b class="big">${dc(x)} − ${dc(y)} = ?</b>`,a:dc(Math.round((x-y)*10)/10),ex:"Кома під комою; віднімай від молодшого розряду."}})(),
+     (()=>{const k=pk([10,100]),x=R(101,999)/100;return{kind:"num",q:`<b class="big">${dc(x)} × ${k} = ?</b>`,a:dc(Math.round(x*k*100)/100),ex:`× ${k} — кома переїжджає праворуч на ${k===10?1:2} ${k===10?"знак":"знаки"}.`}})(),
+     (()=>{const x=R(1001,9999)/1000;return{kind:"num",q:`Округли <b>${dc(x)}</b> до десятих`,a:dc(Math.round(x*10)/10),ex:"Дивимося на соті: 5 і більше — вгору, менше — вниз."}})(),
+     (()=>{const x=R(11,49)/10,k=R(2,6);return{kind:"num",q:`<b class="big">${dc(x)} × ${k} = ?</b>`,a:dc(Math.round(x*k*10)/10),ex:`Помнож як цілі: ${Math.round(x*10)}×${k} = ${Math.round(x*10)*k}, потім відокрем 1 знак комою.`}})()][L-1]}},
+ {id:"ang",ic:"📐",n:"Кути",mon:["🦅","Кутоорел"],g:L=>{
+   if(L<=2){const t=pk(ANG),list=sh(ANG.filter(x=>x[0]!==t[0]));return{kind:"pic",q:`Натисни на <b>${t[0]}</b> кут`,opts:sh([t,...list]).map(x=>x[0]),pic:n=>V.angle(pk(ANG.find(x=>x[0]===n)[1])),a:t[0],ex:"Гострий < 90°, прямий = 90°, тупий — між 90° і 180°, розгорнутий = 180°."}}
+   const x=R(2,17)*5;
+   return[0,0,{kind:"num",q:"Прямий кут = □°",a:90,ex:"Прямий кут — 90°, як кут зошита."},{kind:"num",q:"Розгорнутий кут = □°",a:180,ex:"Розгорнутий кут — пряма лінія, 180°."},
+     {kind:"num",q:`Прямий кут поділили променем. Одна частина ${x}°. Друга = □°`,viz:V.angle(90),a:90-x,ex:`90° − ${x}° = ${90-x}°.`},
+     (()=>{const y=R(2,34)*5;return{kind:"num",q:`Розгорнутий кут поділили променем. Одна частина ${y}°. Друга = □°`,viz:V.angle(180),a:180-y,ex:`180° − ${y}° = ${180-y}°.`}})()][L-1]}},
+ {id:"pct",ic:"💯",n:"Відсотки",mon:["🦝","Знижкун"],g:L=>{const n=R(2,20)*20;
+   return[{kind:"choice",q:"1% — це яка частина числа?",opts:sh(["1/100","1/10","1/1000","1/50"]),a:"1/100",ex:"Відсоток — одна сота частина: 1% = 1/100."},
+     {kind:"num",q:`50% від <b>${n}</b> = ?`,a:n/2,ex:`50% — половина: ${n} : 2 = ${n/2}.`},
+     {kind:"num",q:`10% від <b>${n}</b> = ?`,a:n/10,ex:`10% — десята частина: ${n} : 10 = ${n/10}.`},
+     {kind:"num",q:`25% від <b>${n}</b> = ?`,a:n/4,ex:`25% — четверта частина: ${n} : 4 = ${n/4}.`},
+     {kind:"num",q:`20% від <b>${n}</b> = ?`,a:n/5,ex:`20% — п'ята частина: ${n} : 5 = ${n/5}.`},
+     {kind:"num",q:`Кросівки коштували <b>${n*5} грн</b>. Знижка 10%. Нова ціна?`,a:n*5-n/2,ex:`10% від ${n*5} = ${n/2}. ${n*5} − ${n/2} = ${n*5-n/2} грн.`}][L-1]}}
+]};
+function pizza(n,k,click){let s='<svg class="piz" viewBox="0 0 100 100" role="img" aria-label="Піца">';for(let i=0;i<n;i++){const a0=i/n*2*Math.PI-Math.PI/2,a1=(i+1)/n*2*Math.PI-Math.PI/2;
+  s+=`<path data-i="${i}" class="sl${i<k?" on":""}" d="M50 50L${50+46*Math.cos(a0)} ${50+46*Math.sin(a0)}A46 46 0 ${n===1?1:0} 1 ${50+46*Math.cos(a1)} ${50+46*Math.sin(a1)}Z"/>`}return s+'</svg>'}
+/* --- бліц: швидкі факти --- */
+const BLITZ={1:L=>{const a=R(0,L<2?5:10),b=R(0,L<2?5:10-(L<3?a:0));return pk([[`${a} + ${b}`,a+b],[`${Math.max(a,b)} − ${Math.min(a,b)}`,Math.abs(a-b)]])},
+ 2:L=>{const a=R(2,L<2?5:9),b=R(2,L<3?5:9);return pk([[`${a} × ${b}`,a*b],[`${a*10} + ${b*10}`,(a+b)*10]])},
+ 3:L=>{const a=R(2,9),b=R(2,9);return pk([[`${a} × ${b}`,a*b],[`${a*b} : ${b}`,a]])},
+ 4:L=>{const a=R(2,9),b=R(2,9);return pk([[`${a*10} × ${b}`,a*b*10],[`${a*b*10} : ${b}`,a*10],[`${a} × ${b}`,a*b]])},
+ 5:L=>{const a=R(2,12),b=R(2,9);return pk([[`${a}²`,a*a],[`${a*b} : ${b}`,a],[`50% від ${a*20}`,a*10],[`${a} × ${b}`,a*b]])}};
+
+{
+const FORM="https://docs.google.com/forms/d/e/1FAIpQLSeaDGNzqpEMjZyDt4WUwg3k3FAhGGW4pG1E8IcOk8b4LQsBVw/viewform?usp=pp_url&entry.1997531456=";
+const $=s=>document.querySelector(s);
+const RM=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const DN={1:"🟢 Легко",2:"🟡 Середньо",3:"🔴 Складно"},HPM={1:8,2:10,3:12};
+const today=()=>new Date().toISOString().slice(0,10);
+const S={cls:1,d:1,sm:{},stars:{},gems:0,wins:0,col:{},mis:{day:"",w:0},best:{},err:{},t0:null,att:1,placed:{},wk:{}};
+try{const s=JSON.parse(localStorage.getItem("ostrovy")||"null");if(s&&s.sm)Object.assign(S,s);}catch(e){}
+if(S.mis.day!==today())S.mis={day:today(),w:0};
+S.placed=S.placed||{};S.wk=S.wk||{};
+const save=()=>{try{localStorage.setItem("ostrovy",JSON.stringify(S))}catch(e){}};
+let B=null,team=false,TS=[0,0];
+const key=(t,d)=>S.cls+"-"+t.id+"-"+(d||S.d);
+
+/* ---- озвучка (якщо є український голос) ---- */
+let UKV=null;try{const f=()=>{UKV=(speechSynthesis.getVoices()||[]).find(v=>/^uk/i.test(v.lang))||null};f();speechSynthesis.onvoiceschanged=f}catch(e){}
+function say(t){if(!UKV)return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t.replace(/<[^>]+>/g," ").replace(/×/g," помножити на ").replace(/:/g," поділити на ").replace(/□/g," скільки ").replace(/−/g," мінус "));u.voice=UKV;u.lang="uk-UA";u.rate=.85;speechSynthesis.speak(u)}catch(e){}}
+
+/* ---- верхні панелі ---- */
+function drawBars(){const c=$("#clsBar");c.querySelectorAll(".chip").forEach(x=>x.remove());
+  [1,2,3,4,5].forEach(k=>{const b=document.createElement("button");b.type="button";b.className="chip"+(S.cls===k?" on":"");b.textContent=k+" клас";b.setAttribute("aria-pressed",S.cls===k);b.onclick=()=>{S.cls=k;save();B=null;drawAll();idleArena()};c.append(b)});
+  const d=$("#dBar");d.querySelectorAll(".chip").forEach(x=>x.remove());
+  [1,2,3].forEach(k=>{const b=document.createElement("button");b.type="button";b.className="chip d"+k+(S.d===k?" on":"");b.textContent=DN[k];b.setAttribute("aria-pressed",S.d===k);b.onclick=()=>{S.d=k;save();B=null;drawAll();idleArena()};d.append(b)});
+  $("#teamBtn").classList.toggle("on",team);$("#teamBtn").setAttribute("aria-pressed",team);}
+function drawHud(){$("#hGems").textContent="💎 "+S.gems;$("#hWins").textContent="🏆 "+S.wins;$("#hMis").textContent="🎯 Місія дня: "+Math.min(3,S.mis.w)+"/3"+(S.mis.w>=3?" ✔":"");
+  const all=Object.values(TOPICS).flat().length*3;$("#hCol").textContent="🃏 "+Object.keys(S.col).length+"/"+all;}
+function drawIsl(){const box=$("#isl");box.innerHTML="";
+  TOPICS[S.cls].forEach(t=>{const sm=S.sm[key(t)]||0,st=[1,2,3].map(d=>S.stars[key(t,d)]?["🟢","🟡","🔴"][d-1]:"⚪").join("");
+    const b=document.createElement("button");b.type="button";b.className="is"+(B&&B.t===t?" on":"");
+    b.innerHTML=`<div class="top"><span class="ic" aria-hidden="true">${t.ic}</span><span class="mo" aria-hidden="true">${S.stars[key(t)]?"🏳️":t.mon[0]}</span></div><b>${t.n}</b><div class="ss" aria-hidden="true"><i style="width:${sm}%"></i></div><small>Володіння: ${sm}/100</small><span class="st" aria-label="Перемоги за складністю">${st}</span>`;
+    b.onclick=()=>startBattle(t);box.append(b)});}
+function drawCol(){const c=$("#col");c.innerHTML="";$("#colH").textContent="🃏 Колекція монстрів · "+S.cls+" клас";[[S.cls,TOPICS[S.cls]]].forEach(([k,ts])=>ts.forEach(t=>[1,2,3].forEach(d=>{const has=S.col[k+"-"+t.id+"-"+d];
+  c.insertAdjacentHTML("beforeend",`<div class="card3 d${d}${has?"":" no"}" title="${t.mon[1]} · ${k} клас · ${DN[d]}">${t.mon[0]}<small>${has?t.mon[1]:"?"}</small></div>`)})));}
+function drawAll(){drawBars();drawHud();drawIsl();drawCol();drawWeek();}
+function idleArena(){$("#arena").innerHTML=`<p class="q">👆 Обери острів ${S.cls} класу — і в бій! Складність: ${DN[S.d]}</p>`+(S.placed&&S.placed[S.cls]?"":`<p class="tip">Не знаєш, яку складність обрати? Натисни <b>🧭 Визнач мій рівень</b> — 6 питань, і гра сама ввімкне потрібну.</p>`);}
+
+/* ---- вхідна перевірка рівня і виклик тижня ---- */
+const PL_LV=[1,1,3,3,5,5];
+function startPlace(){if(blitz&&blitz.on){clearInterval(blitz.iv);blitz.on=false}if(!S.t0)S.t0=Date.now();
+  const t={id:"place",ic:"🧭",n:"Перевірка рівня",mon:["🧭","Пілотна перевірка · "+S.cls+" клас"],g:L=>pk(TOPICS[S.cls]).g(L)};
+  B={t,place:true,res:[],hp:6,max:6,hearts:3,streak:0,n:0,errs:0,turn:0};drawIsl();placeNext();$("#arena").scrollIntoView({behavior:RM?"auto":"smooth",block:"start"})}
+function placeNext(){const i=B.res.length;B.q=B.t.g(PL_LV[i]);B.tries=0;B.n++;B.locked=false;renderQ();
+  const meta=document.querySelector("#arena .meta");if(meta)meta.innerHTML=`<span>🧭 Питання ${i+1} з 6 · ${["🟢","🟢","🟡","🟡","🔴","🔴"][i]} · без оцінки й без штрафів</span>`}
+function placeAnswer(ok,el){const fb=$("#fb");B.res.push(ok);lock();if(el)el.classList.add(ok?"ok":"no");
+  fb.className="fb "+(ok?"ok":"bad");fb.textContent=ok?"Правильно!":"Запам'ятали — йдемо далі.";B.hp=6-B.res.filter(Boolean).length;
+  const hpi=document.querySelector(".hp i");if(hpi)hpi.style.width=(B.hp/B.max*100)+"%";
+  setTimeout(()=>B.res.length<6?placeNext():placeEnd(),RM?300:900)}
+function placeEnd(){const r=B.res,e=(r[0]?1:0)+(r[1]?1:0),m=(r[2]?1:0)+(r[3]?1:0),h=(r[4]?1:0)+(r[5]?1:0);
+  let d=1;if(e===2&&m>=1)d=2;if(e>=1&&m===2&&h>=1)d=3;S.d=d;S.placed[S.cls]=d;S.gems+=10;save();B=null;drawAll();
+  const n=r.filter(Boolean).length;$("#arena").innerHTML=`<div class="blitzbig" aria-hidden="true">🧭</div><p class="q">Правильно ${n} з 6. Твій рівень: <b>${DN[d]}</b></p>
+  <p class="tip">Складність уже ввімкнено. Обирай острів — і в бій! +10 💎 за перевірку.</p><div class="row"><button class="btn ghost" type="button" id="rePl">↺ Пройти ще раз</button></div>`;
+  $("#rePl").onclick=startPlace;confetti()}
+function weekId(){const d=new Date();const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));const day=t.getUTCDay()||7;t.setUTCDate(t.getUTCDate()+4-day);const y=new Date(Date.UTC(t.getUTCFullYear(),0,1));return t.getUTCFullYear()+"-"+Math.ceil(((t-y)/864e5+1)/7)}
+function weekTopic(){const w=+weekId().split("-")[1];const ts=TOPICS[S.cls];return ts[(w*7+S.cls*3)%ts.length]}
+function drawWeek(){const t=weekTopic(),done=S.wk[weekId()+"-"+S.cls];$("#week").innerHTML=`<button class="weekbtn${done?" done":""}" type="button" id="weekBtn"><span class="wi" aria-hidden="true">${done?"🏅":"⭐"}</span><span><b>Виклик тижня · ${S.cls} клас</b><small>${t.ic} ${t.n} · 🔴 Складно · ${done?"виконано!":"+100 💎 і медаль"}</small></span></button>`;
+  $("#weekBtn").onclick=()=>{S.d=3;save();drawAll();startBattle(t);B.week=true}}
+/* ---- бій ---- */
+function startBattle(t){if(blitz&&blitz.on){clearInterval(blitz.iv);blitz.on=false}if(!S.t0)S.t0=Date.now();B={t,hp:HPM[S.d],max:HPM[S.d],hearts:3,streak:0,n:0,errs:0,turn:0};TS=[0,0];drawIsl();nextQ();
+  $("#arena").scrollIntoView({behavior:RM?"auto":"smooth",block:"start"});}
+function level(){return Math.min(6,(S.d*2-1)+(B.streak>=3?1:0))}
+function nextQ(){B.q=B.t.g(level());B.tries=0;B.n++;B.locked=false;renderQ();}
+function head(){const a=document.createElement("div");a.className="fight";
+  a.innerHTML=`<span class="mon" id="mon" aria-hidden="true">${B.t.mon[0]}</span><div><div class="mname">${B.t.mon[1]} · ${DN[S.d]}</div><div class="hp" role="progressbar" aria-label="Життя монстра" aria-valuemin="0" aria-valuemax="${B.max}" aria-valuenow="${B.hp}"><i style="width:${B.hp/B.max*100}%"></i></div></div><span class="me" aria-label="Твої серця: ${B.hearts}">${[0,1,2].map(i=>`<span class="${i<B.hearts?"":"lost"}">❤️</span>`).join("")}</span>`;return a}
+function renderQ(){const ar=$("#arena"),q=B.q;ar.innerHTML="";ar.append(head());
+  const meta=document.createElement("div");meta.className="meta";const sm=S.sm[key(B.t)]||0;
+  meta.innerHTML=`<span>Володіння ${sm}/100</span>${B.streak>=3?`<span class="fire">🔥 Хвиля ×${B.streak}: складніше!</span>`:B.streak?`<span class="fire">🔥 ${B.streak}</span>`:""}`;ar.append(meta);
+  if(team){const tm=document.createElement("div");tm.className="teams";tm.innerHTML=`<span class="a${B.turn===0?" on":""}">🟣 Команда 1: ${TS[0]}</span><span class="b${B.turn===1?" on":""}">🟠 Команда 2: ${TS[1]}</span>`;ar.append(tm)}
+  const qq=document.createElement("p");qq.className="q";qq.innerHTML=q.kind==="frac"?`Розфарбуй <b>${q.k}/${q.n}</b> піци — натискай на шматочки`:q.q;ar.append(qq);
+  if(UKV){const sb=document.createElement("button");sb.className="btn ghost";sb.type="button";sb.textContent="🔊 Послухати";sb.onclick=()=>say(qq.innerHTML);ar.append(sb)}
+  if(q.viz){const v=document.createElement("div");v.className="viz";v.innerHTML=q.viz;ar.append(v)}
+  const ans=document.createElement("div");ans.className="ans";ar.append(ans);
+  const fb=document.createElement("div");fb.id="fb";ar.append(fb);
+  INPUT[q.kind](ans,q);}
+const norm=v=>String(v).replace(/\s/g,"").replace(",",".");
+function same(u,a){u=norm(u);a=norm(a);if(u===a)return true;
+  if(a.includes("/")&&u.includes("/")){const[p,q]=a.split("/").map(Number),[x,y]=u.split("/").map(Number);return y!==0&&Math.abs(p/q-x/y)<1e-9}
+  const nu=parseFloat(u),na=parseFloat(a);return !isNaN(nu)&&!isNaN(na)&&/^-?\d*\.?\d+$/.test(u)&&Math.abs(nu-na)<1e-9}
+function answer(ok,el){if(B&&B.place){placeAnswer(ok,el);return}const q=B.q,fb=$("#fb");
+  if(ok){if(el)el.classList.add("ok");
+    const dmg=B.tries===0&&B.streak>=2?2:1;B.hp=Math.max(0,B.hp-dmg);if(B.tries===0)B.streak++;
+    const k=key(B.t),sm=S.sm[k]||0;S.sm[k]=Math.min(100,sm+(B.tries?2:sm<70?10:sm<90?5:3));
+    if(team)TS[B.turn]+=dmg;
+    S.gems+=dmg;fb.className="fb ok";fb.textContent=pk(["Влучно!","Бах!","Чудово!","Супер-удар!","Так тримати!","Точно в ціль!"])+(dmg>1?" 🔥 ×2":"")+" +"+dmg+"💎";
+    floatAt(fb,"💥 −"+dmg);const m=$("#mon");if(m){m.classList.remove("hit");void m.offsetWidth;m.classList.add("hit")}
+    const hpi=document.querySelector(".hp i");if(hpi)hpi.style.width=(B.hp/B.max*100)+"%";
+    lock();save();drawHud();
+    if(team)B.turn=1-B.turn;
+    setTimeout(()=>B.hp<=0?win():nextQ(),RM?400:1100);
+  }else{B.tries++;B.errs++;B.streak=0;if(el){el.classList.remove("no");void el.offsetWidth;el.classList.add("no")}
+    const k=key(B.t);S.sm[k]=Math.max(0,(S.sm[k]||0)-((S.sm[k]||0)<70?5:8));const ek="М"+S.cls+"."+B.t.id;S.err[ek]=(S.err[ek]||0)+1;
+    if(B.tries===1){B.hearts--;const m=$("#mon");if(m){m.classList.remove("atk");void m.offsetWidth;m.classList.add("atk")}
+      const me=document.querySelector(".me");if(me)me.innerHTML=[0,1,2].map(i=>`<span class="${i<B.hearts?"":"lost"}">❤️</span>`).join("")}
+    save();
+    if(B.hearts<=0){lock();setTimeout(lose,900);fb.className="fb bad";fb.textContent="Ой! Монстр сильніший цього разу.";return}
+    fb.className="fb bad";fb.textContent=B.tries>=2?"Подивись розбір 🦉 і спробуй ще!":"Не зовсім. Спробуй ще раз!";
+    if(B.tries>=2)showEx();
+    if(team)B.turn=1-B.turn;
+  }}
+function showEx(){if(document.querySelector(".ex"))return;const q=B.q,ex=document.createElement("div");ex.className="ex";
+  ex.innerHTML=`<b>🦉 Сова-підказка</b><span>${q.ex}</span>`;$("#arena").append(ex);
+  if(q.kind==="choice"||q.kind==="pic"||q.kind==="cmp"){const h=[...document.querySelectorAll(".opt")].find(b=>b.dataset.v===String(q.a));if(h)h.classList.add("hint")}
+  if(q.kind==="num"){const d=document.querySelector(".disp");if(d)d.textContent=""}}
+function lock(){document.querySelectorAll("#arena .opt,#arena .pad button,#arena .ticks button,#arena .coin,#arena .chk").forEach(b=>b.disabled=true);B.locked=true}
+function win(){const t=B.t,k=key(t),first=!S.stars[k];S.stars[k]=1;S.wins++;S.mis.w++;const wkey=weekId()+"-"+S.cls,wkNew=B.week&&!S.wk[wkey];if(wkNew)S.wk[wkey]=1;const bonus=S.d*10+(S.mis.w===3?50:0)+(wkNew?100:0);S.gems+=bonus;
+  const ck=S.cls+"-"+t.id+"-"+S.d,newCard=!S.col[ck];S.col[ck]=1;save();drawAll();
+  const ar=$("#arena");ar.innerHTML=`<div class="blitzbig" aria-hidden="true">🏆</div><p class="q">${t.mon[1]} переможений!</p>
+   ${newCard?`<div class="card3 d${S.d}" style="width:110px;height:140px;font-size:56px">${t.mon[0]}<small>${t.mon[1]}</small></div><p class="tip">Нова картка в колекції!</p>`:""}
+   <p class="tip">+${bonus} 💎${S.mis.w===3?" · 🎯 Місію дня виконано!":""}${wkNew?" · 🏅 Виклик тижня виконано!":""} · Помилок: ${B.errs} · Володіння: ${S.sm[k]||0}/100</p>
+   ${team?`<p class="q">🟣 ${TS[0]} : ${TS[1]} 🟠 — ${TS[0]>TS[1]?"перемогла 🟣 Команда 1!":TS[1]>TS[0]?"перемогла 🟠 Команда 2!":"нічия!"}</p>`:""}
+   <div class="row"><button class="btn ghost" type="button" id="again">↺ Ще раз</button>${S.d<3?`<button class="btn" type="button" id="harder">Складніше: ${DN[S.d+1]} →</button>`:""}</div>`;
+  ar.querySelector("#again").onclick=()=>startBattle(t);const h=ar.querySelector("#harder");if(h)h.onclick=()=>{S.d++;save();drawAll();startBattle(t)};
+  ar.append(sendBox());confetti();}
+function lose(){const t=B.t,ar=$("#arena");ar.innerHTML=`<div class="blitzbig" aria-hidden="true">${t.mon[0]}</div><p class="q">${t.mon[1]} цього разу втік!</p><p class="tip">Монстр утратив ${B.max-B.hp} з ${B.max} життів. Подивись підказки Сови — і реванш!</p>
+  <div class="row"><button class="btn" type="button" id="again">⚔️ Реванш</button>${S.d>1?`<button class="btn ghost" type="button" id="easier">Легше: ${DN[S.d-1]}</button>`:""}</div>`;
+  ar.querySelector("#again").onclick=()=>startBattle(t);const e=ar.querySelector("#easier");if(e)e.onclick=()=>{S.d--;save();drawAll();startBattle(t)};}
+
+/* ---- способи відповіді ---- */
+const mk=(tag,cls,html)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e};
+function optBtns(box,list,render,q){const o=mk("div","opts");list.forEach(v=>{const b=mk("button","opt",render?render(v):v);b.type="button";b.dataset.v=v;b.setAttribute("aria-label",String(v));b.onclick=()=>{if(!B.locked)answer(String(v)===String(q.a),b)};o.append(b)});box.append(o)}
+let padKey=null;
+const INPUT={
+ num(box,q){const d=mk("div","disp");d.setAttribute("aria-label","Твоя відповідь");d.setAttribute("role","status");box.append(d);
+  const keys=["7","8","9","⌫","4","5","6","✔","1","2","3","0",q.fr?"/":","];const p=mk("div","pad");
+  const press=k=>{if(B.locked)return;if(k==="⌫")d.textContent=d.textContent.slice(0,-1);else if(k==="✔"){if(d.textContent){const ok=same(d.textContent,q.a);answer(ok,null);if(!ok){d.classList.remove("no");setTimeout(()=>{if(!B.locked)d.textContent=""},500)}}}else if(d.textContent.length<9)d.textContent+=k};
+  ["7","8","9","⌫","4","5","6","✔","1","2","3","0",q.fr?"/":","].forEach(k=>{const b=mk("button",k==="✔"?"ok":"",k);b.type="button";b.setAttribute("aria-label",k==="⌫"?"Стерти":k==="✔"?"Перевірити":k);b.onclick=()=>press(k);p.append(b)});
+  box.append(p);padKey=e=>{if(!/^(\d|,|\.|\/|Backspace|Enter)$/.test(e.key))return;e.preventDefault();press(e.key==="Backspace"?"⌫":e.key==="Enter"?"✔":e.key==="."?",":e.key)};},
+ choice(box,q){optBtns(box,q.opts,null,q)},
+ pic(box,q){optBtns(box,q.opts,q.pic,q)},
+ cmp(box,q){optBtns(box,["<","=",">"],null,q)},
+ line(box,q){const st=q.step||1,w=mk("div","line"),t=mk("div","ticks");for(let v=q.min;v<=q.max;v+=st){const b=mk("button","",(v===q.min||v===q.max||(q.max-q.min)/st<=10||v%5===0)?String(v):"");b.type="button";b.setAttribute("aria-label","Число "+v);b.dataset.v=v;
+   b.onclick=()=>{if(B.locked)return;b.classList.add("sel");const ok=v===q.a;b.classList.add(ok?"ok":"no");if(!ok){b.textContent=String(v);setTimeout(()=>b.classList.remove("sel","no"),700)}answer(ok,null)};t.append(b)}
+   w.append(t);box.append(w)},
+ order(box,q){const got=[],sel=mk("div","wallet"),o=mk("div","opts");sh(q.items).forEach(v=>{const b=mk("button","opt",String(v));b.type="button";b.onclick=()=>{if(B.locked||b.disabled)return;got.push(v);b.disabled=true;b.style.opacity=.3;sel.append(mk("span","sum",v+" "));
+   if(got.length===q.items.length){const ok=got.join(" ")===q.a;answer(ok,null);if(!ok)setTimeout(()=>{got.length=0;sel.innerHTML="";o.querySelectorAll(".opt").forEach(x=>{x.disabled=false;x.style.opacity=1})},700)}};o.append(b)});box.append(sel,o)},
+ coins(box,q){let tot=0;const sum=mk("div","sum","У гаманці: 0 грн"),wal=mk("div","wallet"),cs=mk("div","coins");
+  const upd=()=>{sum.textContent="У гаманці: "+tot+" грн"};
+  q.coins.forEach(v=>{const b=mk("button","coin"+(v>=20?" note":""),v+(v>=20?" грн":""));b.type="button";b.setAttribute("aria-label","Додати "+v+" грн");
+   b.onclick=()=>{if(B.locked)return;tot+=v;const c=mk("button","coin"+(v>=20?" note":""),String(v));c.type="button";c.setAttribute("aria-label","Забрати "+v+" грн");c.onclick=()=>{if(B.locked)return;tot-=v;c.remove();upd()};wal.append(c);upd()};cs.append(b)});
+  const chk=mk("button","btn chk","Перевірити ✔");chk.type="button";chk.onclick=()=>{if(B.locked)return;const ok=tot===q.a;answer(ok,null);if(!ok&&tot>q.a)$("#fb").textContent+=" Забагато — натисни на монету в гаманці, щоб забрати."};
+  box.append(sum,wal,cs,chk)},
+ frac(box,q){const v=mk("div","viz",pizza(q.n,0));box.append(v);let k=0;const lab=mk("div","sum","Розфарбовано: 0/"+q.n);
+  v.querySelectorAll(".sl").forEach(s=>s.addEventListener("click",()=>{if(B.locked)return;s.classList.toggle("on");k=v.querySelectorAll(".sl.on").length;lab.textContent="Розфарбовано: "+k+"/"+q.n}));
+  const chk=mk("button","btn chk","Перевірити ✔");chk.type="button";chk.onclick=()=>{if(!B.locked)answer(k===q.k,null)};box.append(lab,chk)}
+};
+addEventListener("keydown",e=>{if(blitz&&blitz.on){blitzKey(e);return}if(B&&!B.locked&&B.q&&B.q.kind==="num"&&padKey)padKey(e)});
+
+/* ---- бліц ---- */
+let blitz=null;
+const RANK=[[0,"Новачок"],[10,"Учень"],[20,"Майстер"],[30,"Чемпіон"],[40,"Легенда чисел"]];
+function startBlitz(){B=null;drawIsl();const ar=$("#arena");blitz={on:true,n:0,left:60,cur:null,inp:""};
+  ar.innerHTML=`<p class="q">⚡ Бліц · ${S.cls} клас · ${DN[S.d]}</p><div class="timer" id="tm">60</div><div class="blitzbig" id="bq"></div><div class="disp" id="bd"></div><div class="pad" id="bp"></div><p class="tip">Правильно: <b id="bn">0</b> · Рекорд: ${S.best[S.cls+"-"+S.d]||0}</p>`;
+  const p=$("#bp");["7","8","9","⌫","4","5","6","✔","1","2","3","0"].forEach(k=>{const b=mk("button",k==="✔"?"ok":"",k);b.type="button";b.onclick=()=>bPress(k);p.append(b)});
+  bNext();blitz.iv=setInterval(()=>{blitz.left--;$("#tm").textContent=blitz.left;if(blitz.left<=0)bEnd()},1000);ar.scrollIntoView({behavior:RM?"auto":"smooth",block:"start"});}
+function bNext(){blitz.cur=BLITZ[S.cls](S.d);blitz.inp="";$("#bq").textContent=blitz.cur[0]+" = ?";$("#bd").textContent=""}
+function bPress(k){if(!blitz||!blitz.on)return;if(k==="⌫")blitz.inp=blitz.inp.slice(0,-1);else if(k==="✔"){if(!blitz.inp)return;
+  if(+blitz.inp===blitz.cur[1]){blitz.n++;$("#bn").textContent=blitz.n;floatAt($("#bd"),"+1");bNext();return}else{const d=$("#bd");d.style.borderColor="var(--bad)";setTimeout(()=>d.style.borderColor="",300);blitz.inp=""}}
+  else if(blitz.inp.length<5)blitz.inp+=k;$("#bd").textContent=blitz.inp;
+  if(blitz.inp&&+blitz.inp===blitz.cur[1]&&String(blitz.cur[1]).length===blitz.inp.length){blitz.n++;$("#bn").textContent=blitz.n;floatAt($("#bd"),"+1");bNext()}}
+function blitzKey(e){if(/^\d$/.test(e.key))bPress(e.key);else if(e.key==="Backspace")bPress("⌫");else if(e.key==="Enter")bPress("✔");else return;e.preventDefault()}
+function bEnd(){clearInterval(blitz.iv);blitz.on=false;const k=S.cls+"-"+S.d,rec=blitz.n>(S.best[k]||0);if(rec)S.best[k]=blitz.n;S.gems+=blitz.n;save();drawHud();
+  let r=RANK[0][1];RANK.forEach(x=>{if(blitz.n>=x[0])r=x[1]});
+  $("#arena").innerHTML=`<div class="blitzbig">${blitz.n}</div><p class="q">${rec?"🎉 Новий рекорд!":"Час вийшов!"} Звання: <b>${r}</b></p><p class="tip">+${blitz.n} 💎 · Рекорд: ${S.best[k]}</p><div class="row"><button class="btn" type="button" id="again">⚡ Ще раз</button></div>`;
+  $("#again").onclick=startBlitz;if(rec)confetti();}
+
+/* ---- надіслати вчителю ---- */
+const clean=v=>String(v==null?"":v).replace(/[|\n\r]/g," ").trim()||"—";
+const hm=s=>{s=Math.max(0,Math.round(s));return Math.floor(s/60)+" хв "+String(s%60).padStart(2,"0")+" с"};
+function line(n,c){const ks=Object.keys(S.sm).filter(k=>k.startsWith(S.cls+"-")),avg=ks.length?Math.round(ks.reduce((a,k)=>a+S.sm[k],0)/ks.length):0,errs=Object.values(S.err).reduce((a,b)=>a+b,0);
+  const wins=Object.keys(S.stars).filter(k=>k.startsWith(S.cls+"-")).length;
+  return["v1","Математика "+S.cls,"Острови чисел · "+S.cls+" клас",clean(c),clean(n),S.att,DN[S.d].slice(3),"—",wins+" перемог","володіння "+avg+"%",errs,hm(S.t0?(Date.now()-S.t0)/1000:0),"—","гра",wins>=TOPICS[S.cls].length?"завершено":"не завершено",Object.entries(S.err).map(([k,v])=>k+":"+v).join(",")].join("|")}
+function sendBox(){const box=mk("div","sendbox");let nv0="",cv0="";try{nv0=localStorage.getItem("ost-n")||"";cv0=localStorage.getItem("ost-c")||""}catch(e){}
+  box.innerHTML=`<b>📤 Покажи вчителеві свій прогрес</b><div class="f"><input type="text" placeholder="Прізвище та ім'я" aria-label="Прізвище та ім'я" autocomplete="off"><input type="text" class="cls" placeholder="Клас" maxlength="6" aria-label="Клас" autocomplete="off"></div><div><a class="sendgo" href="#" target="_blank" rel="noopener">📤 Надіслати вчителю</a></div><div class="tip">Відкриється Google Форма — натисни в ній «Надіслати». Вхід в акаунт не потрібен.</div>`;
+  const [n,c]=box.querySelectorAll("input"),a=box.querySelector("a"),m=box.querySelector(".tip");n.value=nv0;c.value=cv0;
+  a.onclick=e=>{const nv=n.value.trim(),cv=c.value.trim();if(!nv||!cv){e.preventDefault();m.textContent="Впиши прізвище, ім'я та клас ☝️";(nv?c:n).focus();return}
+    try{localStorage.setItem("ost-n",nv);localStorage.setItem("ost-c",cv)}catch(x){}a.href=FORM+encodeURIComponent(line(nv,cv));m.textContent="Форму відкрито — натисни там «Надіслати» ✔"};return box}
+$("#jFab").onclick=()=>{if(blitz&&blitz.on)return;B=null;const ar=$("#arena");ar.innerHTML=`<p class="q">🏆 ${S.wins} перемог · 💎 ${S.gems}</p>`;ar.append(sendBox());ar.scrollIntoView({behavior:RM?"auto":"smooth"})};
+
+/* ---- ефекти ---- */
+function floatAt(node,txt){if(RM||!node)return;const r=node.getBoundingClientRect(),d=mk("div","float",txt);d.style.left=(r.left+r.width/2)+"px";d.style.top=r.top+"px";document.body.append(d);setTimeout(()=>d.remove(),1000)}
+function confetti(){if(RM)return;const cv=$("#cf");cv.hidden=false;const x=cv.getContext("2d");cv.width=innerWidth;cv.height=innerHeight;const cols=["#0b8f87","#ffb020","#e03131","#7a4fd8","#2f9e44"];
+  const P=Array.from({length:110},()=>({x:Math.random()*cv.width,y:-20-Math.random()*cv.height*.5,v:2+Math.random()*3,r:Math.random()*6,s:5+Math.random()*5,c:pk(cols)}));let f=0;
+  (function fr(){x.clearRect(0,0,cv.width,cv.height);P.forEach(p=>{p.y+=p.v;p.x+=Math.sin((p.y+p.r*40)/30);p.r+=.1;x.save();x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=p.c;x.fillRect(-p.s/2,-p.s/2,p.s,p.s*1.6);x.restore()});if(++f<140)requestAnimationFrame(fr);else cv.hidden=true})()}
+
+$("#teamBtn").onclick=()=>{team=!team;TS=[0,0];drawBars();if(B&&!B.locked)renderQ()};
+$("#blitzBtn").onclick=startBlitz;$("#placeBtn").onclick=startPlace;
+drawAll();idleArena();
+window.__ost={S,get B(){return B},get blitz(){return blitz},TOPICS,same};
+}
+
+</script></body></html>

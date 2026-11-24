@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="uk"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Матч ЦифроДоп: Scratch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* VOICE: командна гра на великий екран, азарт матчу, коротко й по-доброму
+   IDEA: баскетбольне табло й майданчик «Ліги класу» — кожна відповідь це кидок
+   PICTURE: майданчик із кільцем; м'яч летить у кошик або відскакує від дужки
+   COLOUR AND TYPE: токени «Інфо-хаб», помаранчевий 8 класу; Unbounded — табло, Nunito — питання, JetBrains Mono — формули
+   LAYOUT: табло згори, майданчик ліворуч, питання праворуч; на вузькому екрані стовпчиком */
+:root{color-scheme:light;
+  --bg:#f4f6fb;--surface:#fff;--surface-2:#e9edf5;--ink:#18202f;--muted:#5b6578;--line:#dfe4ee;--accent:#2f5bea;
+  --c:#c2255c;--onc:#fff;--ok:#2e7d32;--ok-bg:#e3f3e4;--bad:#b3261e;--bad-bg:#fbe7e5;--warn:#b45309;
+  --f-display:"Unbounded","Arial Black",system-ui,sans-serif;--f-body:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;--f-mono:"JetBrains Mono",ui-monospace,Consolas,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){color-scheme:dark;
+  --bg:#11141b;--surface:#1a1f2a;--surface-2:#232a38;--ink:#e8ecf4;--muted:#9aa4b6;--line:#2b3242;--accent:#7d9bff;
+  --c:#f06595;--onc:#11141b;--ok:#7fd283;--ok-bg:#1f3522;--bad:#ff8a80;--bad-bg:#3a1f1d;--warn:#f2b46b}}
+:root[data-theme=dark]{color-scheme:dark;
+  --bg:#11141b;--surface:#1a1f2a;--surface-2:#232a38;--ink:#e8ecf4;--muted:#9aa4b6;--line:#2b3242;--accent:#7d9bff;
+  --c:#f06595;--onc:#11141b;--ok:#7fd283;--ok-bg:#1f3522;--bad:#ff8a80;--bad-bg:#3a1f1d;--warn:#f2b46b}
+*{box-sizing:border-box;min-width:0}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.5 var(--f-body);overflow-x:clip}
+.app{max-width:1500px;margin:0 auto;padding:16px max(16px,2vw) 40px;display:grid;gap:16px}
+.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px 20px}
+.eyebrow{font:800 12px/16px var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font:800 clamp(26px,3.4vw,44px)/1.05 var(--f-display);margin:2px 0 0;color:var(--c)}
+h2{font:700 clamp(19px,2vw,26px)/1.2 var(--f-display);margin:0;text-wrap:balance}
+.tools{display:flex;gap:8px;flex-wrap:wrap}
+.btn{font:800 16px var(--f-body);border:2px solid var(--line);background:var(--surface);color:var(--ink);border-radius:12px;padding:10px 16px;min-height:44px;cursor:pointer}
+.btn:hover{border-color:var(--c)}
+.btn.main{background:var(--c);border-color:var(--c);color:var(--onc);font-size:clamp(17px,1.5vw,22px);padding:12px 22px}
+.btn:focus-visible,.shot:focus-visible,.opt:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+/* табло */
+.sb{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:10px;background:#141821;color:#f3f5fa;border-radius:20px;padding:12px 16px}
+.team{display:grid;gap:2px;align-content:center;padding:8px 12px;border-radius:14px;border:3px solid transparent}
+.team.on{border-color:#f59152;background:#1f2633}
+.team.r{text-align:right}
+.team .nm{font:800 clamp(14px,1.7vw,24px)/1.2 var(--f-body);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.team .sc{font:800 clamp(40px,7vw,96px)/1 var(--f-display);font-variant-numeric:tabular-nums;color:#ffb347}
+.team .sc.bump{animation:bump .5s ease}
+.team .st{font:700 13px var(--f-body);color:#9aa4b6;min-height:18px}
+.mid{display:grid;justify-items:center;align-content:center;gap:4px;padding:0 6px;text-align:center}
+.per{font:700 clamp(11px,1.2vw,16px)/1.2 var(--f-display)}
+.clock{font:800 clamp(26px,4.2vw,58px)/1 var(--f-display);font-variant-numeric:tabular-nums;color:#7fd283;min-height:1em}
+.clock.low{color:#ff8a80}
+.poss{font:700 13px var(--f-body);color:#9aa4b6}
+.pause{font:800 13px var(--f-body);background:none;border:1px solid #3a4356;color:#f3f5fa;border-radius:999px;padding:4px 12px;cursor:pointer;min-height:30px}
+@keyframes bump{30%{transform:scale(1.18);color:#fff}}
+/* майданчик */
+.arena{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:16px;align-items:start}
+.court{position:relative;aspect-ratio:16/10;border-radius:20px;overflow:hidden;border:1px solid var(--line);background:var(--surface-2);--wood:color-mix(in srgb,var(--c) 30%,var(--surface))}
+.court svg.bg{position:absolute;inset:0;width:100%;height:100%}
+.ball{position:absolute;width:9%;aspect-ratio:1;left:36%;top:74.5%;transform:translate(-50%,-50%);z-index:2}
+.ball svg{width:100%;height:100%;display:block}
+.ball.spin svg{animation:spin 1.2s linear}
+@keyframes spin{to{transform:rotate(-540deg)}}
+.spot{position:absolute;top:85%;transform:translateX(-50%);font:800 clamp(11px,1.1vw,15px) var(--f-display);background:var(--surface);color:var(--ink);border-radius:999px;padding:2px 10px;border:2px solid var(--line)}
+.spot.on{border-color:var(--c);background:var(--c);color:var(--onc)}
+.call{position:absolute;left:50%;top:9%;transform:translateX(-50%);white-space:nowrap;font:800 clamp(18px,2.6vw,38px)/1 var(--f-display);padding:10px 18px;border-radius:14px;z-index:3}
+.call.ok{background:var(--ok-bg);color:var(--ok);border:2px solid var(--ok)}
+.call.bad{background:var(--bad-bg);color:var(--bad);border:2px solid var(--bad)}
+#net.swish{animation:swish .6s ease;transform-origin:668px 168px}
+@keyframes swish{30%{transform:scaleY(1.25)}60%{transform:scaleY(.92)}}
+/* панель */
+.panel{background:var(--surface);border:1px solid var(--line);border-top:5px solid var(--c);border-radius:16px;padding:clamp(16px,2vw,28px);display:grid;gap:14px;align-content:start;min-height:280px}
+.who{font:700 clamp(18px,2vw,28px)/1.2 var(--f-display)}
+.who span{color:var(--c)}
+.hint{margin:0;color:var(--muted);font-weight:600}
+.shots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.shot{display:grid;gap:4px;justify-items:start;text-align:left;border:2px solid var(--line);background:var(--surface-2);border-radius:14px;padding:14px;cursor:pointer;font-family:var(--f-body);color:var(--ink);min-height:120px;align-content:start}
+.shot:hover{border-color:var(--c)}
+.shot b{font:800 clamp(30px,3.6vw,50px)/1 var(--f-display);color:var(--c)}
+.shot .nm{font:800 clamp(16px,1.5vw,21px)/1.2 var(--f-body)}
+.shot small{font:600 14px/1.3 var(--f-body);color:var(--muted)}
+.tags{display:flex;flex-wrap:wrap;gap:8px}
+.tag{font:800 13px/1 var(--f-body);background:var(--surface-2);border-radius:6px;padding:6px 9px}
+.tag.pts{background:var(--c);color:var(--onc);font-size:14px}
+.q{font:800 clamp(20px,2.1vw,31px)/1.3 var(--f-body);text-wrap:balance;white-space:pre-line}
+.q.small{font-size:clamp(17px,1.5vw,22px);font-weight:700;color:var(--muted)}
+code{font-family:var(--f-mono);font-size:.9em;background:var(--surface-2);border-radius:6px;padding:1px 6px;overflow-wrap:anywhere}
+.opt code,.right code{background:none;padding:0}
+.opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.opt{display:flex;gap:12px;align-items:center;text-align:left;font:700 clamp(17px,1.7vw,25px)/1.25 var(--f-body);border:2px solid var(--line);background:var(--surface-2);color:var(--ink);border-radius:12px;padding:12px 14px;min-height:60px;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--c)}
+.opt .k{flex:none;width:36px;height:36px;border-radius:8px;display:grid;place-items:center;background:var(--surface);font:800 16px var(--f-display)}
+.opt.bad{border-color:var(--bad);background:var(--bad-bg);color:var(--bad);cursor:default}
+.msg{font:800 clamp(17px,1.6vw,23px)/1.3 var(--f-body);border-radius:12px;padding:12px 14px;border:2px solid}
+.msg.ok{color:var(--ok);background:var(--ok-bg);border-color:var(--ok)}
+.msg.bad{color:var(--bad);background:var(--bad-bg);border-color:var(--bad)}
+.inp{display:flex;gap:10px;flex-wrap:wrap}
+.inp input,.cfg input[type=text]{flex:1;min-width:170px;font:700 clamp(18px,1.8vw,26px) var(--f-mono);padding:12px 14px;border-radius:12px;border:2px solid var(--line);background:var(--surface-2);color:var(--ink)}
+.right{font:700 clamp(18px,1.7vw,25px)/1.3 var(--f-body)}
+.right b{font-family:var(--f-mono);color:var(--ok)}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+/* налаштування */
+.cfg{display:grid;gap:14px}
+.cfg .two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.cfg label.f{display:grid;gap:4px;font-weight:800}
+.cfg input[type=text]{font-family:var(--f-body);font-size:18px;width:100%}
+.cfg fieldset{border:1px solid var(--line);border-radius:12px;margin:0;padding:10px 12px;display:flex;flex-wrap:wrap;gap:6px 18px}
+.cfg legend{font-weight:800;padding:0 6px}
+.cfg fieldset label{display:flex;gap:8px;align-items:center;min-height:36px;font-weight:600;cursor:pointer}
+.cfg input[type=radio],.cfg input[type=checkbox]{width:20px;height:20px;accent-color:var(--c)}
+.rules{margin:0;padding-left:20px;display:grid;gap:4px}
+/* підсумок */
+.finscore{font:800 clamp(40px,6vw,84px)/1 var(--f-display);color:var(--c);font-variant-numeric:tabular-nums}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:right;font-weight:700}
+th:first-child,td:first-child{text-align:left}
+th{font-size:14px;color:var(--muted)}
+.bars{display:grid;gap:8px}
+.bar{display:grid;grid-template-columns:minmax(0,1fr) 64px;gap:4px 10px;align-items:center;font-weight:700}
+.bar .tr{grid-column:1/-1;height:12px;border-radius:999px;background:var(--surface-2);overflow:hidden}
+.bar .tr i{display:block;height:100%;background:var(--c);border-radius:999px}
+.bar span:nth-child(2){text-align:right;white-space:nowrap}
+.joke{margin:0;border-left:5px solid var(--c);background:var(--surface-2);border-radius:0 12px 12px 0;padding:12px 16px;font-weight:700}
+@media (max-width:900px){.arena{grid-template-columns:1fr}}
+@media (max-width:620px){.opts,.shots,.cfg .two{grid-template-columns:1fr}.shot{min-height:0}.sb{padding:8px}.team{padding:6px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head>
+<body>
+<div class="app">
+  <header class="top">
+    <div>
+      <div class="eyebrow" id="eyebrow"></div>
+      <h1 id="gtitle"></h1>
+    </div>
+    <div class="tools">
+      <button class="btn" id="mute" type="button" aria-pressed="false">Звук: увімк.</button>
+      <button class="btn" id="reset" type="button" hidden>Нова гра</button>
+    </div>
+  </header>
+
+  <section class="sb" aria-label="Табло">
+    <div class="team" id="tA"><div class="nm">Господарі</div><div class="sc">0</div><div class="st"></div></div>
+    <div class="mid"><div class="per" id="per">Матч класу</div><div class="clock" id="clock">–</div><div class="poss" id="poss">Гра розділу</div><button class="pause" id="pause" type="button" hidden>Пауза</button></div>
+    <div class="team r" id="tB"><div class="nm">Гості</div><div class="sc">0</div><div class="st"></div></div>
+  </section>
+
+  <section class="arena">
+    <div class="court" aria-hidden="true">
+      <svg class="bg" viewBox="0 0 800 500" preserveAspectRatio="none">
+        <g stroke="var(--line)" stroke-width="3"><path d="M0 70H800M0 135H800M0 200H800M0 265H800"/></g>
+        <rect y="330" width="800" height="170" fill="var(--wood)"/>
+        <path d="M0 330H800" stroke="var(--surface)" stroke-width="6"/>
+        <polygon points="560,500 610,336 800,336 800,500" fill="var(--c)" opacity=".38"/>
+        <path d="M700 338C430 338 205 380 150 500" fill="none" stroke="var(--surface)" stroke-width="5"/>
+        <ellipse cx="585" cy="418" rx="70" ry="24" fill="none" stroke="var(--surface)" stroke-width="5"/>
+        <g fill="#000" opacity=".16"><ellipse cx="112" cy="408" rx="44" ry="9"/><ellipse cx="288" cy="408" rx="44" ry="9"/><ellipse cx="440" cy="408" rx="44" ry="9"/><ellipse cx="752" cy="338" rx="44" ry="8"/></g>
+        <rect x="744" y="120" width="16" height="216" fill="var(--muted)"/><rect x="756" y="120" width="5" height="216" fill="#000" opacity=".2"/>
+        <rect x="704" y="150" width="46" height="12" fill="var(--muted)"/>
+        <polygon points="692,74 708,80 708,206 692,200" fill="var(--surface)" stroke="var(--ink)" stroke-width="3"/>
+        <g id="net" fill="none" stroke="var(--ink)" stroke-width="2.5" opacity=".75"><path d="M642 167L653 216M655 171L661 219M668 172V221M681 171L675 219M694 167L683 216M646 185H690M650 201H686M653 216H683"/></g>
+        <ellipse cx="668" cy="166" rx="28" ry="7" fill="none" stroke="var(--c)" stroke-width="6"/>
+      </svg>
+      <span class="spot" id="sp3" style="left:14%">3 очки</span><span class="spot" id="sp2" style="left:36%">2 очки</span><span class="spot" id="sp1" style="left:55%">1 очко</span>
+      <div class="ball" id="ball"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="47" fill="#e8752a"/><path d="M50 3A47 47 0 0 1 50 97A62 62 0 0 0 50 3Z" fill="#000" opacity=".14"/><g fill="none" stroke="#3a2010" stroke-width="3.5"><circle cx="50" cy="50" r="47"/><path d="M3 50H97M50 3V97M17 17Q46 50 17 83M83 17Q54 50 83 83"/></g><ellipse cx="34" cy="28" rx="13" ry="7" fill="#fff" opacity=".35" transform="rotate(-35 34 28)"/></svg></div>
+      <div class="call" id="call" hidden></div>
+    </div>
+    <div class="panel" id="panel" aria-live="polite"></div>
+  </section>
+</div>
+
+<script>
+{
+const G={"id":"match-5-4","grade":5,"section":4,"secName":"Алгоритми та програми (Scratch)","title":"Матч ЦифроДоп: Scratch","topics":["Алгоритм. Пригадаймо Scratch","Як створити програму","Використання блоків","Цикли в Scratch","Спрайти в Scratch","Малювання в Scratch","Умови","Рух у Scratch"]};
+const AUTOCHECK_FIRST=true;
+const BANK=[{"t": 1, "l": 1, "q": "Що таке алгоритм?", "o": ["Покроковий план дій", "Будь-яка картинка на екрані", "Назва файлу програми", "Пристрій для друку"]}, {"t": 1, "l": 1, "q": "Хто виконує команди в Scratch?", "o": ["Спрайт", "Сцена", "Курсор", "Палітра"]}, {"t": 1, "l": 1, "q": "Що запускає більшість сценаріїв у Scratch?", "o": ["Зелений прапорець", "Червоний знак «Стоп»", "Кнопка «Файл» у меню", "Вкладка «Звуки»"]}, {"t": 1, "l": 1, "q": "Де в Scratch відбувається вистава?", "o": ["На сцені", "У палітрі", "У меню «Файл»", "У вкладці «Образи»"]}, {"t": 1, "l": 1, "q": "Куди перетягують блоки, щоб скласти програму?", "o": ["В область коду", "На сцену", "У список спрайтів", "У меню «Редагувати»"]}, {"t": 1, "l": 2, "q": "Біт виконав кроки не в тому порядку й не дійшов до мети. Що порушено?", "o": ["Послідовність", "Колір блоків у палітрі", "Розмір сцени", "Гучність звуку"]}, {"t": 1, "l": 2, "q": "Що зупиняє всі сценарії в Scratch?", "o": ["Червоний знак «Стоп»", "Зелений прапорець угорі", "Подвійний клік по сцені", "Кнопка «Поділитися»"]}, {"t": 1, "l": 2, "q": "Яка команда зрозуміла виконавцю-роботу?", "o": ["Пройди 3 клітинки", "Зроби щось дуже гарне", "Будь уважним сьогодні", "Подумай про обід"]}, {"t": 1, "l": 3, "q": "Як називають того, хто виконує алгоритм? (одне слово)", "a": ["виконавець"]}, {"t": 1, "l": 3, "q": "Як називається вбудований персонаж Scratch за замовчуванням? (одне слово)", "a": ["кіт", "кіт скретч", "котик"]}, {"t": 2, "l": 1, "q": "Яка фігура блок-схеми означає «початок» або «кінець»?", "o": ["Овал", "Ромб", "Прямокутник", "Паралелограм"]}, {"t": 2, "l": 1, "q": "Яка фігура означає рішення «так / ні»?", "o": ["Ромб", "Овал", "Прямокутник", "Коло"]}, {"t": 2, "l": 1, "q": "Яка фігура означає введення або виведення?", "o": ["Паралелограм", "Ромб", "Овал", "Прямокутник із тінню"]}, {"t": 2, "l": 1, "q": "Яка фігура означає дію чи обчислення?", "o": ["Прямокутник", "Ромб", "Овал", "Паралелограм"]}, {"t": 2, "l": 1, "q": "Від чийого імені походить слово «алгоритм»?", "o": ["Аль-Хорезмі", "Ада Лавлейс", "Ньютон", "Піфагор"]}, {"t": 2, "l": 2, "q": "Який перший крок створення програми?", "o": ["Зрозуміти проблему", "Одразу написати код", "Намалювати новий спрайт", "Зберегти файл"]}, {"t": 2, "l": 2, "q": "Скільки виходів має ромб у блок-схемі?", "o": ["Два", "Один", "Три", "Жодного"]}, {"t": 2, "l": 2, "q": "Кого вважають першою програмісткою?", "o": ["Аду Лавлейс", "Марію Кюрі", "Лесю Українку", "Ізабеллу Кастильську"]}, {"t": 2, "l": 2, "q": "Що показують стрілки в блок-схемі?", "o": ["Наступний крок", "Колір фігури", "Кількість спрайтів", "Розмір шрифту"]}, {"t": 2, "l": 3, "q": "Схема з фігур і стрілок, що показує кроки алгоритму, — це … (два слова через дефіс)", "a": ["блок-схема", "блок схема"]}, {"t": 2, "l": 3, "q": "Список команд мовою програмування, збережений як файл, — це … (одне слово)", "a": ["програма"]}, {"t": 3, "l": 1, "q": "Якого кольору блоки категорії «Рух»?", "o": ["Сині", "Жовті", "Рожеві", "Зелені"]}, {"t": 3, "l": 1, "q": "Яка категорія містить блок «говорити»?", "o": ["Вигляд", "Рух", "Звук", "Розширення «Музика»"]}, {"t": 3, "l": 1, "q": "Яка категорія містить «коли 🏁 натиснуто»?", "o": ["Події", "Керування", "Вигляд", "Датчики"]}, {"t": 3, "l": 1, "q": "Яка категорія має блоки «чекати» і «повторити»?", "o": ["Керування", "Звук", "Рух", "Розширення «Олівець»"]}, {"t": 3, "l": 1, "q": "Якого кольору блоки категорії «Звук»?", "o": ["Рожеві", "Сині", "Помаранчеві", "Фіолетові"]}, {"t": 3, "l": 2, "q": "Як швидко створити копію блоку?", "o": ["Права кнопка → Дублювати", "Двічі клацнути по сцені", "Натиснути червоний «Стоп»", "Перетягнути на сцену"]}, {"t": 3, "l": 2, "q": "Як прибрати непотрібний блок?", "o": ["Перетягнути в палітру", "Натиснути зелений прапорець", "Змінити тло сцени", "Додати новий звук"]}, {"t": 3, "l": 2, "q": "Де додають «Олівець» і «Музику»?", "o": ["У розширеннях", "У вкладці «Звуки»", "У меню «Файл»", "На сцені"]}, {"t": 3, "l": 2, "q": "Скільки кроків спрайт іде за стандартним «перемістити»?", "o": ["10", "1", "90", "100"]}, {"t": 3, "l": 3, "q": "Скільки категорій блоків у палітрі Scratch? (число)", "a": ["9"]}, {"t": 3, "l": 3, "q": "На скільки градусів стандартно повертає блок «поворот»? (число)", "a": ["15"]}, {"t": 4, "l": 1, "q": "Що таке цикл?", "o": ["Повторення команд", "Новий спрайт на сцені", "Звуковий ефект", "Зміна тла сцени"]}, {"t": 4, "l": 1, "q": "Який блок повторює без кінця?", "o": ["Завжди", "Повторити 10", "Чекати 1", "Якщо … то"]}, {"t": 4, "l": 1, "q": "Як називають блоки всередині циклу?", "o": ["Тіло циклу", "Голова циклу", "Хвіст циклу", "Сцена"]}, {"t": 4, "l": 1, "q": "Що зупиняє цикл «завжди»?", "o": ["Знак «Стоп»", "Кінець блоків", "Нова вкладка", "Сам цикл"]}, {"t": 4, "l": 2, "q": "Біт робить 10 кроків × «повторити 6». Скільки кроків разом?", "o": ["60", "16", "106", "6"]}, {"t": 4, "l": 2, "q": "Навіщо в цикл додають «чекати 0,5 с»?", "o": ["Щоб побачити кожну дію", "Щоб спрайт зник зі сцени", "Щоб змінити колір тла", "Щоб додати звук"]}, {"t": 4, "l": 2, "q": "Доріжка 80 кроків, за раз 10. Скільки повторів?", "o": ["8", "10", "70", "90"]}, {"t": 4, "l": 2, "q": "Блок під циклом «повторити 5» виконується…", "o": ["Один раз після циклу", "П'ять разів разом із циклом", "Ніколи", "Перед циклом"]}, {"t": 4, "l": 3, "q": "Біт робить 15 кроків, «повторити 4». Скільки кроків пройде? (число)", "a": ["60"]}, {"t": 4, "l": 3, "q": "Який блок повторює, доки умова не стане істинною? (два слова)", "a": ["повторити до", "повторювати до"]}, {"t": 5, "l": 1, "q": "Що таке спрайт?", "o": ["Об'єкт-виконавець", "Тло сцени з малюнком", "Звук із бібліотеки", "Меню програми"]}, {"t": 5, "l": 1, "q": "Що таке образ спрайта?", "o": ["Одна з його поз", "Його звук із бібліотеки", "Його сценарій", "Його ім'я в списку"]}, {"t": 5, "l": 1, "q": "Яка кнопка додає випадковий спрайт?", "o": ["Сюрприз", "Малювати", "Вивантажити", "Вилучити"]}, {"t": 5, "l": 1, "q": "Що створює ілюзію руху?", "o": ["Швидка зміна образів", "Зміна тла раз на хвилину", "Гучний звук", "Великий розмір спрайта"]}, {"t": 5, "l": 2, "q": "Що копіює «Дублювати» на спрайті?", "o": ["Спрайт і сценарій", "Лише назву цього спрайта", "Лише тло сцени", "Лише звук"]}, {"t": 5, "l": 2, "q": "Який блок перемикає позу спрайта?", "o": ["Наступний образ", "Перемістити 10 кроків", "Говорити «Привіт»", "Чекати 1 секунду"]}, {"t": 5, "l": 2, "q": "Як додати спрайт зі свого комп'ютера?", "o": ["Вивантажити", "Кнопка «Сюрприз»", "Намалювати з нуля", "Обрати тло зі сцени"]}, {"t": 5, "l": 2, "q": "Яка подія запускає сценарій від кліку на спрайт?", "o": ["Коли спрайт натиснуто", "Коли 🏁 натиснуто", "Коли клавішу натиснуто", "Коли тло змінюється"]}, {"t": 5, "l": 3, "q": "Як називається вкладка з усіма позами спрайта? (одне слово)", "a": ["образи"]}, {"t": 5, "l": 3, "q": "Як називається тло з динозаврами з епізоду Діно-вечірки? (англ., одне слово)", "a": ["jurassic"]}, {"t": 6, "l": 1, "q": "Як додати блоки олівця?", "o": ["Розширення «Олівець»", "Вкладка «Звуки» і запис", "Меню «Файл» → «Новий»", "Кнопка «Сюрприз»"]}, {"t": 6, "l": 1, "q": "Який блок вмикає малювання?", "o": ["Опустити олівець", "Підняти олівець угору", "Очистити все", "Штамп"]}, {"t": 6, "l": 1, "q": "Що робить «очистити все»?", "o": ["Стирає намальоване", "Видаляє всі спрайти зі сцени", "Вимикає звук", "Зупиняє програму"]}, {"t": 6, "l": 1, "q": "Що робить «штамп»?", "o": ["Лишає відбиток спрайта", "Стирає останню намальовану лінію", "Міняє тло сцени", "Вмикає музику"]}, {"t": 6, "l": 2, "q": "Кут для квадрата в циклі «повторити 4»:", "o": ["90°", "60°", "120°", "45°"]}, {"t": 6, "l": 2, "q": "Кут для трикутника в циклі «повторити 3»:", "o": ["120°", "90°", "60°", "180°"]}, {"t": 6, "l": 2, "q": "Як намалювати пунктир?", "o": ["Чергувати опустити й підняти", "Збільшити розмір олівця до 50", "Додати штамп у кінці", "Змінити колір тла"]}, {"t": 6, "l": 2, "q": "Де ставлять «очистити все» в сценарії?", "o": ["На початку", "Наприкінці", "У тілі циклу", "Ніде"]}, {"t": 6, "l": 3, "q": "Яким буде кут повороту для шестикутника? (число)", "a": ["60"]}, {"t": 6, "l": 3, "q": "Кут повороту = 360 ÷ кількість … (одне слово)", "a": ["сторін", "сторони"]}, {"t": 7, "l": 1, "q": "Що таке умова?", "o": ["Твердження: так чи ні", "Звук спрайта в бібліотеці", "Колір тла", "Номер образу"]}, {"t": 7, "l": 1, "q": "Який блок ставить питання користувачу?", "o": ["Запитати і чекати", "Говорити 2 секунди", "Думати", "Чекати 1"]}, {"t": 7, "l": 1, "q": "Де зберігається введена користувачем відповідь?", "o": ["У блоці «відповідь»", "У першому образі спрайта", "У тлі сцени", "У звуці"]}, {"t": 7, "l": 1, "q": "Як називають помилку в програмі?", "o": ["Баг", "Спрайт", "Цикл", "Образ"]}, {"t": 7, "l": 2, "q": "Година = 9. Чи істинна умова «година < 12»?", "o": ["Так", "Ні", "Інколи", "Не можна перевірити"]}, {"t": 7, "l": 2, "q": "Що зробить «якщо … то», коли умова хибна?", "o": ["Пропустить вкладені блоки", "Зупинить усю програму назавжди", "Повторить їх двічі", "Видалить спрайт"]}, {"t": 7, "l": 2, "q": "Який оператор склеює «Привіт, » і відповідь?", "o": ["З'єднати", "Більше", "Дорівнює", "Випадкове"]}, {"t": 7, "l": 2, "q": "Якого кольору блоки «Датчики»?", "o": ["Блакитні", "Жовті", "Рожеві", "Темно-сині з білим"]}, {"t": 7, "l": 3, "q": "Пошук і виправлення помилок у програмі — це … (одне слово)", "a": ["налагодження"]}, {"t": 7, "l": 3, "q": "Відповідь = 15. Яке значення умови «відповідь > 10»? (одне слово)", "a": ["істинно", "так", "true", "істина"]}, {"t": 8, "l": 1, "q": "Напрямок 90 — це…", "o": ["Праворуч", "Вгору", "Вниз", "Ліворуч і трохи вниз"]}, {"t": 8, "l": 1, "q": "Напрямок 0 — це…", "o": ["Вгору", "Праворуч", "Вниз", "Ліворуч"]}, {"t": 8, "l": 1, "q": "Що робить «якщо на межі, відбити»?", "o": ["Розвертає біля краю", "Ховає спрайт за сценою", "Зупиняє гру", "Міняє образ"]}, {"t": 8, "l": 1, "q": "Який датчик перевіряє клавішу?", "o": ["Клавішу натиснуто?", "Відповідь", "Таймер", "Гучність мікрофона"]}, {"t": 8, "l": 2, "q": "Миша тікає за край сцени. Що додати в цикл?", "o": ["Якщо на межі, відбити", "Чекати 1 секунду", "Наступний образ", "Очистити все намальоване"]}, {"t": 8, "l": 2, "q": "Напрямок для руху ліворуч:", "o": ["-90", "90", "180", "0"]}, {"t": 8, "l": 2, "q": "Чому керування стрілками ставлять у «завжди»?", "o": ["Щоб перевіряти клавішу постійно", "Щоб спрайт зник після старту гри", "Щоб змінити тло", "Щоб зупинити гру"]}, {"t": 8, "l": 2, "q": "Що таке подія?", "o": ["Сигнал: клавіша, клік, прапорець", "Колір усіх блоків у палітрі Scratch", "Кількість спрайтів", "Розмір сцени"]}, {"t": 8, "l": 3, "q": "Який напрямок означає рух униз? (число)", "a": ["180"]}, {"t": 8, "l": 3, "q": "Блок, що перевіряє клавішу, належить до категорії … (одне слово)", "a": ["датчики"]}, {"t": 1, "l": 1, "q": "Алгоритм для Біта — це…", "o": ["Чітка послідовність кроків", "Гарна картинка для афіші сцени", "Пісня", "Будь-який текст"]}, {"t": 2, "l": 1, "q": "Що дає блок-схема до написання коду?", "o": ["Видно всі кроки", "Додає звуки в проєкт", "Малює спрайт", "Зберігає файл"]}, {"t": 3, "l": 1, "q": "Що з'єднує блоки, як LEGO?", "o": ["Їхня форма", "Їхній колір", "Звук", "Тло"]}, {"t": 4, "l": 1, "q": "Цикл «повторити 4» з «перемістити 10» — це…", "o": ["Цикл з відомою кількістю", "Нескінченний цикл без зупинки", "Умова", "Подія"]}, {"t": 5, "l": 1, "q": "Скільки образів має динозавр у прикладі?", "o": ["4", "1", "10", "2"]}, {"t": 6, "l": 1, "q": "Блок «розмір олівця» змінює…", "o": ["Товщину лінії", "Колір тла", "Розмір спрайта", "Швидкість"]}, {"t": 7, "l": 1, "q": "Блок «якщо () то» належить до категорії…", "o": ["Керування", "Рух", "Звук", "Розширення «Олівець»"]}, {"t": 8, "l": 1, "q": "Як Біт ловить мишу в грі?", "o": ["Керуємо стрілками", "Він стоїть на місці", "Змінює тло", "Грає звук"]}, {"t": 4, "l": 2, "q": "Що станеться з циклом без «чекати»?", "o": ["Дії пролетять непомітно", "Цикл не почнеться взагалі ніколи", "Спрайт зникне", "Буде помилка"]}, {"t": 6, "l": 2, "q": "Біт: повторити 5 (перемістити 50, поворот 72°). Яка фігура?", "o": ["П'ятикутник", "Квадрат", "Трикутник", "Коло з дірками"]}, {"t": 8, "l": 2, "q": "Біт дивиться на 90 і повертає на 90° за стрілкою. Куди він дивиться?", "o": ["Вниз (180)", "Вгору (0)", "Ліворуч (-90)", "Праворуч (90)"]}, {"t": 1, "l": 2, "q": "Що в тренді 2025–2026: чим допомагає ШІ в навчанні програмуванню?", "o": ["Підказує, але думаєш ти", "Пише весь код замість учня", "Забороняє Scratch у школах", "Робить уроки зайвими"]}, {"t": 5, "l": 3, "q": "Як називається об'єкт-виконавець у Scratch? (одне слово)", "a": ["спрайт"]}, {"t": 3, "l": 3, "q": "Якого кольору блоки «Події»? (одне слово)", "a": ["жовті", "жовтий"]}, {"t": 2, "l": 3, "q": "Скільки кроків від проблеми до коду в підручнику? (число)", "a": ["4"]}, {"t": 4, "l": 3, "q": "Квадрат: «повторити ?» (перемістити 100, поворот 90). Яке число? (число)", "a": ["4"]}, {"t": 7, "l": 3, "q": "Який блок рахує секунди від запуску? (одне слово)", "a": ["таймер"]}, {"t": 8, "l": 3, "q": "Скільки градусів у повному оберті? (число)", "a": ["360"]}, {"t": 1, "l": 1, "q": "Що з цього — алгоритм?", "o": ["Рецепт млинців", "Фото кота на дивані", "Улюблений колір", "Назва вулиці"]}, {"t": 5, "l": 2, "q": "Біт хоче 2 однакових динозаври з тим самим танцем. Що зробити?", "o": ["Дублювати спрайт", "Намалювати новий з нуля вручну", "Вилучити спрайт", "Змінити тло"]}, {"t": 6, "l": 2, "q": "Олівець опущено, спрайт іде 100 кроків. Що на сцені?", "o": ["Лінія", "Порожньо", "Коло навколо спрайта", "Тло змінилося"]}, {"t": 7, "l": 2, "q": "Відповідь = «так». Умова «відповідь = так» —", "o": ["Істинна", "Хибна", "Помилкова", "Невідома"]}, {"t": 3, "l": 2, "q": "Блок «перемістити 10» у категорії…", "o": ["Рух", "Вигляд", "Події", "Датчики"]}, {"t": 2, "l": 2, "q": "Блок-схема: «Запитати ім'я». Яка фігура?", "o": ["Паралелограм", "Ромб", "Овал", "Прямокутник з округленням"]}, {"t": 6, "l": 3, "q": "Скільки разів повторити, щоб намалювати трикутник? (число)", "a": ["3"]}, {"t": 5, "l": 3, "q": "Яка подія запускає сценарій від кліку на спрайт? Допиши: «коли спрайт …»", "a": ["натиснуто"]}, {"t": 4, "l": 1, "q": "«Повторити до» зупиняється, коли умова…", "o": ["Стає істинною", "Стає хибною", "Змінює колір на червоний", "Зникає"]}, {"t": 8, "l": 2, "q": "Спрайт дивиться на 180 і повертає на 180°. Куди тепер?", "o": ["Вгору (0)", "Вниз (180)", "Праворуч (90)", "Ліворуч (-90)"]}, {"t": 1, "l": 2, "q": "Скретч-проєкт зберігають у файл з розширенням…", "o": ["sb3", "docx", "mp3", "jpg"]}, {"t": 7, "l": 3, "q": "Блок, що чекає, поки користувач введе текст, — «запитати і …» (одне слово)", "a": ["чекати"]}];
+const $id=s=>document.getElementById(s); $id("eyebrow").textContent="Інформатика · "+G.grade+" клас · Розділ "+G.section+" «"+G.secName+"» · Гра розділу"; $id("gtitle").textContent=G.title;
+/*BANK*/
+const SHOT={1:{pts:1,name:"Штрафний",lv:"🟢 базовий",sec:20,x:55,how:"обрати відповідь"},2:{pts:2,name:"Двоочковий",lv:"🟡 середній",sec:30,x:36,how:"обрати відповідь"},3:{pts:3,name:"Триочковий",lv:"🔴 складний",sec:45,x:14,how:"вписати відповідь"}};
+const PER_Q=8, HOOP={x:83.5,y:33}, REST=74.5;
+const JOKES=["Біт ніколи не втомлюється на зарядці: у нього просто цикл «завжди».", "Чому кіт Scratch спокійний? Бо в нього є «якщо на межі, відбити».", "Олівець опущено — Біт малює. Олівець піднято — Біт мріє.", "Найкоротша пісня Біта: «повторити 3: ля-ля».", "Баг — це не жук, а запрошення до налагодження!", "Ромб у блок-схемі завжди сумнівається: «так чи ні?»", "Спрайт без образів — як актор без костюма."];
+const $=s=>document.querySelector(s), panel=$("#panel"), ball=$("#ball");
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt=s=>esc(s).replace(/`([^`]+)`/g,"<code>$1</code>");
+const sh=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const RM=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+let S=null,timer=null,audio=null,mute=false,busy=false;
+const save=()=>{try{S?localStorage.setItem(G.id,JSON.stringify(S)):localStorage.removeItem(G.id)}catch(e){}};
+const load=()=>{try{return JSON.parse(localStorage.getItem(G.id)||"null")}catch(e){return null}};
+
+/* ---------- звук ---------- */
+function beep(kind){ if(mute) return; try{
+  audio=audio||new (window.AudioContext||window.webkitAudioContext)(); const t=audio.currentTime;
+  const tone=(f,s,d,type)=>{const o=audio.createOscillator(),g=audio.createGain();o.type=type||"sine";o.frequency.value=f;g.gain.setValueAtTime(.12,t+s);g.gain.exponentialRampToValueAtTime(.001,t+s+d);o.connect(g);g.connect(audio.destination);o.start(t+s);o.stop(t+s+d)};
+  if(kind==="made"){tone(660,0,.15);tone(880,.13,.28)} else if(kind==="miss"){tone(196,0,.3,"triangle")} else {tone(120,0,.6,"sawtooth")}
+}catch(e){} }
+
+/* ---------- перевірка вписаної відповіді ---------- */
+const ALIAS={"СУМ":"SUM","СУММ":"SUM","СЕРЕДНЄ":"AVERAGE","СРЗНАЧ":"AVERAGE","МАКС":"MAX","МІН":"MIN","МИН":"MIN","ЯКЩО":"IF","ЕСЛИ":"IF","АБО":"OR","ИЛИ":"OR","СТЕПІНЬ":"POWER","СТЕПЕНЬ":"POWER"};
+const norm=s=>String(s).toUpperCase().replace(/[\s ]+/g,"").replace(/[“”«»„‟″]/g,'"').replace(/[’ʼ`]/g,"'").replace(/[–—−]/g,"-").replace(/;/g,",").replace(/[А-ЯІЇЄҐ]+(?=\()/g,m=>ALIAS[m]||m);
+const num=s=>{const m=/^(-?\d+(?:[.,]\d+)?)(%?)$/.exec(s.replace(/(ГРН\.?|₴)$/,""));return m?{v:parseFloat(m[1].replace(",",".")),p:m[2]}:null};
+function check(q,val){ const v=norm(val); if(!v) return {empty:true};
+  for(const a of q.a){ const n=norm(a), x=num(n), y=num(v);
+    if(x&&y){ if(x.v===y.v&&x.p===y.p) return {ok:true}; } else if(n===v) return {ok:true}; }
+  const noEq=q.a.some(a=>a[0]==="="&&norm(a).slice(1)===v);
+  return {ok:false,hint:noEq?"Формула має починатися зі знака «=».":""}; }
+
+/* ---------- гра ---------- */
+function newGame(cfg){ const pool={1:[],2:[],3:[]};
+  BANK.forEach((q,i)=>{ if(cfg.topics.includes(q.t)) pool[q.l].push(i); });
+  for(const l in pool) pool[l]=sh(pool[l]);
+  S={cfg,teams:cfg.names.map(n=>({name:n,score:0,byQ:Array(cfg.quarters).fill(0)})),q:0,turn:0,att:0,phase:"pick",pool,used:{1:[],2:[],3:[]},stat:{},cur:null,left:null,paused:false};
+  save(); render(); }
+function draw(l){ if(!S.pool[l].length){ S.pool[l]=sh(S.used[l]); S.used[l]=[]; }
+  if(!S.pool[l].length) return null; const i=S.pool[l].pop(); S.used[l].push(i); return i; }
+function pick(l){ if(busy||S.phase!=="pick") return; const i=draw(l); if(i==null) return;
+  const q=BANK[i]; S.cur={i,l,opts:q.o?sh(q.o.map((_,k)=>k)):null,tried:[],first:null,res:null};
+  S.phase="ask"; startClock(SHOT[l].sec); save(); render(); }
+function addScore(team,p){ S.teams[team].score+=p; S.teams[team].byQ[S.q]+=p; }
+function shoot(ok,info){ if(busy) return; stopClock(); const q=BANK[S.cur.i], reb=S.phase==="rebound", c=S.cur;
+  if(!reb){ const st=S.stat[q.t]||(S.stat[q.t]={n:0,ok:0}); st.n++; if(ok) st.ok++; }
+  let after;
+  if(ok){ c.team=reb?1-S.att:S.att; c.pts=reb?1:SHOT[q.l].pts; addScore(c.team,c.pts); c.res=reb?"reb":"made"; S.phase="result"; }
+  else if(!reb){ c.first=info; if(q.o&&info!=null) c.tried.push(info); S.phase="rebound"; after=()=>startClock(15); }
+  else { c.res="miss"; S.phase="result"; }
+  save(); busy=true;
+  fly(ok,q.l,reb).then(()=>{ busy=false; if(ok) bump(c.team); render(); if(after&&S&&S.phase==="rebound") after(); }); }
+function judge(){ const c=S.cur, q=BANK[c.i]; if(c.res==="made") return;
+  if(c.res==="reb"){ addScore(c.team,-1); }
+  c.team=S.att; c.pts=SHOT[q.l].pts; addScore(c.team,c.pts); c.res="made"; (S.stat[q.t]||(S.stat[q.t]={n:1,ok:0})).ok++; stopClock(); S.phase="result"; save(); bump(c.team); beep("made"); render(); }
+function next(){ if(busy) return; S.turn++; S.cur=null; const per=S.q<S.cfg.quarters?PER_Q:2;
+  if(S.turn>=per){ const last=S.q>=S.cfg.quarters-1, tie=S.teams[0].score===S.teams[1].score;
+    if(last&&!tie){ S.phase="final"; }
+    else { S.q++; S.turn=0; if(last) S.teams.forEach(t=>t.byQ.push(0)); S.phase="break"; } }
+  else S.phase="pick";
+  S.att=(S.q+S.turn)%2; save(); render(); }
+
+/* ---------- таймер ---------- */
+function drawClock(){ const el=$("#clock"); el.textContent=S&&S.left!=null&&(S.phase==="ask"||S.phase==="rebound")?S.left:"–"; el.classList.toggle("low",!!S&&S.left!=null&&S.left<=5);
+  const p=$("#pause"); p.hidden=!(S&&S.cfg.clock&&(S.phase==="ask"||S.phase==="rebound")); p.textContent=S&&S.paused?"Продовжити":"Пауза"; }
+function stopClock(){ clearInterval(timer); timer=null; }
+function startClock(sec){ stopClock(); if(!S.cfg.clock){ S.left=null; drawClock(); return; }
+  S.left=sec; S.paused=false; drawClock();
+  timer=setInterval(()=>{ if(!S||S.paused||busy) return; S.left--; drawClock(); if(S.left<=0){ beep("buzz"); shoot(false,null); } },1000); }
+
+/* ---------- майданчик ---------- */
+function placeBall(l){ ball.style.left=SHOT[l].x+"%"; ball.style.top=REST+"%"; [1,2,3].forEach(k=>$("#sp"+k).classList.toggle("on",k===l)); }
+function call(text,ok){ const c=$("#call"); c.textContent=text; c.className="call "+(ok?"ok":"bad"); c.hidden=false; }
+function bump(team){ const el=$(team?"#tB":"#tA").querySelector(".sc"); el.classList.remove("bump"); void el.offsetWidth; el.classList.add("bump"); }
+function fly(made,l,reb){ const txt=made?(reb?"Підбирання! +1":"Влучно! +"+SHOT[l].pts):(reb?"Без підбирання":"Промах!");
+  beep(made?"made":"miss");
+  if(RM||!ball.animate||reb){ call(txt,made); if(made){ ball.style.left=HOOP.x+"%"; ball.style.top=(REST)+"%"; } return new Promise(r=>setTimeout(r,reb&&!RM?500:60)); }
+  const x0=SHOT[l].x+1,y0=REST-10,x1=HOOP.x-(made?0:5),y1=HOOP.y-(made?4:1),H=34,fr=[],N=14;
+  for(let i=0;i<=N;i++){ const t=i/N; fr.push({left:(x0+(x1-x0)*t)+"%",top:(y0+(y1-y0)*t-H*4*t*(1-t))+"%",offset:+(t*.7).toFixed(3)}); }
+  if(made) fr.push({left:HOOP.x+"%",top:(HOOP.y+9)+"%",offset:.8},{left:HOOP.x+"%",top:REST+"%",offset:1});
+  else fr.push({left:(x1-9)+"%",top:(y1-13)+"%",offset:.83},{left:(x1-22)+"%",top:REST+"%",offset:1});
+  ball.classList.add("spin");
+  const an=ball.animate(fr,{duration:1250,easing:"linear"});
+  const end=fr[fr.length-1];
+  return new Promise(res=>{ let done=false; const fin=()=>{ if(done) return; done=true; ball.classList.remove("spin"); ball.style.left=end.left; ball.style.top=end.top; call(txt,made);
+      if(made){ const n=$("#net"); n.classList.remove("swish"); void n.getBBox(); n.classList.add("swish"); } res(); };
+    an.onfinish=fin; setTimeout(fin,1400); }); }
+
+/* ---------- екрани ---------- */
+function board(){ const A=$("#tA"),B=$("#tB"); const t=S?S.teams:[{name:"Господарі",score:0},{name:"Гості",score:0}];
+  [A,B].forEach((el,i)=>{ el.querySelector(".nm").textContent=t[i].name; el.querySelector(".sc").textContent=t[i].score;
+    const live=S&&S.phase!=="final"&&S.phase!=="break"; const reb=S&&S.phase==="rebound";
+    el.classList.toggle("on",!!live&&(reb?1-S.att:S.att)===i);
+    el.querySelector(".st").textContent=live&&(reb?1-S.att:S.att)===i?(reb?"підбирання":"атакує"):""; });
+  $("#reset").hidden=!S;
+  if(!S){ $("#per").textContent="Матч класу"; $("#poss").textContent="Розділ "+G.section; }
+  else { const ot=S.q>=S.cfg.quarters; $("#per").textContent=S.phase==="final"?"Фінальна сирена":ot?"Овертайм":"Чверть "+(S.q+1)+" з "+S.cfg.quarters;
+    $("#poss").textContent=S.phase==="final"?"Матч завершено":"Атака "+Math.min(S.turn+1,ot?2:PER_Q)+" з "+(ot?2:PER_Q); }
+  drawClock(); }
+function show(html){ panel.innerHTML=html; }
+function render(){ board(); if(!S) return setup();
+  if(S.phase!=="result"&&S.phase!=="rebound") $("#call").hidden=true;
+  ({pick:vPick,ask:vAsk,rebound:vAsk,result:vResult,break:vBreak,final:vFinal})[S.phase](); }
+function setup(){ const old=load(); placeBall(2);
+  show(`<h2>Баскетбольний матч за темами розділу</h2>
+  <ul class="rules"><li>Команди атакують по черзі й самі обирають кидок: 1, 2 або 3 очки.</li><li>Що дорожчий кидок, то складніше питання. Триочковий — відповідь треба вписати.</li><li>Промах? Суперник може підібрати м’яч: правильна відповідь дає 1 очко.</li></ul>
+  ${old&&old.phase!=="final"?`<div class="row"><button class="btn main" id="cont" type="button">Продовжити матч ${esc(old.teams[0].name)} ${old.teams[0].score} : ${old.teams[1].score} ${esc(old.teams[1].name)}</button></div>`:""}
+  <form class="cfg" id="cfg"><div class="two"><label class="f">Команда 1<input type="text" name="a" value="Господарі" maxlength="18"></label><label class="f">Команда 2<input type="text" name="b" value="Гості" maxlength="18"></label></div>
+  <fieldset><legend>Тривалість</legend><label><input type="radio" name="len" value="2"> 2 чверті, до 15 хв</label><label><input type="radio" name="len" value="4" checked> 4 чверті, до 30 хв</label></fieldset>
+  <fieldset><legend>Час на кидок</legend><label><input type="radio" name="clock" value="1" checked> З таймером (20–45 с)</label><label><input type="radio" name="clock" value="0"> Без таймера</label></fieldset>
+  <fieldset><legend>Теми, які клас уже пройшов</legend>${G.topics.map((t,i)=>`<label><input type="checkbox" name="t" value="${i+1}" checked> Т${i+1}. ${esc(t)}</label>`).join("")}</fieldset>
+  <div class="row"><button class="btn main">Почати матч</button><span class="hint" id="cfgMsg"></span></div></form>`);
+  if($("#cont")) $("#cont").onclick=()=>{ S=old; beep("made"); render(); if(S.phase==="ask"||S.phase==="rebound") startClock(S.phase==="ask"?SHOT[S.cur.l].sec:15); };
+  $("#cfg").onsubmit=e=>{ e.preventDefault(); const f=new FormData(e.target), topics=f.getAll("t").map(Number);
+    if(!topics.length){ $("#cfgMsg").textContent="Оберіть хоча б одну тему."; return; }
+    const a=(f.get("a")||"").trim()||"Господарі", b=(f.get("b")||"").trim()||"Гості";
+    beep("made"); newGame({names:[a,b===a?b+" 2":b],quarters:+f.get("len"),clock:f.get("clock")==="1",topics}); }; }
+function vPick(){ const T=S.teams[S.att]; placeBall(2);
+  show(`<div class="who">Атакує: <span>${esc(T.name)}</span></div><p class="hint">Оберіть кидок. Клавіші 1, 2, 3 теж працюють.</p>
+  <div class="shots">${[1,2,3].map(l=>`<button class="shot" type="button" data-l="${l}"><b>${SHOT[l].pts}</b><span class="nm">${SHOT[l].name}</span><small>${SHOT[l].lv} · ${SHOT[l].how}</small></button>`).join("")}</div>`);
+  panel.querySelectorAll(".shot").forEach(b=>b.onclick=()=>pick(+b.dataset.l)); }
+function vAsk(){ const c=S.cur,q=BANK[c.i],reb=S.phase==="rebound",T=S.teams[reb?1-S.att:S.att]; if(!reb) placeBall(c.l);
+  let h=`<div class="tags"><span class="tag pts">${reb?"Підбирання · 1 очко":SHOT[c.l].name+" · "+SHOT[c.l].pts}</span><span class="tag">${SHOT[c.l].lv}</span><span class="tag">Т${q.t} · ${esc(G.topics[q.t-1])}</span></div>`;
+  h+=reb?`<div class="msg bad">Промах! Підбирає команда «${esc(T.name)}».${!q.o&&c.first?` Відповідь «${esc(c.first)}» не зараховано.`:""}</div>`:`<div class="who">Кидає: <span>${esc(T.name)}</span></div>`;
+  h+=`<div class="q">${fmt(q.q)}</div>`;
+  if(q.o) h+=`<div class="opts">${c.opts.map((oi,k)=>{const x=c.tried.includes(oi);return `<button class="opt${x?" bad":""}" type="button" data-o="${oi}"${x?" disabled":""}><span class="k">${"ABCD"[k]}</span><span>${fmt(q.o[oi])}</span></button>`}).join("")}</div>`;
+  else h+=`<form class="inp" id="f"><input id="ans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Впиши відповідь" aria-label="Відповідь"><button class="btn main">Кинути!</button></form><p class="hint" id="aMsg">${reb&&c.hint?esc(c.hint):"Формули пишемо англійськими назвами функцій; роздільник — «;» або «,»."}</p>`;
+  if(reb) h+=`<div class="row"><button class="btn" id="skip" type="button">Без підбирання</button>${q.o?"":`<button class="btn" id="judge" type="button">Суддя: зарахувати перший кидок</button>`}</div>`;
+  show(h);
+  panel.querySelectorAll(".opt:not(:disabled)").forEach(b=>b.onclick=()=>shoot(+b.dataset.o===0,+b.dataset.o));
+  if($("#f")){ $("#f").onsubmit=e=>{ e.preventDefault(); const val=$("#ans").value, r=check(q,val); if(r.empty){ $("#ans").focus(); return; } if(!reb) c.hint=r.hint||""; shoot(!!r.ok,val.trim()); }; $("#ans").focus(); }
+  if($("#skip")) $("#skip").onclick=()=>shoot(false,null);
+  if($("#judge")) $("#judge").onclick=judge; }
+function vResult(){ const c=S.cur,q=BANK[c.i],right=q.o?q.o[0]:q.a[0];
+  const head=c.res==="made"?`<div class="msg ok">Влучно! «${esc(S.teams[c.team].name)}» отримує +${c.pts}.</div>`:c.res==="reb"?`<div class="msg ok">Підбирання! «${esc(S.teams[c.team].name)}» отримує +1.</div>`:`<div class="msg bad">Промах, очок немає. Розберіть відповідь разом.</div>`;
+  show(`${head}<div class="q small">${fmt(q.q)}</div><div class="right">Правильна відповідь: <b>${fmt(right)}</b></div>
+  <div class="row"><button class="btn main" id="next" type="button">Далі →</button>${!q.o&&c.res!=="made"?`<button class="btn" id="judge" type="button">Суддя: зарахувати перший кидок</button>`:""}</div>`);
+  $("#next").onclick=next; if($("#judge")) $("#judge").onclick=judge; $("#next").focus(); }
+function periods(){ const n=S.teams[0].byQ.length; const head=Array.from({length:n},(_,i)=>`<th>${i<S.cfg.quarters?(i+1)+" чв.":"ОТ"}</th>`).join("");
+  return `<table><tr><th>Команда</th>${head}<th>Разом</th></tr>${S.teams.map(t=>`<tr><td>${esc(t.name)}</td>${t.byQ.map(x=>`<td>${x}</td>`).join("")}<td><b>${t.score}</b></td></tr>`).join("")}</table>`; }
+function vBreak(){ const ot=S.q>=S.cfg.quarters; placeBall(2);
+  show(`<h2>${ot?"Нічия! Овертайм: по одному кидку":"Перерва. Попереду чверть "+(S.q+1)}</h2>${periods()}<div class="row"><button class="btn main" id="next" type="button">${ot?"Почати овертайм":"Почати чверть "+(S.q+1)}</button></div>`);
+  $("#next").onclick=()=>{ S.phase="pick"; save(); render(); }; $("#next").focus(); }
+function vFinal(){ stopClock(); const [a,b]=S.teams, w=a.score>b.score?a:b; ball.style.left=HOOP.x+"%"; ball.style.top=REST+"%";
+  const rows=G.topics.map((t,i)=>({t,i:i+1,s:S.stat[i+1]})).filter(r=>r.s&&r.s.n);
+  const weak=rows.filter(r=>r.s.ok/r.s.n<.6).sort((x,y)=>x.s.ok/x.s.n-y.s.ok/y.s.n).slice(0,3);
+  if(!S.joke) { S.joke=JOKES[Math.floor(Math.random()*JOKES.length)]; save(); }
+  show(`<h2>Перемога: «${esc(w.name)}»</h2><div class="finscore">${a.score} : ${b.score}</div>${periods()}
+  <h2>Влучність перших кидків за темами</h2><div class="bars">${rows.map(r=>`<div class="bar"><span>Т${r.i}. ${esc(r.t)}</span><span>${r.s.ok} з ${r.s.n}</span><div class="tr"><i style="width:${Math.round(100*r.s.ok/r.s.n)}%"></i></div></div>`).join("")}</div>
+  <p class="hint">${weak.length?"Варто повторити: "+weak.map(r=>"Т"+r.i+" «"+esc(r.t)+"»").join(", ")+".":"Усі теми зіграно впевнено. Можна братися за проєкт розділу."}</p>
+  <blockquote class="joke">Жарт після сирени: ${esc(S.joke)}</blockquote>
+  <div class="row"><button class="btn main" id="again" type="button">Реванш</button><button class="btn" id="fresh" type="button">Нові налаштування</button></div>`);
+  $("#again").onclick=()=>{ const cfg=S.cfg; newGame(cfg); }; $("#fresh").onclick=()=>{ S=null; save(); render(); }; }
+
+/* ---------- кнопки й клавіші ---------- */
+$("#mute").onclick=e=>{ mute=!mute; e.currentTarget.textContent="Звук: "+(mute?"вимк.":"увімк."); e.currentTarget.setAttribute("aria-pressed",mute); };
+$("#pause").onclick=()=>{ if(S){ S.paused=!S.paused; drawClock(); } };
+$("#reset").onclick=e=>{ const b=e.currentTarget; if(b.dataset.sure){ delete b.dataset.sure; b.textContent="Нова гра"; stopClock(); S=null; save(); render(); } else { b.dataset.sure=1; b.textContent="Точно завершити матч?"; setTimeout(()=>{ delete b.dataset.sure; b.textContent="Нова гра"; },3000); } };
+addEventListener("keydown",e=>{ if(!S||busy||/INPUT|TEXTAREA/.test(e.target.tagName)) return; const k=e.key.toLowerCase();
+  if(S.phase==="pick"&&"123".includes(k)&&k) pick(+k);
+  else if((S.phase==="ask"||S.phase==="rebound")&&BANK[S.cur.i].o){ let i="abcd".indexOf(k); if(i<0) i="фисв".indexOf(k); if(i<0) i="1234".indexOf(k); const b=panel.querySelectorAll(".opt")[i]; if(i>=0&&b&&!b.disabled) b.click(); } });
+render();
+}
+</script>
+</body></html>

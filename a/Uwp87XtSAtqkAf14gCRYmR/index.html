@@ -1,0 +1,119 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3 клас · Щоденник відкриттів Тимка</title>
+<style>
+:root{--c2:#1e8fd6;--c2d:#0b5c99;--ink:#1f2433;--r:clamp(12px,1.4vmin,22px);font-size:clamp(14px,1.9vmin,30px)}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;font-family:"Segoe UI","Nunito","Trebuchet MS",system-ui,sans-serif;color:var(--ink);
+  background:radial-gradient(circle at 20% 10%,#e7f5ff 0,#a5d8ff 45%,#74c0fc 100%)}
+button{font:inherit;border:0;cursor:pointer}
+.emo{font-family:"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif;line-height:1}
+header{display:flex;align-items:center;gap:1rem;padding:.5rem 1rem;background:var(--c2);color:#fff;box-shadow:0 3px 0 var(--c2d)}
+header h1{margin:0;font-size:1.25rem;flex:1}
+#yb{display:flex;align-items:center;gap:.5rem;background:#2b2100;color:#b2f2bb;border-radius:999px;padding:.3rem .9rem;font-weight:900}
+#yb .bi{width:4rem;height:1.3rem;border:3px solid #b2f2bb;border-radius:.35rem;padding:2px}
+#yb i{display:block;height:100%;background:linear-gradient(90deg,#40c057,#8ce99a);border-radius:.15rem}
+main{position:absolute;top:3.2rem;left:0;right:0;bottom:0;padding:.6rem 1rem;display:flex;flex-direction:column;gap:.5rem}
+.sea{flex:1;display:flex;flex-direction:column;gap:.45rem;min-height:0}
+.arch{flex:1;display:flex;align-items:center;gap:.6rem;background:rgba(255,255,255,.18);border-radius:var(--r);padding:.3rem .6rem;min-height:0}
+.arch .nm{width:9.5rem;flex:none;font-weight:900;color:#0b3f6b;text-shadow:none;font-size:.95rem;line-height:1.15}
+.arch .nm span{display:block;font-size:1.9rem}
+.isl{flex:1;display:flex;align-items:center;justify-content:space-around;gap:.3rem;height:100%}
+.il{position:relative;width:min(8.5vh,5.2rem);height:min(8.5vh,5.2rem);border-radius:14px 22px 14px 14px;
+  background:linear-gradient(#ffffff,#e7f5ff);box-shadow:0 0 0 .3rem #fff8,0 .4rem 0 #0002;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:900;font-size:.8rem;color:#0b5c99}
+.il .emo{font-size:1.7rem}
+.il.lock{filter:grayscale(.8) brightness(1.05);opacity:.65}
+.il.open{animation:bob 2.4s ease-in-out infinite}
+.il.done{background:radial-gradient(circle at 40% 35%,#d3f9d8,#8ce99a 65%,#40c057)}
+.il.done:after{content:"⭐";position:absolute;top:-.7rem;right:-.5rem;font-size:1.4rem}
+.il.sel{box-shadow:0 0 0 .35rem var(--c2),0 .4rem 0 #0002}
+@keyframes bob{50%{transform:translateY(-6px)}}
+#bot{position:fixed;width:4.6rem;pointer-events:none;transition:left 1.2s ease,top 1.2s ease;z-index:5;transform:translate(-15%,-60%)}
+.card{display:flex;align-items:center;gap:1rem;background:#fff;border-radius:var(--r);padding:.6rem 1rem;box-shadow:0 .4rem 0 #0002;min-height:5.2rem}
+.card .t{flex:1;font-size:1.15rem;font-weight:800}
+.card small{display:block;font-weight:600;color:#5c6378;font-size:.8rem}
+.go{background:var(--c2);color:#fff;font-weight:900;font-size:1.2rem;border-radius:999px;padding:.6rem 1.6rem;box-shadow:0 5px 0 var(--c2d);text-decoration:none}
+.go[aria-disabled="true"]{background:#dee2e6;box-shadow:0 5px 0 #adb5bd;color:#5c6378;pointer-events:none}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* phone: scrolling (v2) */
+@media (max-width:900px),(max-height:600px){
+ html,body{overflow-x:hidden;overflow-y:auto;height:auto;touch-action:manipulation}
+ header{position:sticky;top:0;z-index:6;gap:.5rem;padding:.45rem .6rem}
+ header h1{font-size:1rem}
+ main{position:static;padding:.5rem .5rem 1rem}
+ .sea{flex:none}
+ .arch{flex:none;flex-direction:column;align-items:stretch;padding:.5rem .6rem}
+ .arch .nm{width:auto;display:flex;align-items:center;gap:.4rem}
+ .arch .nm span{display:inline;font-size:1.4rem}
+ .isl{flex-wrap:wrap;justify-content:flex-start;gap:.8rem .55rem;height:auto;padding:.3rem 0}
+ .il{width:3.7rem;height:3.7rem}
+ .il .emo{font-size:1.4rem}
+ #bot{display:none}
+ .card{position:sticky;bottom:.4rem;flex-wrap:wrap;gap:.6rem}
+ .card .t{font-size:1rem;min-width:12rem}
+}
+</style>
+</head>
+<body>
+<header><span class="emo" style="font-size:1.6rem">📔</span><h1>3 клас · Щоденник відкриттів Тимка</h1><div id="yb" title="Скільки сторінок заповнено за рік"><span class="bi"><i id="ybi"></i></span><b id="ybp">0 / 30</b></div></header>
+<main>
+  <div class="sea" id="sea"></div>
+  <div class="card" id="card"></div>
+</main>
+<div id="bot"></div>
+<script>
+const LESSONS={"1": "t01.html", "2": "t02.html", "3": "t03.html", "4": "t04.html", "5": "t05.html", "6": "t06.html", "7": "t07.html", "8": "t08.html", "9": "t09.html", "10": "t10.html", "11": "t11.html", "12": "t12.html"};
+const STAGES={"1": 4, "2": 4, "3": 4, "4": 4, "5": 4, "6": 4, "7": 4, "8": 4, "9": 4, "10": 4, "11": 4, "12": 4};
+const A=[
+ {n:"Інформація",e:"💡",t:["Чому інформація важлива для кожної людини?","Як передають повідомлення?","Де зберігають повідомлення і що таке код?","Як з'явився комп'ютер?"],i:["💡","📮","🔐","🧮"]},
+ {n:"Пристрої й файли",e:"💻",t:["Які пристрої працюють з інформацією?","Як упорядкувати файли в папках?"],i:["🖨️","📁"]},
+ {n:"Інтернет",e:"🌐",t:["Що таке комп'ютерна мережа та інтернет?","Для чого потрібен браузер?","Як шукати достовірну інформацію?"],i:["🔗","🧭","🔍"]},
+ {n:"Тексти",e:"📄",t:["Як читати текстові документи на пристроях?","Що таке віртуальна бібліотека?","Що таке текстовий редактор?","Як вводити текст?","Як працювати з абзацами й фрагментами?","Як форматувати символи?","Як додати зображення і надрукувати документ?"],i:["📱","🏛️","📝","⌨️","✂️","🔠","🖨️"]},
+ {n:"Алгоритми й Скретч",e:"🐱",t:["Що таке план, інструкція, команда?","Як подають алгоритми?","Як перевірити і виправити алгоритм?","Як змінювати вигляд спрайта?","Як малювати в Скретч?","Як рухається спрайт?","Що роблять команди Штамп і Очистити?","Як відтворювати звуки в Скретч?","Що таке умова припинення дії?"],i:["📝","🧭","🐞","👕","🖌️","🏃","🔁","🎵","🛑"]},
+ {n:"Презентації",e:"🖼️",t:["Що таке комп'ютерна презентація?","Як редагувати презентацію?","Як додавати готові малюнки на слайд?","Що таке модель і таблиця?","Як підготувати виступ з презентацією?"],i:["🖼️","✏️","🎨","📊","🎤"]}
+];
+const ROBOT=`<svg viewBox="0 0 120 150" aria-hidden="true">
+ <circle class="ant" cx="60" cy="9" r="6" fill="#ffd43b" stroke="#0b5c99" stroke-width="3"/>
+ <path d="M28 40 Q30 12 60 12 Q90 12 92 40 Z" fill="#1e8fd6" stroke="#0b5c99" stroke-width="4"/>
+ <path d="M88 38 Q104 38 108 44 L88 46 Z" fill="#1e8fd6" stroke="#0b5c99" stroke-width="3"/>
+ <circle cx="60" cy="54" r="27" fill="#ffd8b5" stroke="#8a5a3c" stroke-width="3"/>
+ <path d="M34 42 Q60 30 88 42 L88 46 Q60 36 34 46 Z" fill="#1e8fd6" stroke="#0b5c99" stroke-width="3"/>
+ <path d="M38 44 Q44 36 52 44 M66 44 Q74 36 82 44" fill="#7a4b22"/>
+ <circle class="eye" cx="49" cy="55" r="5" fill="#1f2433"/><circle class="eye" cx="71" cy="55" r="5" fill="#1f2433"/>
+ <circle cx="41" cy="65" r="4" fill="#ffa8a8" opacity=".7"/><circle cx="79" cy="65" r="4" fill="#ffa8a8" opacity=".7"/>
+ <path d="M50 68 Q60 77 70 68" stroke="#8a2c2c" stroke-width="4" fill="none" stroke-linecap="round"/>
+ <rect x="32" y="82" width="56" height="44" rx="14" fill="#1e8fd6" stroke="#0b5c99" stroke-width="4"/>
+ <rect x="47" y="92" width="26" height="22" rx="3" fill="#fff" stroke="#0b5c99" stroke-width="3"/><path d="M52 99 H68 M52 106 H64" stroke="#1e8fd6" stroke-width="3"/>
+ <rect class="arm-l" x="12" y="88" width="22" height="11" rx="5.5" fill="#ffd8b5" stroke="#8a5a3c" stroke-width="3"/>
+ <rect class="arm-r" x="86" y="88" width="22" height="11" rx="5.5" fill="#ffd8b5" stroke="#8a5a3c" stroke-width="3"/>
+ <rect x="40" y="124" width="14" height="16" rx="4" fill="#495057"/><rect x="66" y="124" width="14" height="16" rx="4" fill="#495057"/>
+ <ellipse cx="45" cy="142" rx="11" ry="5" fill="#e8590c"/><ellipse cx="75" cy="142" rx="11" ry="5" fill="#e8590c"/>
+</svg>`;
+function done(n){try{const s=JSON.parse(localStorage.getItem('g2:3-T'+String(n).padStart(2,'0'))||'null');return !!(s&&s.done&&s.done.length>=(STAGES[n]||99));}catch(e){return false;}}
+const sea=document.getElementById('sea'),card=document.getElementById('card'),bot=document.getElementById('bot');bot.innerHTML=ROBOT;
+let k=0,els=[],cnt=0,cur=null;
+A.forEach((a,ai)=>{const r=document.createElement('div');r.className='arch';r.innerHTML=`<div class="nm"><span class="emo">${a.e}</span>${ai+1}. ${a.n}</div><div class="isl"></div>`;
+  const box=r.querySelector('.isl');a.t.forEach((t,ti)=>{k++;const n=k,b=document.createElement('button');const d=done(n);if(d)cnt++;
+    b.className='il '+(d?'done':LESSONS[n]?'open':'lock');b.innerHTML=`<span class="emo">${a.i[ti]}</span>${n}`;b.title=t;
+    b.onclick=()=>pick(n,a,t,b);box.appendChild(b);els[n]=b;});sea.appendChild(r);});
+document.getElementById('ybi').style.width=(cnt/30*100)+'%';document.getElementById('ybp').textContent=cnt+' / 30';
+function pick(n,a,t,b){els.forEach(e=>e&&e.classList.remove('sel'));b.classList.add('sel');cur=n;
+  const has=LESSONS[n];card.innerHTML=`<span class="emo" style="font-size:3rem">${b.querySelector('.emo').textContent}</span>
+   <div class="t"><small>Сторінка ${n} · ${a.n}</small>${t}${done(n)?' ⭐':''}</div>
+   <a class="go" ${has?`href="${LESSONS[n]}"`:'aria-disabled="true"'}>${has?(done(n)?'Пограти ще ▶':'Відкрити ▶'):'Скоро 🔒'}</a>`;
+  const r=b.getBoundingClientRect();bot.style.left=(r.right)+'px';bot.style.top=(r.top+r.height/2)+'px';}
+// старт: перший непройдений острів з уроком, інакше перший
+let start=1;for(let n=1;n<=30;n++){if(LESSONS[n]&&!done(n)){start=n;break;}}
+requestAnimationFrame(()=>{const b=els[start];let ai=0,acc=0;for(;ai<A.length;ai++){if(start<=acc+A[ai].t.length)break;acc+=A[ai].t.length;}pick(start,A[ai],A[ai].t[start-acc-1],b);});
+addEventListener('resize',()=>{if(cur)els[cur].click();});
+</script>
+</body>
+</html>
+
+</body></html>

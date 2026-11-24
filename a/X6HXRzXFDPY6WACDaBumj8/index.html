@@ -1,0 +1,740 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Ліга 8 класу · Збір даних</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Golos+Text:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: табло-шапка (стадіонне табло = тема й рахунок учня), вкладки, одна робоча колонка ~800px; лабораторія — справжня сітка-таблиця */
+:root{
+  --bg:#eef2ea; --surface:#ffffff; --surface-2:#e3eadd; --line:#c6d2bf;
+  --fg:#15241a; --dim:#56685b; --accent:#1c7a43; --accent-ink:#ffffff;
+  --amber:#b97300; --ok:#1c7a43; --ok-bg:#dff1e4; --bad:#c03a32; --bad-bg:#fbe5e2; --boss:#a3342b;
+  --t1:#1c7a43; --t2:#b97300; --t3:#c03a32;
+  --board:#0f2a1b; --board-ink:#ffc23d; --board-dim:#8fb39b;
+  --gridline:#d3dccd; --gridhead:#e9eee5; --selfill:rgba(28,122,67,.13);
+  --display:"Russo One","Arial Black",system-ui,sans-serif;
+  --body:"Golos Text","Segoe UI",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0d1611; --surface:#14211a; --surface-2:#1b2c22; --line:#2c4234;
+  --fg:#e4efe6; --dim:#97ad9d; --accent:#4cc47c; --accent-ink:#06170d;
+  --amber:#f2b53c; --ok:#4cc47c; --ok-bg:#15381f; --bad:#f07a70; --bad-bg:#3b1c1a; --boss:#f08070;
+  --t1:#4cc47c; --t2:#f2b53c; --t3:#f07a70;
+  --board:#081a10; --board-ink:#ffc23d; --board-dim:#7fa58b;
+  --gridline:#2b3e31; --gridhead:#1a2a20; --selfill:rgba(76,196,124,.18); color-scheme:dark; } }
+:root[data-theme="dark"]{
+  --bg:#0d1611; --surface:#14211a; --surface-2:#1b2c22; --line:#2c4234;
+  --fg:#e4efe6; --dim:#97ad9d; --accent:#4cc47c; --accent-ink:#06170d;
+  --amber:#f2b53c; --ok:#4cc47c; --ok-bg:#15381f; --bad:#f07a70; --bad-bg:#3b1c1a; --boss:#f08070;
+  --t1:#4cc47c; --t2:#f2b53c; --t3:#f07a70;
+  --board:#081a10; --board-ink:#ffc23d; --board-dim:#7fa58b;
+  --gridline:#2b3e31; --gridhead:#1a2a20; --selfill:rgba(76,196,124,.18); color-scheme:dark; }
+*{box-sizing:border-box}
+body{background:var(--bg); color:var(--fg); font-family:var(--body); font-size:16px; line-height:1.55}
+.wrap{max-width:820px; margin:0 auto; padding-inline:16px; padding-block:18px 64px}
+h1,h2,h3{font-family:var(--display); font-weight:400; text-wrap:balance; margin:0}
+button{font-family:inherit; font-size:inherit}
+:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+.dim{color:var(--dim)}
+
+/* табло */
+.board{background:var(--board); color:var(--board-ink); border-radius:18px; padding:18px 20px 16px; display:flex; flex-direction:column; gap:12px; margin-bottom:16px}
+.board .k{font-family:var(--mono); font-size:.74rem; letter-spacing:.14em; text-transform:uppercase; color:var(--board-dim)}
+.board h1{font-size:clamp(1.9rem,7.5vw,3.1rem); line-height:1.02; color:var(--board-ink); letter-spacing:.01em}
+.board p{margin:0; color:#d7e6da; max-width:60ch; font-size:.95rem}
+.score{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px}
+.score div{background:rgba(255,255,255,.05); border:1px solid rgba(255,194,61,.25); border-radius:10px; padding:7px 8px; text-align:center; min-width:0}
+.score b{display:block; font-family:var(--mono); font-size:1.35rem; font-variant-numeric:tabular-nums; color:var(--board-ink)}
+.score span{font-size:.68rem; letter-spacing:.08em; text-transform:uppercase; color:var(--board-dim)}
+
+/* вкладки */
+.tabs{display:flex; gap:6px; overflow-x:auto; padding-bottom:4px; margin-bottom:16px; scrollbar-width:thin}
+.tab{flex:0 0 auto; background:transparent; border:1px solid var(--line); color:var(--dim); border-radius:999px; padding:8px 15px; cursor:pointer; font-weight:700; font-size:.9rem}
+.tab[aria-selected="true"]{background:var(--fg); color:var(--bg); border-color:var(--fg)}
+.intro{margin:0 0 14px; color:var(--dim); max-width:64ch}
+
+/* вправи */
+.list{display:flex; flex-direction:column; gap:14px}
+.card{background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:18px; min-width:0}
+.card.done{border-color:var(--ok)}
+.card-h{display:flex; flex-wrap:wrap; gap:8px 12px; align-items:center; font-size:.76rem; text-transform:uppercase; letter-spacing:.08em; color:var(--dim); font-weight:800; margin-bottom:6px}
+.tier{border-radius:999px; padding:2px 9px; border:1px solid currentColor}
+.tier.t1{color:var(--t1)}.tier.t2{color:var(--t2)}.tier.t3{color:var(--t3)}
+.score-chip{margin-left:auto; color:var(--ok)}
+.q{font-weight:700; font-size:1.03rem; margin:2px 0 14px}
+.opts{display:flex; flex-direction:column; gap:9px}
+.opt{text-align:left; background:var(--surface-2); border:1px solid var(--line); color:var(--fg); padding:12px 14px; border-radius:11px; cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt.ok{background:var(--ok-bg); border-color:var(--ok)}
+.opt.bad{background:var(--bad-bg); border-color:var(--bad); animation:shake .35s}
+.opt:disabled{cursor:default}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.fb{margin-top:12px; padding:11px 13px; border-radius:11px; font-size:.93rem; border:1px solid}
+.fb.ok{background:var(--ok-bg); border-color:var(--ok)} .fb.bad{background:var(--bad-bg); border-color:var(--bad)}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:12px}
+.btn{background:var(--accent); color:var(--accent-ink); border:none; padding:10px 18px; border-radius:999px; cursor:pointer; font-weight:800}
+.btn:hover{filter:brightness(1.08)} .btn:disabled{opacity:.4; cursor:default; filter:none}
+.btn.ghost{background:transparent; color:var(--fg); border:1px solid var(--line)}
+.in{background:var(--bg); border:1px solid var(--accent); color:var(--fg); border-radius:9px; padding:9px 12px; font:inherit; font-family:var(--mono); width:220px; max-width:100%}
+.in.ok{border-color:var(--ok)} .in.bad{border-color:var(--bad); animation:shake .35s}
+.chips{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px}
+.chip{background:var(--surface-2); border:1px solid var(--accent); color:var(--fg); padding:7px 12px; border-radius:999px; cursor:pointer; font-size:.9rem; font-family:var(--mono)}
+.chip.sel{box-shadow:0 0 0 2px var(--accent)} .chip.bad{border-color:var(--bad); animation:shake .35s}
+.buckets{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px}
+.bucket{min-height:84px; border:2px dashed var(--line); border-radius:12px; padding:10px; cursor:pointer; background:var(--surface-2); text-align:left; color:var(--fg)}
+.bucket:hover{border-color:var(--accent)}
+.bucket h4{margin:0 0 8px; font-size:.78rem; color:var(--accent); text-transform:uppercase; letter-spacing:.06em}
+.bucket .chip{cursor:default; border-color:var(--ok); display:inline-block; margin:0 6px 6px 0; font-size:.8rem}
+.target{display:flex; flex-direction:column; gap:7px; min-height:48px; border:2px dashed var(--line); border-radius:12px; padding:10px; margin-bottom:12px}
+.target:empty::before{content:"Натискайте кроки нижче — вони стануть тут у вашому порядку"; color:var(--dim); font-size:.85rem}
+.step{display:flex; align-items:center; gap:10px; background:var(--surface-2); border:1px solid var(--line); border-radius:10px; padding:8px 11px; font-size:.92rem}
+.step.good{border-color:var(--ok)} .step.wrongpos{border-color:var(--bad)}
+.step .n{color:var(--amber); font-weight:800; width:20px; font-family:var(--mono)}
+.step button{margin-left:auto; background:var(--surface); border:1px solid var(--line); color:var(--dim); border-radius:8px; width:28px; height:28px; cursor:pointer}
+.mcols{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+@media(max-width:560px){.mcols{grid-template-columns:1fr}}
+.mi{display:block; width:100%; text-align:left; background:var(--surface-2); border:1px solid var(--line); color:var(--fg); border-radius:10px; padding:10px 12px; margin-bottom:8px; cursor:pointer; font-size:.92rem}
+.mi.sel{border-color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent)}
+.mi.done{border-color:var(--ok); background:var(--ok-bg); cursor:default}
+.mi.bad{border-color:var(--bad); animation:shake .35s}
+.tw{overflow-x:auto; max-width:100%}
+table.mini{border-collapse:collapse; font-family:var(--mono); font-size:.86rem}
+table.mini th{background:var(--gridhead); color:var(--dim); font-weight:500; border:1px solid var(--gridline); padding:4px 8px; min-width:28px}
+table.mini td{border:1px solid var(--gridline); padding:0}
+table.mini td button{display:block; width:100%; min-width:64px; min-height:34px; background:var(--surface); border:0; color:var(--fg); cursor:pointer; font:inherit; padding:6px 8px; text-align:left}
+table.mini td button.n{text-align:right}
+table.mini td button.in-rect{background:var(--selfill)}
+table.mini td button.anchor{box-shadow:inset 0 0 0 2px var(--accent)}
+table.mini td button.mark{background:var(--bad-bg); box-shadow:inset 0 0 0 2px var(--bad)}
+table.mini td button.found{background:var(--ok-bg); box-shadow:inset 0 0 0 2px var(--ok)}
+table.mini td.fixed{padding:6px 8px; color:var(--dim)}
+
+/* квест */
+.hud{display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:12px}
+.pill{background:var(--surface); border:1px solid var(--line); padding:5px 13px; border-radius:999px; font-size:.88rem; font-variant-numeric:tabular-nums}
+.pill b{color:var(--amber)}
+.map{display:flex; flex-direction:column; gap:10px}
+.node{display:flex; align-items:center; gap:14px; background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:13px 15px; cursor:pointer; text-align:left; color:var(--fg); width:100%}
+.node:hover:not(:disabled){border-color:var(--accent)}
+.node:disabled{opacity:.5; cursor:not-allowed}
+.node .ico{font-family:var(--display); font-size:1.1rem; width:46px; height:46px; display:grid; place-items:center; background:var(--surface-2); border-radius:50%; border:2px solid var(--line); flex:0 0 auto; color:var(--amber)}
+.node.done .ico{border-color:var(--ok); color:var(--ok)} .node.boss{border-color:var(--boss)}
+.node .nm{font-weight:800} .node .ds{font-size:.85rem; color:var(--dim)}
+.node .st{margin-left:auto; color:var(--amber); letter-spacing:2px; white-space:nowrap}
+.node > div{min-width:0}
+.dots{display:flex; gap:5px; margin:6px 0 12px}.dots i{flex:1; height:6px; border-radius:6px; background:var(--surface-2)}
+.dots i.on{background:var(--accent)} .dots i.cur{background:var(--amber)}
+.boss-bar{height:12px; background:var(--surface-2); border-radius:99px; overflow:hidden; margin-bottom:12px}
+.boss-bar i{display:block; height:100%; background:var(--boss); transition:width .5s}
+.center{text-align:center}
+.big{font-family:var(--display); font-size:2.2rem; color:var(--amber); letter-spacing:4px}
+
+/* картки */
+.flip{width:100%; min-height:210px; perspective:1000px; background:none; border:none; padding:0; cursor:pointer; color:var(--fg)}
+.flip-in{position:relative; width:100%; min-height:210px; transition:transform .45s; transform-style:preserve-3d}
+.flip.on .flip-in{transform:rotateY(180deg)}
+.face{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:22px; border-radius:var(--r); border:1px solid var(--line); backface-visibility:hidden; background:var(--surface)}
+.face.back{transform:rotateY(180deg); background:var(--surface-2)}
+.face .term{font-family:var(--display); font-size:clamp(1.3rem,5vw,1.8rem); text-align:center}
+.face .def{font-size:1.04rem; text-align:center; max-width:46ch}
+.face small{color:var(--dim); font-size:.8rem}
+@media (prefers-reduced-motion: reduce){ .flip-in{transition:none} .opt.bad,.chip.bad,.in.bad,.mi.bad{animation:none} }
+
+/* лабораторія — міні-Excel */
+.proto{font-family:var(--mono); font-size:.84rem; background:var(--surface-2); border-radius:10px; padding:10px 12px; white-space:pre-wrap; margin:8px 0 0}
+.xl{border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--surface)}
+.ribbon{display:flex; flex-wrap:wrap; gap:6px; padding:8px; background:var(--gridhead); border-bottom:1px solid var(--line)}
+.rb{background:var(--surface); border:1px solid var(--line); color:var(--fg); border-radius:8px; padding:6px 10px; cursor:pointer; font-size:.84rem; font-weight:600}
+.rb:hover{border-color:var(--accent)} .rb.on{border-color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent); color:var(--accent)}
+.rb select{font:inherit}
+select.rb{padding:6px 8px}
+.fxbar{display:grid; grid-template-columns:92px auto minmax(0,1fr); gap:6px; align-items:center; padding:6px 8px; border-bottom:1px solid var(--line)}
+.fxbar input{background:var(--surface); border:1px solid var(--line); color:var(--fg); border-radius:6px; padding:6px 8px; font-family:var(--mono); font-size:.88rem; min-width:0; width:100%}
+.fxbar .fx{font-family:var(--mono); font-style:italic; color:var(--dim)}
+.gridwrap{overflow-x:auto; outline:none}
+table.sheet{border-collapse:collapse; font-family:var(--mono); font-size:.85rem; table-layout:fixed}
+table.sheet th{background:var(--gridhead); color:var(--dim); font-weight:500; border:1px solid var(--gridline); padding:3px 4px; height:26px}
+table.sheet th.rh{width:34px}
+table.sheet col.c{width:118px}
+table.sheet td{border:1px solid var(--gridline); padding:4px 6px; height:30px; vertical-align:bottom; overflow:hidden; white-space:nowrap; text-overflow:clip; cursor:cell; user-select:none; touch-action:none; max-width:118px}
+table.sheet td.wrapT{white-space:normal; word-break:break-word}
+table.sheet td.n{text-align:right}
+table.sheet td.al-l{text-align:left} table.sheet td.al-c{text-align:center} table.sheet td.al-r{text-align:right}
+table.sheet td.in-rect{background:var(--selfill)}
+table.sheet td.active{box-shadow:inset 0 0 0 2px var(--accent)}
+table.sheet th.hl{color:var(--accent); background:var(--selfill)}
+.checks{display:flex; flex-direction:column; gap:8px; margin:0; padding:0; list-style:none}
+.checks li{display:grid; grid-template-columns:26px minmax(0,1fr); gap:8px; align-items:start; font-size:.94rem}
+.checks li i{font-style:normal; width:22px; height:22px; border-radius:50%; display:grid; place-items:center; border:2px solid var(--line); font-size:.75rem; margin-top:2px}
+.checks li.ok i{border-color:var(--ok); background:var(--ok); color:var(--accent-ink)}
+.checks small{display:block; color:var(--dim)}
+
+/* результат */
+table.res{width:100%; border-collapse:collapse; font-size:.95rem}
+table.res td{padding:9px 6px; border-bottom:1px solid var(--line)}
+table.res td:last-child{text-align:right; font-weight:800; font-variant-numeric:tabular-nums}
+.grade{font-family:var(--display); font-size:4rem; color:var(--accent); line-height:1}
+textarea.copy{width:100%; height:90px; margin-top:10px; background:var(--surface-2); color:var(--fg); border:1px solid var(--line); border-radius:10px; font:13px/1.4 var(--mono)}
+.lb{width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums}
+.lb th{font-size:.75rem; text-transform:uppercase; letter-spacing:.08em; color:var(--dim); text-align:left; padding:6px; border-bottom:1px solid var(--line)}
+.lb td{padding:8px 6px; border-bottom:1px solid var(--line)}
+.lb tr.me td{background:var(--selfill); font-weight:700}
+.lb td.r{text-align:right; font-family:var(--mono)}
+.fieldrow{display:flex; flex-wrap:wrap; gap:10px}
+.fieldrow input{flex:1 1 180px; min-width:0; background:var(--surface); border:1px solid var(--line); color:var(--fg); border-radius:10px; padding:10px 12px; font:inherit}
+.fieldrow input.short{flex:0 1 110px}
+</style>
+
+<div class="wrap">
+  <header class="board">
+    <div class="k">Інформатика · 8 клас · Розділ 2 · Тема 1 · Епізод 1</div>
+    <h1>Ліга 8 класу: збираємо дані</h1>
+    <p>Клас запускає футбольну лігу. Перед першим туром треба зібрати дані про команди й записати їх в електронну таблицю так, щоб табло було зрозуміле всім.</p>
+    <div class="score" aria-label="Ваш рахунок">
+      <div><b id="sEx">0</b><span>вправи</span></div>
+      <div><b id="sStars">0</b><span>зірки</span></div>
+      <div><b id="sXp">0</b><span>XP</span></div>
+      <div><b id="sLab">0/6</b><span>табло</span></div>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" data-t="ex" aria-selected="true">Вправи</button>
+    <button class="tab" role="tab" data-t="quest" aria-selected="false">Квест</button>
+    <button class="tab" role="tab" data-t="cards" aria-selected="false">Картки</button>
+    <button class="tab" role="tab" data-t="lab" aria-selected="false">Лабораторія</button>
+    <button class="tab" role="tab" data-t="res" aria-selected="false">Результат</button>
+  </nav>
+
+  <section id="p-ex">
+    <p class="intro">14 вправ: 🟢 базові, 🟡 середні, 🔴 складні. Правильно з першої спроби — 1 бал, з повторної — 0,5. Деякі завдання треба виконати самостійно: вписати, виділити, розставити.</p>
+    <div class="list" id="exList"></div>
+  </section>
+  <section id="p-quest" hidden>
+    <p class="intro">Чотири етапи турніру й фінал проти Хаос-Таблиці. На кожному етапі 3 серця. Менше помилок — більше зірок.</p>
+    <div id="questApp"></div>
+  </section>
+  <section id="p-cards" hidden>
+    <p class="intro">Натисніть картку, щоб перевернути. «Знаю» прибирає її з колоди, «Ще раз» відкладає в кінець.</p>
+    <div id="cardsApp"></div>
+  </section>
+  <section id="p-lab" hidden>
+    <p class="intro">Тренер приніс протокол заявок. Зберіть з нього табло ліги в таблиці нижче: введіть дані й відформатуйте їх. Виділяйте комірки мишею (тягніть для діапазону) або впишіть адресу в поле Ім'я. Вводьте вміст у рядок формул і тисніть Enter.</p>
+    <div class="card">
+      <div class="card-h">Протокол тренера</div>
+      <div class="proto">Заголовок: Ліга 8 класу
+Шапка: Команда | Ігри | Перемоги | Частка перемог | Внесок
+Барси   6  4  0,67  150
+Тигри   6  2  0,33  150
+Ракети  5  3  0,6   120
+(Частку перемог показати у відсотках, внесок — у гривнях.)</div>
+    </div>
+    <div class="xl" style="margin-top:14px">
+      <div class="ribbon" id="ribbon">
+        <button class="rb" data-a="wrap" id="bWrap" title="Переносити текст">↵ Переносити текст</button>
+        <button class="rb" data-a="merge" id="bMerge" title="Об'єднати та розташувати в центрі">⇔ Об'єднати й центрувати</button>
+        <button class="rb" data-a="al-l" title="За лівим краєм">⯇ Ліворуч</button>
+        <button class="rb" data-a="al-c" title="По центру">≡ Центр</button>
+        <button class="rb" data-a="al-r" title="За правим краєм">Праворуч ⯈</button>
+        <select class="rb" id="fmt" aria-label="Числовий формат">
+          <option value="general">Загальний</option>
+          <option value="percent">Відсотковий %</option>
+          <option value="currency">Грошовий ₴</option>
+          <option value="sep">З роздільниками</option>
+        </select>
+        <button class="rb" data-a="dec+" title="Збільшити розрядність">,0 →,00</button>
+        <button class="rb" data-a="dec-" title="Зменшити розрядність">,00 →,0</button>
+      </div>
+      <div class="fxbar">
+        <input id="nameBox" aria-label="Поле Ім'я" value="A1" autocomplete="off">
+        <span class="fx">fx</span>
+        <input id="fxInput" aria-label="Рядок формул" autocomplete="off" placeholder="Вміст активної комірки">
+      </div>
+      <div class="gridwrap" id="gridWrap" tabindex="0" aria-label="Аркуш1"><table class="sheet" id="sheet"></table></div>
+    </div>
+    <div class="row"><button class="btn ghost" id="labReset">Почати табло спочатку</button></div>
+    <div class="card" style="margin-top:14px">
+      <div class="card-h">Вимоги до табло <span class="score-chip" id="labScore">0 з 6</span></div>
+      <ul class="checks" id="labChecks"></ul>
+    </div>
+  </section>
+  <section id="p-res" hidden>
+    <div class="list">
+      <div class="card">
+        <div class="card-h">Ваш результат</div>
+        <div class="row" style="margin-top:0; align-items:flex-end; gap:18px">
+          <div class="grade" id="grade">—</div>
+          <div class="dim" id="gradeNote">балів з 12. Оцінка = середнє вправ і лабораторії.</div>
+        </div>
+        <table class="res" id="resTable" style="margin-top:12px"></table>
+      </div>
+      <div class="card">
+        <div class="card-h">Для вчителя</div>
+        <div class="fieldrow">
+          <input id="pName" placeholder="Ім'я та прізвище" autocomplete="off" aria-label="Ім'я та прізвище">
+          <input id="pClass" class="short" placeholder="Клас" autocomplete="off" aria-label="Клас">
+        </div>
+        <textarea class="copy" id="csv" readonly aria-label="Рядок результату"></textarea>
+        <div class="row"><button class="btn" id="copyBtn">Скопіювати рядок</button><span class="dim" id="copyMsg"></span></div>
+      </div>
+      <div class="card">
+        <div class="card-h">Рейтинг ліги класу</div>
+        <p class="dim" style="margin:0 0 10px">У спільний рейтинг потрапляє лише нікнейм або код, без прізвища.</p>
+        <div class="fieldrow">
+          <input id="nick" placeholder="Нікнейм або код (напр. Барс-07)" maxlength="20" autocomplete="off" aria-label="Нікнейм">
+          <button class="btn" id="pubBtn">Записати в рейтинг</button>
+        </div>
+        <p class="dim" id="lbMsg" style="margin:10px 0 0">Рейтинг завантажується…</p>
+        <div class="tw" style="margin-top:10px"><table class="lb" id="lbTable"></table></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+/*DATA*/
+const EX = [
+ {id:"e1", tier:1, type:"mc", q:"Тренер записав рахунки всіх матчів, але ще нічого не підрахував. Ці записи — це…",
+  opts:["Необроблені факти й спостереження","Висновки, які зробили після аналізу","Готова інформація для вболівальників","Повідомлення від тренера команди"], ans:0,
+  why:"Дані — це необроблені факти. Інформацією вони стають після впорядкування й аналізу."},
+ {id:"e2", tier:1, type:"input", q:"Рахунок записали в комірку на перетині стовпця C і рядка 4. Напишіть її ім'я.",
+  accept:["c4"], ph:"Ім'я комірки", why:"Ім'я комірки = літера стовпця + номер рядка: C4."},
+ {id:"e3", tier:1, type:"mc", q:"Як називається файл Microsoft Excel, у якому зберігаються аркуші ліги?",
+  opts:["Робоча книга","Робочий стіл","Сторінка формул","Таблиця даних"], ans:0,
+  why:"Аркуші зберігаються у файлі, який називається робочою книгою."},
+ {id:"e4", tier:1, type:"match", q:"З'єднайте термін і його опис.",
+  pairs:[["Комірка","Перетин рядка і стовпця"],["Рядок","Пронумерований зліва числом"],["Стовпець","Позначений літерою вгорі"],["Аркуш","Основний документ у книзі"]],
+  why:"Рядки нумеруються 1, 2, 3…, стовпці позначаються A, B, C…, а на їхньому перетині — комірки."},
+ {id:"e5", tier:1, type:"input", q:"Яку назву Excel дає новій робочій книзі за замовчуванням?",
+  accept:["книга1"], ph:"Назва файлу", why:"Нова книга називається «Книга1». Її варто одразу перейменувати, наприклад «Ліга 8 класу»."},
+ {id:"e6", tier:2, type:"grid", q:"Капітан просить виділити блок із перемогами й голами — діапазон B2:C4. Клацніть першу, а потім останню комірку діапазону.",
+  target:"B2:C4", why:"Діапазон B2:C4 — це прямокутник від B2 до C4: 2 стовпці × 3 рядки = 6 комірок."},
+ {id:"e7", tier:2, type:"sort", q:"Розкладіть записи з протоколу за типами числових даних. Оберіть запис, потім натисніть потрібну коробку.",
+  buckets:["Цілі числа","Дробові числа","Валюта","Відсотки","Дата й час"],
+  items:[["12",0],["−3",0],["2,75",1],["3/5",1],["150,00 грн",2],["18,76 €",2],["25 %",3],["75 %",3],["15.09.2026",4],["18:30",4]],
+  why:"Тип визначає, як число відображається й рахується: гривні — валюта, 25 % — відсотки, 18:30 — час."},
+ {id:"e8", tier:2, type:"input", q:"Скільки комірок містить діапазон A1:C2?",
+  accept:["6"], ph:"Число", why:"Стовпці A, B, C (3) × рядки 1, 2 (2) = 6 комірок."},
+ {id:"e9", tier:2, type:"order", q:"Розставте кроки, щоб створити таблицю ліги й почати її заповнювати.",
+  steps:["Натиснути кнопку Пуск","Знайти й клацнути Microsoft Excel","Обрати «Пуста книга»","Перейти до комірки A1","Надрукувати «Команда»","Натиснути →, щоб перейти до B1"],
+  why:"Спершу відкриваємо Excel і нову книгу, потім вводимо дані в A1 і переходимо до наступної комірки."},
+ {id:"e10", tier:2, type:"mc", q:"У комірку ввели «12 голів». Як Excel сприйме цей запис?",
+  opts:["Як текст, бо є літери","Як ціле число дванадцять","Як дату проведення матчу","Як грошову суму в гривнях"], ans:0,
+  why:"Якщо в комірці і текст, і числа, Excel сприймає все як текст і вирівнює його ліворуч. Рахувати з ним не вийде."},
+ {id:"e11", tier:3, type:"input", q:"Як записати в полі Ім'я, щоб вибрати три окремі комірки A1, B2 і C3?",
+  accept:["a1;b2;c3"], ph:"Запис у полі Ім'я", why:"Окремі комірки записують через крапку з комою: A1;B2;C3. Діапазон — через двокрапку: A1:C3."},
+ {id:"e12", tier:3, type:"spot", q:"У протоколі є значення, які Excel сприйме як текст, а не як число. Знайдіть і позначте всі такі комірки в стовпцях Ігри, Перемоги, Голи.",
+  head:["Команда","Ігри","Перемоги","Голи"],
+  rows:[["Барси","6","4","12 гол"],["Тигри","шість","2","9"],["Ракети","5","3","1O"],["Леви","6","1","7"]],
+  bad:["1-3","2-1","3-3"],
+  why:"«12 гол» і «шість» містять літери, а в «1O» замість нуля стоїть літера O. Такі значення не порахуєш."},
+ {id:"e13", tier:3, type:"input", q:"У комірці число 40. Що в ній з'явиться після натискання кнопки «Відсотки» (%)?",
+  accept:["4000%"], ph:"Як виглядатиме", why:"Відсотковий формат множить значення на 100: 40 → 4000%. Тому частку 0,4 вводять як 0,4 — і бачать 40%."},
+ {id:"e14", tier:3, type:"match", q:"З'єднайте кнопку форматування з тим, що вона робить.",
+  pairs:[["Переносити текст","Довгий напис стає кількома рядками в комірці"],["Об'єднати та розташувати в центрі","З A1:E1 виходить одна комірка-заголовок"],["Грошовий формат","40 → 40,00 ₴"],["Формат із роздільниками","40000 → 40 000,00"],["Збільшити розрядність","40,5 → 40,50"]],
+  why:"Форматування не змінює саме число — лише те, як воно виглядає в комірці."}
+];
+
+const QUEST = [
+ {nm:"Роздягальня", ds:"Дані та інформація", ico:"1", qs:[
+   {type:"mc", q:"Тренер переглянув 30 рахунків і зробив висновок: «Барси — лідери». Цей висновок — це…", opts:["Інформація","Необроблені дані","Номер рядка","Робоча книга"], ans:0},
+   {type:"mc", q:"Як найшвидше дізнатися, хто з класу хоче грати в лізі?", opts:["Онлайн-анкета для класу","Розклад шкільних автобусів","Підручник з географії","Старі шкільні новини"], ans:0},
+   {type:"input", q:"Як називається основний документ для роботи з даними в Excel? (одне слово)", accept:["аркуш"]}]},
+ {nm:"Табло", ds:"Комірки й діапазони", ico:"2", qs:[
+   {type:"input", q:"Комірка в стовпці E і рядку 7. Як її ім'я?", accept:["e7"]},
+   {type:"mc", q:"Що означає запис A1:C2?", opts:["Усі комірки від A1 до C2","Тільки дві комірки: A1 і C2","Аркуш із назвою «A1:C2»","Рядки з першого по другий"], ans:0},
+   {type:"mc", q:"Де видно ім'я активної комірки?", opts:["У полі Ім'я","У рядку стану","На вкладці Дані","У назві книги"], ans:0}]},
+ {nm:"Статистика", ds:"Типи числових даних", ico:"3", qs:[
+   {type:"mc", q:"До якого типу належить запис 25 %?", opts:["Відсотки","Валюта","Дата й час","Ціле число"], ans:0},
+   {type:"mc", q:"Як Excel за замовчуванням вирівнює числа?", opts:["За правим краєм","За лівим краєм","Посередині комірки","За верхнім краєм"], ans:0},
+   {type:"input", q:"Скільки окремих комірок у записі A1;B2;C3?", accept:["3"]}]},
+ {nm:"Пресцентр", ds:"Форматування", ico:"4", qs:[
+   {type:"mc", q:"Що треба зробити ПЕРЕД форматуванням?", opts:["Виділити дані","Зберегти книгу","Закрити аркуш","Видалити рядок"], ans:0},
+   {type:"mc", q:"Число 40 у грошовому форматі. Як воно виглядатиме?", opts:["40,00 ₴","4000 %","40 000","40,0 грн"], ans:0},
+   {type:"mc", q:"Назва команди не вміщується в комірку. Що допоможе, не розширюючи стовпець?", opts:["Переносити текст","Формат із роздільниками","Збільшити розрядність","Грошовий формат"], ans:0}]},
+ {nm:"Фінал: Хаос-Таблиця", ds:"Бос перемішав табло", ico:"!", boss:true, qs:[
+   {type:"input", q:"Ім'я комірки: стовпець B, рядок 12.", accept:["b12"]},
+   {type:"mc", q:"Яка дія зробить з A1:E1 одну комірку-заголовок?", opts:["Об'єднати комірки","Перенести текст","Зменшити розрядність","Змінити тип даних"], ans:0},
+   {type:"input", q:"Скільки комірок у діапазоні B2:D5?", accept:["12"]},
+   {type:"mc", q:"У комірку ввели «8 матчів». Як Excel вирівняє цей запис?", opts:["За лівим краєм","За правим краєм","По центру","За нижнім краєм"], ans:0},
+   {type:"mc", q:"Що з'явиться замість 0,25 у відсотковому форматі?", opts:["25%","0,25%","2500%","25,00 ₴"], ans:0}]}
+];
+
+const CARDS = [
+ ["Дані","Необроблені факти та спостереження: рахунки, імена, дати."],
+ ["Інформація","Дані, перетворені в зрозумілий вигляд для сприйняття й опрацювання."],
+ ["Збір даних","Процес внесення даних у комп'ютерну систему: анкети, опитування, датчики, сайти."],
+ ["Електронна таблиця","Сітка з комірок, що утворюються на перетині рядків і стовпців."],
+ ["Робоча книга","Файл Excel, у якому зберігаються робочі аркуші. Нова книга — «Книга1»."],
+ ["Аркуш","Основний документ для роботи та зберігання даних у книзі."],
+ ["Комірка","Місце на перетині рядка і стовпця, куди вводять дані."],
+ ["Ім'я комірки","Літера стовпця + номер рядка, наприклад D6."],
+ ["Активна комірка","Вибрана комірка з товстішою рамкою; її ім'я видно в полі Ім'я."],
+ ["Діапазон","Прямокутний блок комірок, наприклад A1:C2 — від A1 до C2."],
+ ["Рядок формул","Поле над аркушем, де видно й можна змінити вміст активної комірки."],
+ ["Перенесення тексту","Довгий текст розбивається на кілька рядків усередині однієї комірки."],
+ ["Об'єднання комірок","Кілька комірок стають однією — зручно для заголовка над таблицею."]
+];
+/*END*/
+
+/* ---------- утиліти ---------- */
+const $=(s,el=document)=>el.querySelector(s);
+function h(tag,attrs,...kids){const e=document.createElement(tag);if(attrs)for(const k in attrs){const v=attrs[k];if(v==null||v===false)continue;if(k==="class")e.className=v;else if(k.startsWith("on"))e.addEventListener(k.slice(2),v);else if(k==="text")e.textContent=v;else e.setAttribute(k,v===true?"":v);}for(const k of kids.flat()){if(k==null||k===false)continue;e.append(k.nodeType?k:document.createTextNode(k));}return e;}
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const LAT={"а":"a","в":"b","с":"c","е":"e","к":"k","м":"m","н":"h","о":"o","р":"p","т":"t","х":"x","і":"i"};
+function norm(s){return String(s).toLowerCase().replace(/[\s  ]+/g,"").replace(/[’ʼ`]/g,"'");}
+function normAddr(s){return norm(s).replace(/[авсекмнортхі]/g,ch=>LAT[ch]||ch).replace(/,/g,";");}
+const fmtN=n=>String(Math.round(n*100)/100).replace(".",",");
+
+/* ---------- стан ---------- */
+const KEY="liga8-t1-v2";
+let S={ex:{},quest:{best:[0,0,0,0,0],xp:0},lab:null,cards:0,name:"",cls:"",nick:""};
+/* Прогрес не зберігається між відкриттями: на спільних комп'ютерах кожен учень починає з нуля. Старі збережені дані стираються. */
+try{localStorage.removeItem(KEY);}catch(e){}
+function save(){}
+function exState(id){return S.ex[id]||(S.ex[id]={tries:0,done:false,pts:0});}
+function award(id){const st=exState(id);if(st.done)return;st.done=true;st.pts=st.tries===0?1:0.5;save();updateScore();}
+function miss(id){exState(id).tries++;save();}
+const exPts=()=>EX.reduce((s,e)=>s+(S.ex[e.id]?.pts||0),0);
+const stars=()=>S.quest.best.reduce((a,b)=>a+b,0);
+
+/* ---------- вкладки ---------- */
+document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.setAttribute("aria-selected",x===b?"true":"false"));
+  ["ex","quest","cards","lab","res"].forEach(t=>$("#p-"+t).hidden=(t!==b.dataset.t));
+  if(b.dataset.t==="res")renderRes();
+  if(b.dataset.t==="lab")renderSheet();
+}));
+
+/* ---------- вправи ---------- */
+const TIER={1:["t1","🟢 базовий"],2:["t2","🟡 середній"],3:["t3","🔴 складний"]};
+function fb(card,ok,text){let f=card.querySelector(".fb");if(!f){f=h("div",{class:"fb"});card.append(f);}f.className="fb "+(ok?"ok":"bad");f.textContent=text;}
+function finish(card,ex){award(ex.id);card.classList.add("done");const st=exState(ex.id);card.querySelector(".score-chip").textContent="+"+fmtN(st.pts)+" бал.";fb(card,true,"Правильно! "+ex.why);}
+function renderEx(){
+  const list=$("#exList");list.innerHTML="";
+  EX.forEach((ex,i)=>{
+    const st=exState(ex.id);
+    const card=h("div",{class:"card"+(st.done?" done":"")},
+      h("div",{class:"card-h"},h("span",null,"Вправа "+(i+1)),h("span",{class:"tier "+TIER[ex.tier][0]},TIER[ex.tier][1]),h("span",{class:"score-chip"},st.done?"+"+fmtN(st.pts)+" бал.":"")),
+      h("div",{class:"q"},ex.q));
+    list.append(card);
+    if(st.done){fb(card,true,"Виконано. "+ex.why);return;}
+    BUILD[ex.type](card,ex);
+  });
+}
+const BUILD={
+ mc(card,ex){
+  const box=h("div",{class:"opts"});card.append(box);
+  shuffle(ex.opts.map((t,i)=>({t,i}))).forEach(o=>{
+   const b=h("button",{class:"opt",onclick:()=>{
+     if(o.i===ex.ans){b.classList.add("ok");box.querySelectorAll(".opt").forEach(x=>x.disabled=true);finish(card,ex);}
+     else{b.classList.add("bad");b.disabled=true;miss(ex.id);fb(card,false,"Ні, подумайте ще. Наступна правильна відповідь дасть 0,5 бала.");}
+   }},o.t);box.append(b);});
+ },
+ input(card,ex){
+  const inp=h("input",{class:"in",placeholder:ex.ph||"Відповідь",autocomplete:"off","aria-label":"Відповідь",id:"in-"+ex.id});
+  const go=()=>{const v=normAddr(inp.value);if(!v)return;
+    if(ex.accept.some(a=>normAddr(a)===v)){inp.classList.remove("bad");inp.classList.add("ok");inp.disabled=true;btn.disabled=true;finish(card,ex);}
+    else{inp.classList.remove("bad");void inp.offsetWidth;inp.classList.add("bad");miss(ex.id);fb(card,false,"Не так. Перевірте запис і спробуйте ще раз.");}};
+  const btn=h("button",{class:"btn",onclick:go},"Перевірити");
+  inp.addEventListener("keydown",e=>{if(e.key==="Enter")go();});
+  card.append(h("div",{class:"row",style:"margin-top:0"},inp,btn));
+ },
+ match(card,ex){
+  let selL=null;const done=new Set();
+  const L=h("div",null),R=h("div",null);card.append(h("div",{class:"mcols"},L,R));
+  const lb=ex.pairs.map((p,i)=>{const b=h("button",{class:"mi",onclick:()=>{if(done.has(i))return;lb.forEach(x=>x.classList.remove("sel"));b.classList.add("sel");selL=i;}},p[0]);L.append(b);return b;});
+  shuffle(ex.pairs.map((p,i)=>({t:p[1],i}))).forEach(o=>{
+   const b=h("button",{class:"mi",onclick:()=>{
+    if(selL==null||b.classList.contains("done"))return;
+    if(o.i===selL){b.classList.add("done");lb[selL].classList.remove("sel");lb[selL].classList.add("done");done.add(selL);selL=null;
+      if(done.size===ex.pairs.length)finish(card,ex);}
+    else{b.classList.remove("bad");void b.offsetWidth;b.classList.add("bad");miss(ex.id);fb(card,false,"Ця пара не підходить. Спробуйте іншу.");}
+   }},o.t);R.append(b);});
+ },
+ sort(card,ex){
+  let sel=null;const pool=h("div",{class:"chips"});const bk=h("div",{class:"buckets"});card.append(pool,bk);
+  let left=ex.items.length;
+  const chips=shuffle(ex.items.map((it,i)=>({t:it[0],b:it[1],i}))).map(o=>{const c=h("button",{class:"chip",onclick:()=>{chips.forEach(x=>x.el.classList.remove("sel"));c.classList.add("sel");sel=o;}},o.t);o.el=c;pool.append(c);return o;});
+  ex.buckets.forEach((name,bi)=>{const zone=h("div",null);const b=h("button",{class:"bucket",onclick:()=>{
+    if(!sel)return;
+    if(sel.b===bi){sel.el.remove();zone.append(h("span",{class:"chip"},sel.t));sel=null;left--;if(left===0)finish(card,ex);}
+    else{const el=sel.el;el.classList.remove("bad");void el.offsetWidth;el.classList.add("bad");miss(ex.id);fb(card,false,"Цей запис належить до іншого типу.");}
+  }},h("h4",null,name),zone);bk.append(b);});
+ },
+ order(card,ex){
+  const target=h("div",{class:"target"});const pool=h("div",{class:"chips"});card.append(target,pool);
+  let picked=[];
+  const draw=()=>{target.innerHTML="";picked.forEach((s,k)=>target.append(h("div",{class:"step"},h("span",{class:"n"},k+1),h("span",null,s),h("button",{"aria-label":"Прибрати",onclick:()=>{picked.splice(k,1);draw();}},"✕"))));
+    pool.innerHTML="";ord.filter(s=>!picked.includes(s)).forEach(s=>pool.append(h("button",{class:"chip",style:"font-family:var(--body)",onclick:()=>{picked.push(s);draw();}},s)));
+    chk.disabled=picked.length!==ex.steps.length;};
+  const ord=shuffle(ex.steps);
+  const chk=h("button",{class:"btn",onclick:()=>{
+    const rows=target.querySelectorAll(".step");let ok=true;
+    picked.forEach((s,k)=>{const good=s===ex.steps[k];rows[k].classList.toggle("good",good);rows[k].classList.toggle("wrongpos",!good);if(!good)ok=false;});
+    if(ok){chk.disabled=true;target.querySelectorAll(".step button").forEach(b=>b.remove());finish(card,ex);}
+    else{miss(ex.id);fb(card,false,"Червоні кроки стоять не на своєму місці. Приберіть їх і спробуйте ще.");}
+  }},"Перевірити");
+  card.append(h("div",{class:"row"},chk));draw();
+ },
+ grid(card,ex){
+  const cols=["A","B","C","D","E"];let a=null,b=null;
+  const t=h("table",{class:"mini"});const tw=h("div",{class:"tw"},t);
+  const info=h("span",{class:"dim"},"Виділено: —");
+  const btns={};
+  t.append(h("tr",null,h("th",null,""),cols.map(c=>h("th",null,c))));
+  for(let r=1;r<=5;r++){t.append(h("tr",null,h("th",null,r),cols.map((c,ci)=>{const bt=h("button",{"aria-label":c+r,onclick:()=>{
+      if(a&&b){a=null;b=null;}
+      if(!a)a=[r,ci];else b=[r,ci];paint();}}," ");btns[c+r]=bt;return h("td",null,bt);})));}
+  function rect(){if(!a)return null;const e=b||a;return{r1:Math.min(a[0],e[0]),r2:Math.max(a[0],e[0]),c1:Math.min(a[1],e[1]),c2:Math.max(a[1],e[1])};}
+  function name(){const q=rect();if(!q)return"—";const s=cols[q.c1]+q.r1,e=cols[q.c2]+q.r2;return s===e?s:s+":"+e;}
+  function paint(){const q=rect();for(const k in btns){const c=cols.indexOf(k[0]),r=+k.slice(1);const inr=q&&r>=q.r1&&r<=q.r2&&c>=q.c1&&c<=q.c2;btns[k].classList.toggle("in-rect",!!inr);btns[k].classList.toggle("anchor",!!(a&&a[0]===r&&a[1]===c));}info.textContent="Виділено: "+name();chk.disabled=!b;}
+  const chk=h("button",{class:"btn",disabled:true,onclick:()=>{
+    if(name()===ex.target){chk.disabled=true;Object.values(btns).forEach(x=>x.disabled=true);finish(card,ex);}
+    else{miss(ex.id);fb(card,false,"Ви виділили "+name()+". Потрібно "+ex.target+". Клацніть знову, щоб почати заново.");}
+  }},"Перевірити");
+  card.append(tw,h("div",{class:"row"},info,chk));
+ },
+ spot(card,ex){
+  const marks=new Set();const t=h("table",{class:"mini"});const btns={};
+  t.append(h("tr",null,ex.head.map(x=>h("th",null,x))));
+  ex.rows.forEach((row,ri)=>t.append(h("tr",null,row.map((v,ci)=>{
+    if(ci===0)return h("td",{class:"fixed"},v);
+    const k=(ri+1)+"-"+ci;const bt=h("button",{class:/^\d+$/.test(v)?"n":"",onclick:()=>{if(marks.has(k))marks.delete(k);else marks.add(k);bt.classList.toggle("mark",marks.has(k));}},v);btns[k]=bt;return h("td",null,bt);}))));
+  const chk=h("button",{class:"btn",onclick:()=>{
+    const bad=new Set(ex.bad);const wrong=[...marks].filter(k=>!bad.has(k)).length;const found=[...marks].filter(k=>bad.has(k)).length;
+    if(wrong===0&&found===bad.size){for(const k of bad){btns[k].classList.remove("mark");btns[k].classList.add("found");}Object.values(btns).forEach(b=>b.disabled=true);chk.disabled=true;finish(card,ex);}
+    else{miss(ex.id);fb(card,false,"Знайдено "+found+" з "+bad.size+(wrong?", ще "+wrong+" позначено зайве":"")+". Пам'ятайте: справжнє число вирівнюється праворуч і не має літер.");}
+  }},"Перевірити");
+  card.append(h("div",{class:"tw"},t),h("div",{class:"row"},chk));
+ }
+};
+
+/* ---------- квест ---------- */
+let Q=null;
+function renderQuest(){
+  const app=$("#questApp");app.innerHTML="";
+  if(Q)return playQuest();
+  app.append(h("div",{class:"hud"},h("span",{class:"pill"},"Зірки: ",h("b",null,stars()+" / 15")),h("span",{class:"pill"},"XP: ",h("b",null,S.quest.xp))));
+  const map=h("div",{class:"map"});app.append(map);
+  QUEST.forEach((L,i)=>{
+    const open=i===0||S.quest.best[i-1]>0;const best=S.quest.best[i];
+    map.append(h("button",{class:"node"+(best?" done":"")+(L.boss?" boss":""),disabled:!open,onclick:()=>{Q={i,qi:0,hearts:3,err:0};renderQuest();}},
+      h("span",{class:"ico"},best?"✓":L.ico),h("div",null,h("div",{class:"nm"},L.nm),h("div",{class:"ds"},open?L.ds:"Спершу пройдіть попередній етап")),
+      h("span",{class:"st","aria-label":best+" зірки"},"★".repeat(best)+"☆".repeat(3-best))));
+  });
+}
+function playQuest(){
+  const app=$("#questApp");app.innerHTML="";const L=QUEST[Q.i];const item=L.qs[Q.qi];
+  app.append(h("div",{class:"hud"},h("span",{class:"pill"},L.nm),h("span",{class:"pill"},"Серця: ",h("b",null,"♥".repeat(Q.hearts)+"♡".repeat(3-Q.hearts))),h("span",{class:"pill"},"XP: ",h("b",null,S.quest.xp)),
+    h("button",{class:"btn ghost",style:"margin-left:auto;padding:5px 13px",onclick:()=>{Q=null;renderQuest();}},"До мапи")));
+  if(L.boss){const left=(L.qs.length-Q.qi)/L.qs.length*100;app.append(h("div",{class:"dim",style:"font-size:.85rem"},"Сила Хаос-Таблиці"),h("div",{class:"boss-bar"},h("i",{style:"width:"+left+"%"})));}
+  else app.append(h("div",{class:"dots"},L.qs.map((_,k)=>h("i",{class:k<Q.qi?"on":k===Q.qi?"cur":""}))));
+  const card=h("div",{class:"card"},h("div",{class:"q"},item.q));app.append(card);
+  const right=()=>{S.quest.xp+=L.boss?20:10;save();updateScore();Q.qi++;
+    if(Q.qi>=L.qs.length){const st=Q.err===0?3:Q.err===1?2:1;S.quest.best[Q.i]=Math.max(S.quest.best[Q.i],st);save();updateScore();
+      app.innerHTML="";app.append(h("div",{class:"card center"},h("h2",null,L.boss?"Хаос-Таблицю переможено!":"Етап пройдено"),h("div",{class:"big"},"★".repeat(st)+"☆".repeat(3-st)),
+        h("p",{class:"dim"},"Помилок: "+Q.err+". XP: "+S.quest.xp),h("div",{class:"row",style:"justify-content:center"},h("button",{class:"btn",onclick:()=>{Q=null;renderQuest();}},"До мапи"))));Q=null;}
+    else setTimeout(playQuest,450);};
+  const wrong=()=>{Q.hearts--;Q.err++;
+    if(Q.hearts<=0){app.innerHTML="";app.append(h("div",{class:"card center"},h("h2",null,"Серця закінчились"),h("p",{class:"dim"},"Перегляньте картки й спробуйте етап ще раз."),
+      h("div",{class:"row",style:"justify-content:center"},h("button",{class:"btn",onclick:()=>{Q={i:Q.i,qi:0,hearts:3,err:0};playQuest();}},"Ще раз"),h("button",{class:"btn ghost",onclick:()=>{Q=null;renderQuest();}},"До мапи"))));return false;}
+    app.querySelector(".hud .pill:nth-child(2) b").textContent="♥".repeat(Q.hearts)+"♡".repeat(3-Q.hearts);return true;};
+  if(item.type==="mc"){const box=h("div",{class:"opts"});card.append(box);
+    shuffle(item.opts.map((t,i)=>({t,i}))).forEach(o=>{const b=h("button",{class:"opt",onclick:()=>{
+      if(o.i===item.ans){b.classList.add("ok");box.querySelectorAll(".opt").forEach(x=>x.disabled=true);right();}
+      else{b.classList.add("bad");b.disabled=true;wrong();}}},o.t);box.append(b);});}
+  else{const inp=h("input",{class:"in",placeholder:"Відповідь",autocomplete:"off","aria-label":"Відповідь",id:"qin"});
+    const go=()=>{const v=normAddr(inp.value);if(!v)return;if(item.accept.some(a=>normAddr(a)===v)){inp.classList.add("ok");inp.disabled=true;right();}else{inp.classList.remove("bad");void inp.offsetWidth;inp.classList.add("bad");wrong();}};
+    inp.addEventListener("keydown",e=>{if(e.key==="Enter")go();});
+    card.append(h("div",{class:"row",style:"margin-top:0"},inp,h("button",{class:"btn",onclick:go},"Відповісти")));setTimeout(()=>inp.focus(),50);}
+}
+
+/* ---------- картки ---------- */
+let deck=shuffle(CARDS.map((_,i)=>i)),known=0;
+function renderCards(){
+  const app=$("#cardsApp");app.innerHTML="";
+  app.append(h("div",{class:"hud"},h("span",{class:"pill"},"Знаю: ",h("b",null,known+" / "+CARDS.length))));
+  if(!deck.length){app.append(h("div",{class:"card center"},h("h2",null,"Колоду пройдено"),h("p",{class:"dim"},"Усі 13 термінів ви знаєте. Час на квест або лабораторію."),h("button",{class:"btn",onclick:()=>{deck=shuffle(CARDS.map((_,i)=>i));known=0;renderCards();}},"Перемішати знову")));return;}
+  const [t,d]=CARDS[deck[0]];
+  const f=h("button",{class:"flip","aria-label":"Перевернути картку",onclick:()=>f.classList.toggle("on")},h("div",{class:"flip-in"},h("div",{class:"face"},h("div",{class:"term"},t),h("small",null,"натисніть, щоб побачити пояснення")),h("div",{class:"face back"},h("div",{class:"def"},d),h("small",null,t))));
+  app.append(f,h("div",{class:"row",style:"justify-content:center"},
+    h("button",{class:"btn ghost",onclick:()=>{deck.push(deck.shift());renderCards();}},"Ще раз"),
+    h("button",{class:"btn",onclick:()=>{deck.shift();known++;S.cards=Math.max(S.cards,known);save();renderCards();}},"Знаю")));
+}
+
+/* ---------- лабораторія: міні-Excel ---------- */
+const COLS=["A","B","C","D","E"],NR=7;
+const freshLab=()=>({cells:{},merges:[]});
+if(!S.lab||!S.lab.cells)S.lab=freshLab();
+let act={r:0,c:0},foc={r:0,c:0},drag=false;
+const K=(r,c)=>COLS[c]+(r+1);
+const DEF={raw:"",fmt:"general",dec:null,align:null,wrap:false};
+const getC=k=>S.lab.cells[k]||DEF;
+const ensure=k=>S.lab.cells[k]||(S.lab.cells[k]={raw:"",fmt:"general",dec:null,align:null,wrap:false});
+function num(raw){const s=String(raw).trim().replace(/[\s  ]/g,"").replace("−","-");if(!/^-?\d+([.,]\d+)?$/.test(s))return null;return parseFloat(s.replace(",","."));}
+function decOf(raw){const m=String(raw).trim().match(/[.,](\d+)$/);return m?m[1].length:0;}
+function grouped(n,d){const s=Math.abs(n).toFixed(d).split(".");s[0]=s[0].replace(/\B(?=(\d{3})+(?!\d))/g," ");return(n<0?"-":"")+s.join(",");}
+function curDec(c){if(c.dec!=null)return c.dec;if(c.fmt==="percent")return 0;if(c.fmt==="currency"||c.fmt==="sep")return 2;return decOf(c.raw);}
+function show(c){if(c.raw==="")return"";const n=num(c.raw);if(n===null)return c.raw;const d=curDec(c);
+  if(c.fmt==="percent")return grouped(n*100,d)+"%";if(c.fmt==="currency")return grouped(n,d)+" ₴";if(c.fmt==="sep")return grouped(n,d);
+  return c.dec==null?String(c.raw).trim().replace(".",","):grouped(n,d).replace(/ /g,"");}
+function mergeAt(r,c){return S.lab.merges.find(m=>r>=m.r1&&r<=m.r2&&c>=m.c1&&c<=m.c2);}
+function selRect(){return{r1:Math.min(act.r,foc.r),r2:Math.max(act.r,foc.r),c1:Math.min(act.c,foc.c),c2:Math.max(act.c,foc.c)};}
+function rectName(q){const s=K(q.r1,q.c1),e=K(q.r2,q.c2);return s===e?s:s+":"+e;}
+function eachSel(fn){const q=selRect();for(let r=q.r1;r<=q.r2;r++)for(let c=q.c1;c<=q.c2;c++){const m=mergeAt(r,c);if(m&&(m.r1!==r||m.c1!==c))continue;fn(ensure(K(r,c)),r,c);}}
+function renderSheet(){
+  const t=$("#sheet");t.innerHTML="";
+  const cg=h("colgroup",null,h("col",{style:"width:34px"}),COLS.map(()=>h("col",{class:"c"})));t.append(cg);
+  const q=selRect();
+  t.append(h("tr",null,h("th",{class:"rh"},""),COLS.map((L,c)=>h("th",{class:c>=q.c1&&c<=q.c2?"hl":""},L))));
+  for(let r=0;r<NR;r++){const tr=h("tr",null,h("th",{class:"rh"+(r>=q.r1&&r<=q.r2?" hl":"")},r+1));
+    for(let c=0;c<COLS.length;c++){const m=mergeAt(r,c);if(m&&(m.r1!==r||m.c1!==c))continue;
+      const cell=getC(K(r,c));const isNum=num(cell.raw)!==null;
+      const cls=[isNum?"n":"",cell.align?"al-"+cell.align:"",cell.wrap?"wrapT":"",(r>=q.r1&&r<=q.r2&&c>=q.c1&&c<=q.c2)?"in-rect":"",(r===act.r&&c===act.c)?"active":""].filter(Boolean).join(" ");
+      const td=h("td",{class:cls,"data-r":r,"data-c":c,colspan:m?m.c2-m.c1+1:null,rowspan:m?m.r2-m.r1+1:null},show(cell));
+      if(m)td.style.maxWidth="none";tr.append(td);}
+    t.append(tr);}
+  $("#nameBox").value=rectName(q);
+  const ac=getC(K(act.r,act.c));
+  if(document.activeElement!==$("#fxInput"))$("#fxInput").value=ac.raw;
+  $("#fmt").value=ac.fmt;$("#bWrap").classList.toggle("on",ac.wrap);$("#bMerge").classList.toggle("on",!!mergeAt(act.r,act.c));
+  checkLab();
+}
+function cellFrom(el){const td=el&&el.closest&&el.closest("td[data-r]");return td?{r:+td.dataset.r,c:+td.dataset.c}:null;}
+$("#sheet").addEventListener("pointerdown",e=>{const p=cellFrom(e.target);if(!p)return;commitFx();act=p;foc=p;drag=true;renderSheet();$("#gridWrap").focus({preventScroll:true});e.preventDefault();});
+document.addEventListener("pointermove",e=>{if(!drag)return;const p=cellFrom(document.elementFromPoint(e.clientX,e.clientY));if(p&&(p.r!==foc.r||p.c!==foc.c)){foc=p;renderSheet();}});
+document.addEventListener("pointerup",()=>{drag=false;});
+$("#sheet").addEventListener("dblclick",()=>{$("#fxInput").focus();});
+function move(dr,dc){const m=mergeAt(act.r,act.c);let r=act.r,c=act.c;if(m){if(dr>0)r=m.r2;if(dc>0)c=m.c2;}
+  r=Math.min(NR-1,Math.max(0,r+dr));c=Math.min(COLS.length-1,Math.max(0,c+dc));const m2=mergeAt(r,c);if(m2){r=m2.r1;c=m2.c1;}act={r,c};foc={r,c};renderSheet();}
+$("#gridWrap").addEventListener("keydown",e=>{
+  const map={ArrowUp:[-1,0],ArrowDown:[1,0],ArrowLeft:[0,-1],ArrowRight:[0,1]};
+  if(map[e.key]){e.preventDefault();if(e.shiftKey){foc={r:Math.min(NR-1,Math.max(0,foc.r+map[e.key][0])),c:Math.min(COLS.length-1,Math.max(0,foc.c+map[e.key][1]))};renderSheet();}else move(...map[e.key]);return;}
+  if(e.key==="Enter"){e.preventDefault();move(1,0);return;}
+  if(e.key==="Tab"){e.preventDefault();move(0,1);return;}
+  if(e.key==="Delete"||e.key==="Backspace"){e.preventDefault();eachSel(c=>{c.raw="";});save();renderSheet();return;}
+  if(e.key.length===1&&!e.ctrlKey&&!e.metaKey&&!e.altKey){e.preventDefault();const fx=$("#fxInput");fx.value=e.key;fx.focus();ensure(K(act.r,act.c)).raw=e.key;liveCell();}
+});
+function liveCell(){const td=$('#sheet td[data-r="'+act.r+'"][data-c="'+act.c+'"]');const c=getC(K(act.r,act.c));if(td){td.textContent=show(c);td.classList.toggle("n",num(c.raw)!==null);}}
+$("#fxInput").addEventListener("input",e=>{ensure(K(act.r,act.c)).raw=e.target.value;liveCell();});
+function commitFx(){const k=K(act.r,act.c);const c=S.lab.cells[k];if(!c)return;
+  const m=String(c.raw).trim().match(/^(-?\d+(?:[.,]\d+)?)\s*%$/);if(m){c.raw=fmtN(parseFloat(m[1].replace(",","."))/100);c.fmt="percent";}
+  save();}
+$("#fxInput").addEventListener("keydown",e=>{
+  if(e.key==="Enter"){e.preventDefault();commitFx();e.target.blur();move(1,0);$("#gridWrap").focus({preventScroll:true});}
+  else if(e.key==="Tab"){e.preventDefault();commitFx();e.target.blur();move(0,1);$("#gridWrap").focus({preventScroll:true});}
+  else if(e.key==="Escape"){e.target.blur();renderSheet();}
+});
+$("#fxInput").addEventListener("blur",()=>{commitFx();renderSheet();});
+$("#nameBox").addEventListener("keydown",e=>{if(e.key!=="Enter")return;e.preventDefault();
+  const v=normAddr(e.target.value).toUpperCase();const mm=v.match(/^([A-E])([1-7])(?::([A-E])([1-7]))?$/);
+  if(!mm){e.target.value=rectName(selRect());return;}
+  act={r:+mm[2]-1,c:COLS.indexOf(mm[1])};foc=mm[3]?{r:+mm[4]-1,c:COLS.indexOf(mm[3])}:{...act};renderSheet();$("#gridWrap").focus({preventScroll:true});});
+$("#nameBox").addEventListener("focus",e=>e.target.select());
+$("#ribbon").addEventListener("click",e=>{const b=e.target.closest("button[data-a]");if(!b)return;commitFx();const a=b.dataset.a;
+  if(a==="wrap"){const on=!getC(K(act.r,act.c)).wrap;eachSel(c=>{c.wrap=on;});}
+  else if(a==="merge"){const q=selRect();const m=mergeAt(act.r,act.c);
+    if(m&&q.r1===q.r2&&q.c1===q.c2){S.lab.merges=S.lab.merges.filter(x=>x!==m);}
+    else if(q.r1!==q.r2||q.c1!==q.c2){S.lab.merges=S.lab.merges.filter(x=>x.r2<q.r1||x.r1>q.r2||x.c2<q.c1||x.c1>q.c2);
+      for(let r=q.r1;r<=q.r2;r++)for(let c=q.c1;c<=q.c2;c++)if(r!==q.r1||c!==q.c1){const x=S.lab.cells[K(r,c)];if(x)x.raw="";}
+      S.lab.merges.push({...q});ensure(K(q.r1,q.c1)).align="c";act={r:q.r1,c:q.c1};foc={...act};}}
+  else if(a.startsWith("al-")){const al=a.slice(3);eachSel(c=>{c.align=al;});}
+  else if(a==="dec+"||a==="dec-"){eachSel(c=>{if(num(c.raw)===null)return;c.dec=Math.max(0,Math.min(6,curDec(c)+(a==="dec+"?1:-1)));});}
+  save();renderSheet();});
+$("#fmt").addEventListener("change",e=>{commitFx();const f=e.target.value;eachSel(c=>{c.fmt=f;c.dec=null;});save();renderSheet();});
+$("#labReset").addEventListener("click",()=>{S.lab=freshLab();act={r:0,c:0};foc={r:0,c:0};save();renderSheet();});
+
+const HEAD=["команда","ігри","перемоги","частка перемог","внесок"];
+const TEAMS=[["барси",6,4,0.67,150],["тигри",6,2,0.33,150],["ракети",5,3,0.6,120]];
+const txt=r=>String(r).toLowerCase().trim().replace(/\s+/g," ");
+let labOk=0;
+function checkLab(){
+  const C=(r,c)=>getC(K(r,c));
+  const res=[];
+  const m=S.lab.merges.find(x=>x.r1===0&&x.r2===0&&x.c1===0&&x.c2===4);
+  res.push([!!m&&txt(C(0,0).raw).includes("ліга"),"Заголовок «Ліга 8 класу» в A1, комірки A1:E1 об'єднано","Виділіть A1:E1 і натисніть «Об'єднати й центрувати»."]);
+  res.push([HEAD.every((x,c)=>txt(C(1,c).raw).replace(/[’ʼ']/g,"")===x),"Шапка в рядку 2: Команда, Ігри, Перемоги, Частка перемог, Внесок","Кожен заголовок — у своїй комірці A2…E2."]);
+  let rowsOk=true,textNums=false;const used=new Set();
+  for(let r=2;r<=4;r++){const name=txt(C(r,0).raw);const t=TEAMS.find(x=>x[0]===name&&!used.has(x[0]));if(!t){rowsOk=false;continue;}used.add(t[0]);
+    for(let c=1;c<=4;c++){const n=num(C(r,c).raw);if(n===null){rowsOk=false;if(C(r,c).raw!=="")textNums=true;continue;}if(Math.abs(n-t[c])>0.006)rowsOk=false;}}
+  res.push([rowsOk,"Дані трьох команд у рядках 3–5 введено числами",textNums?"Є число з літерами чи знаком — Excel вважає його текстом. Вводьте лише цифри: 150, а не «150 грн».":"Частку вводьте як 0,67 (або 67%), внесок — як 150."]);
+  const all=(c,f)=>[2,3,4].every(r=>C(r,c).fmt===f&&C(r,c).raw!=="");
+  res.push([all(3,"percent"),"Частка перемог D3:D5 — у відсотковому форматі","Виділіть D3:D5 і оберіть «Відсотковий %». 0,67 стане 67%."]);
+  res.push([all(4,"currency"),"Внесок E3:E5 — у грошовому форматі","Виділіть E3:E5 і оберіть «Грошовий ₴»."]);
+  res.push([[0,1,2,3,4].some(c=>C(1,c).wrap&&C(1,c).raw!==""),"Довгий заголовок шапки (наприклад, «Частка перемог») перенесено","Виділіть D2 і натисніть «Переносити текст»."]);
+  labOk=res.filter(x=>x[0]).length;S.labRes=res.map(x=>!!x[0]);
+  const ul=$("#labChecks");ul.innerHTML="";res.forEach(([ok,t,hint])=>ul.append(h("li",{class:ok?"ok":""},h("i",null,ok?"✓":""),h("div",null,t,ok?null:h("small",null,hint)))));
+  $("#labScore").textContent=labOk+" з 6";S.labOk=labOk;save();updateScore();
+}
+
+/* ---------- результат ---------- */
+function grade(){const e=exPts()/EX.length,l=(S.labOk||0)/6;if(!exPts()&&!S.labOk)return 0;return Math.max(1,Math.round((e+l)/2*12));}
+function updateScore(){$("#sEx").textContent=fmtN(exPts());$("#sStars").textContent=stars();$("#sXp").textContent=S.quest.xp;$("#sLab").textContent=(S.labOk||0)+"/6";}
+function csvLine(){const d=new Date();return[S.name||"—",S.cls||"—","Збір даних (8 кл, Р2 Т1)",fmtN(exPts())+"/14",(S.labOk||0)+"/6",stars()+"/15",S.quest.xp,grade()+"/12",d.toLocaleDateString("uk-UA")].join(";");}
+function renderRes(){
+  const g=grade();$("#grade").textContent=g||"—";
+  const t=$("#resTable");t.innerHTML="";
+  [["Вправи",fmtN(exPts())+" з 14"],["Лабораторія «Табло ліги»",(S.labOk||0)+" з 6"],["Квест: зірки",stars()+" з 15"],["Квест: XP",S.quest.xp],["Картки: знаю",S.cards+" з "+CARDS.length]].forEach(([a,b])=>t.append(h("tr",null,h("td",null,a),h("td",null,b))));
+  $("#pName").value=S.name;$("#pClass").value=S.cls;$("#nick").value=S.nick;$("#csv").value="Ім'я;Клас;Тема;Вправи;Лабораторія;Зірки;XP;Оцінка;Дата\n"+csvLine();
+}
+$("#pName").addEventListener("input",e=>{S.name=e.target.value;save();renderRes();});
+$("#pClass").addEventListener("input",e=>{S.cls=e.target.value;save();renderRes();});
+$("#nick").addEventListener("input",e=>{S.nick=e.target.value;save();});
+$("#copyBtn").addEventListener("click",()=>{const ta=$("#csv");const done=()=>{$("#copyMsg").textContent="Скопійовано. Надішліть учителю.";};
+  try{navigator.clipboard.writeText(csvLine()).then(done,()=>{ta.select();$("#copyMsg").textContent="Текст виділено — натисніть Ctrl+C.";});}catch(e){ta.select();$("#copyMsg").textContent="Текст виділено — натисніть Ctrl+C.";}});
+
+/* ---------- спільний рейтинг ---------- */
+let DB=null,USER=null,MY=null,BOARD=[],dbPending=true;
+function renderBoard(){
+  const t=$("#lbTable");t.innerHTML="";
+  if(!DB&&dbPending){$("#lbMsg").textContent="Рейтинг завантажується…";$("#pubBtn").disabled=true;return;}
+  if(!DB){$("#lbMsg").textContent="Спільний рейтинг працює, коли ви ввійшли в Claude і вчитель дав доступ «Учасник». Без цього скопіюйте рядок результату й надішліть учителю.";$("#pubBtn").disabled=true;return;}
+  $("#pubBtn").disabled=false;
+  if(!BOARD.length){$("#lbMsg").textContent="У рейтингу ще нікого немає. Пройдіть квест і запишіть свій нікнейм першим.";return;}
+  $("#lbMsg").textContent="Сортування: зірки, потім XP.";
+  t.append(h("tr",null,h("th",null,"#"),h("th",null,"Нікнейм"),h("th",null,"Клас"),h("th",{style:"text-align:right"},"★"),h("th",{style:"text-align:right"},"XP"),h("th",{style:"text-align:right"},"Бали")));
+  BOARD.slice().sort((a,b)=>(b.stars-a.stars)||(b.xp-a.xp)).slice(0,40).forEach((r,i)=>t.append(h("tr",{class:r.id===MY?"me":""},h("td",null,i+1),h("td",null,r.nick),h("td",null,r.cls||""),h("td",{class:"r"},r.stars),h("td",{class:"r"},r.xp),h("td",{class:"r"},r.grade||""))));
+}
+$("#pubBtn").addEventListener("click",async()=>{
+  const nick=($("#nick").value||"").trim().slice(0,20);if(!nick){$("#lbMsg").textContent="Впишіть нікнейм або код.";return;}
+  if(!DB||!MY)return;
+  try{await DB.collection("board").doc(MY).set({nick,cls:(S.cls||"").slice(0,6),stars:stars(),xp:S.quest.xp,grade:grade(),ts:Date.now()});$("#lbMsg").textContent="Записано в рейтинг.";}
+  catch(e){$("#lbMsg").textContent="Не вдалося записати: у вас доступ лише на перегляд. Попросіть учителя дати доступ «Учасник» або надішліть рядок результату.";}
+});
+(async()=>{try{if(!window.claude||!window.claude.use){dbPending=false;renderBoard();return;}
+  USER=await window.claude.use("user");DB=await window.claude.use("db");
+  if(DB&&USER){MY=await USER.id();DB.collection("board").onSnapshot(s=>{BOARD=s.docs.filter(d=>d.exists).map(d=>({id:d.id,...d.data()})).filter(r=>typeof r.nick==="string");renderBoard();},()=>{DB=null;dbPending=false;renderBoard();});}
+  dbPending=false;renderBoard();}catch(e){DB=null;dbPending=false;renderBoard();}})();
+
+/* ---------- надіслати вчителю (Google Форма → журнал і теплова карта) ---------- */
+const FORM_PREFILL="https://docs.google.com/forms/d/e/1FAIpQLSeaDGNzqpEMjZyDt4WUwg3k3FAhGGW4pG1E8IcOk8b4LQsBVw/viewform?usp=pp_url&entry.1997531456=test";
+const TOPIC_J="Збір даних", LABN_J=6;
+// число = скільки помилок у завданні (0 — з першої спроби), «н» — не виконано; К — етапи квесту (3★=0, 2★=1, 1★=2)
+function taskStrJ(){const a=[];
+  EX.forEach((e,i)=>{const st=S.ex[e.id];a.push("В"+(i+1)+":"+(st&&st.done?st.tries:(st&&st.tries?st.tries+"н":"н")))});
+  S.quest.best.forEach((b,i)=>a.push("К"+(i+1)+":"+(b?3-b:"н")));
+  (S.labRes||[]).forEach((ok,i)=>a.push("Л"+(i+1)+":"+(ok?0:1)));
+  return a.join(",")}
+const cleanJ=v=>String(v||"").replace(/[|\n\r]/g," ").trim()||"—";
+function sendLineJ(){const errs=EX.reduce((s,e)=>s+((S.ex[e.id]&&S.ex[e.id].tries)||0),0);
+  return ["v1",8,TOPIC_J,cleanJ(S.cls),cleanJ(S.name),1,"—",grade(),fmtN(exPts()),Math.round((S.labOk||0)/LABN_J*100),errs,"—","—","","надіслано",taskStrJ()].join("|")}
+(function(){const cb=$("#copyBtn"),row=cb.parentNode;
+  const a=h("a",{class:"btn",id:"sendBtn",href:"#",target:"_blank",rel:"noopener",style:"text-decoration:none;display:inline-block"},"📤 Надіслати вчителю");
+  const msg=h("span",{class:"dim",id:"sendMsg"});
+  const wrap=h("div",{class:"row"},a,msg);row.parentNode.insertBefore(wrap,row);
+  wrap.after(h("p",{class:"dim",style:"margin:8px 0 0"},"Відкриється Google Форма з уже заповненим результатом — натисніть у ній «Надіслати». Не оновлюйте цю сторінку, доки не надішлете: прогрес не зберігається."));
+  cb.classList.add("ghost");cb.textContent="Скопіювати рядок (запасний варіант)";
+  a.addEventListener("click",e=>{
+    if(!String(S.name||"").trim()||!String(S.cls||"").trim()){e.preventDefault();msg.textContent="Спершу впишіть ім'я, прізвище та клас.";return}
+    a.href=FORM_PREFILL.replace(/(entry\.\d+=)[^&]*/,(m,p)=>p+encodeURIComponent(sendLineJ()));
+    msg.textContent="Форму відкрито в новій вкладці — натисніть там «Надіслати» ✔";});
+})();
+
+/* ---------- старт ---------- */
+renderEx();renderQuest();renderCards();renderSheet();updateScore();renderBoard();
+</script>
+
+</body></html>

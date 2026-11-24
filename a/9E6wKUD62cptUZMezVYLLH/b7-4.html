@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Білети · 7 клас · Розділ 4. Графічне програмування</title>
+<style>
+:root{--cl:#4263eb;--bg:#f5f6fa;--card:#fff;--ink:#1f2433;--muted:#5b6275;--line:#e3e6ee;--ok:#2b8a3e;--r:16px}
+@media (prefers-color-scheme:dark){:root{--cl:#91a7ff;--bg:#151821;--card:#1f2330;--ink:#eef0f6;--muted:#a3aabb;--line:#2e3344}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Nunito","Segoe UI",system-ui,sans-serif;font-size:16px;line-height:1.45}
+header{background:var(--cl);color:#fff;padding:14px 18px}
+header small{opacity:.85;display:block}header h1{margin:2px 0 0;font-size:1.35rem}
+main{max-width:1100px;margin:0 auto;padding:14px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 14px;position:sticky;top:0;background:var(--bg);padding:6px 0;z-index:5}
+.tabs button,.btn{border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 14px;font:inherit;font-weight:800;cursor:pointer}
+.tabs button[aria-selected=true],.btn.main{background:var(--cl);border-color:var(--cl);color:#fff}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:8px 0}
+input,select{font:inherit;padding:7px 10px;border:2px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
+.lead{color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
+.tk{background:var(--card);border-radius:var(--r);border:2px solid var(--line);padding:12px 14px;break-inside:avoid}
+.tk h3{margin:0 0 6px;color:var(--cl);display:flex;justify-content:space-between}
+.cd{border-top:1px dashed var(--line);padding:8px 0}
+.cd .lv{font-weight:900;font-size:.85rem}
+.cd .q{font-weight:700;white-space:pre-wrap}
+.cd ul{margin:4px 0 0;padding-left:18px}.cd li{white-space:pre-wrap}
+.cd .src{font-size:.75rem;color:var(--muted)}
+.ans{display:none;background:#e6f4ea;color:#1b5e20;border-radius:8px;padding:4px 8px;margin-top:4px;font-size:.92rem}
+@media (prefers-color-scheme:dark){.ans{background:#1d3a26;color:#b7f0c3}}
+body.show .ans{display:block}
+table{border-collapse:collapse;width:100%;background:var(--card);border-radius:var(--r);overflow:hidden}
+th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left}
+td input{width:100%}td select{width:100%}
+.tot{font-weight:900;color:var(--cl);font-size:1.1rem}
+.topic h2{color:var(--cl);margin:18px 0 6px}
+[hidden]{display:none!important}
+@media print{header,.tabs,.noprint{display:none!important}body{background:#fff;color:#000}.tk{border:1px solid #999;page-break-inside:avoid}.grid{display:block}.tk{margin-bottom:10px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header><small id="eb"></small><h1 id="ht"></h1></header>
+<main>
+<div class="tabs" role="tablist">
+ <button role="tab" aria-selected="true" data-t="t1">🎫 Білети</button>
+ <button role="tab" aria-selected="false" data-t="t2">📚 Усі картки</button>
+ <button role="tab" aria-selected="false" data-t="t3">📝 Журнал</button>
+</div>
+<section id="t1">
+ <p class="lead">Кожен білет = 🟢 базова (3 б) + 🟡 середня (4 б) + 🔴 складна (5 б) з трьох різних тем = <b>12 балів</b>. Номер серії дає ті самі білети знову (зручно для паралельних класів).</p>
+ <div class="row noprint"><label>Білетів: <input id="n" type="number" min="1" max="40" value="20" style="width:80px"></label>
+  <label>Серія: <input id="seed" type="number" value="1" style="width:90px"></label>
+  <button class="btn main" id="gen">🎲 Скласти білети</button>
+  <label><input type="checkbox" id="sa"> Показати відповіді</label>
+  <button class="btn" id="pr">🖨️ Друк</button></div>
+ <div class="grid" id="tickets"></div>
+</section>
+<section id="t2" hidden><p class="lead">По 4 картки на тему. Можна давати усно або на дошці. Відповіді — зеленим (увімкни «Показати відповіді» на вкладці «Білети» або тут).</p>
+ <div class="row noprint"><label><input type="checkbox" id="sa2"> Показати відповіді</label></div><div id="all"></div></section>
+<section id="t3" hidden>
+ <p class="lead">Впиши учнів і бали за кожну картку білета. Підсумок рахується сам. Дані зберігаються лише на цьому комп'ютері.</p>
+ <table><thead><tr><th>Учень</th><th>Білет №</th><th>🟢 /3</th><th>🟡 /4</th><th>🔴 /5</th><th>Разом</th></tr></thead><tbody id="jb"></tbody></table>
+ <div class="row noprint"><button class="btn" id="add">+ Рядок</button><button class="btn main" id="csv">⬇️ CSV для журналу</button><button class="btn" id="copy">📋 Скопіювати таблицю</button><span id="msg" class="lead"></span></div>
+</section>
+</main>
+<script>
+const D={"grade": 7, "sec": 4, "secName": "Графічне програмування", "saga": "Кібербаза", "topics": [{"n": 1, "title": "Алгоритми та програми", "cards": [{"q": "Що таке алгоритм?", "body": ["А) Модуль мови програмування Python", "Б) Покроковий список інструкцій", "В) Колір у моделі RGB", "Г) Тип файлу"], "ans": "Б) Покроковий список інструкцій", "lv": 1, "pts": 3}, {"q": "З'єднай фігуру блок-схеми зі значенням.", "body": ["1) Овал", "2) Ромб", "3) Паралелограм", "4) Прямокутник", "—", "А) Умова (Так / Ні)", "Б) Дія", "В) Початок / кінець", "Г) Введення / виведення"], "ans": "1–В, 2–А, 3–Г, 4–Б", "lv": 1, "pts": 3}, {"q": "Точка у вікні pygame має координати (300, 200). На скільки пікселів вона правіше й нижче за (0, 0)? Де (0, 0)?", "body": [], "ans": "300 правіше, 200 нижче; (0, 0) — лівий верхній кут", "lv": 2, "pts": 4}, {"q": "Учень записав пам'ятку. Знайди 3 помилки. Запиши номери рядків і як виправити.", "body": ["1) Thonny  ⟶  середовище для Python", "2) Запуск програми  ⟶  клавіша F1", "3) (255, 0, 0)  ⟶  червоний", "4) Більші y  ⟶  вгорі вікна", "5) pygame  ⟶  ставиться через Інструменти → Управління пакетами", "6) RGB  ⟶  кожне число від 0 до 100"], "ans": "Рядки 2, 4, 6. Запуск — F5; більші y — внизу; числа від 0 до 255", "lv": 3, "pts": 5}]}, {"n": 2, "title": "Команди та змінні", "cards": [{"q": "Яка назва змінної правильна?", "body": ["А) 2player", "Б) my-name-and-age", "В) total_volume", "Г) while"], "ans": "В) total_volume", "lv": 1, "pts": 3}, {"q": "З'єднай функцію з дією.", "body": ["1) print()", "2) input()", "3) int()", "4) def", "—", "А) Створює власну функцію", "Б) Перетворює рядок на ціле число", "В) Виводить дані", "Г) Чекає введення користувача"], "ans": "1–В, 2–Г, 3–Б, 4–А", "lv": 1, "pts": 3}, {"q": "a = \"5\", b = \"3\". Що надрукує print(a + b), а що print(int(a) + int(b))? Чому?", "body": [], "ans": "53 і 8: рядки склеюються, а числа додаються", "lv": 2, "pts": 4}, {"q": "Знайди 3 помилки в коді. Запиши номери рядків і як виправити.", "body": ["1) name = input(\"Ім'я: \")", "2) 2age = int(input(\"Вік: \"))", "3) print(“Вітаю, ” + name)", "4) # коментар про програму", "5) team = [\"Ада\", \"Бо\"]", "6) print = 5"], "ans": "Рядки 2, 3, 6. Назва не з цифри (age2); прямі лапки \"; print — зарезервоване слово", "lv": 3, "pts": 5}]}, {"n": 3, "title": "Малюємо кодом", "cards": [{"q": "Яка команда показує намальоване у вікні?", "body": ["А) pygame.init()", "Б) screen.fill()", "В) pygame.display.update()", "Г) pygame.display.set_caption()"], "ans": "В) pygame.display.update()", "lv": 1, "pts": 3}, {"q": "З'єднай команду з фігурою.", "body": ["1) draw.line", "2) draw.rect", "3) draw.circle", "4) draw.ellipse", "—", "А) Коло за центром і радіусом", "Б) Відрізок", "В) Овал у прямокутнику", "Г) Прямокутник від лівого верхнього кута"], "ans": "1–Б, 2–Г, 3–А, 4–В", "lv": 1, "pts": 3}, {"q": "pygame.draw.rect(screen, c, (120, 40, 90, 60)). Знайди x правого краю та y нижнього краю. Покажи обчислення.", "body": [], "ans": "210 = 120 + 90; 100 = 40 + 60", "lv": 2, "pts": 4}, {"q": "Знайди 3 помилки в коді. Запиши номери рядків і як виправити.", "body": ["1) import pygame", "2) pygame.init()", "3) screen = pygame.display.set_mode(400, 300)", "4) screen.fill((0, 0, 0))", "5) pygame.draw.circle(screen, (255, 0, 0), (200, 150))", "6) pygame.display.update"], "ans": "Рядки 3, 5, 6. Розмір у подвійних дужках ((400, 300)); бракує радіуса; update() з дужками", "lv": 3, "pts": 5}]}, {"n": 4, "title": "Поєднуємо графічні примітиви", "cards": [{"q": "Кола зі спільним центром — це…", "body": ["А) Дотичні", "Б) Концентричні", "В) Паралельні", "Г) Перпендикулярні"], "ans": "Б) Концентричні", "lv": 1, "pts": 3}, {"q": "З'єднай команду з призначенням.", "body": ["1) draw.polygon", "2) draw.arc", "3) set_caption", "4) math.pi", "—", "А) Назва вікна", "Б) Дуга з еліпса", "В) Число π ≈ 3,14", "Г) Многокутник за вершинами"], "ans": "1–Г, 2–Б, 3–А, 4–В", "lv": 1, "pts": 3}, {"q": "Рот: (head_x + 50, head_y + 120). head_x = 180, head_y = 40. Знайди координати рота. Навіщо відносні координати?", "body": [], "ans": "(230, 160); щоб переносити весь малюнок зміною базової точки", "lv": 2, "pts": 4}, {"q": "Знайди 3 помилки в коді робота. Запиши номери рядків і як виправити.", "body": ["1) pygame.display.set_caption(\"Робот\")", "2) pygame.draw.polygon(screen, blue, [(10, 10), (50, 10)])", "3) pygame.draw.arc(screen, gold, (0, 0, 60, 80), 0, 180, 4)", "4) pygame.draw.ellipse(screen, white, (130, 100, 50, 40))", "5) pygame.draw.rect(screen, red, (head_x + 50, head_y + 120, 100))", "6) head_x, head_y = 100, 60"], "ans": "Рядки 2, 3, 5. Многокутнику ≥ 3 вершини; кути в радіанах (0, math.pi); прямокутнику 4 числа", "lv": 3, "pts": 5}]}, {"n": 5, "title": "Складні фігури", "cards": [{"q": "Який цикл має відому кількість повторень?", "body": ["А) while", "Б) if", "В) for", "Г) def"], "ans": "В) for", "lv": 1, "pts": 3}, {"q": "З'єднай range() з числами.", "body": ["1) range(4)", "2) range(2, 5)", "3) range(1, 8, 3)", "4) range(6, 0, -2)", "—", "А) 1, 4, 7", "Б) 0, 1, 2, 3", "В) 6, 4, 2", "Г) 2, 3, 4"], "ans": "1–Б, 2–Г, 3–А, 4–В", "lv": 1, "pts": 3}, {"q": "Кола зовнішньо дотичні: r1 = 50, r2 = 30, центр першого x1 = 120. Знайди x2. Покажи обчислення.", "body": [], "ans": "x2 = x1 + r1 + r2 = 120 + 50 + 30 = 200", "lv": 2, "pts": 4}, {"q": "Знайди 3 помилки в коді радара. Запиши номери рядків і як виправити.", "body": ["1) for r in range(20, 141, 20):", "2) for i in range(5)", "3) pygame.draw.circle(...)  # без відступу під for", "4) while n < 10:", "5) for x in range(0, 400, 0):", "6) n = n * 2"], "ans": "Рядки 2, 3, 5. Двокрапка після заголовка; відступ 4 пропуски; крок не 0 (50)", "lv": 3, "pts": 5}]}, {"n": 6, "title": "Прийняття рішень і випадкові числа", "cards": [{"q": "Яким оператором перевіряють рівність?", "body": ["А) =", "Б) ==", "В) =>", "Г) !="], "ans": "Б) ==", "lv": 1, "pts": 3}, {"q": "З'єднай елемент з дією.", "body": ["1) elif", "2) break", "3) random.randint(a, b)", "4) pygame.KEYDOWN", "—", "А) Подія — натиснули клавішу", "Б) Випадкове ціле від a до b", "В) Інакше якщо", "Г) Вихід із циклу"], "ans": "1–В, 2–Г, 3–Б, 4–А", "lv": 1, "pts": 3}, {"q": "energy = 20. if energy < 20: «Тривога» elif energy < 60: «Економ» else: «Норма». Що надрукує? Чому?", "body": [], "ans": "Економ: 20 < 20 — False, 20 < 60 — True", "lv": 2, "pts": 4}, {"q": "Знайди 3 помилки. Запиши номери рядків і як виправити.", "body": ["1) if energy = 0:", "2) x = random.randint(0, 400)", "3) elif energy < 50", "4) if event.type == pygame.KEYDOWN:", "5) r = random.randint(30, 5)", "6) text = font.render(\"ЩИТ\", True, (0, 255, 0))"], "ans": "Рядки 1, 3, 5. == для порівняння; двокрапка після elif; randint(5, 30)", "lv": 3, "pts": 5}]}, {"n": 7, "title": "Тестування", "cards": [{"q": "Програма працює, але результат неправильний. Це помилка…", "body": ["А) Синтаксична", "Б) Виконання", "В) Семантична", "Г) Друкарська"], "ans": "В) Семантична", "lv": 1, "pts": 3}, {"q": "З'єднай повідомлення з причиною.", "body": ["1) SyntaxError: expected ':'", "2) NameError: name 'inpyt'", "3) ZeroDivisionError", "4) IndentationError", "—", "А) Бракує відступу", "Б) Ділення на нуль", "В) Бракує двокрапки", "Г) Помилка в назві команди"], "ans": "1–В, 2–Г, 3–Б, 4–А", "lv": 1, "pts": 3}, {"q": "total = 0; for i in range(5): total += i. Хотіли суму 1…5. Що вийде і як виправити?", "body": [], "ans": "10; потрібно range(1, 6)", "lv": 2, "pts": 4}, {"q": "Програма «середній бал». Знайди 3 баги. Запиши номери рядків і як виправити.", "body": ["1) total = int(input(\"Сума: \"))", "2) count = int(input(\"Кількість: \")", "3) if count = 0:", "4)     print(\"Немає даних\")", "5) else:", "6)     print(total / count + 1)"], "ans": "Рядки 2, 3, 6. Бракує дужки; потрібно ==; «+ 1» зайве (семантична)", "lv": 3, "pts": 5}]}, {"n": 8, "title": "Анімація", "cards": [{"q": "Що таке анімація?", "body": ["А) Один яскравий малюнок", "Б) Звук у програмі", "В) Швидка зміна кадрів", "Г) Випадкове число"], "ans": "В) Швидка зміна кадрів", "lv": 1, "pts": 3}, {"q": "З'єднай крок кадру з командою.", "body": ["1) Стерти кадр", "2) Показати кадр", "3) Пауза", "4) Рух", "—", "А) x = x + dx", "Б) pygame.display.update()", "В) screen.fill(тло)", "Г) pygame.time.delay(40)"], "ans": "1–В, 2–Б, 3–Г, 4–А", "lv": 1, "pts": 3}, {"q": "10 спрайтів у списку, показуємо frames[k % 10]. Який номер при k = 47? Навіщо остача?", "body": [], "ans": "7; щоб брати спрайти по колу 0…9", "lv": 2, "pts": 4}, {"q": "Знайди 3 помилки в анімації кулі. Запиши номери рядків і як виправити.", "body": ["1) for frame in range(60)", "2)     screen.fill((5, 15, 30))", "3)     pygame.draw.circle(screen, gold, (x, 150), 20)", "4)     if x > 380 or x < 20: dx = dx", "5)     pygame.display.update()", "6)     pygame.time.delay(-40)"], "ans": "Рядки 1, 4, 6. Двокрапка після range(60); dx = -dx; пауза додатна (40)", "lv": 3, "pts": 5}]}]};
+</script>
+<script>
+"use strict";
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+$("#eb").textContent="Інформатика · "+D.grade+" клас · Розділ "+D.sec+" · для вчителя";
+$("#ht").textContent="Картки-білети: "+D.secName;
+document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{document.querySelectorAll(".tabs button").forEach(x=>x.setAttribute("aria-selected",x===b));["t1","t2","t3"].forEach(id=>$("#"+id).hidden=id!==b.dataset.t)});
+const LV={1:"🟢 Базовий · 3 б",2:"🟡 Середній · 4 б",3:"🔴 Складний · 5 б"};
+const cardHTML=(c,t)=>`<div class="cd"><div class="lv">${LV[c.lv]}</div><div class="q">${esc(c.q)}</div>${c.body&&c.body.length?"<ul>"+c.body.map(x=>"<li>"+esc(x)+"</li>").join("")+"</ul>":"<p style=\"margin:4px 0\">Відповідь: ____________</p>"}<div class="ans">✓ ${esc(c.ans)}</div><div class="src">Тема ${t.n}. ${esc(t.title)}</div></div>`;
+$("#all").innerHTML=D.topics.map(t=>`<div class="topic"><h2>Тема ${t.n}. ${esc(t.title)}</h2><div class="grid">${t.cards.map(c=>`<div class="tk">${cardHTML(c,t)}</div>`).join("")}</div></div>`).join("");
+function rng(seed){let a=seed>>>0||1;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function gen(){const n=Math.max(1,Math.min(40,+$("#n").value||20)),R=rng(+$("#seed").value||1);
+ const pool=lv=>D.topics.flatMap(t=>t.cards.filter(c=>c.lv===lv).map(c=>({c,t})));
+ const P={1:pool(1),2:pool(2),3:pool(3)};const used={1:[],2:[],3:[]};
+ const take=(lv,avoid)=>{let cand=P[lv].filter(x=>!avoid.includes(x.t.n)&&!used[lv].includes(x));if(!cand.length){used[lv]=[];cand=P[lv].filter(x=>!avoid.includes(x.t.n));}if(!cand.length)cand=P[lv];const x=cand[Math.floor(R()*cand.length)];used[lv].push(x);return x};
+ let h="";for(let i=1;i<=n;i++){const a=take(1,[]),b=take(2,[a.t.n]),c=take(3,[a.t.n,b.t.n]);
+  h+=`<div class="tk"><h3><span>Білет № ${i}</span><span>12 б</span></h3>${cardHTML(a.c,a.t)}${cardHTML(b.c,b.t)}${cardHTML(c.c,c.t)}</div>`;}
+ $("#tickets").innerHTML=h;}
+$("#gen").onclick=gen;gen();
+const sync=v=>{document.body.classList.toggle("show",v);$("#sa").checked=v;$("#sa2").checked=v};
+$("#sa").onchange=e=>sync(e.target.checked);$("#sa2").onchange=e=>sync(e.target.checked);
+$("#pr").onclick=()=>window.print();
+// журнал
+const KEY="tickets-"+D.grade+"-"+D.sec;let J=[];try{J=JSON.parse(localStorage.getItem(KEY)||"[]")}catch(e){}
+if(!J.length)J=Array.from({length:5},()=>({n:"",t:"",a:0,b:0,c:0}));
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(J))}catch(e){}};
+const opts=m=>Array.from({length:m+1},(_,i)=>`<option>${i}</option>`).join("");
+function draw(){$("#jb").innerHTML=J.map((r,i)=>`<tr><td><input data-i="${i}" data-k="n" value="${esc(r.n)}" aria-label="Учень"></td><td><input data-i="${i}" data-k="t" value="${esc(r.t)}" style="width:70px" aria-label="Білет"></td>
+ <td><select data-i="${i}" data-k="a">${opts(3)}</select></td><td><select data-i="${i}" data-k="b">${opts(4)}</select></td><td><select data-i="${i}" data-k="c">${opts(5)}</select></td><td class="tot">${(+r.a)+(+r.b)+(+r.c)}</td></tr>`).join("");
+ $("#jb").querySelectorAll("select").forEach(s=>s.value=J[s.dataset.i][s.dataset.k]);
+ $("#jb").querySelectorAll("input,select").forEach(el=>el.oninput=el.onchange=()=>{J[el.dataset.i][el.dataset.k]=el.value;save();if(el.tagName==="SELECT")draw()});}
+draw();$("#add").onclick=()=>{J.push({n:"",t:"",a:0,b:0,c:0});save();draw()};
+const csv=()=>"Учень;Білет;Базова;Середня;Складна;Разом\n"+J.filter(r=>r.n).map(r=>[r.n,r.t,r.a,r.b,r.c,(+r.a)+(+r.b)+(+r.c)].join(";")).join("\n");
+$("#csv").onclick=()=>{try{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["﻿"+csv()],{type:"text/csv"}));a.download="bilety-"+D.grade+"-"+D.sec+".csv";a.click();$("#msg").textContent="Файл збережено."}catch(e){$("#msg").textContent="Не вдалося — скористайся «Скопіювати таблицю»."}};
+$("#copy").onclick=async()=>{try{await navigator.clipboard.writeText(csv().replace(/;/g,"\t"));$("#msg").textContent="Скопійовано — встав у Google Таблицю."}catch(e){$("#msg").textContent="Браузер не дав скопіювати."}};
+</script>
+</body>
+</html>

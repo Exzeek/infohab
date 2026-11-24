@@ -1,0 +1,107 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2 клас · Карта року з Дослідиком</title>
+<style>
+:root{--c2:#f59f00;--c2d:#7a4b00;--ink:#1f2433;--r:clamp(12px,1.4vmin,22px);font-size:clamp(14px,1.9vmin,30px)}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;font-family:"Segoe UI","Nunito","Trebuchet MS",system-ui,sans-serif;color:var(--ink);
+  background:radial-gradient(circle at 20% 10%,#a5d8ff 0,#74c0fc 40%,#4dabf7 100%)}
+button{font:inherit;border:0;cursor:pointer}
+.emo{font-family:"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif;line-height:1}
+header{display:flex;align-items:center;gap:1rem;padding:.5rem 1rem;background:var(--c2);color:#2b2100;box-shadow:0 3px 0 var(--c2d)}
+header h1{margin:0;font-size:1.25rem;flex:1}
+#yb{display:flex;align-items:center;gap:.5rem;background:#2b2100;color:#b2f2bb;border-radius:999px;padding:.3rem .9rem;font-weight:900}
+#yb .bi{width:4rem;height:1.3rem;border:3px solid #b2f2bb;border-radius:.35rem;padding:2px}
+#yb i{display:block;height:100%;background:linear-gradient(90deg,#40c057,#8ce99a);border-radius:.15rem}
+main{position:absolute;top:3.2rem;left:0;right:0;bottom:0;padding:.6rem 1rem;display:flex;flex-direction:column;gap:.5rem}
+.sea{flex:1;display:flex;flex-direction:column;gap:.45rem;min-height:0}
+.arch{flex:1;display:flex;align-items:center;gap:.6rem;background:rgba(255,255,255,.18);border-radius:var(--r);padding:.3rem .6rem;min-height:0}
+.arch .nm{width:9.5rem;flex:none;font-weight:900;color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.25);font-size:.95rem;line-height:1.15}
+.arch .nm span{display:block;font-size:1.9rem}
+.isl{flex:1;display:flex;align-items:center;justify-content:space-around;gap:.3rem;height:100%}
+.il{position:relative;width:min(8.5vh,5.2rem);height:min(8.5vh,5.2rem);border-radius:46% 54% 50% 50%/55% 45% 55% 45%;
+  background:radial-gradient(circle at 40% 35%,#ffe8a1,#f4c56b 65%,#d9a441);box-shadow:0 0 0 .3rem #fff8,0 .4rem 0 #0002;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:900;font-size:.8rem;color:#5c3d00}
+.il .emo{font-size:1.7rem}
+.il.lock{filter:grayscale(.8) brightness(1.05);opacity:.65}
+.il.open{animation:bob 2.4s ease-in-out infinite}
+.il.done{background:radial-gradient(circle at 40% 35%,#d3f9d8,#8ce99a 65%,#40c057)}
+.il.done:after{content:"⭐";position:absolute;top:-.7rem;right:-.5rem;font-size:1.4rem}
+.il.sel{box-shadow:0 0 0 .35rem var(--c2),0 .4rem 0 #0002}
+@keyframes bob{50%{transform:translateY(-6px)}}
+#bot{position:fixed;width:4.6rem;pointer-events:none;transition:left 1.2s ease,top 1.2s ease;z-index:5;transform:translate(-15%,-60%)}
+.card{display:flex;align-items:center;gap:1rem;background:#fff;border-radius:var(--r);padding:.6rem 1rem;box-shadow:0 .4rem 0 #0002;min-height:5.2rem}
+.card .t{flex:1;font-size:1.15rem;font-weight:800}
+.card small{display:block;font-weight:600;color:#5c6378;font-size:.8rem}
+.go{background:var(--c2);color:#2b2100;font-weight:900;font-size:1.2rem;border-radius:999px;padding:.6rem 1.6rem;box-shadow:0 5px 0 var(--c2d);text-decoration:none}
+.go[aria-disabled="true"]{background:#dee2e6;box-shadow:0 5px 0 #adb5bd;color:#5c6378;pointer-events:none}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* phone: scrolling (v2) */
+@media (max-width:900px),(max-height:600px){
+ html,body{overflow-x:hidden;overflow-y:auto;height:auto;touch-action:manipulation}
+ header{position:sticky;top:0;z-index:6;gap:.5rem;padding:.45rem .6rem}
+ header h1{font-size:1rem}
+ main{position:static;padding:.5rem .5rem 1rem}
+ .sea{flex:none}
+ .arch{flex:none;flex-direction:column;align-items:stretch;padding:.5rem .6rem}
+ .arch .nm{width:auto;display:flex;align-items:center;gap:.4rem}
+ .arch .nm span{display:inline;font-size:1.4rem}
+ .isl{flex-wrap:wrap;justify-content:flex-start;gap:.8rem .55rem;height:auto;padding:.3rem 0}
+ .il{width:3.7rem;height:3.7rem}
+ .il .emo{font-size:1.4rem}
+ #bot{display:none}
+ .card{position:sticky;bottom:.4rem;flex-wrap:wrap;gap:.6rem}
+ .card .t{font-size:1rem;min-width:12rem}
+}
+</style>
+</head>
+<body>
+<header><span class="emo" style="font-size:1.6rem">🤖</span><h1>2 клас · Карта року з Дослідиком</h1><div id="yb" title="Скільки островів пройдено за рік"><span class="bi"><i id="ybi"></i></span><b id="ybp">0 / 34</b></div></header>
+<main>
+  <div class="sea" id="sea"></div>
+  <div class="card" id="card"></div>
+</main>
+<div id="bot"></div>
+<script>
+const LESSONS={"1":"t01.html","2":"t02.html","3":"t03.html","4":"t04.html","5":"t05.html","6":"t06.html","7":"t07.html","8":"t08.html","9":"t09.html","10":"t10.html","11":"t11.html","12":"t12.html","13":"t13.html","14":"t14.html","15":"t15.html","16":"t16.html"};
+const STAGES={"1":3,"2":3,"3":3,"4":3,"5":3,"6":3,"7":3,"8":3,"9":3,"10":3,"11":4,"12":4,"13":4,"14":4,"15":4,"16":4};
+const A=[
+ {n:"Інформація",e:"💡",t:["Як я можу досліджувати світ навколо себе?","Як я сприймаю інформацію?","Якою буває інформація?","Як я можу перевірити правдивість інформації?","Чи правильно я обмінююсь інформацією?"],i:["🔍","👂","🖼️","✅","💬"]},
+ {n:"Пристрої",e:"💻",t:["Якими інструментами я вмію користуватися?","Як я можу захистити себе під час роботи з комп’ютером?","Які пристрої я використовую для роботи з відео й зображеннями?","Які пристрої будуть корисними для роботи зі звуком?","Яким буває папір і пристрої для роботи з ним?","Як комп’ютер може допомогти під час обчислень?"],i:["🛠️","🛡️","📷","🎧","🖨️","🧮"]},
+ {n:"Об’єкти",e:"🧸",t:["Які об’єкти я можу знайти у своєму оточенні?","Які дії я можу виконувати з об’єктами?","У яких середовищах перебувають різні об’єкти?","З якими об’єктами працює комп’ютер?","Якими бувають меню?"],i:["🍋","✋","🌊","🖱️","📋"]},
+ {n:"Малюнки й моделі",e:"🎨",t:["Що таке графічний редактор?","Чи будь-який малюнок можна зафарбувати?","Як під час малювання використовують лінії?","Які інструменти можуть творити «дива» на комп’ютері?","Як створювати «аплікацію» на комп’ютері?","Як я можу використовувати геометричні фігури?","Як створювати орнаменти?","Як підписувати малюнки в графічному редакторі?","Як комп’ютер може допомогти досягти успіху?"],i:["🖌️","🖍️","〰️","✨","✂️","🔺","🌸","🔤","🏆"]},
+ {n:"Алгоритми",e:"🧭",t:["Як план та інструкція впливають на виконання завдання?","Як скласти алгоритм?","Чи є виконавці в комп’ютерних програмах?","Як передбачити результат виконання алгоритму?","Як створити свого власного виконавця алгоритму?","Що таке фрагмент малюнка?","Як малювати в середовищі Скретч?","Як створювати алгоритми побудови малюнків у Скретч?","Як організувати виставку?"],i:["📝","🥪","🐢","🔮","🤖","🧩","🐱","📐","🖼️"]}
+];
+const ROBOT=`<svg viewBox="0 0 120 150"><line x1="60" y1="8" x2="60" y2="24" stroke="#5c6378" stroke-width="4"/><circle cx="60" cy="8" r="7" fill="#ffd43b"/>
+<rect x="22" y="22" width="76" height="58" rx="18" fill="#dee2e6" stroke="#5c6378" stroke-width="4"/><rect x="32" y="32" width="56" height="38" rx="12" fill="#1f2433"/>
+<circle cx="48" cy="48" r="6" fill="#66d9e8"/><circle cx="72" cy="48" r="6" fill="#66d9e8"/><path d="M47 60 Q60 68 73 60" stroke="#66d9e8" stroke-width="4" fill="none" stroke-linecap="round"/>
+<rect x="30" y="84" width="60" height="44" rx="14" fill="#f59f00" stroke="#7a4b00" stroke-width="4"/><circle cx="60" cy="100" r="7" fill="#fff"/>
+<rect x="10" y="88" width="20" height="10" rx="5" fill="#adb5bd" stroke="#5c6378" stroke-width="3"/><rect x="90" y="88" width="20" height="10" rx="5" fill="#adb5bd" stroke="#5c6378" stroke-width="3"/>
+<rect x="38" y="128" width="14" height="16" rx="5" fill="#5c6378"/><rect x="68" y="128" width="14" height="16" rx="5" fill="#5c6378"/></svg>`;
+function done(n){try{const s=JSON.parse(localStorage.getItem('g2:2-T'+String(n).padStart(2,'0'))||'null');return !!(s&&s.done&&s.done.length>=(STAGES[n]||99));}catch(e){return false;}}
+const sea=document.getElementById('sea'),card=document.getElementById('card'),bot=document.getElementById('bot');bot.innerHTML=ROBOT;
+let k=0,els=[],cnt=0,cur=null;
+A.forEach((a,ai)=>{const r=document.createElement('div');r.className='arch';r.innerHTML=`<div class="nm"><span class="emo">${a.e}</span>${ai+1}. ${a.n}</div><div class="isl"></div>`;
+  const box=r.querySelector('.isl');a.t.forEach((t,ti)=>{k++;const n=k,b=document.createElement('button');const d=done(n);if(d)cnt++;
+    b.className='il '+(d?'done':LESSONS[n]?'open':'lock');b.innerHTML=`<span class="emo">${a.i[ti]}</span>${n}`;b.title=t;
+    b.onclick=()=>pick(n,a,t,b);box.appendChild(b);els[n]=b;});sea.appendChild(r);});
+document.getElementById('ybi').style.width=(cnt/34*100)+'%';document.getElementById('ybp').textContent=cnt+' / 34';
+function pick(n,a,t,b){els.forEach(e=>e&&e.classList.remove('sel'));b.classList.add('sel');cur=n;
+  const has=LESSONS[n];card.innerHTML=`<span class="emo" style="font-size:3rem">${b.querySelector('.emo').textContent}</span>
+   <div class="t"><small>Острів ${n} · ${a.n}</small>${t}${done(n)?' ⭐':''}</div>
+   <a class="go" ${has?`href="${LESSONS[n]}"`:'aria-disabled="true"'}>${has?(done(n)?'Пограти ще ▶':'Вирушити ▶'):'Скоро 🔒'}</a>`;
+  const r=b.getBoundingClientRect();bot.style.left=(r.right)+'px';bot.style.top=(r.top+r.height/2)+'px';}
+// старт: перший непройдений острів з уроком, інакше перший
+let start=1;for(let n=1;n<=34;n++){if(LESSONS[n]&&!done(n)){start=n;break;}}
+requestAnimationFrame(()=>{const b=els[start];let ai=0,acc=0;for(;ai<A.length;ai++){if(start<=acc+A[ai].t.length)break;acc+=A[ai].t.length;}pick(start,A[ai],A[ai].t[start-acc-1],b);});
+addEventListener('resize',()=>{if(cur)els[cur].click();});
+</script>
+</body>
+</html>
+
+</body></html>

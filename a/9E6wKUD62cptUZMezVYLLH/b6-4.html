@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Білети · 6 клас · Розділ 4. Алгоритми та програми (Scratch)</title>
+<style>
+:root{--cl:#2f9e44;--bg:#f5f6fa;--card:#fff;--ink:#1f2433;--muted:#5b6275;--line:#e3e6ee;--ok:#2b8a3e;--r:16px}
+@media (prefers-color-scheme:dark){:root{--cl:#69db7c;--bg:#151821;--card:#1f2330;--ink:#eef0f6;--muted:#a3aabb;--line:#2e3344}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Nunito","Segoe UI",system-ui,sans-serif;font-size:16px;line-height:1.45}
+header{background:var(--cl);color:#fff;padding:14px 18px}
+header small{opacity:.85;display:block}header h1{margin:2px 0 0;font-size:1.35rem}
+main{max-width:1100px;margin:0 auto;padding:14px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 14px;position:sticky;top:0;background:var(--bg);padding:6px 0;z-index:5}
+.tabs button,.btn{border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 14px;font:inherit;font-weight:800;cursor:pointer}
+.tabs button[aria-selected=true],.btn.main{background:var(--cl);border-color:var(--cl);color:#fff}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:8px 0}
+input,select{font:inherit;padding:7px 10px;border:2px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
+.lead{color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
+.tk{background:var(--card);border-radius:var(--r);border:2px solid var(--line);padding:12px 14px;break-inside:avoid}
+.tk h3{margin:0 0 6px;color:var(--cl);display:flex;justify-content:space-between}
+.cd{border-top:1px dashed var(--line);padding:8px 0}
+.cd .lv{font-weight:900;font-size:.85rem}
+.cd .q{font-weight:700;white-space:pre-wrap}
+.cd ul{margin:4px 0 0;padding-left:18px}.cd li{white-space:pre-wrap}
+.cd .src{font-size:.75rem;color:var(--muted)}
+.ans{display:none;background:#e6f4ea;color:#1b5e20;border-radius:8px;padding:4px 8px;margin-top:4px;font-size:.92rem}
+@media (prefers-color-scheme:dark){.ans{background:#1d3a26;color:#b7f0c3}}
+body.show .ans{display:block}
+table{border-collapse:collapse;width:100%;background:var(--card);border-radius:var(--r);overflow:hidden}
+th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left}
+td input{width:100%}td select{width:100%}
+.tot{font-weight:900;color:var(--cl);font-size:1.1rem}
+.topic h2{color:var(--cl);margin:18px 0 6px}
+[hidden]{display:none!important}
+@media print{header,.tabs,.noprint{display:none!important}body{background:#fff;color:#000}.tk{border:1px solid #999;page-break-inside:avoid}.grid{display:block}.tk{margin-bottom:10px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header><small id="eb"></small><h1 id="ht"></h1></header>
+<main>
+<div class="tabs" role="tablist">
+ <button role="tab" aria-selected="true" data-t="t1">🎫 Білети</button>
+ <button role="tab" aria-selected="false" data-t="t2">📚 Усі картки</button>
+ <button role="tab" aria-selected="false" data-t="t3">📝 Журнал</button>
+</div>
+<section id="t1">
+ <p class="lead">Кожен білет = 🟢 базова (3 б) + 🟡 середня (4 б) + 🔴 складна (5 б) з трьох різних тем = <b>12 балів</b>. Номер серії дає ті самі білети знову (зручно для паралельних класів).</p>
+ <div class="row noprint"><label>Білетів: <input id="n" type="number" min="1" max="40" value="20" style="width:80px"></label>
+  <label>Серія: <input id="seed" type="number" value="1" style="width:90px"></label>
+  <button class="btn main" id="gen">🎲 Скласти білети</button>
+  <label><input type="checkbox" id="sa"> Показати відповіді</label>
+  <button class="btn" id="pr">🖨️ Друк</button></div>
+ <div class="grid" id="tickets"></div>
+</section>
+<section id="t2" hidden><p class="lead">По 4 картки на тему. Можна давати усно або на дошці. Відповіді — зеленим (увімкни «Показати відповіді» на вкладці «Білети» або тут).</p>
+ <div class="row noprint"><label><input type="checkbox" id="sa2"> Показати відповіді</label></div><div id="all"></div></section>
+<section id="t3" hidden>
+ <p class="lead">Впиши учнів і бали за кожну картку білета. Підсумок рахується сам. Дані зберігаються лише на цьому комп'ютері.</p>
+ <table><thead><tr><th>Учень</th><th>Білет №</th><th>🟢 /3</th><th>🟡 /4</th><th>🔴 /5</th><th>Разом</th></tr></thead><tbody id="jb"></tbody></table>
+ <div class="row noprint"><button class="btn" id="add">+ Рядок</button><button class="btn main" id="csv">⬇️ CSV для журналу</button><button class="btn" id="copy">📋 Скопіювати таблицю</button><span id="msg" class="lead"></span></div>
+</section>
+</main>
+<script>
+const D={"grade": 6, "sec": 4, "secName": "Алгоритми та програми (Scratch)", "saga": "Класний Врожай", "topics": [{"n": 1, "title": "Датчики", "cards": [{"q": "Що може «повідомити» блок «торкається краю?»?", "body": ["А) Число від 0 до 100", "Б) Назву костюма спрайта", "В) Колір фону сцени", "Г) «Так» або «ні»"], "ans": "Г) «Так» або «ні»", "lv": 1, "pts": 3}, {"q": "Який це блок за формою? Категорії: Шестикутний (так/ні) · Овальний (значення).", "body": ["1) торкається кольору 🟩?", "2) відстань до вказівника миші", "3) клавішу пропуск натиснуто?", "4) відповідь"], "ans": "1 — Шестикутний (так/ні); 2 — Овальний (значення); 3 — Шестикутний (так/ні); 4 — Овальний (значення)", "lv": 1, "pts": 3}, {"q": "Спрайт стоїть у точці x = 40, вказівник миші — у точці x = 100 на тій самій висоті. Що покаже «відстань до вказівника миші»?", "body": [], "ans": "60 (Обидва об'єкти на одній висоті — рахуємо лише по x. Відстань = більше x мінус менше x. Відстань завжди додатна: знак «−» не потрібен.)", "lv": 2, "pts": 4}, {"q": "Скрипт «Бульбик поливає грядку» має 3 помилки. Познач рядки з помилками. Запиши номери рядків і як виправити.", "body": ["1) коли 🏁 натиснуто  ⟶  Запуск гри", "2) сказати (відповідь)  ⟶  Привітати гравця на ім'я", "3) запитати «Як тебе звати?» і чекати  ⟶  Дізнатися ім'я", "4) якщо ⟨торкається кольору 🟦?⟩ то полити  ⟶  Полити зелену грядку", "5) якщо ⟨клавішу пропуск натиснуто?⟩ то x + 10  ⟶  Іти праворуч стрілкою ➡", "6) скинути таймер  ⟶  Почати відлік поливу"], "ans": "Рядки 2, 4, 5. спершу запитати, потім відповідь; колір грядки; яка клавіша?", "lv": 3, "pts": 5}]}, {"n": 2, "title": "Цикли", "cards": [{"q": "Що таке цикл у програмі?", "body": ["А) Один крок спрайта", "Б) Повторення команд", "В) Звук у кінці гри", "Г) Зміна фону сцени"], "ans": "Б) Повторення команд", "lv": 1, "pts": 3}, {"q": "З'єднай цикл із ситуацією на фермі.", "body": ["1) повторити 8", "2) завжди", "3) повторювати до ⟨торкається краю?⟩", "4) без циклу", "—", "А) Один раз сказати «Привіт!»", "Б) Полити рівно 8 грядок", "В) Іти, доки не дійде до паркану", "Г) Вітряк крутиться всю гру"], "ans": "1–Б, 2–Г, 3–В, 4–А", "lv": 1, "pts": 3}, {"q": "Яке число вписати в «повторити …», щоб Бульбик намалював квадратну грядку (4 сторони)?", "body": [], "ans": "4", "lv": 2, "pts": 4}, {"q": "Скрипт поливу 8 грядок має 3 помилки. Познач їх. Запиши номери рядків і як виправити.", "body": ["1) коли 🏁 натиснуто  ⟶  Старт", "2) повторити 6  ⟶  Полити 8 грядок", "3)   перемістити на 1 грядку  ⟶  Перейти до наступної", "4) полити (поза циклом)  ⟶  Полити кожну грядку", "5) завжди → сказати «Готово!»  ⟶  Один раз сказати «Готово!»"], "ans": "Рядки 2, 4, 5. скільки грядок?; полив — усередині циклу; «Готово!» — без циклу", "lv": 3, "pts": 5}]}, {"n": 3, "title": "Змінні", "cards": [{"q": "Що таке змінна в Scratch?", "body": ["А) Фон сцени з картинкою", "Б) Звук у бібліотеці звуків Scratch", "В) Новий спрайт на сцені", "Г) Іменоване місце для значення"], "ans": "Г) Іменоване місце для значення", "lv": 1, "pts": 3}, {"q": "З'єднай блок із дією.", "body": ["1) задати морква значення 0", "2) змінити морква на 1", "3) показати змінну морква", "4) змінити вода на −1", "—", "А) Відняти одну одиницю води", "Б) Вивести лічильник на сцену", "В) Додати одну морквину", "Г) Почати рахунок з нуля"], "ans": "1–Г, 2–В, 3–Б, 4–А", "lv": 1, "pts": 3}, {"q": "Як називається категорія блоків Scratch, де створюють змінні? (одне слово)", "body": [], "ans": "змінні", "lv": 2, "pts": 4}, {"q": "Скрипт «Рахуємо врожай» має 3 помилки. Познач їх. Запиши номери рядків і як виправити.", "body": ["1) коли 🏁 натиснуто  ⟶  Старт", "2) задати морква значення 0  ⟶  Почати з нуля", "3) повторити 8 → задати морква значення 1  ⟶  Додавати по морквині", "4) змінити вода на 5  ⟶  Витрачати воду", "5) сказати «морква»  ⟶  Показати кількість моркви", "6) показати змінну морква  ⟶  Лічильник на сцені"], "ans": "Рядки 3, 4, 5. додавати — «змінити на 1»; витрачати — мінус; овальний блок змінної, не текст", "lv": 3, "pts": 5}]}, {"n": 4, "title": "Прийняття рішень", "cards": [{"q": "Яку форму має блок-умова в Scratch?", "body": ["А) Шестикутну", "Б) Овальну", "В) Квадратну", "Г) Зірчасту з кутами"], "ans": "А) Шестикутну", "lv": 1, "pts": 3}, {"q": "З'єднай блок і що він робить.", "body": ["1) якщо ⟨…⟩ то", "2) якщо ⟨…⟩ то … інакше", "3) чекати до ⟨…⟩", "4) повторювати до ⟨…⟩", "—", "А) Цикл, доки умова не стане «так»", "Б) Одна з двох дій", "В) Пауза, доки умова не стане «так»", "Г) Дія лише коли умова «так»"], "ans": "1–Г, 2–Б, 3–В, 4–А", "lv": 1, "pts": 3}, {"q": "Блок, що дає дві різні дії для «так» і «ні», називається «якщо … то …» — яке слово пропущено? (одне слово)", "body": [], "ans": "інакше", "lv": 2, "pts": 4}, {"q": "Скрипт сортувальника має 3 помилки. Познач їх. Запиши номери рядків і як виправити.", "body": ["1) коли 🏁 натиснуто  ⟶  Старт", "2) повторити 8  ⟶  Пройти 8 грядок", "3)   якщо ⟨торкається 🟩?⟩ то змінити кошик на 1  ⟶  Брати стиглі (червоні)", "4)   інакше змінити кошик на 1  ⟶  Зелені не брати", "5)   перемістити на 1 крок  ⟶  Йти далі", "6) сказати «кошик»  ⟶  Сказати, скільки зібрано"], "ans": "Рядки 3, 4, 6. стиглі — червоні 🟥; інакше — нічого не додавати; овальний блок змінної «кошик», а не текст", "lv": 3, "pts": 5}]}, {"n": 5, "title": "Координати", "cards": [{"q": "Які координати центру сцени Scratch?", "body": ["А) (480; 360)", "Б) (240; 180)", "В) (1; 1)", "Г) (0; 0)"], "ans": "Г) (0; 0)", "lv": 1, "pts": 3}, {"q": "З'єднай блок і що він робить.", "body": ["1) перейти в x: 0 y: 0", "2) змінити x на 10", "3) змінити y на −10", "4) ковзати 1 с до x: 100 y: 0", "—", "А) Плавно доїхати до точки", "Б) Стрибнути в центр", "В) Зсунутися праворуч на 10", "Г) Зсунутися вниз на 10"], "ans": "1–Б, 2–В, 3–Г, 4–А", "lv": 1, "pts": 3}, {"q": "Яка найбільша координата x на сцені Scratch? (число)", "body": [], "ans": "240", "lv": 2, "pts": 4}, {"q": "Маршрут дрона має 3 помилки. Познач їх. Запиши номери рядків і як виправити.", "body": ["1) перейти в x: 0 y: 0  ⟶  Старт у центрі", "2) змінити x на −50  ⟶  Полетіти праворуч на 50", "3) змінити y на 30  ⟶  Піднятися на 30", "4) перейти в x: 300 y: 0  ⟶  Долетіти до правого краю", "5) змінити y на 20  ⟶  Опуститися на 20", "6) сказати «Готово»  ⟶  Повідомити"], "ans": "Рядки 2, 4, 5. праворуч — додатне число; правий край сцени — x = 240; вниз — від'ємне число", "lv": 3, "pts": 5}]}, {"n": 6, "title": "Логічні оператори", "cards": [{"q": "Коли умова ⟨А і Б⟩ істинна?", "body": ["А) Коли хоч одна істинна", "Б) Коли обидві істинні", "В) Коли обидві хибні", "Г) Ніколи не буває"], "ans": "Б) Коли обидві істинні", "lv": 1, "pts": 3}, {"q": "З'єднай ситуацію з оператором.", "body": ["1) Пускати, якщо є квиток і маска", "2) Пускати, якщо учень або вчитель", "3) Пускати, якщо це не коза", "4) Пускати всіх", "—", "А) без умови", "Б) і", "В) або", "Г) не"], "ans": "1–Б, 2–В, 3–Г, 4–А", "lv": 1, "pts": 3}, {"q": "Оператор, який дає «так», лише коли обидві умови «так» (одне слово):", "body": [], "ans": "і", "lv": 2, "pts": 4}, {"q": "Правила воріт мають 3 помилки. Познач їх. Запиши номери рядків і як виправити.", "body": ["1) ⟨час > 8⟩ і ⟨час < 18⟩  ⟶  Ворота відкриті з 8 до 18", "2) ⟨дощ⟩ і ⟨вітер⟩  ⟶  Закрити теплицю в дощ АБО вітер", "3) не ⟨коза⟩  ⟶  Пускати всіх, крім кози", "4) ⟨учень⟩ і ⟨вчитель⟩  ⟶  Пускати учнів або вчителів", "5) ⟨очки > 10⟩ або ⟨життя > 0⟩  ⟶  Перемога: багато очок І живий", "6) ⟨вода < 5⟩  ⟶  Полити, коли мало води"], "ans": "Рядки 2, 4, 5. досить одного — «або»; людина не може бути одночасно обома — «або»; обидві умови — «і»", "lv": 3, "pts": 5}]}, {"n": 7, "title": "Ігри", "cards": [{"q": "Що зазвичай стоїть на початку скрипта гри?", "body": ["А) коли 🏁 натиснуто", "Б) сказати «Кінець»", "В) видалити всі спрайти", "Г) зупинити все"], "ans": "А) коли 🏁 натиснуто", "lv": 1, "pts": 3}, {"q": "З'єднай частину гри з прикладом.", "body": ["1) Мета", "2) Керування", "3) Перешкода", "4) Рахунок", "—", "А) Гусінь на грядці", "Б) Стрілки ⬅ ➡", "В) Змінна «очки»", "Г) Зібрати 10 морквин"], "ans": "1–Г, 2–Б, 3–А, 4–В", "lv": 1, "pts": 3}, {"q": "Блок, який зупиняє всю гру (два слова, «зупинити …»):", "body": [], "ans": "зупинити все", "lv": 2, "pts": 4}, {"q": "Скрипт гри має 3 помилки. Познач їх. Запиши номери рядків і як виправити.", "body": ["1) коли 🏁 натиснуто  ⟶  Старт гри", "2) змінити очки на 0  ⟶  Почати з нуля очок", "3) завжди  ⟶  Ігровий цикл", "4)   якщо ⟨клавішу ⬅ натиснуто?⟩ то змінити x на 10  ⟶  Йти ліворуч", "5)   якщо ⟨торкається 🥕?⟩ то змінити очки на 1  ⟶  Їсти моркву", "6)   якщо ⟨очки = 10⟩ то сказати «Ой!»  ⟶  Перемога"], "ans": "Рядки 2, 4, 6. на старті — «задати очки значення 0»; ліворуч — змінити x на −10; перемога — «Перемога!» і зупинити все", "lv": 3, "pts": 5}]}, {"n": 8, "title": "Удосконалення гри", "cards": [{"q": "Як зробити гру складнішою на другому рівні?", "body": ["А) Вимкнути керування", "Б) Видалити рахунок", "В) Прибрати морквини", "Г) Пришвидшити гусінь"], "ans": "Г) Пришвидшити гусінь", "lv": 1, "pts": 3}, {"q": "З'єднай відгук гравця з удосконаленням.", "body": ["1) «Занадто легко»", "2) «Тихо й нудно»", "3) «Рахунок не скидається»", "4) «Не знаю, що робити»", "—", "А) Звук при з'їданні морквини", "Б) задати очки 0 на старті", "В) Новий рівень зі швидшою гусінню", "Г) Екран з правилами"], "ans": "1–В, 2–А, 3–Б, 4–Г", "lv": 1, "pts": 3}, {"q": "Як називається перевірка гри, коли шукають помилки? (одне слово)", "body": [], "ans": "тестування", "lv": 2, "pts": 4}, {"q": "Скрипт таймера має 3 помилки. Познач їх. Запиши номери рядків і як виправити.", "body": ["1) коли 🏁 натиснуто  ⟶  Старт", "2) задати час значення 0  ⟶  Почати з 60 секунд", "3) повторювати до ⟨час = 0⟩  ⟶  Відлік до нуля", "4)   чекати 1 секунду  ⟶  Пауза", "5)   змінити час на 1  ⟶  Відняти секунду", "6) сказати «Перемога!»  ⟶  Час вийшов — програш"], "ans": "Рядки 2, 5, 6. почати з 60; віднімати — змінити на −1; коли час вийшов — «Час вийшов!»", "lv": 3, "pts": 5}]}]};
+</script>
+<script>
+"use strict";
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+$("#eb").textContent="Інформатика · "+D.grade+" клас · Розділ "+D.sec+" · для вчителя";
+$("#ht").textContent="Картки-білети: "+D.secName;
+document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{document.querySelectorAll(".tabs button").forEach(x=>x.setAttribute("aria-selected",x===b));["t1","t2","t3"].forEach(id=>$("#"+id).hidden=id!==b.dataset.t)});
+const LV={1:"🟢 Базовий · 3 б",2:"🟡 Середній · 4 б",3:"🔴 Складний · 5 б"};
+const cardHTML=(c,t)=>`<div class="cd"><div class="lv">${LV[c.lv]}</div><div class="q">${esc(c.q)}</div>${c.body&&c.body.length?"<ul>"+c.body.map(x=>"<li>"+esc(x)+"</li>").join("")+"</ul>":"<p style=\"margin:4px 0\">Відповідь: ____________</p>"}<div class="ans">✓ ${esc(c.ans)}</div><div class="src">Тема ${t.n}. ${esc(t.title)}</div></div>`;
+$("#all").innerHTML=D.topics.map(t=>`<div class="topic"><h2>Тема ${t.n}. ${esc(t.title)}</h2><div class="grid">${t.cards.map(c=>`<div class="tk">${cardHTML(c,t)}</div>`).join("")}</div></div>`).join("");
+function rng(seed){let a=seed>>>0||1;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function gen(){const n=Math.max(1,Math.min(40,+$("#n").value||20)),R=rng(+$("#seed").value||1);
+ const pool=lv=>D.topics.flatMap(t=>t.cards.filter(c=>c.lv===lv).map(c=>({c,t})));
+ const P={1:pool(1),2:pool(2),3:pool(3)};const used={1:[],2:[],3:[]};
+ const take=(lv,avoid)=>{let cand=P[lv].filter(x=>!avoid.includes(x.t.n)&&!used[lv].includes(x));if(!cand.length){used[lv]=[];cand=P[lv].filter(x=>!avoid.includes(x.t.n));}if(!cand.length)cand=P[lv];const x=cand[Math.floor(R()*cand.length)];used[lv].push(x);return x};
+ let h="";for(let i=1;i<=n;i++){const a=take(1,[]),b=take(2,[a.t.n]),c=take(3,[a.t.n,b.t.n]);
+  h+=`<div class="tk"><h3><span>Білет № ${i}</span><span>12 б</span></h3>${cardHTML(a.c,a.t)}${cardHTML(b.c,b.t)}${cardHTML(c.c,c.t)}</div>`;}
+ $("#tickets").innerHTML=h;}
+$("#gen").onclick=gen;gen();
+const sync=v=>{document.body.classList.toggle("show",v);$("#sa").checked=v;$("#sa2").checked=v};
+$("#sa").onchange=e=>sync(e.target.checked);$("#sa2").onchange=e=>sync(e.target.checked);
+$("#pr").onclick=()=>window.print();
+// журнал
+const KEY="tickets-"+D.grade+"-"+D.sec;let J=[];try{J=JSON.parse(localStorage.getItem(KEY)||"[]")}catch(e){}
+if(!J.length)J=Array.from({length:5},()=>({n:"",t:"",a:0,b:0,c:0}));
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(J))}catch(e){}};
+const opts=m=>Array.from({length:m+1},(_,i)=>`<option>${i}</option>`).join("");
+function draw(){$("#jb").innerHTML=J.map((r,i)=>`<tr><td><input data-i="${i}" data-k="n" value="${esc(r.n)}" aria-label="Учень"></td><td><input data-i="${i}" data-k="t" value="${esc(r.t)}" style="width:70px" aria-label="Білет"></td>
+ <td><select data-i="${i}" data-k="a">${opts(3)}</select></td><td><select data-i="${i}" data-k="b">${opts(4)}</select></td><td><select data-i="${i}" data-k="c">${opts(5)}</select></td><td class="tot">${(+r.a)+(+r.b)+(+r.c)}</td></tr>`).join("");
+ $("#jb").querySelectorAll("select").forEach(s=>s.value=J[s.dataset.i][s.dataset.k]);
+ $("#jb").querySelectorAll("input,select").forEach(el=>el.oninput=el.onchange=()=>{J[el.dataset.i][el.dataset.k]=el.value;save();if(el.tagName==="SELECT")draw()});}
+draw();$("#add").onclick=()=>{J.push({n:"",t:"",a:0,b:0,c:0});save();draw()};
+const csv=()=>"Учень;Білет;Базова;Середня;Складна;Разом\n"+J.filter(r=>r.n).map(r=>[r.n,r.t,r.a,r.b,r.c,(+r.a)+(+r.b)+(+r.c)].join(";")).join("\n");
+$("#csv").onclick=()=>{try{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["﻿"+csv()],{type:"text/csv"}));a.download="bilety-"+D.grade+"-"+D.sec+".csv";a.click();$("#msg").textContent="Файл збережено."}catch(e){$("#msg").textContent="Не вдалося — скористайся «Скопіювати таблицю»."}};
+$("#copy").onclick=async()=>{try{await navigator.clipboard.writeText(csv().replace(/;/g,"\t"));$("#msg").textContent="Скопійовано — встав у Google Таблицю."}catch(e){$("#msg").textContent="Браузер не дав скопіювати."}};
+</script>
+</body>
+</html>

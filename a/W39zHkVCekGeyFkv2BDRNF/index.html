@@ -149,7 +149,7 @@ td:last-child,th:last-child{text-align:right;white-space:nowrap}
       </div>
     </section>
     <section id="tab-real" hidden style="display:grid;gap:16px">
-      <div class="card"><h2>Завдання для справжнього Scratch</h2><p style="margin:0">Відкрий Scratch на комп’ютері або в браузері: <a href="https://scratch.mit.edu/projects/editor/" target="_blank" rel="noopener">scratch.mit.edu/projects/editor</a>. Виконай завдання, познач готові пункти й покажи проєкт учителю. Найцікавіші роботи потраплять у галерею Інфо-хабу.</p></div>
+      <div class="card"><h2>Завдання для справжнього Scratch</h2><p style="margin:0">Відкрий Scratch на комп’ютері або в браузері: <a href="https://scratch.mit.edu/projects/editor/" target="_blank" rel="noopener">scratch.mit.edu/projects/editor</a>. Виконай завдання, познач готові пункти й покажи проєкт учителю. Найцікавіші роботи потраплять у галерею сайту.</p></div>
       <div class="grid" id="real"></div>
     </section>
     <section id="tab-res" hidden style="display:grid;gap:16px"><div class="card" id="res"></div>
@@ -252,7 +252,7 @@ const T=[
    return s.length>3?"Є зайва лінія. До першої точки йди з піднятим олівцем.":"";}},
  {id:13,lv:3,name:"Багато чи мало",text:"У змінній «рахунок» буде число (ми підставимо різні). Якщо воно більше за 5, робот каже «Багато», інакше — «Мало».",hint:"Потрібен один блок «якщо … то … інакше» і два блоки «говорити».",pal:["ifelse","say"],conds:["gt","lt","eq"],tests:true,check:(w,p,t)=>{for(const [v,exp] of [[3,"мало"],[8,"багато"],[5,"мало"]]){const r=simulate(p,t,v);if(r.say.trim().toLowerCase()!==exp)return "Перевірка з рахунком "+v+": робот мав сказати «"+exp[0].toUpperCase()+exp.slice(1)+"», а сказав «"+(r.say||"нічого")+"».";}return "";}},
  {id:14,lv:3,name:"Зірка",text:"Намалюй п’ятикутну зірку зі стороною 150 кроків за допомогою циклу.",hint:"Зірка замикається, якщо повертати на 144 градуси.",start:{x:-75,y:30},pal:DRAW.concat("repeat"),check:(w,p)=>regular(w,5,150,144)||(uses(p,"repeat")?"":"Зірка є! А тепер зроби її через блок «повторити».")},
- {id:15,lv:3,name:"Вільна майстерня",text:"Тут немає перевірки. Придумай власний малюнок чи програму й покажи вчителю: найкращі роботи потраплять у галерею Інфо-хабу.",hint:"Спробуй вкласти один цикл в інший: вийдуть візерунки.",pal:ALL,free:true}
+ {id:15,lv:3,name:"Вільна майстерня",text:"Тут немає перевірки. Придумай власний малюнок чи програму й покажи вчителю: найкращі роботи потраплять у галерею сайту.",hint:"Спробуй вкласти один цикл в інший: вийдуть візерунки.",pal:ALL,free:true}
 ];
 const N=T.filter(t=>!t.free).length, LV={1:"🟢 Перші кроки",2:"🟡 Цикли",3:"🔴 Змінні, умови, координати"};
 const REAL=[

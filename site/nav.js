@@ -44,3 +44,5 @@
   document.body.appendChild(ft);
 })();
 (function(){if(window.LIVE||document.getElementById("liveJs"))return;var s=document.createElement("script");s.id="liveJs";s.src="/site/live.js";s.defer=true;document.head.appendChild(s)})();
+
+(function(){var h=location.hostname;if(window.__ugd||location.protocol==="file:"||/(^|\.)urokinfo\.com\.ua$|github\.io$|^localhost$|^127\./.test(h))return;window.__ugd=1;var f=function(){if(document.getElementById("ugd"))return;var b=document.createElement("a");b.id="ugd";b.href="https://urokinfo.com.ua"+location.pathname;b.textContent="Цей матеріал скопійовано з urokinfo.com.ua без дозволу — відкрити оригінал →";b.style.cssText="position:fixed;left:0;right:0;top:0;z-index:2147483647;background:#e03131;color:#fff;font:800 15px system-ui,sans-serif;padding:10px;text-align:center;text-decoration:none";document.body.appendChild(b)};document.readyState==="loading"?document.addEventListener("DOMContentLoaded",f):f()})();

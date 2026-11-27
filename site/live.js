@@ -41,7 +41,7 @@ function taskIdx(m){var T=(m&&m.tasks)||[],here=norm(location.href),hp=location.
 var META=null,TI=-1;
 function send(force){var L=me();if(!L)return;
   var d=Object.assign({n:L.name,pg:page(),u:location.pathname+location.search},extra);
-  if(TI>=0){d["r/"+TI]={v:1,d:extra.d==null?null:extra.d,t:extra.t==null?null:extra.t,g:extra.g==null?null:extra.g};d.ti=TI}else d.ti=-1;
+  if(TI>=0){d["r/"+TI]={v:1,d:extra.d==null?null:extra.d,t:extra.t==null?null:extra.t,g:extra.g==null?null:extra.g,e:extra.e==null?null:extra.e,x:extra.x||null};d.ti=TI}else d.ti=-1;
   var sig=JSON.stringify(d);if(!force&&sig===last&&Date.now()-lastT<45000)return;last=sig;lastT=Date.now();
   d.ts={".sv":"timestamp"};
   token().then(function(a){return api("s/"+L.code+"/st/"+a.uid,"PATCH",d)}).catch(function(e){if(e.status===401||e.status===403){badge("⛔ Урок завершено")}});
@@ -80,9 +80,25 @@ function watchTask(first){var L=me();if(!L||/^\/(pult|klas)\//.test(location.pat
     if(cur0===null){cur0=c;return}
     if(c!==cur0){cur0=c;if(c>=0&&T[c]&&T[c].url&&c!==TI){location.href=T[c].url}}
   }).catch(function(){})}
+/* ---------- сторінки уроків: читаємо рядок «Надіслати вчителю» ---------- */
+function parseRow(r){var f=String(r).split("|");if(f[0]!=="v1"||f.length<15)return null;
+  var x=(f[15]||"").trim(),items=x&&x!=="—"?x.split(","):[],d=0;
+  items.forEach(function(it){var v=(it.split(":")[1]||"");if(!/н/.test(v))d++});
+  var fin=/^завершено/.test(f[14]||""),g=parseInt(f[7],10);
+  return{d:items.length?d:null,t:items.length||null,e:parseInt(f[10],10)||0,g:fin&&g>0?g:null,x:x.slice(0,600)}}
+var rowFn=null,rowTried=0;
+function findRowFn(){var c=[];for(var k in window){try{var f=window[k];if(typeof f==="function"&&f.length<=3&&!/^on|^__/.test(k)){var src=Function.prototype.toString.call(f);if(src.indexOf('"v1"')>-1&&/join\(["']\|["']\)/.test(src))c.push(f)}}catch(e){}}
+  for(var i=0;i<c.length;i++){try{var r=c[i]("·","·");if(typeof r==="string"&&r.indexOf("v1|")===0)return c[i]}catch(e){}}return null}
+function lessonTick(){if(!rowFn&&rowTried<3){rowTried++;rowFn=findRowFn()}if(!rowFn)return;
+  try{var o=parseRow(rowFn("·","·"));if(o)report(o)}catch(e){}}
+function hookLesson(){if(!/^\/a\//.test(location.pathname))return;
+  setInterval(function(){if(me()&&!document.hidden)lessonTick()},4000);setTimeout(lessonTick,1500);
+  document.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest('a[href*="entry.1997531456"]');if(!a||!me())return;
+    setTimeout(function(){try{var u=new URL(a.href);var o=parseRow(u.searchParams.get("entry.1997531456"));if(o){report(o);send(true)}}catch(x){}},50)},true);
+  var wo=window.open;window.open=function(u){try{if(me()&&String(u).indexOf("entry.1997531456")>-1){var o=parseRow(new URL(u,location.href).searchParams.get("entry.1997531456"));if(o){report(o);setTimeout(function(){send(true)},900)}}}catch(x){}return wo.apply(this,arguments)}}
 window.LIVE={join:join,leave:leave,report:report,me:me,meta:meta,api:api,stream:stream,token:token,send:send};
 if(me()){
-  var go=function(){badge();watchTask(true);send(true);setInterval(function(){if(!document.hidden)send()},30000);setInterval(watchTask,20000)};
+  var go=function(){badge();watchTask(true);send(true);hookLesson();setInterval(function(){if(!document.hidden)send()},30000);setInterval(watchTask,20000)};
   document.readyState==="loading"?document.addEventListener("DOMContentLoaded",go):go();
   document.addEventListener("visibilitychange",function(){if(!document.hidden)send(true)});
 }

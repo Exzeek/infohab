@@ -1,4 +1,13 @@
 <!doctype html><html lang="uk"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+.hstat{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0}.hstat a{font:800 13px var(--f-body);color:var(--ink);text-decoration:none;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px 10px}.hstat a b{font-family:var(--f-display);font-size:15px;margin-right:3px}
+.show{margin:34px 0 10px}.show h2{font-family:var(--f-display);font-size:24px;margin:0 0 12px}
+.shg{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-bottom:26px}
+.shc{--c:#5b3cc4;display:grid;gap:4px;align-content:start;background:var(--surface);border:1px solid var(--line);border-top:5px solid var(--c);border-radius:16px;padding:14px 16px;color:var(--ink);text-decoration:none;transition:transform .15s}
+.shc:hover{transform:translateY(-2px)}.shc i{font-style:normal;font-size:34px;line-height:1}.shc b{font-size:18px;color:var(--c)}.shc span{color:var(--muted);font-size:15px}.shc small{font-weight:800;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.how{list-style:none;padding:0;margin:0 0 16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;counter-reset:h}
+.how li{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px;display:grid;gap:4px;counter-increment:h;position:relative}.how li b{font-size:17px}.how li span{color:var(--muted);font-size:15px}
+.row2{display:flex;flex-wrap:wrap;gap:8px}.sb{font:800 15px var(--f-body);border:2px solid var(--line);border-radius:999px;padding:9px 16px;color:var(--ink);text-decoration:none;background:var(--surface)}.sb.pri{background:#5b3cc4;border-color:#5b3cc4;color:#fff}
+@media (prefers-reduced-motion:reduce){.shc{transition:none}.shc:hover{transform:none}}
 /* ---- навігація 22.11 ---- */
 .ov{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
 .ovc{--c:var(--cx);display:flex;flex-direction:column;gap:8px;background:var(--surface);border:1px solid var(--line);border-left:6px solid var(--c);border-radius:16px;padding:16px 18px;min-width:0}
@@ -231,8 +240,9 @@ footer{color:var(--muted);font-size:13px;border-top:1px solid var(--line);paddin
 <div class="wrap">
   <header>
     <div class="brand">
-      <h1>Інтерактивні <span>уроки</span></h1>
-      <p id="lead">Безкоштовні уроки, вправи, ігри й проєкти з інформатики для 2–11 класу. Обери клас → розділ → тему.</p>
+      <h1>Інтерактивні уроки <span>інформатики</span></h1>
+      <p id="lead">Учні не просто клацають тести, а <b>роблять руками</b>: таблиці, папки, пошта, презентації, Python і дизайн — у безпечних тренажерах просто в браузері. 2–11 клас за підручниками «Біос». Безкоштовно, без реєстрації.</p>
+      <p class="hstat" id="hstat"></p>
     </div>
     <div class="mode" role="group" aria-label="Режим">
       <button id="m-s" aria-pressed="true">Учням</button>
@@ -273,6 +283,24 @@ footer{color:var(--muted);font-size:13px;border-top:1px solid var(--line);paddin
   </div>
 
   <main id="list"></main>
+<section class="show" id="show" aria-labelledby="showH">
+  <h2 id="showH">Спробуйте зараз</h2>
+  <div class="shg">
+    <a class="shc" href="/seredovyshcha/tablytsi/" style="--c:#2b8a3e"><i>📊</i><b>ТаблиціЛаб</b><span>Справжні формули SUM, IF, COUNTIF — сторінка сама рахує й перевіряє</span><small>5–9 клас · середовище</small></a>
+    <a class="shc" href="/seredovyshcha/pk/?set=b5" style="--c:#1c7ed6"><i>🖥️</i><b>Мій перший ПК і Браузер</b><span>Вікна, Пуск, налаштування й сайти шахраїв, які треба розпізнати</span><small>2–5 клас · середовище</small></a>
+    <a class="shc" href="/infobytva/" style="--c:#e8590c"><i>⚔️</i><b>Інфо-битва</b><span>Командна вікторина на проектор: оберіть розділи — гра збереться сама</span><small>на весь клас</small></a>
+    <a class="shc" href="/seredovyshcha/vektor/" style="--c:#7048e8"><i>✏️</i><b>ВекторЛаб</b><span>Фігури, вирівнювання, типографіка й клікабельний прототип</span><small>8 клас · середовище</small></a>
+    <a class="shc" href="/seredovyshcha/maliuvalka/" style="--c:#f08c00"><i>🖍️</i><b>Малювалка</b><span>Пензлі, заливка й розмальовка з автоперевіркою для малят</span><small>2 клас · середовище</small></a>
+    <a class="shc" href="/seredovyshcha/git/" style="--c:#c2255c"><i>🌿</i><b>Git-тренажер</b><span>Коміти, гілки й злиття — без встановлення програм</span><small>8 клас · середовище</small></a>
+  </div>
+  <h2>Як проходить урок</h2>
+  <ol class="how">
+    <li><b>🧩 Учитель збирає урок</b><span>У Конструкторі з готових вправ, ігор і середовищ — 2 хвилини.</span></li>
+    <li><b>📱 Учні входять за кодом</b><span>5 цифр на екрані або QR — з телефона чи комп'ютера, без акаунтів.</span></li>
+    <li><b>📡 Учитель бачить прогрес</b><span>Хто на якому завданні, помилки, оцінки й найважчі вправи класу — наживо.</span></li>
+  </ol>
+  <div class="row2"><a class="sb pri" href="/pult/">📡 Провести урок наживо</a><a class="sb" href="/vchyteliu/">Як провести урок</a><a class="sb" href="/vse/">Уся бібліотека →</a></div>
+</section>
 <button class="totop" id="totop" type="button" aria-label="Нагору" hidden>↑</button>
 
   <footer id="foot"><a href="vse/" style="font-weight:700">Усі уроки, вправи, ігри та проєкти одним списком →</a><br>Інформатика за класами: <a href="2-klas/">2 клас</a> · <a href="3-klas/">3 клас</a> · <a href="4-klas/">4 клас</a> · <a href="5-klas/">5 клас</a> · <a href="6-klas/">6 клас</a> · <a href="7-klas/">7 клас</a> · <a href="8-klas/">8 клас</a> · <a href="9-klas/">9 клас</a> · <a href="10-11-klas/">10–11 клас</a> · <a href="matematyka/">Математика</a> · <a href="chytannia/">Читання</a><br>Адреса: <b class="hubAddr">urokinfo.com.ua</b></footer>
@@ -1219,6 +1247,7 @@ function overview(){
   $("#list").querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{const [k,r]=b.dataset.go.split("|");st.k=k;st.f="all";st.sel=r?{k,r,t:null}:null;location.hash=r?`k${k}-r${r}`:"k"+k;});
 }
 function render(){
+  {const sh=document.getElementById("show");if(sh)sh.hidden=!(st.k==="all"&&!st.q);}
   $("#m-s").setAttribute("aria-pressed",st.mode==="s");
   $("#m-t").setAttribute("aria-pressed",st.mode==="t");
   $("#liveBan").hidden = st.mode!=="t";
@@ -1226,8 +1255,8 @@ function render(){
   document.querySelector(".codebox").hidden = st.mode==="t";
   try{const H=JSON.parse(localStorage.getItem("ui-hist")||"[]").slice(0,4);const sp=$("#span");sp.hidden=st.mode==="t"||!H.length;
     sp.innerHTML=H.length?`<h2>Продовжити, де зупинився</h2><ul>${H.map(x=>`<li><a href="${esc(x.u)}">${esc(x.t)}</a></li>`).join("")}</ul>`:""}catch(e){}
-  $("#lead").textContent=st.mode==="s"
-    ?"Безкоштовні уроки, вправи, ігри й проєкти з інформатики для 2–11 класу. Обери клас → розділ → тему."
+  $("#lead").innerHTML=st.mode==="s"
+    ?"Учні не просто клацають тести, а <b>роблять руками</b>: таблиці, папки, пошта, презентації, Python і дизайн — у безпечних тренажерах просто в браузері. 2–11 клас за підручниками «Біос». Безкоштовно, без реєстрації."
     :"Режим вчителя: до кожної теми додано презентацію, конспекти, ігри на великий екран і попередні версії уроків.";
   renderTabs();
   if(st.k==="arch") $("#lead").textContent="Архів: попередні версії уроків для порівняння й повторного використання. Учні цієї вкладки не бачать.";
@@ -1315,4 +1344,6 @@ if(jump) setTimeout(()=>goTo(jump),80);
 try{const qr=qrcode(0,"M");qr.addData(HUB);qr.make();const box=$("#qr");box.innerHTML=qr.createSvgTag({cellSize:4,margin:1,scalable:true});box.hidden=false}catch(e){}
 </script>
 
-<script src="/site/nav.js" defer></script></body></html>
+<script src="/site/nav.js" defer></script><script>fetch("/site/catalog.json").then(r=>r.json()).then(c=>{const n=y=>c.filter(x=>x.y===y).length,env=new Set(c.filter(x=>/seredovyshcha\/[a-z]/.test(x.u)).map(x=>x.u.split("?")[0])).size;
+const L=[["📘",n("ex"),"уроків і вправ","vse/?t=ex"],["🎮",n("game"),"ігор","vse/?t=game"],["🧪",env,"середовищ","seredovyshcha/"],["🛠️",n("proj"),"проєктів","vse/?t=proj"],["🖥️",n("slides"),"презентацій","vse/?t=slides&w=t"]];
+const h=document.getElementById("hstat");if(h)h.innerHTML=L.map(x=>`<a href="${x[3]}">${x[0]} <b>${x[1]}</b>${x[2]}</a>`).join("")}).catch(()=>{});</script></body></html>

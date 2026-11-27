@@ -29,6 +29,7 @@ td.nm{font-weight:800;white-space:nowrap}.dot{display:inline-block;width:10px;he
 #big b{font:800 min(22vw,200px)/1 "JetBrains Mono",monospace;letter-spacing:.1em;color:var(--acc)}#big .qr{width:min(40vh,300px);margin:16px auto;background:#fff;padding:10px;border-radius:14px}#big p{font:800 clamp(18px,3vw,30px) Nunito}
 #tl{margin:0;padding:0;list-style:none;display:grid;gap:6px;counter-reset:t}#tl li{display:flex;gap:8px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:12px;counter-increment:t}#tl li::before{content:counter(t);min-width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--line);font-weight:800}#tl li.cur{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 10%,transparent)}#tl li a,#tl li span{flex:1;min-width:0;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:inherit}#tl li button{padding:4px 8px;font-size:13px}
 td.c{text-align:center;font-weight:800;white-space:nowrap}td.c.ok{color:var(--ok)}td.c .v{color:var(--mut)}th.c{text-align:center}details summary{cursor:pointer;font-weight:800}
+#hl{display:grid;gap:6px;margin-top:8px}#hl .hr{display:grid;grid-template-columns:70px minmax(0,1fr) auto;gap:10px;align-items:center}#hl .hr b{font-family:"JetBrains Mono",monospace}#hl .hb{height:12px;border-radius:6px;background:var(--line);overflow:hidden;display:flex}#hl .hb i{background:var(--bad)}#hl .hb u{background:#f59f00}
 .err{color:var(--bad);font-weight:800}
 @media (max-width:720px){.top{grid-template-columns:1fr}th.h,td.h{display:none}}
 </style><link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#5b3cc4"><link rel="apple-touch-icon" href="/site/apple-touch-icon.png"></head><body><main>
@@ -45,6 +46,7 @@ td.c{text-align:center;font-weight:800;white-space:nowrap}td.c.ok{color:var(--ok
    <details id="add"><summary>➕ Додати завдання з бібліотеки</summary><div class="row" style="margin-top:8px"><select id="tk"><option value="">Усі класи</option></select><input id="tq" placeholder="Пошук: назва, тема або код" style="flex:1"></div><div id="res" style="margin-top:6px"></div></details>
    <div class="row"><button id="lock">🔒 Закрити вхід</button><button id="hide">🙈 Сховати імена</button><button id="csv">⬇ CSV</button><button class="d" id="end">⏹ Завершити урок</button></div></div></div>
  <div class="stats" id="stats"></div>
+ <div class="card" id="hard" hidden><div class="row" style="justify-content:space-between"><b>🔥 Найважчі завдання</b><select id="hsel"></select></div><div id="hl"></div></div>
  <div style="overflow-x:auto"><table><thead id="th"></thead><tbody id="tb"></tbody></table></div>
 </section></main>
 <div id="big"><div><p>Заходь на <u>urokinfo.com.ua/klas</u></p><b id="bigc"></b><div class="qr" id="bigq"></div><button id="bigx">✕ Закрити</button></div></div>
@@ -74,7 +76,7 @@ function drawMeta(){const L=T(),c=typeof META.cur==="number"?META.cur:-1;
  $("#mode").textContent=c>=0?"👣 Крок за кроком":"🏃 Кожен у своєму темпі";$("#modeh").textContent=c>=0?"учні бачать завдання, яке ви відкрили":"учні проходять список по черзі самі";
  $("#lock").textContent=META.open?"🔒 Закрити вхід":"🔓 Відкрити вхід";$("#lb").textContent=META.lbl||""}
 function online(s,id){return !s.off&&(Date.now()-(SEEN[id]||0)<75000||Date.now()-(s.ts||0)<75000)}
-function cell(r){if(!r)return"";if(r.g)return r.g;if(r.t)return r.d+"/"+r.t;return '<span class="v">👁</span>'}
+function cell(r){if(!r)return"";const e=r.e?`<small style="color:var(--bad);display:block;font-size:11px">${r.e} пом.</small>`:"";if(r.g)return r.g+e;if(r.t)return r.d+"/"+r.t+e;return '<span class="v">👁</span>'}
 function prog(s){const L=T(),R=s.r||{};if(!L.length)return s.t?s.d/s.t:0;let sum=0,n=0;L.forEach((t,i)=>{if(!t.url)return;n++;const x=R[i];if(x)sum+=x.g?1:x.t?x.d/x.t:0.5});return n?sum/n:0}
 function rows(){return Object.entries(ST).filter(([,s])=>s&&s.n).map(([id,s])=>({id,...s,on:online(s,id),p:prog(s)}))}
 function draw(){const R=rows(),L=T();R.sort((a,b)=>SORT==="n"?String(a.n).localeCompare(b.n,"uk"):SORT==="pg"?(a.ti??-1)-(b.ti??-1):SORT==="g"?(b.g||0)-(a.g||0):b.p-a.p);
@@ -84,7 +86,17 @@ function draw(){const R=rows(),L=T();R.sort((a,b)=>SORT==="n"?String(a.n).locale
  $("#th").querySelectorAll("th[data-s]").forEach(th=>th.onclick=()=>{SORT=th.dataset.s;draw()});
  $("#tb").innerHTML=R.length?R.map((r,i)=>`<tr><td class="nm"><span class="dot${r.on?" on":""}"></span>${HIDE?"Учень "+(i+1):esc(r.n)}</td><td class="h"><div class="pg" title="${esc(r.u)}">${r.ti>=0?"<b>"+(r.ti+1)+".</b> ":""}${esc(r.env?r.env+" · "+(r.set||""):r.pg)}</div></td>
   <td><div class="row" style="flex-wrap:nowrap"><div class="bar" style="flex:1"><i style="width:${Math.round(100*r.p)}%"></i></div><b>${Math.round(100*r.p)}%</b></div></td>${L.map((t,j)=>{const x=(r.r||{})[j];return`<td class="c${x&&(x.g||x.t&&x.d===x.t)?" ok":""}">${cell(x)}</td>`}).join("")}</tr>`).join("")
-  :`<tr><td colspan="${3+L.length}" class="empty">Поки нікого. Покажіть учням код <b>${CODE}</b> — вони з'являться тут.</td></tr>`}
+  :`<tr><td colspan="${3+L.length}" class="empty">Поки нікого. Покажіть учням код <b>${CODE}</b> — вони з'являться тут.</td></tr>`;
+ hard(R)}
+let HSEL=null;
+function hard(R){const L=T(),ix=L.map((t,j)=>j).filter(j=>R.some(r=>r.r&&r.r[j]&&r.r[j].x));
+ if(!ix.length){$("#hard").hidden=true;return}$("#hard").hidden=false;
+ if(HSEL==null||!ix.includes(HSEL))HSEL=ix[0];
+ $("#hsel").innerHTML=ix.map(j=>`<option value="${j}"${j===HSEL?" selected":""}>${j+1}. ${esc(L[j].title).slice(0,50)}</option>`).join("");
+ const M={};R.forEach(r=>{const q=r.r&&r.r[HSEL],x=q&&q.x;if(!x||!(q.d>0||q.e>0))return;x.split(",").forEach(it=>{const [c,v=""]=it.split(":");if(!c)return;const m=M[c]||(M[c]={c,n:0,nd:0,e:0});m.n++;if(/н/.test(v))m.nd++;m.e+=parseInt(v,10)||0})});
+ const A=Object.values(M).map(m=>({...m,s:m.e+2*m.nd})).filter(m=>m.s>0).sort((a,b)=>b.s-a.s).slice(0,6),mx=Math.max(1,...A.map(m=>m.s));
+ $("#hl").innerHTML=A.length?A.map(m=>`<div class="hr"><b>${esc(m.c)}</b><div class="hb" style="width:${Math.max(8,100*m.s/mx)}%"><i style="flex:${m.e||0}"></i><u style="flex:${2*m.nd}"></u></div><span class="mut" style="font-size:14px">${m.e} помилок · ${m.nd} з ${m.n} не зробили</span></div>`).join("")+'<span class="mut" style="font-size:13px">Коди як у журналі: В — вправи, Л — етапи місії, К — квест. Червоне — помилки, жовте — не виконали.</span>':'<span class="mut">Поки немає помилок або учні ще не почали 👍</span>'}
+$("#hsel").onchange=()=>{HSEL=+$("#hsel").value;draw()};
 setInterval(()=>{if(CODE)draw()},10000);
 async function setMeta(o){Object.assign(META,o);for(const k in o)if(o[k]===null)delete META[k];drawMeta();draw();try{await LIVE.api("s/"+CODE+"/meta","PATCH",o)}catch(e){alert("Немає зв'язку з сервером")}}
 function search(){const q=$("#tq").value.trim().toLowerCase(),k=$("#tk").value;

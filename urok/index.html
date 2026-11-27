@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Урок — urokinfo</title>
+<meta name="robots" content="noindex,follow"><link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;800&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f7fb;--s:#fff;--ink:#1b1e28;--mut:#5c6375;--line:#e3e6ee;--acc:#c2255c;--ok:#2b8a3e;--warn:#e67700}
+@media (prefers-color-scheme:dark){:root{--bg:#12141b;--s:#1b1e28;--ink:#eef0f5;--mut:#a3a9b8;--line:#2c3040;--acc:#f06595;--ok:#69db7c;--warn:#ffa94d}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.45 Nunito,system-ui,sans-serif}
+main{max-width:860px;margin:0 auto;padding:18px 14px 50px}
+.eb{font-weight:800;color:var(--cc,var(--acc));font-size:14px;text-transform:uppercase;letter-spacing:.04em}
+h1{font:800 clamp(22px,5vw,34px)/1.15 Unbounded,sans-serif;margin:4px 0 10px}
+.pg{display:flex;gap:10px;align-items:center;margin:6px 0 16px;font-weight:800;color:var(--mut);font-size:14px}.pg .bar{flex:1;height:10px;border-radius:99px;background:var(--line);overflow:hidden}.pg .bar i{display:block;height:100%;background:var(--ok);transition:width .3s}
+ol.st{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.s{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;background:var(--s);border:1px solid var(--line);border-left:5px solid var(--cc,var(--mut));border-radius:16px;padding:12px 14px}
+.s .n{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--cc,var(--mut));color:#fff;font:800 17px Unbounded,sans-serif}
+.s.done .n{background:var(--ok)}.s.done .n::after{content:"✓"}.s.done .n span{display:none}
+.s b{display:block;font-size:17px;line-height:1.25}.s small{color:var(--mut);font-size:14px;display:block}
+.s .cd{font:700 13px "JetBrains Mono",monospace;color:var(--cc)}
+.go{background:var(--cc,var(--acc));color:#fff;border:0;border-radius:12px;padding:10px 16px;font:800 15px Nunito,sans-serif;text-decoration:none;white-space:nowrap;cursor:pointer}
+.s.done .go{background:var(--bg);color:var(--ink);border:1px solid var(--line)}
+.mk{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:12px;padding:10px 14px;font:800 15px Nunito,sans-serif;cursor:pointer}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}.btn{border:1px solid var(--line);background:var(--s);color:var(--ink);border-radius:10px;padding:8px 12px;font:800 14px Nunito,sans-serif;cursor:pointer;text-decoration:none}
+.err{background:var(--s);border:1px solid var(--line);border-radius:16px;padding:24px;text-align:center}
+/* режим екрана */
+.scr{display:none}body.t .stu{display:none}body.t .scr{display:grid}body.t header.un{display:none}
+.scr{grid-template-columns:minmax(0,1fr) 300px;gap:18px;max-width:none;min-height:100vh;padding:20px 24px;align-items:start}
+.big{background:var(--s);border:1px solid var(--line);border-top:8px solid var(--cc,var(--acc));border-radius:22px;padding:26px 30px;display:grid;gap:12px}
+.big .k{font:800 16px Nunito;color:var(--mut)}.big h2{font:800 clamp(28px,4.2vw,56px)/1.1 Unbounded,sans-serif;margin:0}
+.big .l{font-size:clamp(18px,2vw,26px);color:var(--mut)}
+.big .code{font:800 clamp(40px,7vw,96px)/1 "JetBrains Mono",monospace;color:var(--cc,var(--acc))}.big .code small{font:800 18px Nunito;color:var(--mut);display:block;margin-bottom:4px}
+.big .note{background:#ffb02022;border-radius:12px;padding:10px 14px;font-size:18px}
+.timer{font:800 clamp(48px,8vw,110px)/1 "JetBrains Mono",monospace;letter-spacing:.02em}.timer.low{color:var(--warn)}.timer.out{color:#e03131}
+.nav2{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.nav2 button,.nav2 a{font:800 18px Nunito,sans-serif;padding:12px 18px;border-radius:14px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;text-decoration:none}
+.nav2 .pri{background:var(--cc,var(--acc));border-color:var(--cc,var(--acc));color:#fff}
+.side{display:grid;gap:12px}.side .qr{background:#fff;border-radius:16px;padding:12px;text-align:center;color:#1b1e28}.side .qr svg{width:100%;height:auto;display:block}.side .qr b{font-size:14px}
+.side ol{list-style:none;margin:0;padding:0;display:grid;gap:6px;counter-reset:x}
+.side li{counter-increment:x;background:var(--s);border:1px solid var(--line);border-radius:12px;padding:8px 10px;font-size:15px;cursor:pointer;display:flex;gap:8px;justify-content:space-between}
+.side li::before{content:counter(x);font:800 13px Unbounded;color:var(--mut)}.side li span{flex:1}.side li.cur{border-color:var(--cc,var(--acc));box-shadow:0 0 0 2px var(--cc,var(--acc))}.side li.past{opacity:.55}
+.side li small{color:var(--mut);white-space:nowrap}
+.tot{font-weight:800;color:var(--mut);font-size:14px}
+@media (max-width:900px){.scr{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style></head><body>
+<main class="stu" id="stu"><p class="err">Завантаження уроку…</p></main>
+<main class="scr" id="scr"></main>
+<script src="/site/qrcode.js"></script>
+<script>
+const $=s=>document.querySelector(s),esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c]);
+const CN={2:"2 клас",3:"3 клас",4:"4 клас",5:"5 клас",6:"6 клас",7:"7 клас",8:"8 клас",9:"9 клас",10:"10–11 клас",12:"Математика",1:"Читання",0:"Інструменти"};
+const CC={2:"#d98a00",3:"#1e8fd6",4:"#7a4fd8",5:"#c2255c",6:"#2f9e4f",7:"#364fc7",8:"#e0661b",9:"#0f8a8a",10:"#495057",12:"#2b8a3e",1:"#9c36b5",0:"#495057"};
+const TI={ex:"📘",game:"🎮",env:"🧪",proj:"🛠️",slides:"🖥️",other:"📎"};
+const ls={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const m=/d=([A-Za-z0-9_-]+)/.exec(location.hash),T=/[&#]v=t\b/.test(location.hash);
+let D=null,S=[],key="";
+try{D=JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(m[1].replace(/-/g,"+").replace(/_/g,"/")),c=>c.charCodeAt(0))));key="urok-"+m[1].slice(0,40)+m[1].length}catch(e){}
+function fail(t){$("#stu").innerHTML=`<div class="err"><h1>Урок не знайдено</h1><p>${t}</p><p><a class="btn" href="/">На головну</a> <a class="btn" href="/konstruktor/">Зібрати урок</a></p></div>`;document.body.classList.remove("t")}
+if(!D||!Array.isArray(D.b))fail("Посилання пошкоджене або неповне. Попросіть учителя надіслати його ще раз.");
+else fetch("/site/catalog.json").then(r=>r.json()).then(cat=>{const BY={};cat.forEach(x=>BY[x.i]=x);
+ S=D.b.map(x=>x[0]==="_"?{own:1,ti:x[3]||"Етап уроку",m:x[1],t:x[2],y:"own"}:Object.assign({m:x[1],t:x[2]},BY[x[0]]||{gone:1,ti:"Матеріал недоступний"}));
+ document.title=(D.n||"Урок")+" — urokinfo";document.documentElement.style.setProperty("--cc",CC[D.k]||"#c2255c");
+ T?screen():student()}).catch(()=>fail("Не вдалося завантажити каталог. Перевірте інтернет і оновіть сторінку."));
+/* ---------- учень ---------- */
+function student(){document.body.classList.remove("t");const done=ls.get(key,{}),vis=S.map((s,i)=>[s,i]).filter(([s])=>s.w!=="t");
+ const n=vis.filter(([s,i])=>done[i]).length;
+ $("#stu").innerHTML=`<div class="eb">${D.k?CN[D.k]+" · ":""}урок від учителя</div><h1>${esc(D.n||"Урок")}</h1>
+ <div class="pg"><div class="bar"><i style="width:${vis.length?100*n/vis.length:0}%"></i></div>${n} з ${vis.length}</div>
+ <ol class="st">${vis.map(([s,i],j)=>`<li class="s${done[i]?" done":""}" style="${s.k!=null?"--cc:"+CC[s.k]:""}"><span class="n"><span>${j+1}</span></span><div><b>${s.own?"":TI[s.y]+" "}${esc(s.ti)}</b>${s.l?`<small>${esc(s.l)}</small>`:""}<small>${s.m?s.m+" хв":""}${s.c?` · <span class="cd">код ${s.c}</span>`:""}</small></div>${s.own||s.gone?`<button class="mk" data-i="${i}">${done[i]?"Зроблено":"Готово"}</button>`:`<a class="go" href="${esc(s.u)}" target="_blank" rel="noopener" data-i="${i}">${done[i]?"Ще раз":"Відкрити"}</a>`}</li>`).join("")}</ol>
+ <div class="tools"><button class="btn" id="tv">🖥️ Режим учителя</button><a class="btn" href="/konstruktor/${location.hash.replace(/&v=t/,"")}">✏️ Змінити урок</a></div>`;
+ $("#stu").onclick=e=>{const a=e.target.closest("[data-i]");if(a){const d=ls.get(key,{});d[a.dataset.i]=1;ls.set(key,d);setTimeout(student,a.tagName==="A"?400:0)}};
+ $("#tv").onclick=()=>{location.hash=location.hash.replace(/&v=t/,"")+"&v=t";location.reload()};
+ try{const u=location.pathname+location.hash,h=ls.get("ui-hist",[]).filter(x=>x.u!==u);h.unshift({u,t:"Урок: "+(D.n||"без назви"),ts:Date.now()});ls.set("ui-hist",h.slice(0,40))}catch(e){}}
+/* ---------- екран учителя ---------- */
+let cur=0,left=0,run=false,tI=null;
+const fmt=s=>{const a=Math.abs(s);return(s<0?"−":"")+String(Math.floor(a/60)).padStart(2,"0")+":"+String(a%60).padStart(2,"0")};
+function screen(){document.body.classList.add("t");cur=Math.min(ls.get(key+"-cur",0),S.length-1);left=(S[cur].m||5)*60;draw()}
+function draw(){const s=S[cur],cc=s.k!=null?CC[s.k]:(CC[D.k]||"#c2255c"),tot=S.reduce((a,x)=>a+(+x.m||0),0);
+ const su=location.origin+location.pathname+location.hash.replace(/&v=t/,"");
+ $("#scr").style.setProperty("--cc",cc);
+ $("#scr").innerHTML=`<section class="big"><div class="k">${esc(D.n||"Урок")} · етап ${cur+1} з ${S.length}${s.w==="t"?" · лише для вчителя":""}</div>
+  <h2>${s.own?"":TI[s.y]+" "}${esc(s.ti)}</h2>${s.l?`<div class="l">${esc(s.l)}</div>`:""}
+  ${s.c?`<div class="code"><small>Код для учнів — введи вгорі сайту urokinfo.com.ua</small>${s.c}</div>`:""}
+  ${s.t?`<div class="note">📝 ${esc(s.t)}</div>`:""}
+  <div class="timer" id="tmr">${fmt(left)}</div>
+  <div class="nav2"><button id="pv" ${cur?"":"disabled"}>← Назад</button><button class="pri" id="pl">${run?"⏸ Пауза":"▶ Старт"}</button><button id="rs">↺</button>${s.u?`<a href="${esc(s.u)}" target="_blank" rel="noopener">Відкрити ↗</a>`:""}<button class="pri" id="nx">${cur<S.length-1?"Далі →":"Завершити"}</button><button id="fs">⛶</button><button id="sv">Вигляд учня</button></div></section>
+ <aside class="side"><div class="qr"><div id="qr"></div><b>Скануй — урок для учнів</b></div><ol>${S.map((x,i)=>`<li data-c="${i}" class="${i===cur?"cur":i<cur?"past":""}"><span>${esc(x.ti)}</span><small>${x.m} хв</small></li>`).join("")}</ol><div class="tot">Разом ${tot} хв</div></aside>`;
+ try{const q=qrcode(0,su.length>900?"L":"M");q.addData(su);q.make();$("#qr").innerHTML=q.createSvgTag({scalable:true,margin:0})}catch(e){$("#qr").textContent="Посилання задовге для QR"}
+ tick0();$("#pv").onclick=()=>go(cur-1);$("#nx").onclick=()=>cur<S.length-1?go(cur+1):(stop(),alert("Урок завершено! 🎉"));
+ $("#pl").onclick=()=>{run?stop():start();$("#pl").textContent=run?"⏸ Пауза":"▶ Старт"};$("#rs").onclick=()=>{left=(s.m||5)*60;tick0()};
+ $("#fs").onclick=()=>{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen?.()};
+ $("#sv").onclick=()=>{stop();location.hash=location.hash.replace(/&v=t/,"");location.reload()};
+ document.querySelectorAll(".side li").forEach(li=>li.onclick=()=>go(+li.dataset.c))}
+function go(i){if(i<0||i>=S.length)return;cur=i;ls.set(key+"-cur",i);left=(S[i].m||5)*60;const r=run;stop();draw();if(r){start();$("#pl").textContent="⏸ Пауза"}}
+function tick0(){const t=$("#tmr");if(!t)return;t.textContent=fmt(left);t.classList.toggle("low",left<=60&&left>0);t.classList.toggle("out",left<=0)}
+function start(){if(run)return;run=true;tI=setInterval(()=>{left--;tick0()},1000)}
+function stop(){run=false;clearInterval(tI)}
+addEventListener("keydown",e=>{if(!document.body.classList.contains("t")||e.target.tagName==="INPUT")return;if(e.key==="ArrowRight"||e.key==="PageDown")go(cur+1);if(e.key==="ArrowLeft"||e.key==="PageUp")go(cur-1);if(e.key===" "){e.preventDefault();$("#pl").click()}});
+</script>
+<script src="/site/nav.js" defer></script>
+</body></html>

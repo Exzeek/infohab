@@ -11,11 +11,11 @@
   '.un button{border:1px solid #c2255c;background:#c2255c;color:#fff;border-radius:0 10px 10px 0;padding:7px 10px;font:800 14px Nunito,system-ui,sans-serif;cursor:pointer}'+
   '.un .m{position:absolute;right:0;top:110%;background:#1b1e28;color:#fff;font-size:13px;padding:6px 10px;border-radius:8px;white-space:nowrap;display:none}.un .m.on{display:block}'+
   '@media (prefers-color-scheme:dark){.un{--un-bg:#14161e;--un-ink:#eef0f5;--un-mut:#a3a9b8;--un-line:#2c3040;--un-hov:#232634}.un .b span{color:#f06595}}'+
-  '.un .s{display:none}@media (max-width:560px){.un .b{display:none}.un input{width:56px}.un>div{padding:8px 8px;gap:4px}.un nav a{padding:8px 6px;font-size:14px}.un input{width:48px;padding:7px 6px}.un button{display:none}.un input{border-right:1px solid var(--un-line,#d6d9e3);border-radius:10px;width:54px}.un .f{display:none}.un .s{display:inline}}';
+  '.un .un-s{display:none}@media (max-width:560px){.un .b{display:none}.un input{width:56px}.un>div{padding:8px 8px;gap:4px}.un nav a{padding:8px 6px;font-size:14px}.un input{width:48px;padding:7px 6px}.un button{display:none}.un input{border-right:1px solid var(--un-line,#d6d9e3);border-radius:10px;width:54px}.un .un-f{display:none}.un .un-s{display:inline}}';
   document.head.appendChild(css);
-  var L=[["/","Уроки","Уроки",/^\/($|\d+-klas|10-11-klas|matematyka|chytannia)/],["/vse/","Інтерактиви","Інтерактиви",/^\/(vse|seredovyshcha)\//],["/vchyteliu/","Для вчителя","Вчителю",/^\/(vchyteliu|kody)\//],["/progres/","Мій прогрес","Прогрес",/^\/progres\//]];
+  var L=[["/","Уроки","Уроки",/^\/($|\d+-klas|10-11-klas|matematyka|chytannia)/],["/vse/","Інтерактиви","Інтерактиви",/^\/(vse|seredovyshcha)\//],["/vchyteliu/","Для вчителя","Вчителю",/^\/(vchyteliu|kody|konstruktor)\//],["/progres/","Мій прогрес","Прогрес",/^\/progres\//]];
   var h=document.createElement("header");h.className="un";
-  h.innerHTML='<div><a class="b" href="/">urok<span>info</span></a><nav aria-label="Головне меню">'+L.map(function(x){return '<a href="'+x[0]+'"'+(x[3].test(P)?' aria-current="page"':'')+'><span class="f">'+x[1]+'</span><span class="s">'+x[2]+'</span></a>'}).join("")+
+  h.innerHTML='<div><a class="b" href="/">urok<span>info</span></a><nav aria-label="Головне меню">'+L.map(function(x){return '<a href="'+x[0]+'"'+(x[3].test(P)?' aria-current="page"':'')+'><span class="un-f">'+x[1]+'</span><span class="un-s">'+x[2]+'</span></a>'}).join("")+
    '</nav><form role="search" aria-label="Перейти за кодом"><input inputmode="numeric" enterkeyhint="go" maxlength="5" placeholder="код" aria-label="Код уроку чи гри"><button type="submit">→</button><span class="m" role="status"></span></form></div>';
   document.body.insertBefore(h,document.body.firstChild);
   var f=h.querySelector("form"),i=h.querySelector("input"),m=h.querySelector(".m"),C=null;

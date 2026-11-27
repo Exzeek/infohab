@@ -387,7 +387,18 @@ canvas#fx{position:fixed;inset:0;pointer-events:none;z-index:80}
 @media (max-width:900px){.ifw{flex-direction:column;overflow:auto}.ifr{width:95%}.anmw{overflow:auto;justify-content:flex-start}.slot{width:4.2rem}.fcard{width:6.5rem}.frm .emo{font-size:1.8rem}.scb{min-width:0}}
 
 </style>
-</head>
+<style id="mfix">
+html,body{touch-action:manipulation}
+.screen.on{overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+@media (max-width:900px),(max-height:600px){
+ main{overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+ #map.screen.on{bottom:auto;overflow:visible}
+ #mapRobot{display:none!important}
+ .chip{touch-action:none}
+ .gframe{touch-action:pan-y}
+ .scene .it{font-size:min(4rem,10vw)!important}
+}
+</style></head>
 <body>
 <div id="app">
   <header>
@@ -600,7 +611,7 @@ function intro(){const s=$('#intro');s.innerHTML=`${ROBOT}<h1>${G.title}</h1>
 
 /* map */
 function openMap(){const s=$('#map');const st=G.stages;
-  const pts=(innerWidth<700&&innerHeight>innerWidth)?Array.from({length:st.length+1},(_,i)=>[i%2?70:30,30+i*(57/st.length)]):(G.mapPts||Array.from({length:st.length+1},(_,i)=>[10+i*(80/st.length), i%2?48:80]));
+  const SM=(innerWidth<=900||innerHeight<=600),T0=innerWidth<600?310:(innerHeight<=600?235:185),MH=Math.max(document.querySelector('main').clientHeight,T0+60+st.length*118);s.style.height=SM?MH+'px':'';const pts=SM?Array.from({length:st.length+1},(_,i)=>[i%2?72:28,(T0+i*118)/MH*100]):(G.mapPts||Array.from({length:st.length+1},(_,i)=>[10+i*(80/st.length), i%2?48:80]));
   const nextI=st.findIndex((_,i)=>!S.done.includes(i));
   let d='M '+pts.map(p=>p[0]+' '+p[1]).join(' L ');
   s.innerHTML=`<svg class="path" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="${d}" fill="none" stroke="#e9d8b0" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" style="stroke-width:28px"/>

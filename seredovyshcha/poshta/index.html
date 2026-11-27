@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Поштова скринька — симулятор електронної пошти для уроку інформатики</title>
+<meta name="description" content="Симулятор електронної пошти для 5–6 класу: написати лист, копія, вкладення, відповідь, пересилання, папки, спам і фішинг. Завдання з автоперевіркою, без реєстрації.">
+<link rel="canonical" href="https://urokinfo.com.ua/seredovyshcha/poshta/"><link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta property="og:title" content="Поштова скринька — симулятор електронної пошти"><meta property="og:locale" content="uk_UA">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;800&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../kit.css">
+<style>
+:root{--acc:#c2255c}@media (prefers-color-scheme:dark){:root{--acc:#f06595}}
+.mail{display:grid;grid-template-columns:200px 340px 1fr;height:100%;min-height:560px}
+.fold{border-right:1px solid var(--line);background:var(--surface);padding:10px 8px;display:flex;flex-direction:column;gap:2px}
+.fold .new{margin:0 4px 10px}
+.fold div{padding:7px 10px;border-radius:10px;cursor:pointer;display:flex;justify-content:space-between;font-weight:700;font-size:15px}
+.fold div.cur{background:color-mix(in srgb,var(--acc) 15%,transparent);color:var(--acc)}
+.fold div.drop{outline:2px dashed var(--acc)}
+.fold small{color:var(--muted);font-weight:700}
+.fold .add{color:var(--muted);font-weight:600;font-size:14px}
+.lst{border-right:1px solid var(--line);overflow:auto;background:var(--bg)}
+.lst .m{padding:10px 14px;border-bottom:1px solid var(--line);cursor:pointer;display:grid;gap:2px;background:var(--surface)}
+.lst .m.unread b{color:var(--ink)}.lst .m.unread{border-left:4px solid var(--acc)}
+.lst .m.cur{background:color-mix(in srgb,var(--acc) 10%,var(--surface))}
+.lst .m .fr{display:flex;justify-content:space-between;gap:6px;font-size:14px;color:var(--muted)}
+.lst .m b{font-size:15px;color:var(--muted)}
+.lst .m .pv{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lst .empty{padding:20px;color:var(--muted)}
+.view{overflow:auto;padding:16px 22px;background:var(--surface)}
+.view h2{margin:0 0 8px;font:800 20px/1.25 var(--f-display)}
+.view .hd{color:var(--muted);font-size:14px;border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:12px}
+.view .hd code{font-family:var(--f-mono);color:var(--ink)}
+.view .bd{white-space:pre-wrap;line-height:1.55}
+.view .bd a{color:#1c64d6;text-decoration:underline;cursor:pointer}
+.att{display:inline-flex;gap:6px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:6px 10px;margin-top:12px;font-size:14px}
+.vacts{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px}
+.vacts button,.vacts select{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:9px;padding:6px 10px;font:700 14px var(--f-body)}
+.comp{display:grid;gap:8px}
+.comp label{display:grid;grid-template-columns:80px 1fr;align-items:center;gap:8px;font-weight:700;font-size:14px}
+.comp input,.comp textarea,.comp select{font:15px var(--f-body);padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.comp textarea{min-height:180px;resize:vertical}
+.warn{background:color-mix(in srgb,var(--bad) 12%,transparent);border-radius:10px;padding:8px 12px;font-size:14px;font-weight:700;color:var(--bad);margin-bottom:10px}
+.hint{color:var(--muted);font-size:14px}
+@media (max-width:900px){.mail{grid-template-columns:1fr;grid-template-rows:auto auto 1fr}.fold{flex-direction:row;flex-wrap:wrap;border-right:0;border-bottom:1px solid var(--line)}.lst{max-height:260px;border-right:0}}
+</style></head><body>
+<main id="app">
+<div class="mail">
+ <nav class="fold" id="fold"></nav>
+ <div class="lst" id="lst"></div>
+ <div class="view" id="view"></div>
+</div>
+</main>
+<script src="../kit.js"></script>
+<script>
+const $=s=>document.querySelector(s);
+const ME="uchen5@shkola.ua";
+const START=()=>({folders:["Вхідні","Надіслані","Спам","Кошик"],sent:[],uid:20,mails:[
+ {id:1,f:"Вхідні",from:"Бібліотека школи <biblioteka@shkola.ua>",subj:"Нові книжки в бібліотеці",d:"Пн 9:12",body:"Привіт!\n\nДо шкільної бібліотеки надійшли нові книжки про роботів і програмування. Приходь на перерві — запишемо тебе.\n\nБібліотекарка Ганна Петрівна",unread:1},
+ {id:2,f:"Вхідні",from:"Служба безпеки <support@gmai1-security.com>",subj:"⚠ Ваш акаунт буде ЗАБЛОКОВАНО через 24 години",d:"Пн 10:40",body:"Шановний користувачу!\n\nМи помітили підозрілу активність. Щоб не втратити доступ, терміново перейдіть за посиланням і введіть свій пароль:\nhttp://gmai1-security.com/login\n\nЯкщо не зробите цього, акаунт буде видалено.",unread:1,ph:1},
+ {id:3,f:"Вхідні",from:"Гурток робототехніки <robot@shkola.ua>",subj:"Розклад гуртків",d:"Вт 15:03",body:"Добрий день!\n\nНадсилаємо розклад гуртків на наступний тиждень:\nПонеділок — робототехніка, каб. 12\nСереда — шахи, каб. 5\nП'ятниця — Scratch, каб. 12\n\nКерівник гуртка",unread:1,att:"розклад_гуртків.pdf"},
+ {id:4,f:"Вхідні",from:"Супер Розіграш <prize@win-iphone-free.xyz>",subj:"🎉 Ви виграли iPhone 17! Заберіть приз",d:"Вт 18:20",body:"ВІТАЄМО!!! Саме ви — переможець розіграшу!\nЩоб отримати телефон, надішліть номер картки батьків і код із SMS.\nПропозиція діє лише 1 годину!",unread:1,ph:1},
+ {id:5,f:"Вхідні",from:"Ігровий магазин <news@igroshop.ua>",subj:"Знижки на настільні ігри до -30%",d:"Ср 8:00",body:"Тільки цього тижня — знижки на настільні ігри! Оформлюйте замовлення на нашому сайті.",unread:1,ad:1},
+ {id:6,f:"Вхідні",from:"Класна керівничка <kerivnyk@shkola.ua>",subj:"Екскурсія в п'ятницю",d:"Ср 12:44",body:"Діти, у п'ятницю їдемо на екскурсію до музею науки. Збір о 8:30 біля школи. Не забудьте воду й перекус!",unread:1},
+ {id:7,f:"Вхідні",from:"Олена Коваль <olena.k@shkola.ua>",subj:"Що задали з інформатики?",d:"Чт 17:05",body:"Привіт! Я пропустила урок. Скажи, будь ласка, що задали з інформатики? Дякую!",unread:1}
+]});
+let M,cur="Вхідні",open=null,mode="read",draft=null;
+const FILES=["дз_інформатика.docx","малюнок.png","реферат_космос.docx","пісня.mp3"];
+const addr=s=>{const m=/<([^>]+)>/.exec(s||"");return(m?m[1]:s||"").trim().toLowerCase()};
+const name=s=>(s||"").replace(/<.*>/,"").trim()||s;
+const sent=()=>M.mails.filter(m=>m.f==="Надіслані");
+const SETS={
+ k5:{name:"5 клас: електронна пошта",cls:5,norm:18,story:"Ти — учень, у тебе нова поштова скринька. Розберися з листами, як справжній користувач: відповідай, пересилай, сортуй і не попадайся на шахраїв.",tasks:[
+  {t:"Напиши вчителю (<b>vchytel@shkola.ua</b>) лист з темою <b>«Домашнє завдання»</b> і вкладенням <b>«дз_інформатика.docx»</b>.",ok:()=>sent().some(m=>m.to.includes("vchytel@shkola.ua")&&/домашн/i.test(m.subj)&&m.att==="дз_інформатика.docx")},
+  {t:"У цьому чи іншому листі вчителю додай у <b>копію</b> однокласницю olena.k@shkola.ua.",ok:()=>sent().some(m=>m.to.includes("vchytel@shkola.ua")&&(m.cc||"").includes("olena.k@shkola.ua"))},
+  {t:"<b>Дай відповідь</b> Олені Коваль на її запитання про домашнє завдання.",hint:"Відкрий лист і натисни «Відповісти»",ok:()=>sent().some(m=>m.to.includes("olena.k@shkola.ua")&&/^re:/i.test(m.subj)&&m.body.trim().length>10)},
+  {t:"<b>Перешли</b> лист «Розклад гуртків» мамі: <b>mama@ukr.net</b> (з вкладенням!).",ok:()=>sent().some(m=>m.to.includes("mama@ukr.net")&&/^(fwd|переслано):/i.test(m.subj)&&m.att==="розклад_гуртків.pdf")},
+  {t:"Знайди <b>два шахрайські (фішингові)</b> листи й познач їх як спам. Звичайні листи в спам не відправляй!",ok:()=>M.mails.filter(m=>m.ph).every(m=>m.f==="Спам")&&!M.mails.some(m=>!m.ph&&m.f==="Спам")},
+  {t:"Створи папку <b>«Школа»</b> і перемісти туди всі листи з адрес <b>@shkola.ua</b>, що є у Вхідних.",ok:()=>M.folders.includes("Школа")&&M.mails.filter(m=>m.f!=="Надіслані"&&!m.mine&&addr(m.from).endsWith("@shkola.ua")).every(m=>m.f==="Школа")},
+  {t:"Видали рекламний лист магазину в <b>Кошик</b>.",ok:()=>M.mails.find(m=>m.ad).f==="Кошик"}]}
+};
+function save(){KIT.store(M);KIT.refresh()}
+function folders(){const f=$("#fold");f.innerHTML=`<button class="btn new" id="bNew">✏️ Написати</button>`;
+  M.folders.forEach(n=>{const d=document.createElement("div");const k=M.mails.filter(m=>m.f===n&&m.unread).length;d.innerHTML=`<span>${{"Вхідні":"📥","Надіслані":"📤","Спам":"⚠️","Кошик":"🗑"}[n]||"📁"} ${KIT.esc(n)}</span>${k?`<small>${k}</small>`:""}`;d.className=n===cur&&mode==="read"?"cur":"";
+    d.onclick=()=>{cur=n;open=null;mode="read";draw()};d.ondragover=e=>{e.preventDefault();d.classList.add("drop")};d.ondragleave=()=>d.classList.remove("drop");
+    d.ondrop=e=>{e.preventDefault();d.classList.remove("drop");const id=+e.dataTransfer.getData("text");moveTo(id,n)};f.append(d)});
+  const a=document.createElement("div");a.className="add";a.textContent="+ Створити папку";a.onclick=()=>{const n=(prompt("Назва нової папки:")||"").trim();if(!n)return;if(M.folders.includes(n)){KIT.toast("Така папка вже є");return}KIT.touch();M.folders.push(n);save();draw()};f.append(a);
+  $("#bNew").onclick=()=>compose({})}
+function list(){const l=$("#lst");const ms=M.mails.filter(m=>m.f===cur).sort((a,b)=>b.id-a.id);l.innerHTML=ms.length?"":`<div class="empty">Папка «${KIT.esc(cur)}» порожня</div>`;
+  ms.forEach(m=>{const d=document.createElement("div");d.className="m"+(m.unread?" unread":"")+(open===m.id?" cur":"");d.draggable=true;d.ondragstart=e=>e.dataTransfer.setData("text",m.id);
+    d.innerHTML=`<div class="fr"><span>${KIT.esc(cur==="Надіслані"?"Кому: "+m.to:name(m.from))}</span><span>${m.d}</span></div><b>${KIT.esc(m.subj)}</b><div class="pv">${m.att?"📎 ":""}${KIT.esc(m.body.slice(0,80))}</div>`;
+    d.onclick=()=>{open=m.id;m.unread=0;mode="read";save();draw()};l.append(d)})}
+function moveTo(id,f){const m=M.mails.find(x=>x.id===id);if(!m||m.f===f)return;KIT.touch();m.f=f;if(open===id)open=null;save();draw();KIT.toast("Переміщено в «"+f+"»")}
+function view(){const v=$("#view");
+  if(mode==="compose"){const d=draft;v.innerHTML=`<h2>${d.title||"Новий лист"}</h2><div class="comp">
+   <label>Кому <input id="cTo" value="${KIT.esc(d.to||"")}" placeholder="adresa@shkola.ua"></label>
+   <label>Копія <input id="cCc" value="${KIT.esc(d.cc||"")}" placeholder="необов'язково"></label>
+   <label>Тема <input id="cSubj" value="${KIT.esc(d.subj||"")}"></label>
+   <label>Вкладення <select id="cAtt"><option value="">— без вкладення —</option>${(d.att&&!FILES.includes(d.att)?[d.att]:[]).concat(FILES).map(f=>`<option ${f===d.att?"selected":""}>${f}</option>`).join("")}</select></label>
+   <textarea id="cBody">${KIT.esc(d.body||"")}</textarea>
+   <div class="vacts"><button class="btn" id="cSend">📤 Надіслати</button><button id="cCancel">Скасувати</button></div><div class="hint">Кілька адрес розділяй комою.</div></div>`;
+   $("#cSend").onclick=send;$("#cCancel").onclick=()=>{mode="read";draw()};return}
+  const m=M.mails.find(x=>x.id===open);
+  if(!m){v.innerHTML=`<p class="hint">Обери лист зліва. Листи можна перетягувати мишкою в папки.</p>`;return}
+  const others=M.folders.filter(f=>f!==m.f);
+  v.innerHTML=`<div class="vacts"><button id="aRe">↩ Відповісти</button><button id="aFw">↪ Переслати</button><button id="aSpam">⚠ Спам</button><button id="aDel">🗑 Видалити</button><select id="aMove"><option value="">Перемістити в…</option>${others.map(f=>`<option>${KIT.esc(f)}</option>`).join("")}</select></div>
+   <h2>${KIT.esc(m.subj)}</h2><div class="hd">${m.mine?"Кому: <code>"+KIT.esc(m.to)+"</code>"+(m.cc?" · Копія: <code>"+KIT.esc(m.cc)+"</code>":""):"Від: "+KIT.esc(name(m.from))+" <code>&lt;"+KIT.esc(addr(m.from))+"&gt;</code>"} · ${m.d}</div>
+   ${m.f==="Спам"?`<div class="warn">Цей лист позначено як спам. Не переходь за посиланнями й не надсилай особисті дані!</div>`:""}
+   <div class="bd">${KIT.esc(m.body).replace(/(https?:\/\/\S+)/g,'<a data-l="$1">$1</a>')}</div>${m.att?`<div class="att">📎 ${KIT.esc(m.att)}</div>`:""}`;
+  $("#aRe").onclick=()=>compose({title:"Відповідь",to:addr(m.from)||m.to,subj:"Re: "+m.subj.replace(/^re:\s*/i,""),body:"\n\n----- "+name(m.from)+" писав(ла):\n"+m.body});
+  $("#aFw").onclick=()=>compose({title:"Пересилання",subj:"Fwd: "+m.subj,att:m.att||"",body:"\n\n----- Переслане повідомлення -----\nВід: "+(m.from||ME)+"\nТема: "+m.subj+"\n\n"+m.body});
+  $("#aSpam").onclick=()=>moveTo(m.id,"Спам");$("#aDel").onclick=()=>moveTo(m.id,"Кошик");$("#aMove").onchange=e=>e.target.value&&moveTo(m.id,e.target.value);
+  v.querySelectorAll("[data-l]").forEach(a=>a.onclick=()=>KIT.toast(m.ph?"Стоп! Це фішингове посилання — у справжньому житті тут крадуть паролі.":"Посилання відкрилося б у браузері"))}
+function compose(d){draft=d;mode="compose";open=null;draw();KIT.touch()}
+function send(){const to=$("#cTo").value.trim(),cc=$("#cCc").value.trim(),subj=$("#cSubj").value.trim(),body=$("#cBody").value,att=$("#cAtt").value;
+  const ok=s=>s.split(",").map(x=>x.trim()).filter(Boolean).every(x=>/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(x));
+  if(!to||!ok(to)){KIT.toast("Перевір адресу отримувача: name@domain.ua");return}if(cc&&!ok(cc)){KIT.toast("Перевір адресу в копії");return}
+  if(!subj&&!confirm("Надіслати лист без теми?"))return;
+  M.mails.push({id:M.uid++,f:"Надіслані",mine:1,to:to.toLowerCase(),cc:cc.toLowerCase(),subj:subj||"(без теми)",body,att,d:"щойно"});mode="read";cur="Надіслані";save();draw();KIT.toast("Лист надіслано")}
+function draw(){folders();list();view()}
+KIT.start({id:"poshta",title:"Поштова скринька",sub:ME,cls:5,sets:SETS,onSet(k,fresh){const d=!fresh&&KIT.load(null);M=d||START();cur="Вхідні";open=null;mode="read";draw();if(!d)save()}});
+</script>
+</body></html>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Тренажер мишки й клавіатури для 2–4 класу — українська розкладка</title>
+<meta name="description" content="Тренажер мишки (клік, подвійний клік, перетягування, прокручування) і клавіатури з українською розкладкою для 2–4 класу. Рівні з автоперевіркою, без реєстрації.">
+<link rel="canonical" href="https://urokinfo.com.ua/seredovyshcha/myshka-klaviatura/"><link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta property="og:title" content="Тренажер мишки й клавіатури для 2–4 класу"><meta property="og:locale" content="uk_UA">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;800&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../kit.css">
+<style>
+:root{--acc:#7c3aed}@media (prefers-color-scheme:dark){:root{--acc:#b794ff}}
+body{font-size:19px}
+.lvbar{display:flex;flex-wrap:wrap;gap:6px;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--surface)}
+.lvbar button{border-radius:99px;border:2px solid var(--line);background:var(--bg);color:var(--ink);font:800 15px var(--f-body);padding:6px 12px}
+.lvbar button.done{background:var(--ok);border-color:var(--ok);color:#fff}.lvbar button.cur{border-color:var(--acc)}
+.task{padding:14px 16px 4px;font-weight:800;font-size:21px;text-align:center}.task small{display:block;color:var(--muted);font-weight:600;font-size:16px}
+.say{text-align:center;font-weight:800;min-height:1.5em;color:var(--ok)}
+.stage{position:relative;margin:10px auto 20px;width:min(860px,94%);height:420px;background:linear-gradient(#e9f4ff,#fdf6e3);border-radius:22px;overflow:hidden;border:2px solid var(--line);touch-action:none;user-select:none}
+.bub{position:absolute;width:70px;height:70px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#fff,#7cc3ff 55%,#3b82f6);display:grid;place-items:center;font-size:30px;cursor:pointer;transition:transform .15s}
+.bub.pop{transform:scale(0);opacity:0;transition:.25s}
+.box{position:absolute;width:96px;height:96px;font-size:64px;display:grid;place-items:center;cursor:pointer}
+.fruit{position:absolute;font-size:52px;cursor:grab;touch-action:none}
+.fruit.drag{cursor:grabbing;z-index:5;filter:drop-shadow(0 6px 6px #0004)}
+.basket{position:absolute;right:30px;bottom:20px;width:170px;height:130px;font-size:110px;display:grid;place-items:center;border-radius:20px;border:3px dashed #c99a3b}
+.basket.hot{background:#fff5d6}
+.scroller{position:absolute;inset:16px;overflow-y:scroll;background:#fff;border-radius:14px;padding:16px;font-size:18px;color:#333}
+.scroller .star{font-size:56px;cursor:pointer;display:inline-block}
+.typ{text-align:center;padding:10px}
+.target{font:800 clamp(28px,6vw,48px)/1.3 var(--f-mono);letter-spacing:.04em;color:#222;background:#fff;border-radius:16px;display:inline-block;padding:10px 18px;border:2px solid var(--line);max-width:100%;word-break:break-word}
+.target .d{color:#16a34a}.target .c{background:#ffe08a;border-radius:6px}.target .e{color:#dc2626;text-decoration:underline}
+.kb{display:grid;gap:6px;justify-content:center;margin:16px auto;user-select:none}
+.kb .r{display:flex;gap:6px;justify-content:center}
+.kb span{min-width:44px;height:48px;border-radius:10px;background:var(--surface);border:2px solid var(--line);display:grid;place-items:center;font:800 18px var(--f-body);color:var(--ink)}
+.kb span.hi{background:#ffd43b;border-color:#f08c00;color:#222;animation:bl 1s infinite}@keyframes bl{50%{transform:translateY(-3px)}}
+.kb span.wide{min-width:280px}.kb span.mid{min-width:84px}
+.lay{color:var(--bad);font-weight:800;text-align:center;min-height:1.3em}
+.inp{position:absolute;opacity:0;pointer-events:none}
+.stats{color:var(--muted);text-align:center;font-weight:700}
+@media (max-width:620px){.kb span{min-width:24px;height:40px;font-size:14px}.kb span.wide{min-width:140px}.kb span.mid{min-width:48px}.stage{height:360px}}
+@media (prefers-reduced-motion:reduce){.kb span.hi{animation:none}}
+</style></head><body>
+<main id="app">
+ <div class="lvbar" id="lvbar"></div>
+ <div class="task" id="task"></div>
+ <div class="say" id="say" role="status"></div>
+ <div id="area"></div>
+ <input class="inp" id="mob" autocomplete="off" autocapitalize="off" aria-hidden="true">
+</main>
+<script src="../kit.js"></script>
+<script>
+const $=s=>document.querySelector(s);
+const MAP={KeyQ:"й",KeyW:"ц",KeyE:"у",KeyR:"к",KeyT:"е",KeyY:"н",KeyU:"г",KeyI:"ш",KeyO:"щ",KeyP:"з",BracketLeft:"х",BracketRight:"ї",KeyA:"ф",KeyS:"і",KeyD:"в",KeyF:"а",KeyG:"п",KeyH:"р",KeyJ:"о",KeyK:"л",KeyL:"д",Semicolon:"ж",Quote:"є",KeyZ:"я",KeyX:"ч",KeyC:"с",KeyV:"м",KeyB:"и",KeyN:"т",KeyM:"ь",Comma:"б",Period:"ю",Backslash:"ґ",Slash:".",Space:" ",Backquote:"'"};
+const ROWS=["'йцукенгшщзхї","фівапролджє","ґячсмитьбю."];
+const LV={
+ click:{name:"Клацання",t:"Клацни по всіх бульбашках 🫧",kind:"mouse"},
+ dbl:{name:"Подвійне клацання",t:"Відкрий подвійним клацанням усі скриньки 🎁",kind:"mouse"},
+ drag:{name:"Перетягування",t:"Перетягни всі фрукти в кошик 🧺",kind:"mouse"},
+ scroll:{name:"Прокручування",t:"Прокрути текст коліщатком і знайди зірочку ⭐",kind:"mouse"},
+ letters:{name:"Літери",t:"Натискай клавішу, яка світиться",kind:"kb",seq:["а","о","і","м","л","т","к","н","р","с","в","п"],letters:1},
+ words:{name:"Слова",t:"Надрукуй слова. Між словами — пробіл",kind:"kb",seq:["мама тато кіт","сонце небо ліс","школа клас урок"]},
+ caps:{name:"Великі літери",t:"Велику літеру друкуй із затиснутою клавішею Shift",kind:"kb",seq:["Тимко","Київ","Олена","Дніпро"]},
+ fix:{name:"Стирання",t:"У рядку є зайві літери. Стирай клавішею Backspace ⌫ і надрукуй правильно: «комп'ютер»",kind:"fix",bad:"компп'ютерр",good:"комп'ютер"},
+ sentence:{name:"Речення",t:"Надрукуй речення з розділовими знаками",kind:"kb",seq:["Я люблю інформатику.","Сьогодні гарна погода, правда?","Робот Біт допомагає учням!"]},
+ speed:{name:"Швидкість",t:"Надрукуй речення без помилок швидше, ніж за 60 секунд",kind:"kb",seq:["Кожен день я вчуся друкувати швидше й без помилок."],speed:60}
+};
+const SETS={
+ mouse:{name:"Мишка (2 клас)",cls:2,norm:10,lv:["click","dbl","drag","scroll"]},
+ kb1:{name:"Клавіатура (2–3 клас)",cls:3,norm:15,lv:["letters","words","caps","fix"]},
+ kb2:{name:"Клавіатура (4 клас)",cls:4,norm:15,lv:["words","caps","sentence","speed"]}
+};
+Object.values(SETS).forEach(s=>{s.story=s.lv[0]==="click"?"Навчися керувати мишкою: клацати, двічі клацати, перетягувати й прокручувати.":"Навчися друкувати українською. Дивись на клавішу, що світиться, і натискай її. Розкладка — УКР.";
+  s.tasks=s.lv.map(k=>({t:"<b>"+LV[k].name+"</b>: "+LV[k].t[0].toLowerCase()+LV[k].t.slice(1),ok:()=>!!done[k]}))});
+let done={},cur=null,cleanup=null;
+const say=t=>$("#say").textContent=t||"";
+function lvbar(){const s=SETS[KIT.set];$("#lvbar").innerHTML=s.lv.map((k,i)=>`<button data-k="${k}" class="${done[k]?"done":""} ${k===cur?"cur":""}">${i+1}. ${LV[k].name}</button>`).join("")}
+$("#lvbar").onclick=e=>{const b=e.target.closest("button");if(b)load(b.dataset.k)};
+function win(){done[cur]=1;KIT.store({done});KIT.refresh();lvbar();say("Молодець! Рівень пройдено 🎉");const s=SETS[KIT.set];const nx=s.lv.find(k=>!done[k]);const was=cur;if(nx)setTimeout(()=>{if(cur===was)load(nx)},1500)}
+function load(k){if(cleanup){cleanup();cleanup=null}cur=k;lvbar();say("");const L=LV[k];$("#task").innerHTML=L.t+(L.kind!=="mouse"?"<small>Клацни по полю й друкуй на клавіатурі</small>":"");const a=$("#area");a.innerHTML="";({mouse:mouse,kb:kb,fix:fix})[L.kind](k,a)}
+const rnd=(a,b)=>a+Math.random()*(b-a);
+function stage(a){const s=document.createElement("div");s.className="stage";a.append(s);return s}
+function mouse(k,a){const s=stage(a);const W=()=>s.clientWidth,H=()=>s.clientHeight;
+ if(k==="click"){let left=10;const mk=()=>{const b=document.createElement("div");b.className="bub";b.textContent=["🐟","⭐","🍓","🎈","🐞"][left%5];b.style.left=rnd(10,W()-80)+"px";b.style.top=rnd(10,H()-80)+"px";
+   b.onclick=()=>{KIT.touch();b.classList.add("pop");setTimeout(()=>b.remove(),250);left--;say("Залишилось: "+left);if(left===0)win();else mk()};s.append(b)};mk();mk();left=10;say("Залишилось: 10")}
+ if(k==="dbl"){let left=5;for(let i=0;i<5;i++){const b=document.createElement("div");b.className="box";b.textContent="🎁";b.style.left=(40+i*(W()-140)/4)+"px";b.style.top=rnd(60,H()-140)+"px";
+   b.onclick=()=>{if(b.dataset.o)return;say("Клацни двічі швидко!")};
+   b.ondblclick=()=>{KIT.touch();if(b.dataset.o)return;b.dataset.o=1;b.textContent=["🧸","🚀","🎨","⚽","🎹"][i];left--;say("Відкрито: "+(5-left)+" з 5");if(!left)win()};s.append(b)}}
+ if(k==="drag"){const bas=document.createElement("div");bas.className="basket";bas.textContent="🧺";s.append(bas);let left=6;
+   ["🍎","🍐","🍌","🍇","🍒","🍑"].forEach((f,i)=>{const e=document.createElement("div");e.className="fruit";e.textContent=f;e.style.left=(20+(i%3)*90)+"px";e.style.top=(30+Math.floor(i/3)*120)+"px";s.append(e);
+    e.onpointerdown=ev=>{KIT.touch();e.setPointerCapture(ev.pointerId);e.classList.add("drag");const r=s.getBoundingClientRect(),ox=ev.clientX-e.offsetLeft,oy=ev.clientY-e.offsetTop;
+     e.onpointermove=m=>{e.style.left=(m.clientX-ox)+"px";e.style.top=(m.clientY-oy)+"px";const br=bas.getBoundingClientRect();bas.classList.toggle("hot",m.clientX>br.left&&m.clientX<br.right&&m.clientY>br.top&&m.clientY<br.bottom)};
+     e.onpointerup=m=>{e.onpointermove=null;e.classList.remove("drag");bas.classList.remove("hot");const br=bas.getBoundingClientRect();if(m.clientX>br.left&&m.clientX<br.right&&m.clientY>br.top&&m.clientY<br.bottom){e.remove();left--;say("У кошику: "+(6-left)+" з 6");if(!left)win()}}}})}
+ if(k==="scroll"){const sc=document.createElement("div");sc.className="scroller";let h="";for(let i=1;i<=40;i++)h+=`<p>${i}. Тимко гортає сторінку все нижче й нижче…</p>`;h+=`<p style="text-align:center"><span class="star" role="button" aria-label="Зірочка">⭐</span><br>Ось вона! Клацни по зірочці.</p>`;sc.innerHTML=h;s.append(sc);
+   sc.addEventListener("scroll",KIT.touch,{once:true});sc.querySelector(".star").onclick=()=>win()}
+}
+function kbHTML(){return`<div class="kb" id="kb">${ROWS.map(r=>`<div class="r">${[...r].map(c=>`<span data-c="${c}">${c.toUpperCase()}</span>`).join("")}</div>`).join("")}<div class="r"><span class="mid" data-c="shift">Shift</span><span class="wide" data-c=" ">пробіл</span><span class="mid" data-c="bs">⌫</span></div></div>`}
+function hi(ch){document.querySelectorAll("#kb .hi").forEach(e=>e.classList.remove("hi"));if(ch==null)return;const low=ch.toLowerCase();const e=document.querySelector(`#kb [data-c="${CSS.escape(low)}"]`);if(e)e.classList.add("hi");if(ch!==low&&ch.toUpperCase()===ch)document.querySelector('#kb [data-c="shift"]').classList.add("hi")}
+function keyChar(e){let k=e.key;if(k.length!==1)return null;if(/[ʼ’`]/.test(k))k="'";if(/[a-z]/i.test(k)&&MAP[e.code]){$("#lay").textContent="Перемкни розкладку на УКР (Alt+Shift або Win+Пробіл)";let c=MAP[e.code];return e.shiftKey?c.toUpperCase():c}
+  if(/[а-яіїєґ']/i.test(k))$("#lay").textContent="";return k}
+function kb(k,a){const L=LV[k];let item=0,pos=0,errs=0,t0=0;
+ a.innerHTML=`<div class="typ"><div class="target" id="tg"></div><div class="stats" id="stx"></div><div class="lay" id="lay"></div></div>${kbHTML()}`;
+ const tg=$("#tg");
+ const cur=()=>L.letters?L.seq[item]:L.seq[item];
+ function paint(){const s=cur();if(s==null)return;if(L.letters){tg.innerHTML=`<span class="c">${s.toUpperCase()}</span>`;hi(s)}else{tg.innerHTML=[...s].map((c,i)=>`<span class="${i<pos?"d":i===pos?"c":""}">${c===" "?"&nbsp;":KIT.esc(c)}</span>`).join("");hi(s[pos])}
+   $("#stx").textContent=(L.letters?"Літера ":"Рядок ")+(item+1)+" з "+L.seq.length+(errs?" · помилок: "+errs:"")+(L.speed&&t0?" · "+Math.round((Date.now()-t0)/1000)+" с":"")}
+ function next(){item++;pos=0;if(item>=L.seq.length){hi(null);tg.textContent="✓";if(L.speed){const s=(Date.now()-t0)/1000;if(s>L.speed||errs>0){say(`Час ${Math.round(s)} с, помилок ${errs}. Спробуй ще раз — без помилок і швидше ніж ${L.speed} с!`);item=0;errs=0;t0=0;setTimeout(paint,600);return}}win();return}paint()}
+ function onKey(e){if(e.ctrlKey||e.metaKey||e.altKey)return;const c=keyChar(e);if(c==null)return;e.preventDefault();KIT.touch();if(!t0)t0=Date.now();
+   const s=cur();const need=L.letters?s:s[pos];
+   if(c===need){if(L.letters){next();return}pos++;if(pos>=s.length)next();else paint()}else{errs++;tg.classList.remove("shake");void tg.offsetWidth;paint();const sp=tg.querySelector(".c");sp&&sp.classList.add("e")}}
+ document.addEventListener("keydown",onKey);cleanup=()=>document.removeEventListener("keydown",onKey);
+ mobileInput(onKey);paint();
+}
+function fix(k,a){const L=LV[k];let val=L.bad;
+ a.innerHTML=`<div class="typ"><div class="target" id="tg"></div><div class="stats">Клавіші: ← → щоб пересувати курсор, ⌫ — стерти, букви — вставити</div><div class="lay" id="lay"></div></div>${kbHTML()}`;
+ let caret=val.length;const tg=$("#tg");
+ function paint(){tg.innerHTML=[...val].map((c,i)=>(i===caret?'<span class="c">|</span>':"")+KIT.esc(c)).join("")+(caret===val.length?'<span class="c">|</span>':"");hi(null)}
+ function onKey(e){KIT.touch();if(e.key==="ArrowLeft"){caret=Math.max(0,caret-1);e.preventDefault()}else if(e.key==="ArrowRight"){caret=Math.min(val.length,caret+1);e.preventDefault()}
+   else if(e.key==="Backspace"){if(caret>0){val=val.slice(0,caret-1)+val.slice(caret);caret--}e.preventDefault()}else if(e.key==="Delete"){val=val.slice(0,caret)+val.slice(caret+1);e.preventDefault()}
+   else{const c=keyChar(e);if(c==null)return;e.preventDefault();val=val.slice(0,caret)+c+val.slice(caret);caret++}
+   paint();if(val===L.good)win()}
+ document.addEventListener("keydown",onKey);cleanup=()=>document.removeEventListener("keydown",onKey);mobileInput(onKey,true);paint()}
+function mobileInput(onKey){const m=$("#mob");if(!matchMedia("(pointer:coarse)").matches)return;$("#area").onclick=()=>m.focus();
+ m.oninput=()=>{const v=m.value;m.value="";for(const ch of v)onKey({key:ch,code:"",shiftKey:false,preventDefault(){},ctrlKey:false,metaKey:false,altKey:false})}}
+KIT.start({id:"myshka",title:"Мишка й клавіатура",sub:"тренажер для 2–4 класу",cls:2,sets:SETS,onSet(k,fresh){const d=!fresh&&KIT.load(null);done=d?d.done||{}:{};const s=SETS[k];load(s.lv.find(x=>!done[x])||s.lv[0])}});
+</script>
+</body></html>

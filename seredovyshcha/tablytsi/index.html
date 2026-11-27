@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ТаблиціЛаб — електронні таблиці онлайн для уроку інформатики</title>
+<meta name="description" content="Електронна таблиця в браузері для уроків інформатики 7–9 клас: формули СУМ, ЯКЩО, РАХУНОКЯКЩО, абсолютні посилання, сортування, діаграми. Завдання з автоперевіркою, без реєстрації.">
+<link rel="canonical" href="https://urokinfo.com.ua/seredovyshcha/tablytsi/"><link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta property="og:title" content="ТаблиціЛаб — електронні таблиці онлайн"><meta property="og:description" content="Формули, $-посилання, сортування й діаграми з автоперевіркою завдань."><meta property="og:locale" content="uk_UA">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;800&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../kit.css">
+<style>
+:root{--acc:#0f8a5f}@media (prefers-color-scheme:dark){:root{--acc:#3fd39b}}
+.stick{position:sticky;top:0;z-index:3}.tb{display:flex;flex-wrap:wrap;gap:6px;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--surface)}
+.tb button{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:9px;padding:6px 10px;font-weight:700;font-size:14px}
+.tb button:hover{border-color:var(--acc)}
+.tb .sep{width:1px;background:var(--line);margin:0 4px}
+.fx{display:flex;gap:8px;align-items:center;padding:8px 14px;border-bottom:1px solid var(--line);background:var(--surface)}
+.fx .nb{font:700 14px var(--f-mono);min-width:72px;text-align:center;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.fx .fxl{font:italic 700 15px var(--f-mono);color:var(--muted)}
+.fx input{flex:1;font:500 16px var(--f-mono);padding:7px 10px;border:2px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink);min-width:0}
+.fx input:focus{outline:none;border-color:var(--acc)}
+.gridw{padding:12px 14px;overflow:auto}
+table.g{border-collapse:collapse;font:14px var(--f-body);user-select:none;background:var(--surface)}
+table.g th{background:var(--bg);color:var(--muted);font:700 12px var(--f-mono);border:1px solid var(--line);padding:3px 6px;min-width:30px;position:sticky;top:0}
+table.g td{border:1px solid var(--line);min-width:96px;max-width:200px;height:28px;padding:2px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:cell}
+table.g td.num{text-align:right;font-family:var(--f-mono);font-size:13px}
+table.g td.b{font-weight:800}
+table.g td.err{color:var(--bad);font-weight:700}
+table.g td.sel{background:color-mix(in srgb,var(--acc) 14%,var(--surface))}
+table.g td.act{outline:2px solid var(--acc);outline-offset:-2px}
+table.g td.pick{outline:2px dashed #e67e22;outline-offset:-2px}
+.chartw{padding:4px 14px 18px}
+.chartw canvas{max-width:100%;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.msgbar{padding:0 14px;color:var(--bad);font-weight:700;min-height:1.2em;font-size:14px}
+dialog{border:1px solid var(--line);border-radius:16px;background:var(--surface);color:var(--ink);max-width:520px}
+dialog input,dialog select{font:500 15px var(--f-mono);padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+dialog label{display:grid;gap:4px;margin:8px 0;font-weight:700}
+.help code{font-family:var(--f-mono);background:var(--bg);padding:1px 5px;border-radius:5px}
+</style></head><body>
+<main id="app">
+ <div class="stick"><div class="tb" role="toolbar" aria-label="Інструменти таблиці">
+  <button id="bBold" title="Жирний (Ctrl+B)"><b>Ж</b></button>
+  <span class="sep"></span>
+  <button id="bCopy" title="Ctrl+C">Копіювати</button><button id="bPaste" title="Ctrl+V">Вставити</button>
+  <button id="bFillD" title="Ctrl+D: копіює верхню клітинку виділення вниз">Заповнити ↓</button><button id="bFillR" title="Ctrl+R">Заповнити →</button>
+  <span class="sep"></span>
+  <button id="bSortA">Сортувати ↑</button><button id="bSortD">Сортувати ↓</button>
+  <span class="sep"></span>
+  <button id="bChart">📊 Діаграма</button><button id="bCsv">⬇ CSV</button><button id="bHelp">ƒ Функції</button>
+ </div>
+ <div class="fx"><span class="nb" id="nb">A1</span><span class="fxl">fx</span><input id="fx" autocomplete="off" spellcheck="false" aria-label="Рядок формул" placeholder="Число, текст або формула, що починається з ="></div></div>
+ <div class="msgbar" id="msg"></div>
+ <div class="gridw"><table class="g" id="g"></table></div>
+ <div class="chartw" id="chartw" hidden><canvas id="cv" width="640" height="300"></canvas></div>
+ <dialog id="dChart"><form method="dialog"><h3 style="margin-top:0">Діаграма</h3>
+  <label>Тип <select id="cType"><option value="bar">Стовпчаста</option><option value="pie">Кругова</option><option value="line">Лінійна</option></select></label>
+  <label>Підписи (діапазон) <input id="cLab" placeholder="A2:A6"></label>
+  <label>Значення (діапазон) <input id="cVal" placeholder="D2:D6"></label>
+  <label>Назва <input id="cTitle" placeholder="Назва діаграми"></label>
+  <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn ghost" value="del">Видалити діаграму</button><button class="btn ghost" value="cancel">Скасувати</button><button class="btn" value="ok">Побудувати</button></div></form></dialog>
+ <dialog id="dHelp"><div class="help"><h3 style="margin-top:0">Функції</h3>
+  <p>Формула починається з <code>=</code>. Аргументи розділяй <code>;</code> або <code>,</code>. Можна писати українською чи англійською.</p>
+  <p><code>=СУМ(A1:A5)</code> · <code>=СЕРЕДНЄ(...)</code> · <code>=МАКС(...)</code> · <code>=МІН(...)</code> · <code>=РАХУНОК(...)</code><br>
+  <code>=ЯКЩО(B2&gt;=10;"Так";"Ні")</code> · <code>=І(...)</code> · <code>=АБО(...)</code><br>
+  <code>=РАХУНОКЯКЩО(F2:F7;"Плей-оф")</code> · <code>=СУМЯКЩО(B2:B9;"Какао";E2:E9)</code> · <code>=ОКРУГЛ(A1;2)</code></p>
+  <p><b>Абсолютне посилання</b> <code>$D$8</code> не змінюється під час копіювання. Порада: коли пишеш формулу, клацни на клітинку — її адреса вставиться сама.</p>
+  <form method="dialog" style="text-align:right"><button class="btn">Зрозуміло</button></form></div></dialog>
+</main>
+<script src="../sheet-engine.js"></script>
+<script src="../kit.js"></script>
+<script>
+const {Sheet,shift,parseRef,refStr,colName,COLS,ROWS,isErr,parse}=SHEET;
+const $=s=>document.querySelector(s);
+let sh=new Sheet(),chart=null,act={c:0,r:0},anc={c:0,r:0},clip=null,editing=false,orig="";
+const g=$("#g"),fx=$("#fx");
+/* ---------- набори ---------- */
+const DATA={
+ koshtorys:{rows:[["Стаття","Кількість","Ціна, грн","Вартість, грн","Частка"],["Автобус",1,6500],["Квитки в музей",28,120],["Обід",28,185],["Екскурсовод",1,1500],["Вода",30,18],[],["Разом"],["Учнів",28],["На одного учня"]]},
+ liga:{rows:[["Команда","Перемоги","Нічиї","Поразки","Очки","Статус","","Підсумки"],["Леви",4,1,1,"","","","Команд у плей-оф"],["Орли",2,3,1,"","","",""],["Вовки",3,0,3,"","","","Найбільше очок"],["Тигри",5,0,1,"","","",""],["Ведмеді",1,2,3],["Сови",3,2,1]]},
+ kaviarnia:{rows:[["День","Напій","Кількість","Ціна, грн","Виторг, грн","","Напій","Виторг, грн"],["Пн","Какао",14,45,"","","Какао"],["Пн","Чай",9,30,"","","Чай"],["Вт","Какао",11,45,"","","Лимонад"],["Вт","Лимонад",7,40],["Ср","Чай",12,30],["Ср","Какао",16,45],["Чт","Лимонад",10,40],["Пт","Какао",18,45],["Пт","Чай",8,30],[],["Середня кількість",""],["Найбільший виторг",""]]}
+};
+function load(key){sh=new Sheet();chart=null;DATA[key].rows.forEach((row,r)=>row.forEach((v,c)=>{if(v!==""&&v!=null)sh.set(refStr(c,r),String(v))}));sh.bold={};}
+function persist(){KIT.store({raw:sh.raw,bold:sh.bold,chart})}
+/* ---------- перевірки ---------- */
+const V=r=>sh.value(r),F=r=>sh.get(r),isF=r=>F(r).trim().startsWith("=");
+const near=(a,b,e)=>typeof a==="number"&&Math.abs(a-b)<=(e||0.011);
+const hasFn=(r,re)=>re.test(F(r).toUpperCase());
+const allRows=(r1,r2,fn)=>{for(let r=r1;r<=r2;r++)if(!fn(r))return false;return true};
+const SUM=/(СУМ|SUM)\(/,IFX=/(ЯКЩО|IF)\(/,CIF=/(РАХУНОКЯКЩО|COUNTIF)\(/,SIF=/(СУМЯКЩО|SUMIF)\(/,MAXX=/(МАКС|MAX)\(/,AVG=/(СЕРЕДНЄ|AVERAGE|СРЗНАЧ)\(/,RND=/(ОКРУГЛ|ROUND)\(/;
+const chartIs=(lab,val,type)=>chart&&chart.val.toUpperCase().replace(/\$/g,"")===val&&(!lab||chart.lab.toUpperCase().replace(/\$/g,"")===lab)&&(!type||chart.type===type);
+const KOSHT=[[1,6500],[28,120],[28,185],[1,1500],[30,18]],TOT=KOSHT.reduce((s,[a,b])=>s+a*b,0);
+const TEAMS={"Леви":[4,1,1],"Орли":[2,3,1],"Вовки":[3,0,3],"Тигри":[5,0,1],"Ведмеді":[1,2,3],"Сови":[3,2,1]};
+const pts=t=>TEAMS[t][0]*3+TEAMS[t][1];
+const SALES=[["Какао",14,45],["Чай",9,30],["Какао",11,45],["Лимонад",7,40],["Чай",12,30],["Какао",16,45],["Лимонад",10,40],["Какао",18,45],["Чай",8,30]];
+const byDrink=d=>SALES.filter(s=>s[0]===d).reduce((t,s)=>t+s[1]*s[2],0);
+const SETS={
+ koshtorys:{name:"Кошторис екскурсії (7–8 клас)",cls:8,norm:15,story:"Клас їде на екскурсію. Порахуй вартість кожної статті, загальну суму, суму на одного учня й частку кожної витрати — лише формулами.",tasks:[
+  {t:"У <b>D2</b> порахуй вартість автобуса: кількість × ціну.",hint:"Формула починається з <b>=</b>, наприклад <b>=B2*C2</b>",ok:()=>isF("D2")&&near(V("D2"),6500)},
+  {t:"Скопіюй формулу з D2 у <b>D3:D6</b>.",hint:"Виділи D2:D6 і натисни «Заповнити ↓» (Ctrl+D)",ok:()=>allRows(3,6,r=>isF("D"+r)&&near(V("D"+r),KOSHT[r-2][0]*KOSHT[r-2][1]))},
+  {t:"У <b>D8</b> знайди загальну суму функцією СУМ.",hint:"<b>=СУМ(D2:D6)</b>",ok:()=>hasFn("D8",SUM)&&near(V("D8"),TOT)},
+  {t:"У <b>D10</b> порахуй, скільки має здати кожен учень (кількість учнів — у B9).",ok:()=>isF("D10")&&near(V("D10"),TOT/28,0.01)},
+  {t:"У <b>E2:E6</b> порахуй частку кожної статті від загальної суми однією формулою, скопійованою вниз.",hint:"Загальна сума не має «з'їжджати» під час копіювання: <b>$D$8</b>",ok:()=>allRows(2,6,r=>isF("E"+r)&&/\$?D\$8/i.test(F("E"+r))&&near(V("E"+r),KOSHT[r-2][0]*KOSHT[r-2][1]/TOT,0.001))},
+  {t:"Зроби рядок заголовків <b>A1:E1</b> жирним.",ok:()=>["A1","B1","C1","D1","E1"].every(r=>sh.bold[r])},
+  {t:"Побудуй стовпчасту діаграму витрат: підписи <b>A2:A6</b>, значення <b>D2:D6</b>.",ok:()=>chartIs("A2:A6","D2:D6","bar")}]},
+ liga:{name:"Турнірна таблиця ліги (8 клас)",cls:8,norm:18,story:"Ліга класу зіграла тур. Нарахуй очки (перемога 3, нічия 1), визнач команди плей-оф (10 очок і більше), відсортуй таблицю й побудуй діаграму.",tasks:[
+  {t:"У <b>E2:E7</b> нарахуй очки кожній команді формулою.",hint:"Перемога — 3 очки, нічия — 1",ok:()=>allRows(2,7,r=>isF("E"+r)&&TEAMS[V("A"+r)]&&near(V("E"+r),pts(V("A"+r))))},
+  {t:"У <b>F2:F7</b> функцією ЯКЩО напиши «Плей-оф», якщо в команди 10 очок і більше, інакше «—».",ok:()=>allRows(2,7,r=>hasFn("F"+r,IFX)&&TEAMS[V("A"+r)]&&String(V("F"+r)).toLowerCase()===(pts(V("A"+r))>=10?"плей-оф":"—"))},
+  {t:"У <b>H3</b> порахуй функцією, скільки команд виходить у плей-оф.",ok:()=>hasFn("H3",CIF)&&V("H3")===3},
+  {t:"У <b>H5</b> знайди найбільшу кількість очок функцією.",ok:()=>hasFn("H5",MAXX)&&V("H5")===15},
+  {t:"Відсортуй команди за очками від більших до менших (рядки 2–7 разом!).",hint:"Виділи A2:F7, стань на стовпець E і натисни «Сортувати ↓»",ok:()=>{for(let r=2;r<=7;r++){const t=V("A"+r);if(!TEAMS[t]||!near(V("E"+r),pts(t))||V("B"+r)!==TEAMS[t][0])return false;if(r>2&&V("E"+r)>V("E"+(r-1)))return false}return true}},
+  {t:"Побудуй стовпчасту діаграму очок: підписи <b>A2:A7</b>, значення <b>E2:E7</b>.",ok:()=>chartIs("A2:A7","E2:E7","bar")}]},
+ kaviarnia:{name:"Продажі кав'ярні «Байт» (9 клас)",cls:9,norm:18,story:"Кав'ярня «Байт» веде облік продажів за тиждень. Порахуй виторг, підсумки по напоях і побудуй кругову діаграму.",tasks:[
+  {t:"У <b>E2:E10</b> порахуй виторг кожного рядка.",ok:()=>allRows(2,10,r=>isF("E"+r)&&near(V("E"+r),SALES[r-2][1]*SALES[r-2][2]))},
+  {t:"У <b>H2:H4</b> функцією СУМЯКЩО порахуй виторг для кожного напою з G2:G4.",hint:"<b>=СУМЯКЩО($B$2:$B$10;G2;$E$2:$E$10)</b> — і скопіюй вниз",ok:()=>[["H2","Какао"],["H3","Чай"],["H4","Лимонад"]].every(([r,d])=>hasFn(r,SIF)&&near(V(r),byDrink(d)))},
+  {t:"У <b>B12</b> знайди середню кількість проданих напоїв, округлену до десятих.",hint:"Функцію СЕРЕДНЄ можна вкласти в ОКРУГЛ",ok:()=>hasFn("B12",AVG)&&hasFn("B12",RND)&&near(V("B12"),Math.round(SALES.reduce((s,x)=>s+x[1],0)/9*10)/10,0.001)},
+  {t:"У <b>B13</b> знайди найбільший виторг за один рядок.",ok:()=>hasFn("B13",MAXX)&&near(V("B13"),Math.max(...SALES.map(s=>s[1]*s[2])))},
+  {t:"Побудуй <b>кругову</b> діаграму виторгу по напоях: підписи <b>G2:G4</b>, значення <b>H2:H4</b>.",ok:()=>chartIs("G2:G4","H2:H4","pie")},
+  {t:"Виділи жирним підсумкову таблицю <b>G1:H4</b>.",ok:()=>["G1","H1","G2","H2","G3","H3","G4","H4"].every(r=>sh.bold[r])}]}
+};
+/* ---------- малювання ---------- */
+function fmt(v){if(v===""||v==null)return"";if(isErr(v))return v.err;if(typeof v==="boolean")return v?"ІСТИНА":"ХИБНІСТЬ";if(typeof v==="number"){if(Number.isInteger(v))return String(v);return String(Math.round(v*1000)/1000).replace(".",",")}return String(v)}
+function build(){let h="<thead><tr><th></th>";for(let c=0;c<COLS;c++)h+=`<th>${colName(c)}</th>`;h+="</tr></thead><tbody>";
+  for(let r=0;r<ROWS;r++){h+=`<tr><th>${r+1}</th>`;for(let c=0;c<COLS;c++)h+=`<td data-c="${c}" data-r="${r}" id="c_${refStr(c,r)}"></td>`;h+="</tr>"}g.innerHTML=h+"</tbody>"}
+function selBox(){return{c1:Math.min(act.c,anc.c),c2:Math.max(act.c,anc.c),r1:Math.min(act.r,anc.r),r2:Math.max(act.r,anc.r)}}
+function render(){const b=selBox();
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const ref=refStr(c,r),td=document.getElementById("c_"+ref),v=sh.value(ref);
+    td.textContent=fmt(v);td.className=(typeof v==="number"?"num ":"")+(isErr(v)?"err ":"")+(sh.bold[ref]?"b ":"")+(c>=b.c1&&c<=b.c2&&r>=b.r1&&r<=b.r2?"sel ":"")+(c===act.c&&r===act.r?"act":"");td.title=sh.get(ref)}
+  $("#nb").textContent=b.c1===b.c2&&b.r1===b.r2?refStr(act.c,act.r):refStr(b.c1,b.r1)+":"+refStr(b.c2,b.r2);
+  if(!editing)fx.value=sh.get(refStr(act.c,act.r));
+  drawChart();
+}
+function changed(){sh.cache={};render();persist();KIT.refresh()}
+function msg(m){$("#msg").textContent=m||""}
+/* ---------- редагування ---------- */
+function commit(move){if(!editing)return;editing=false;const ref=refStr(act.c,act.r),v=fx.value;
+  if(v.trim().startsWith("=")){try{parse(v.trim().slice(1));msg("")}catch(e){msg("Помилка у формулі: "+e.message)}}else msg("");
+  sh.set(ref,v.trim());if(move==="down"&&act.r<ROWS-1)act.r++;if(move==="right"&&act.c<COLS-1)act.c++;anc={...act};changed();}
+fx.addEventListener("focus",()=>{if(!editing){editing=true;orig=fx.value}});
+fx.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();commit("down");g.focus()}else if(e.key==="Tab"){e.preventDefault();commit("right");g.focus()}else if(e.key==="Escape"){editing=false;fx.value=orig;fx.blur();g.focus();render()}});
+fx.addEventListener("blur",()=>{setTimeout(()=>{if(editing&&!picking)commit()},120)});
+let drag=false,picking=false,pickStart=null;
+g.tabIndex=0;
+g.addEventListener("mousedown",e=>{const td=e.target.closest("td");if(!td)return;const c=+td.dataset.c,r=+td.dataset.r;
+  if(editing&&fx.value.trim().startsWith("=")){e.preventDefault();picking=true;pickStart={c,r};insertRef(refStr(c,r));return}
+  if(editing)commit();
+  if(e.shiftKey){act={c,r}}else{act={c,r};anc={c,r}}drag=true;render();g.focus()});
+g.addEventListener("mouseover",e=>{const td=e.target.closest("td");if(!td)return;const c=+td.dataset.c,r=+td.dataset.r;
+  if(picking&&e.buttons){const a=pickStart,b={c,r};const s=refStr(Math.min(a.c,b.c),Math.min(a.r,b.r))+(a.c===b.c&&a.r===b.r?"":":"+refStr(Math.max(a.c,b.c),Math.max(a.r,b.r)));insertRef(s,true);return}
+  if(drag&&e.buttons){act={c,r};render()}});
+document.addEventListener("mouseup",()=>{drag=false;if(picking){picking=false;fx.focus()}});
+g.addEventListener("dblclick",()=>{fx.focus();fx.setSelectionRange(fx.value.length,fx.value.length)});
+let lastIns=null;
+function insertRef(s,replace){const v=fx.value;let pos=fx.selectionStart??v.length;
+  if(replace&&lastIns){fx.value=v.slice(0,lastIns.at)+s+v.slice(lastIns.at+lastIns.len);lastIns.len=s.length;fx.setSelectionRange(lastIns.at+s.length,lastIns.at+s.length);return}
+  fx.value=v.slice(0,pos)+s+v.slice(fx.selectionEnd??pos);lastIns={at:pos,len:s.length};setTimeout(()=>{fx.focus();fx.setSelectionRange(pos+s.length,pos+s.length)},0)}
+fx.addEventListener("input",()=>{lastIns=null});
+g.addEventListener("keydown",e=>{
+  const k=e.key,ctrl=e.ctrlKey||e.metaKey;
+  if(ctrl&&(k==="c"||k==="с")){e.preventDefault();copy();return}
+  if(ctrl&&(k==="v"||k==="м")){e.preventDefault();paste();return}
+  if(ctrl&&(k==="d"||k==="в")){e.preventDefault();fill("d");return}
+  if(ctrl&&(k==="r"||k==="к")){e.preventDefault();fill("r");return}
+  if(ctrl&&(k==="b"||k==="и")){e.preventDefault();bold();return}
+  const mv={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0],Enter:[0,1],Tab:[1,0]}[k];
+  if(mv){e.preventDefault();act={c:Math.max(0,Math.min(COLS-1,act.c+mv[0])),r:Math.max(0,Math.min(ROWS-1,act.r+mv[1]))};if(!e.shiftKey||k==="Enter"||k==="Tab")anc={...act};render();return}
+  if(k==="Delete"||k==="Backspace"){e.preventDefault();const b=selBox();for(let r=b.r1;r<=b.r2;r++)for(let c=b.c1;c<=b.c2;c++)sh.set(refStr(c,r),"");changed();return}
+  if(k==="F2"){fx.focus();return}
+  if(k.length===1&&!ctrl){e.preventDefault();fx.value=k;editing=true;orig=sh.get(refStr(act.c,act.r));fx.focus();fx.setSelectionRange(1,1)}
+});
+/* ---------- дії ---------- */
+function copy(){const b=selBox(),cells=[];for(let r=b.r1;r<=b.r2;r++){const row=[];for(let c=b.c1;c<=b.c2;c++){const ref=refStr(c,r);row.push({raw:sh.get(ref),b:!!sh.bold[ref]})}cells.push(row)}clip={c:b.c1,r:b.r1,cells};KIT.toast("Скопійовано "+$("#nb").textContent)}
+function put(c,r,cell,dc,dr){const ref=refStr(c,r);if(c>=COLS||r>=ROWS)return;sh.set(ref,cell.raw.startsWith("=")?shift(cell.raw,dc,dr):cell.raw);if(cell.b)sh.bold[ref]=1;else delete sh.bold[ref]}
+function paste(){if(!clip){KIT.toast("Спершу скопіюй клітинки");return}const b=selBox();
+  const h=clip.cells.length,w=clip.cells[0].length,H=Math.max(h,b.r2-b.r1+1),W=Math.max(w,b.c2-b.c1+1);
+  for(let i=0;i<H;i++)for(let j=0;j<W;j++){const cell=clip.cells[i%h][j%w];put(b.c1+j,b.r1+i,cell,b.c1+j-(clip.c+j%w),b.r1+i-(clip.r+i%h))}changed()}
+function fill(dir){const b=selBox();
+  if(dir==="d"){if(b.r1===b.r2){KIT.toast("Виділи кілька клітинок униз, щоб заповнити");return}for(let c=b.c1;c<=b.c2;c++){const src={raw:sh.get(refStr(c,b.r1)),b:!!sh.bold[refStr(c,b.r1)]};for(let r=b.r1+1;r<=b.r2;r++)put(c,r,src,0,r-b.r1)}}
+  else{if(b.c1===b.c2){KIT.toast("Виділи кілька клітинок праворуч, щоб заповнити");return}for(let r=b.r1;r<=b.r2;r++){const src={raw:sh.get(refStr(b.c1,r)),b:!!sh.bold[refStr(b.c1,r)]};for(let c=b.c1+1;c<=b.c2;c++)put(c,r,src,c-b.c1,0)}}
+  changed()}
+function bold(){const b=selBox();let all=true;for(let r=b.r1;r<=b.r2;r++)for(let c=b.c1;c<=b.c2;c++)if(!sh.bold[refStr(c,r)])all=false;
+  for(let r=b.r1;r<=b.r2;r++)for(let c=b.c1;c<=b.c2;c++){const ref=refStr(c,r);if(all)delete sh.bold[ref];else sh.bold[ref]=1}changed()}
+function sort(desc){const b=selBox();if(b.r1===b.r2){KIT.toast("Виділи кілька рядків таблиці, а потім сортуй");return}
+  const key=act.c,rows=[];for(let r=b.r1;r<=b.r2;r++){const v=sh.value(refStr(key,r));const cells=[];for(let c=b.c1;c<=b.c2;c++){const ref=refStr(c,r);cells.push({raw:sh.get(ref),b:!!sh.bold[ref]})}rows.push({r,v,cells})}
+  rows.sort((x,y)=>{const a=x.v,bb=y.v;const na=typeof a==="number",nb=typeof bb==="number";let d=na&&nb?a-bb:na?-1:nb?1:String(a).localeCompare(String(bb),"uk");return desc?-d:d});
+  rows.forEach((row,i)=>{const nr=b.r1+i;row.cells.forEach((cell,j)=>put(b.c1+j,nr,cell,0,nr-row.r))});changed();KIT.toast("Відсортовано за стовпцем "+colName(key)+(desc?" ↓":" ↑"))}
+function csv(){let out=[];for(let r=0;r<ROWS;r++){const row=[];let any=false;for(let c=0;c<COLS;c++){const v=fmt(sh.value(refStr(c,r)));if(v)any=true;row.push(/[;"\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v)}out.push(any?row.join(";"):"")}
+  while(out.length&&!out[out.length-1])out.pop();const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["﻿"+out.join("\r\n")],{type:"text/csv"}));a.download="tablytsia.csv";a.click()}
+/* ---------- діаграма ---------- */
+function rangeVals(s){try{const[a,b]=s.toUpperCase().replace(/\$/g,"").split(":").map(parseRef);if(!a)return null;const B=b||a;const out=[];for(let r=Math.min(a.r,B.r);r<=Math.max(a.r,B.r);r++)for(let c=Math.min(a.c,B.c);c<=Math.max(a.c,B.c);c++)out.push(sh.value(refStr(c,r)));return out}catch(e){return null}}
+function drawChart(){const w=$("#chartw");if(!chart){w.hidden=true;return}w.hidden=false;
+  const cv=$("#cv"),x=cv.getContext("2d"),W=cv.width,H=cv.height;x.clearRect(0,0,W,H);
+  const ink=getComputedStyle(document.body).color,acc=getComputedStyle(document.documentElement).getPropertyValue("--acc").trim()||"#0f8a5f";
+  const L=(rangeVals(chart.lab)||[]).map(fmt),Vv=(rangeVals(chart.val)||[]).map(v=>typeof v==="number"?v:0);
+  x.fillStyle=ink;x.font="700 15px Nunito,sans-serif";x.fillText(chart.title||"Діаграма",14,22);
+  const pal=["#0f8a5f","#5b3cc4","#e67e22","#c2255c","#1c7ed6","#f2b705","#2b8a3e","#868e96"];
+  if(chart.type==="pie"){const tot=Vv.reduce((s,v)=>s+Math.max(0,v),0)||1;let a=-Math.PI/2;const cx=150,cy=165,R=110;
+    Vv.forEach((v,i)=>{const d=2*Math.PI*Math.max(0,v)/tot;x.beginPath();x.moveTo(cx,cy);x.arc(cx,cy,R,a,a+d);x.closePath();x.fillStyle=pal[i%pal.length];x.fill();a+=d;
+      x.fillRect(300,50+i*24,14,14);x.fillStyle=ink;x.font="14px Nunito,sans-serif";x.fillText((L[i]||"")+" — "+fmt(v)+" ("+Math.round(100*Math.max(0,v)/tot)+"%)",322,62+i*24)});return}
+  const max=Math.max(1,...Vv),n=Vv.length||1,left=56,bot=H-40,top=40,bw=(W-left-20)/n;
+  x.strokeStyle="#8888";x.beginPath();x.moveTo(left,top);x.lineTo(left,bot);x.lineTo(W-10,bot);x.stroke();
+  x.font="12px JetBrains Mono,monospace";x.fillStyle=ink;for(let i=0;i<=4;i++){const yv=max*i/4,y=bot-(bot-top)*i/4;x.fillText(fmt(Math.round(yv)),4,y+4)}
+  if(chart.type==="line"){x.strokeStyle=acc;x.lineWidth=3;x.beginPath();Vv.forEach((v,i)=>{const X=left+bw*i+bw/2,Y=bot-(bot-top)*v/max;i?x.lineTo(X,Y):x.moveTo(X,Y)});x.stroke();x.lineWidth=1}
+  Vv.forEach((v,i)=>{const X=left+bw*i,h=(bot-top)*v/max;if(chart.type!=="line"){x.fillStyle=pal[i%pal.length];x.fillRect(X+bw*.15,bot-h,bw*.7,h)}x.fillStyle=ink;x.font="12px Nunito,sans-serif";const l=String(L[i]||"");x.fillText(l.length>12?l.slice(0,11)+"…":l,X+bw*.1,bot+16)});
+}
+$("#bChart").onclick=()=>{const b=selBox();const d=$("#dChart");
+  if(chart){$("#cType").value=chart.type;$("#cLab").value=chart.lab;$("#cVal").value=chart.val;$("#cTitle").value=chart.title||""}
+  else{$("#cLab").value=b.c2>b.c1?refStr(b.c1,b.r1)+":"+refStr(b.c1,b.r2):"";$("#cVal").value=refStr(b.c2,b.r1)+":"+refStr(b.c2,b.r2);$("#cTitle").value=""}
+  d.showModal()};
+$("#dChart").addEventListener("close",()=>{const v=$("#dChart").returnValue;if(v==="del"){chart=null;changed();return}if(v!=="ok")return;
+  const val=$("#cVal").value.trim(),lab=$("#cLab").value.trim();if(!rangeVals(val)){KIT.toast("Перевір діапазон значень, напр. D2:D6");return}
+  chart={type:$("#cType").value,lab,val,title:$("#cTitle").value.trim()};changed();setTimeout(()=>$("#chartw").scrollIntoView({behavior:"smooth",block:"nearest"}),50)});
+$("#bBold").onclick=bold;$("#bCopy").onclick=copy;$("#bPaste").onclick=paste;$("#bFillD").onclick=()=>fill("d");$("#bFillR").onclick=()=>fill("r");
+$("#bSortA").onclick=()=>sort(false);$("#bSortD").onclick=()=>sort(true);$("#bCsv").onclick=csv;$("#bHelp").onclick=()=>$("#dHelp").showModal();
+build();
+KIT.start({id:"tablytsi",title:"ТаблиціЛаб",sub:"електронна таблиця",cls:8,sets:SETS,onSet(k,fresh){
+  const d=!fresh&&KIT.load(null);if(d){sh=new Sheet();sh.raw=d.raw||{};sh.bold=d.bold||{};chart=d.chart||null}else{load(k);persist()}
+  act={c:0,r:0};anc={...act};render();}});
+</script>
+</body></html>

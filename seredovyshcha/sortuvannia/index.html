@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Алгоритми сортування — тренажер бульбашкою, вибором, вставками онлайн</title>
+<meta name="description" content="Тренажер алгоритмів сортування для 8–9 класу: виконай сортування бульбашкою, вибором і вставками власноруч, крок за кроком, з лічильником порівнянь і обмінів та автоперевіркою.">
+<link rel="canonical" href="https://urokinfo.com.ua/seredovyshcha/sortuvannia/"><link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta property="og:title" content="Алгоритми сортування — тренажер"><meta property="og:locale" content="uk_UA">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;800&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../kit.css">
+<style>
+:root{--acc:#0c8599}@media (prefers-color-scheme:dark){:root{--acc:#3bc9db}}
+.sw{padding:16px;display:grid;gap:14px;max-width:960px;margin:0 auto}
+.algs{display:flex;gap:6px;flex-wrap:wrap}
+.algs button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:7px 14px;font:700 14px var(--f-body)}
+.algs button.cur{background:var(--acc);border-color:var(--acc);color:#fff}
+.algs button .ok{margin-left:4px}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px}
+.rule{font-size:15px;line-height:1.5;color:var(--muted)}.rule b{color:var(--ink)}
+.bars{display:flex;align-items:flex-end;gap:8px;height:230px;padding:10px 4px 0;justify-content:center}
+.bar{flex:1;max-width:64px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;user-select:none}
+.bar i{display:block;width:100%;border-radius:10px 10px 4px 4px;background:color-mix(in srgb,var(--acc) 55%,var(--surface));transition:height .25s,background .2s,transform .2s}
+.bar b{font:700 16px var(--f-mono)}.bar small{font:12px var(--f-mono);color:var(--muted)}
+.bar.sel i{background:#f59f00;transform:translateY(-6px)}
+.bar.done i{background:var(--ok)}
+.bar.cmp i{outline:3px solid #7048e8;outline-offset:2px}
+.bar.minc i{background:#7048e8}
+.bar.key i{background:#e8590c}
+.bar.bad i{animation:sh .35s}@keyframes sh{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}.bar.bad i{animation:none}}
+.act{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.act button{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:8px 14px;font:700 15px var(--f-body)}
+.act button.pri{background:var(--acc);border-color:var(--acc);color:#fff}
+.stat{display:flex;gap:16px;flex-wrap:wrap;font:700 14px var(--f-mono);color:var(--muted)}.stat span b{color:var(--ink)}
+.msg{min-height:24px;font-weight:700}.msg.ok{color:var(--ok)}.msg.bad{color:var(--bad)}
+.pred{display:grid;gap:8px}.pred label{display:flex;gap:8px;align-items:center;font-weight:700;flex-wrap:wrap}
+.pred input{width:90px;font:16px var(--f-mono);padding:6px 8px;border-radius:9px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+table.cmp{border-collapse:collapse;font:14px var(--f-mono);width:100%}table.cmp td,table.cmp th{border:1px solid var(--line);padding:6px 8px;text-align:center}
+</style></head><body>
+<main id="app"><div class="sw">
+ <div class="algs" id="algs"></div>
+ <div class="box"><div class="rule" id="rule"></div></div>
+ <div class="box"><div class="bars" id="bars"></div></div>
+ <div class="act" id="act"></div>
+ <div class="stat" id="stat"></div>
+ <div class="msg" id="msg" aria-live="polite"></div>
+ <div class="box" id="extra"></div>
+</div></main>
+<script src="../kit.js"></script>
+<script>
+const $=s=>document.querySelector(s);
+const ALG={
+ bubble:{n:"Бульбашкою",rule:"<b>Сортування бульбашкою.</b> Йди зліва направо і порівнюй <b>сусідні</b> пари. Якщо лівий більший — обміняй. Після кожного проходу найбільший «спливає» в кінець. Натискай <b>«Обміняти»</b> або <b>«Далі»</b> для виділеної пари."},
+ select:{n:"Вибором",rule:"<b>Сортування вибором.</b> У невідсортованій частині знайди <b>найменший</b> елемент і постав його на першу вільну позицію. Клацни найменший стовпчик — він обміняється з першим невідсортованим."},
+ insert:{n:"Вставками",rule:"<b>Сортування вставками.</b> Бери наступний елемент (помаранчевий) і <b>вставляй</b> у відсортовану ліву частину на своє місце. Клацни стовпчик, <b>перед яким</b> його вставити (або сам ключ, якщо він уже на місці)."}};
+let S,alg="bubble";
+const DATA={a:[7,3,9,2,6,4],b:[5,1,8,3,9,2,7],c:[2,4,1,5,3,6,8,7]};
+function init(a){return{arr:[...a],orig:[...a],cmp:0,sw:0,err:0,done:false,i:0,j:0,sorted:0,minI:-1,key:1,passSw:false}}
+function st(){return S.runs[alg]}
+function msg(t,c){const m=$("#msg");m.textContent=t;m.className="msg "+(c||"")}
+function shake(k){const b=$("#bars").children[k];if(!b)return;b.classList.add("bad");setTimeout(()=>b.classList.remove("bad"),400)}
+function wrong(k,t){const r=st();r.err++;S.err++;shake(k);msg(t,"bad");KIT.touch();save()}
+function finish(){const r=st();r.done=true;msg(`Готово! Порівнянь: ${r.cmp}, обмінів: ${r.sw}, помилок: ${r.err}.`,"ok");save()}
+/* --- бульбашка --- */
+function bubbleAct(swap){const r=st(),a=r.arr,j=r.j,need=a[j]>a[j+1];r.cmp++;
+  if(swap!==need){r.cmp--;return wrong(j,swap?`${a[j]} ≤ ${a[j+1]} — обмінювати не треба.`:`${a[j]} > ${a[j+1]} — ці треба обміняти!`)}
+  if(swap){[a[j],a[j+1]]=[a[j+1],a[j]];r.sw++;r.passSw=true}msg(swap?"Обміняли ✓":"Правильно, на місці ✓","ok");
+  r.j++;if(r.j>=a.length-1-r.sorted){r.sorted++;r.j=0;if(!r.passSw||r.sorted>=a.length-1){r.sorted=a.length;finish()}r.passSw=false}KIT.touch();save()}
+/* --- вибір --- */
+function selectClick(k){const r=st(),a=r.arr,s=r.sorted;if(k<s)return;let m=s;for(let x=s+1;x<a.length;x++)if(a[x]<a[m])m=x;
+  if(a[k]!==a[m])return wrong(k,`${a[k]} — не найменший у невідсортованій частині.`);
+  r.cmp+=a.length-1-s;if(k!==s){[a[s],a[k]]=[a[k],a[s]];r.sw++}r.sorted++;msg(`${a[s]} став на позицію ${s+1} ✓`,"ok");if(r.sorted>=a.length-1){r.sorted=a.length;finish()}KIT.touch();save()}
+/* --- вставки --- */
+function insertClick(k){const r=st(),a=r.arr,key=r.key;if(k>key)return;const v=a[key];let p=key;while(p>0&&a[p-1]>v)p--;
+  if(k!==p)return wrong(k,k===key?`${v} не на місці — він менший за сусіда зліва.`:`Не туди: ${v} має стояти ${p===0?"першим":"після "+a[p-1]}.`);
+  r.cmp+=key-p+(p>0?1:0);if(p!==key){a.splice(key,1);a.splice(p,0,v);r.sw+=key-p}msg(p===key?`${v} уже на місці ✓`:`Вставили ${v} ✓`,"ok");r.key++;if(r.key>=a.length)finish();KIT.touch();save()}
+function draw(){const r=st();$("#algs").innerHTML=Object.entries(ALG).map(([k,v])=>`<button data-a="${k}" class="${k===alg?"cur":""}">${v.n}${S.runs[k]?.done?'<span class="ok">✓</span>':""}</button>`).join("");
+  $("#rule").innerHTML=ALG[alg].rule;const a=r.arr,mx=Math.max(...a);
+  $("#bars").innerHTML=a.map((v,k)=>{let c="";if(r.done)c="done";else if(alg==="bubble"){if(k>=a.length-r.sorted)c="done";else if(k===r.j||k===r.j+1)c="cmp"}
+    else if(alg==="select"){if(k<r.sorted)c="done"}else if(alg==="insert"){if(k===r.key)c="key";else if(k<r.key)c="done"}
+    return `<div class="bar ${c}" data-k="${k}"><b>${v}</b><i style="height:${Math.round(25+v/mx*160)}px"></i><small>${k+1}</small></div>`}).join("");
+  $("#act").innerHTML=r.done?`<button class="pri" id="again">↺ Нові числа</button>`:(alg==="bubble"?`<button class="pri" id="bSw">⇄ Обміняти</button><button id="bNx">→ Далі (не міняти)</button>`:`<span class="rule">${alg==="select"?"Клацни найменший серед невідсортованих":"Клацни місце для помаранчевого ключа "+a[r.key]}</span>`);
+  $("#stat").innerHTML=`<span>порівнянь <b>${r.cmp}</b></span><span>обмінів/зсувів <b>${r.sw}</b></span><span>помилок <b>${r.err}</b></span>`;
+  if($("#bSw")){$("#bSw").onclick=()=>bubbleAct(true);$("#bNx").onclick=()=>bubbleAct(false)}
+  if($("#again"))$("#again").onclick=()=>{S.runs[alg]=init(DATA[S.cur==="a"?"b":"c"]);S.cur=S.cur==="a"?"b":"a";msg("");save()};
+  extra()}
+function extra(){const e=$("#extra"),R=S.runs;
+  if(S.set==="k9"){e.innerHTML=`<h3 style="margin:0 0 8px">Порівняй алгоритми</h3><table class="cmp"><tr><th></th>${Object.values(ALG).map(v=>`<th>${v.n}</th>`).join("")}</tr>
+   <tr><td>порівнянь</td>${Object.keys(ALG).map(k=>`<td>${R[k]?.done?R[k].cmp:"—"}</td>`).join("")}</tr><tr><td>обмінів</td>${Object.keys(ALG).map(k=>`<td>${R[k]?.done?R[k].sw:"—"}</td>`).join("")}</tr></table>
+   <div class="pred" style="margin-top:12px"><label>Скільки порівнянь зробить бульбашка для 10 чисел за найгіршого випадку (усі проходи)? <input id="p1" inputmode="numeric" value="${S.p1||""}"></label>
+   <label>Який алгоритм зробив найменше обмінів на твоїх даних? <select id="p2"><option value="">—</option>${Object.entries(ALG).map(([k,v])=>`<option value="${k}" ${S.p2===k?"selected":""}>${v.n}</option>`).join("")}</select></label></div>`;
+   $("#p1").oninput=x=>{S.p1=x.target.value.trim();KIT.touch();save()};$("#p2").onchange=x=>{S.p2=x.target.value;KIT.touch();save()}}
+  else e.innerHTML=`<div class="pred"><label>Передбач: скільки обмінів знадобиться бульбашці для [${DATA.a.join(", ")}]? <input id="p0" inputmode="numeric" value="${S.p0||""}"></label><span class="rule">Спершу вгадай, потім перевір, виконавши сортування.</span></div>`,$("#p0").oninput=x=>{S.p0=x.target.value.trim();KIT.touch();save()}}
+$("#algs").onclick=e=>{const b=e.target.closest("button");if(!b)return;alg=b.dataset.a;if(!S.runs[alg])S.runs[alg]=init(DATA.a);msg("");draw()};
+$("#bars").onclick=e=>{const b=e.target.closest(".bar");if(!b||st().done)return;const k=+b.dataset.k;if(alg==="select")selectClick(k);else if(alg==="insert")insertClick(k)};
+function save(){KIT.store(S);draw();KIT.refresh()}
+const inv=a=>{let n=0;for(let i=0;i<a.length;i++)for(let j=i+1;j<a.length;j++)if(a[i]>a[j])n++;return n};
+const SETS={
+ k8:{name:"8 клас: бульбашка й вибір",cls:8,norm:10,story:"Тренер ліги має впорядкувати гравців за кількістю голів. Відсортуй числа власноруч, як це робить комп'ютер, крок за кроком.",tasks:[
+  {t:"Передбач, скільки обмінів знадобиться бульбашці для першого набору.",ok:()=>S.p0!==undefined&&S.p0!==""},
+  {t:"Виконай сортування <b>бульбашкою</b> до кінця.",ok:()=>S.runs.bubble?.done},
+  {t:"Перевір передбачення: твоє число збіглося з лічильником обмінів?",hint:"Кількість обмінів = кількості «неправильних» пар",ok:()=>S.runs.bubble?.done&&+S.p0===inv(DATA.a)},
+  {t:"Виконай сортування <b>вибором</b> до кінця.",ok:()=>S.runs.select?.done},
+  {t:"Відсортуй бульбашкою ще й інший набір («Нові числа») з не більше ніж 1 помилкою.",ok:()=>S.runs.bubble?.done&&S.runs.bubble.orig.join()!==DATA.a.join()&&S.runs.bubble.err<=1}]},
+ k9:{name:"9 клас: три алгоритми",cls:9,norm:14,story:"У кав'ярні «Байт» треба впорядкувати замовлення за часом приготування. Порівняй три алгоритми на тих самих даних і зроби висновок, який ефективніший.",tasks:[
+  {t:"Відсортуй дані <b>бульбашкою</b>.",ok:()=>S.runs.bubble?.done},
+  {t:"Відсортуй ті самі дані <b>вибором</b>.",ok:()=>S.runs.select?.done},
+  {t:"Відсортуй ті самі дані <b>вставками</b>.",ok:()=>S.runs.insert?.done},
+  {t:"Скільки порівнянь у бульбашки для 10 чисел у найгіршому випадку? Впиши під таблицею.",hint:"9 + 8 + … + 1",ok:()=>S.p1==="45"},
+  {t:"Визнач за таблицею, який алгоритм зробив найменше обмінів.",ok:()=>{const R=S.runs;if(!["bubble","select","insert"].every(k=>R[k]?.done))return false;const m=Math.min(...["bubble","select","insert"].map(k=>R[k].sw));return S.p2&&R[S.p2].sw===m}}]}
+};
+KIT.start({id:"sortuvannia",title:"Алгоритми сортування",sub:"крок за кроком",cls:9,sets:SETS,onSet(k,fresh){const d=!fresh&&KIT.load(null);S=d||{set:k,cur:"a",err:0,runs:{bubble:init(DATA.a),select:init(DATA.a),insert:init(DATA.a)}};S.set=k;alg="bubble";msg("");draw();if(!d)save()}});
+</script>
+</body></html>

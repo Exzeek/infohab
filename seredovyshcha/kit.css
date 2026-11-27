@@ -1,0 +1,53 @@
+/* Каркас середовищ — urokinfo.com.ua */
+:root{--bg:#f6f6fb;--surface:#fff;--ink:#1c1d2b;--muted:#62657a;--line:#e2e3ee;--acc:#5b3cc4;--ok:#16a34a;--bad:#dc2626;--send:#ffb020;--send-ink:#2a1a00;
+--f-body:"Nunito",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--f-display:"Unbounded","Nunito",system-ui,sans-serif;--f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#12131b;--surface:#1c1d29;--ink:#ececf4;--muted:#a2a5ba;--line:#2e3040;--acc:#a58cff;color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font:16px/1.45 var(--f-body);display:flex;flex-direction:column}
+a{color:var(--acc)}
+button{font:inherit;cursor:pointer}
+.k-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--line)}
+.k-top .home{font-weight:800;text-decoration:none;color:var(--muted);font-size:14px}
+.k-top h1{font:800 20px/1.1 var(--f-display);margin:0;color:var(--acc)}
+.k-top .sub{color:var(--muted);font-size:14px}
+.k-top .sp{flex:1}
+.k-top select{font:600 14px var(--f-body);padding:6px 8px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);max-width:320px}
+.k-timer{font:700 15px var(--f-mono);padding:4px 10px;border-radius:99px;background:var(--bg);border:1px solid var(--line)}
+.k-wrap{flex:1;display:flex;min-height:0}
+.k-main{flex:1;min-width:0;overflow:auto;position:relative}
+.k-side{width:340px;flex:none;border-left:1px solid var(--line);background:var(--surface);display:flex;flex-direction:column;min-height:0}
+.k-side h2{font:800 15px var(--f-display);margin:0;padding:14px 16px 6px;display:flex;justify-content:space-between;align-items:center}
+.k-side .story{padding:0 16px 8px;color:var(--muted);font-size:14px}
+.k-prog{margin:0 16px 8px;height:8px;border-radius:99px;background:var(--line);overflow:hidden}.k-prog i{display:block;height:100%;width:0;background:var(--ok);transition:width .3s}
+.k-tasks{list-style:none;margin:0;padding:0 10px 10px;overflow:auto;flex:1}
+.k-tasks li{display:flex;gap:10px;padding:9px 8px;border-radius:12px;align-items:flex-start;font-size:15px}
+.k-tasks li+li{border-top:1px dashed var(--line)}
+.k-tasks .n{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font:800 13px var(--f-mono);border:2px solid var(--line);color:var(--muted)}
+.k-tasks li.ok .n{background:var(--ok);border-color:var(--ok);color:#fff}
+.k-tasks li.ok .tx{color:var(--muted)}
+.k-tasks li.miss{background:color-mix(in srgb,var(--bad) 8%,transparent)}
+.k-tasks .hint{display:block;font-size:13px;color:var(--muted);margin-top:3px}
+.k-tasks .hint b{font-family:var(--f-mono);font-weight:700;color:var(--ink)}
+.k-act{padding:12px 16px;border-top:1px solid var(--line);display:grid;gap:8px}
+.btn{border:0;border-radius:12px;padding:10px 14px;font-weight:800;background:var(--acc);color:#fff}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.send{background:var(--send);color:var(--send-ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.k-res{padding:12px 16px;border-top:1px solid var(--line);display:none;gap:8px}
+.k-res.on{display:grid}
+.k-res .big{font:800 44px/1 var(--f-display);color:var(--acc)}
+.k-res .row{display:flex;gap:8px;flex-wrap:wrap;font-size:14px;color:var(--muted)}
+.k-res input{font:inherit;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);width:100%}
+.k-res .msg{font-size:13px;color:var(--bad);min-height:1em}
+.k-fab{position:fixed;right:16px;bottom:16px;z-index:50;border-radius:99px;padding:12px 18px;box-shadow:0 6px 20px #0003;display:none}
+.k-toggle{display:none}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:700;z-index:99;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw}
+.toast.on{opacity:1}
+@media (max-width:860px){
+ .k-wrap{flex-direction:column}
+ .k-side{width:auto;border-left:0;border-top:1px solid var(--line);max-height:46vh}
+ .k-side.min .k-tasks,.k-side.min .story,.k-side.min .k-act,.k-side.min .k-prog{display:none}
+ .k-toggle{display:inline-block;background:none;border:1px solid var(--line);border-radius:8px;padding:2px 8px;color:var(--ink);font-size:13px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ДокументЛаб — текстовий редактор онлайн для уроку інформатики</title>
+<meta name="description" content="Текстовий редактор у браузері для уроків інформатики 5 і 7 клас: стилі, списки, таблиці, зображення, колонтитули, злиття документів. Завдання з автоперевіркою, без реєстрації.">
+<link rel="canonical" href="https://urokinfo.com.ua/seredovyshcha/dokument/"><link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta property="og:title" content="ДокументЛаб — текстовий редактор онлайн"><meta property="og:locale" content="uk_UA">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;800&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../kit.css">
+<style>
+:root{--acc:#1c64d6}@media (prefers-color-scheme:dark){:root{--acc:#6aa7ff}}
+.stick{position:sticky;top:0;z-index:3}
+.tb{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px 14px;border-bottom:1px solid var(--line);background:var(--surface)}
+.tb button,.tb select{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:9px;padding:6px 9px;font:700 14px var(--f-body);min-width:34px}
+.tb button:hover{border-color:var(--acc)}
+.tb .sep{width:1px;align-self:stretch;background:var(--line);margin:0 3px}
+.tb input[type=color]{width:34px;height:32px;border:1px solid var(--line);border-radius:9px;padding:2px;background:var(--bg)}
+.desk{padding:22px 14px 40px;background:color-mix(in srgb,var(--bg) 80%,#888 20%);min-height:100%}
+.page{background:#fff;color:#1b1b1b;max-width:760px;margin:0 auto;box-shadow:0 4px 24px #0002;border-radius:4px;display:flex;flex-direction:column;min-height:900px;font:16px/1.5 "Times New Roman",Georgia,serif}
+.hf{padding:14px 64px;font:13px/1.4 Arial,sans-serif;color:#555;min-height:46px;outline:none}
+.hf:empty::before{content:attr(data-ph);color:#aaa}
+.hf.h{border-bottom:1px dashed #ccc}.hf.f{border-top:1px dashed #ccc;margin-top:auto}
+.hf.off{display:none}
+.body{padding:26px 64px 40px;outline:none;flex:1}
+.body h1{font:700 28px/1.2 Arial,sans-serif;margin:.4em 0;color:#1f3864}.body h2{font:700 21px/1.25 Arial,sans-serif;margin:.6em 0 .3em;color:#2f5496}
+.body p{margin:.35em 0}.body table{border-collapse:collapse;margin:.6em 0;width:100%}.body td,.body th{border:1px solid #888;padding:4px 8px;min-width:40px;height:24px}
+.body img{max-width:100%;vertical-align:middle}
+.fld{background:#fff3c4;border:1px solid #e6b800;border-radius:4px;padding:0 3px;font:600 14px Arial,sans-serif;color:#7a5c00;white-space:nowrap}
+.pgn{background:#e7f0ff;border-radius:4px;padding:0 4px;font-weight:700}
+.merge{max-width:760px;margin:18px auto 0;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 16px}
+.merge h3{margin:0 0 6px;font:800 15px var(--f-display)}
+.merge table{border-collapse:collapse;font-size:14px}.merge td,.merge th{border:1px solid var(--line);padding:3px 6px}.merge td[contenteditable]{min-width:120px;outline:none}
+.merge .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+dialog{border:1px solid var(--line);border-radius:16px;background:var(--surface);color:var(--ink);max-width:640px}
+.clips{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.clips button{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:8px}.clips img{width:64px;height:64px}
+.letters{max-height:60vh;overflow:auto;display:grid;gap:10px}.letters .lt{background:#fff;color:#111;border-radius:6px;padding:12px 18px;font:15px/1.5 Georgia,serif;box-shadow:0 1px 6px #0002}
+dialog input{font:15px var(--f-body);padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);width:70px}
+</style></head><body>
+<main id="app">
+<div class="stick"><div class="tb" role="toolbar" aria-label="Форматування">
+ <select id="sStyle" title="Стиль абзацу"><option value="p">Звичайний</option><option value="h1">Заголовок 1</option><option value="h2">Заголовок 2</option></select>
+ <select id="sSize" title="Розмір шрифту"><option value="">Розмір</option><option value="2">10</option><option value="3">12</option><option value="4">14</option><option value="5">18</option><option value="6">24</option><option value="7">32</option></select>
+ <span class="sep"></span>
+ <button data-c="bold" title="Жирний (Ctrl+B)"><b>Ж</b></button><button data-c="italic" title="Курсив (Ctrl+I)"><i>К</i></button><button data-c="underline" title="Підкреслений (Ctrl+U)"><u>П</u></button>
+ <input type="color" id="cFore" value="#c00000" title="Колір тексту"><button id="bFore" title="Застосувати колір">A</button>
+ <span class="sep"></span>
+ <button data-c="justifyLeft" title="Ліворуч">⯇</button><button data-c="justifyCenter" title="По центру">≡</button><button data-c="justifyRight" title="Праворуч">⯈</button><button data-c="justifyFull" title="За шириною">☰</button>
+ <span class="sep"></span>
+ <button data-c="insertUnorderedList" title="Маркований список">• список</button><button data-c="insertOrderedList" title="Нумерований список">1. список</button>
+ <span class="sep"></span>
+ <button id="bTable">▦ Таблиця</button><button id="bImg">🖼 Зображення</button><button id="bHF">Колонтитули</button><button id="bPg" title="Номер сторінки в колонтитул">№ стор.</button>
+ <span class="sep"></span>
+ <button id="bSave" title="Зберегти файл для Word">⬇ .doc</button><button id="bPrint">🖨 PDF</button>
+</div></div>
+<div class="desk">
+ <div class="page" id="page">
+  <div class="hf h off" id="hdr" contenteditable="true" data-ph="Верхній колонтитул"></div>
+  <div class="body" id="doc" contenteditable="true" spellcheck="true"></div>
+  <div class="hf f off" id="ftr" contenteditable="true" data-ph="Нижній колонтитул"></div>
+ </div>
+ <section class="merge" id="merge" hidden><h3>✉ Розсилка (злиття)</h3>
+  <p style="margin:0 0 6px;font-size:14px;color:var(--muted)">Список отримувачів. Постав курсор у документ і встав поле — під час злиття на його місці з'явиться дані з таблиці.</p>
+  <table id="mt"><thead><tr><th>Ім'я</th><th>Клас</th></tr></thead><tbody></tbody></table>
+  <div class="acts"><button class="btn ghost" id="fName">Вставити поле «Ім'я»</button><button class="btn ghost" id="fCls">Вставити поле «Клас»</button><button class="btn ghost" id="mAdd">+ рядок</button><button class="btn" id="mRun">Виконати злиття</button></div>
+ </section>
+</div>
+<dialog id="dTab"><form method="dialog"><h3 style="margin-top:0">Вставити таблицю</h3><p>Стовпців <input id="tc" type="number" min="1" max="8" value="3"> рядків <input id="tr" type="number" min="1" max="15" value="4"></p><div style="text-align:right"><button class="btn ghost" value="no">Скасувати</button> <button class="btn" value="ok">Вставити</button></div></form></dialog>
+<dialog id="dImg"><h3 style="margin-top:0">Вставити зображення</h3><div class="clips" id="clips"></div><form method="dialog" style="text-align:right;margin-top:10px"><button class="btn ghost">Закрити</button></form></dialog>
+<dialog id="dLet"><h3 style="margin-top:0">Результат злиття</h3><div class="letters" id="letters"></div><form method="dialog" style="text-align:right;margin-top:10px"><button class="btn">Готово</button></form></dialog>
+</main>
+<script src="../kit.js"></script>
+<script>
+const $=s=>document.querySelector(s),doc=$("#doc"),hdr=$("#hdr"),ftr=$("#ftr");
+let st={merged:0,saved:false,mdata:[]};
+const CLIPS={"Ярмарок":"🎪","Книга":"📚","Комп'ютер":"💻","Ялинка":"🎄","М'яч":"⚽","Сонце":"☀️","Робот":"🤖","Лист":"✉️"};
+const svgImg=(e,t)=>"data:image/svg+xml,"+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><title>${t}</title><rect width="100" height="100" rx="18" fill="#f1f4ff"/><text x="50" y="68" font-size="58" text-anchor="middle">${e}</text></svg>`);
+const START={
+ ogoloshennia:{hf:false,merge:false,html:`<p>Шкільний ярмарок</p><p>Запрошуємо всіх учнів і батьків на благодійний ярмарок у суботу, 12 грудня, о 10:00 в актовій залі.</p><p>Що можна принести:</p><p>випічку</p><p>вироби своїми руками</p><p>книжки, які вже прочитали</p><p>Усі кошти підуть на подарунки для дитячого будинку.</p>`},
+ tablytsia:{hf:false,merge:false,html:`<p>Розклад гуртків</p><p>Наш клас відвідує гуртки протягом тижня. Склади таблицю-розклад і додай малюнок.</p><p>Правила гуртків:</p><p>приходити вчасно</p><p>брати зошит</p><p>прибирати своє місце</p>`},
+ dyzain:{hf:true,merge:true,html:`<p>Запрошення на День відкритих дверей</p><p>Шановний учню!</p><p>Кібербаза запрошує тебе на День відкритих дверей гуртка програмування. Ти побачиш роботи старших учнів, спробуєш зібрати робота й напишеш першу програму.</p><p>Програма дня</p><p>Знайомство з гуртком — 14:00.</p><p>Майстер-клас з робототехніки — 14:30.</p><p>Чекаємо на тебе!</p>`,mdata:[["Олена","7-А"],["Максим","7-А"],["Софія","7-Б"],["Артем","7-Б"]]}
+};
+/* ---------- перевірки ---------- */
+const txt=el=>(el.textContent||"").replace(/\s+/g," ").trim().toLowerCase();
+const blocks=()=>[...doc.querySelectorAll("h1,h2,p,div,li")];
+const findBlock=(sel,word)=>[...doc.querySelectorAll(sel)].find(e=>txt(e).includes(word));
+const alignOf=el=>{for(let e=el;e&&e!==doc.parentNode;e=e.parentElement){const a=e.style&&e.style.textAlign||e.getAttribute&&e.getAttribute("align");if(a)return a}return""};
+const isBold=el=>{for(let e=el;e&&e!==doc;e=e.parentElement){if(/^(B|STRONG|H1|H2)$/.test(e.tagName)||(e.style&&/bold|[6-9]00/.test(e.style.fontWeight)))return true}return false};
+function styledWord(word,test){const w=document.createTreeWalker(doc,NodeFilter.SHOW_TEXT);let n;while(n=w.nextNode()){if(n.nodeValue.toLowerCase().includes(word)&&test(n.parentElement))return true}
+  /* слово розбите на кілька вузлів */const els=[...doc.querySelectorAll("b,strong,font,span,i,em,u")].filter(e=>txt(e).includes(word));return els.some(e=>test(e))}
+const colored=el=>{for(let e=el;e&&e!==doc;e=e.parentElement){const c=(e.getAttribute&&e.getAttribute("color"))||(e.style&&e.style.color);if(c&&!/^(#000|#000000|black|rgb\(0, 0, 0\)|#1b1b1b)$/i.test(c.trim()))return true}return false};
+const listWith=(tag,n,word)=>[...doc.querySelectorAll(tag)].some(l=>l.querySelectorAll("li").length>=n&&(!word||txt(l).includes(word)));
+const tables=()=>[...doc.querySelectorAll("table")];
+const SETS={
+ ogoloshennia:{name:"Оголошення про ярмарок (5 клас)",cls:5,norm:12,story:"Оформи оголошення про шкільний ярмарок так, щоб його хотілося прочитати.",tasks:[
+  {t:"Зроби перший рядок «Шкільний ярмарок» стилем <b>Заголовок 1</b>.",hint:"Постав курсор у рядок і обери стиль у першому списку",ok:()=>!!findBlock("h1","ярмарок")},
+  {t:"Вирівняй заголовок <b>по центру</b>.",ok:()=>{const h=findBlock("h1","ярмарок");return h&&alignOf(h)==="center"}},
+  {t:"Виділи слово «суботу» <b>жирним</b>.",ok:()=>styledWord("суботу",isBold)},
+  {t:"Зроби дату «12 грудня» <b>кольоровою</b>.",hint:"Виділи текст, обери колір і натисни «A»",ok:()=>styledWord("12 грудня",colored)},
+  {t:"Перетвори три рядки (випічку, вироби, книжки) на <b>маркований список</b>.",ok:()=>listWith("ul",3,"випічку")},
+  {t:"Останнє речення зроби <b>курсивом</b>.",ok:()=>styledWord("кошти",el=>{for(let e=el;e&&e!==doc;e=e.parentElement)if(/^(I|EM)$/.test(e.tagName)||(e.style&&e.style.fontStyle==="italic"))return true;return false})}]},
+ tablytsia:{name:"Таблиця й зображення (5 клас)",cls:5,norm:14,story:"Склади розклад гуртків у таблиці, додай малюнок і нумерований список правил.",tasks:[
+  {t:"Зроби «Розклад гуртків» заголовком (<b>Заголовок 1</b> або <b>2</b>).",ok:()=>!!findBlock("h1,h2","розклад")},
+  {t:"Встав <b>таблицю</b> щонайменше з 3 стовпців і 4 рядків.",ok:()=>tables().some(t=>t.rows.length>=4&&t.rows[0].cells.length>=3)},
+  {t:"Заповни перший рядок таблиці: <b>День</b>, <b>Гурток</b>, <b>Кабінет</b>.",ok:()=>tables().some(t=>{const r=[...t.rows[0].cells].map(txt);return r[0]==="день"&&r[1]==="гурток"&&r[2]==="кабінет"})},
+  {t:"Заповни ще хоча б <b>два рядки</b> таблиці (усі клітинки).",ok:()=>tables().some(t=>[...t.rows].slice(1).filter(r=>[...r.cells].every(c=>txt(c).length>0)).length>=2)},
+  {t:"Зроби перший рядок таблиці <b>жирним</b>.",ok:()=>tables().some(t=>[...t.rows[0].cells].every(c=>txt(c)&&(c.tagName==="TH"||styledWord(txt(c),isBold))))},
+  {t:"Встав у документ <b>зображення</b>.",ok:()=>doc.querySelectorAll("img").length>0},
+  {t:"Перетвори правила на <b>нумерований список</b>.",ok:()=>listWith("ol",3,"вчасно")}]},
+ dyzain:{name:"Колонтитули й злиття (7 клас)",cls:7,norm:18,story:"Підготуй запрошення від Кібербази для кількох учнів одразу: стилі, колонтитули й злиття.",tasks:[
+  {t:"Зроби перший рядок стилем <b>Заголовок 1</b>, а «Програма дня» — <b>Заголовок 2</b>.",ok:()=>!!findBlock("h1","запрошення")&&!!findBlock("h2","програма")},
+  {t:"Перетвори два пункти програми на <b>нумерований список</b>.",ok:()=>listWith("ol",2,"майстер")},
+  {t:"У <b>верхній колонтитул</b> напиши «Кібербаза · гурток програмування».",hint:"Кнопка «Колонтитули» показує їх на сторінці",ok:()=>!hdr.classList.contains("off")&&txt(hdr).includes("кібербаза")},
+  {t:"У <b>нижній колонтитул</b> встав номер сторінки.",hint:"Постав курсор у нижній колонтитул і натисни «№ стор.»",ok:()=>!ftr.classList.contains("off")&&!!ftr.querySelector(".pgn")},
+  {t:"Заміни слово «учню» на поле злиття <b>«Ім'я»</b> (звертання: «Шановний(а) «Ім'я»!»).",hint:"Постав курсор у документ і натисни «Вставити поле «Ім'я»» під сторінкою",ok:()=>!!doc.querySelector('.fld[data-f="Ім\'я"]')},
+  {t:"Додай у текст поле <b>«Клас»</b>.",ok:()=>!!doc.querySelector('.fld[data-f="Клас"]')},
+  {t:"Додай у список ще одного учня й <b>виконай злиття</b> (щонайменше 5 листів).",ok:()=>st.merged>=5},
+  {t:"Збережи документ як файл <b>.doc</b>.",ok:()=>st.saved}]}
+};
+/* ---------- редактор ---------- */
+document.execCommand("styleWithCSS",false,false);
+let saveT;function persist(){clearTimeout(saveT);saveT=setTimeout(()=>{KIT.store({html:doc.innerHTML,h:hdr.innerHTML,f:ftr.innerHTML,hon:!hdr.classList.contains("off"),st:{...st,mdata:readM()}});KIT.refresh()},250)}
+[doc,hdr,ftr].forEach(el=>el.addEventListener("input",persist));
+let lastRange=null,lastEl=doc;
+document.addEventListener("selectionchange",()=>{const s=getSelection();if(!s.rangeCount)return;const r=s.getRangeAt(0);const host=[doc,hdr,ftr].find(e=>e.contains(r.commonAncestorContainer));if(host){lastRange=r.cloneRange();lastEl=host;syncStyle()}});
+function restore(){if(!lastRange)return;const s=getSelection();s.removeAllRanges();s.addRange(lastRange)}
+function syncStyle(){let n=lastRange&&lastRange.startContainer;while(n&&n!==doc&&!(n.tagName&&/^(H1|H2|P|DIV|LI)$/.test(n.tagName)))n=n.parentNode;$("#sStyle").value=n&&n.tagName==="H1"?"h1":n&&n.tagName==="H2"?"h2":"p"}
+function cmd(c,v){restore();lastEl.focus();document.execCommand(c,false,v);persist()}
+document.querySelectorAll(".tb [data-c]").forEach(b=>b.addEventListener("mousedown",e=>{e.preventDefault();cmd(b.dataset.c)}));
+$("#sStyle").onchange=e=>cmd("formatBlock","<"+e.target.value+">");
+$("#sSize").onchange=e=>{if(e.target.value)cmd("fontSize",e.target.value);e.target.value=""};
+$("#bFore").addEventListener("mousedown",e=>{e.preventDefault();cmd("foreColor",$("#cFore").value)});
+$("#bTable").onclick=()=>$("#dTab").showModal();
+$("#dTab").addEventListener("close",()=>{if($("#dTab").returnValue!=="ok")return;const c=Math.min(8,+$("#tc").value||3),r=Math.min(15,+$("#tr").value||4);
+  let h="<table>";for(let i=0;i<r;i++){h+="<tr>";for(let j=0;j<c;j++)h+="<td><br></td>";h+="</tr>"}h+="</table><p><br></p>";cmd("insertHTML",h)});
+$("#clips").innerHTML=Object.entries(CLIPS).map(([t,e])=>`<button type="button" data-t="${t}" data-e="${e}" title="${t}"><img alt="${t}" src="${svgImg(e,t)}"><div>${t}</div></button>`).join("");
+$("#clips").onclick=e=>{const b=e.target.closest("button");if(!b)return;$("#dImg").close();cmd("insertHTML",`<img alt="${b.dataset.t}" width="120" src="${svgImg(b.dataset.e,b.dataset.t)}">`)};
+$("#bImg").onclick=()=>$("#dImg").showModal();
+$("#bHF").onclick=()=>{const on=hdr.classList.toggle("off");ftr.classList.toggle("off",on);if(!on)hdr.focus();persist()};
+$("#bPg").addEventListener("mousedown",e=>{e.preventDefault();if(lastEl!==ftr&&lastEl!==hdr){KIT.toast("Спершу клацни в колонтитул");return}cmd("insertHTML",'<span class="pgn" contenteditable="false">1</span>&nbsp;')});
+/* ---------- злиття ---------- */
+function renderM(rows){$("#mt tbody").innerHTML=rows.map(r=>`<tr><td contenteditable="true">${KIT.esc(r[0])}</td><td contenteditable="true">${KIT.esc(r[1])}</td></tr>`).join("")}
+function readM(){return[...$("#mt tbody").rows].map(r=>[r.cells[0].textContent.trim(),r.cells[1].textContent.trim()])}
+$("#mt").addEventListener("input",persist);
+$("#mAdd").onclick=()=>{renderM([...readM(),["",""]]);persist();$("#mt tbody tr:last-child td").focus()};
+function field(f){if(lastEl!==doc){restore()}if(!lastRange||!doc.contains(lastRange.commonAncestorContainer)){KIT.toast("Спершу постав курсор у текст документа");return}cmd("insertHTML",`<span class="fld" contenteditable="false" data-f="${f}">«${f}»</span>&nbsp;`)}
+$("#fName").addEventListener("mousedown",e=>{e.preventDefault();field("Ім'я")});$("#fCls").addEventListener("mousedown",e=>{e.preventDefault();field("Клас")});
+$("#mRun").onclick=()=>{const rows=readM().filter(r=>r[0]);if(!doc.querySelector(".fld")){KIT.toast("Додай у документ хоча б одне поле злиття");return}
+  $("#letters").innerHTML=rows.map(r=>{const c=doc.cloneNode(true);c.querySelectorAll(".fld").forEach(f=>f.replaceWith(f.dataset.f==="Клас"?r[1]:r[0]));c.removeAttribute("contenteditable");return`<div class="lt">${c.innerHTML}</div>`}).join("");
+  st.merged=rows.length;persist();$("#dLet").showModal();KIT.toast("Створено листів: "+rows.length)};
+/* ---------- збереження ---------- */
+$("#bSave").onclick=()=>{const html=`<html><head><meta charset="utf-8"><title>Документ</title></head><body>${hdr.classList.contains("off")?"":"<div style='color:#555'>"+hdr.innerHTML+"</div><hr>"}${doc.innerHTML}${ftr.classList.contains("off")?"":"<hr><div style='color:#555'>"+ftr.innerHTML+"</div>"}</body></html>`;
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["﻿"+html],{type:"application/msword"}));a.download="dokument.doc";a.click();st.saved=true;persist();KIT.toast("Файл dokument.doc збережено")};
+$("#bPrint").onclick=()=>{const w=window.open("","_blank");if(!w)return;w.document.write(`<html><head><meta charset="utf-8"><title>Документ</title><style>body{font:16px/1.5 'Times New Roman',serif;margin:2cm}h1{font:700 28px Arial}h2{font:700 21px Arial}table{border-collapse:collapse;width:100%}td{border:1px solid #888;padding:4px}.fld{background:#fff3c4}</style></head><body>${hdr.classList.contains("off")?"":"<div style='color:#555'>"+hdr.innerHTML+"</div><hr>"}${doc.innerHTML}${ftr.classList.contains("off")?"":"<hr><div style='color:#555'>"+ftr.innerHTML+"</div>"}<script>print()<\/script></body></html>`);w.document.close()};
+KIT.start({id:"dokument",title:"ДокументЛаб",sub:"текстовий редактор",cls:5,sets:SETS,onSet(k,fresh){
+  const S=START[k],d=!fresh&&KIT.load(null);
+  doc.innerHTML=d?d.html:S.html;hdr.innerHTML=d?d.h:"";ftr.innerHTML=d?d.f:"";
+  const hon=d?d.hon:false;hdr.classList.toggle("off",!hon);ftr.classList.toggle("off",!hon);
+  st=d&&d.st?{merged:d.st.merged||0,saved:!!d.st.saved}:{merged:0,saved:false};
+  $("#merge").hidden=!S.merge;renderM(d&&d.st&&d.st.mdata&&d.st.mdata.length?d.st.mdata:(S.mdata||[]));
+  $("#bHF").hidden=!S.hf;$("#bPg").hidden=!S.hf;lastRange=null;lastEl=doc;if(!d)persist();}});
+</script>
+</body></html>

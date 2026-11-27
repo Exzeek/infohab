@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Провідник — симулятор файлів і папок для уроку інформатики</title>
+<meta name="description" content="Симулятор провідника для 3 і 5 класу: створення папок, перейменування, переміщення, копіювання, кошик, пошук і розширення файлів. Завдання з автоперевіркою, без реєстрації.">
+<link rel="canonical" href="https://urokinfo.com.ua/seredovyshcha/providnyk/"><link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta property="og:title" content="Провідник — симулятор файлів і папок"><meta property="og:locale" content="uk_UA">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;800&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../kit.css">
+<style>
+:root{--acc:#0b7fc7}@media (prefers-color-scheme:dark){:root{--acc:#5cb8ff}}
+.win{display:grid;grid-template-columns:230px 1fr;grid-template-rows:auto auto 1fr;height:100%;min-height:520px}
+.tb{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px;border-bottom:1px solid var(--line);background:var(--surface);align-items:center}
+.tb button{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:9px;padding:6px 10px;font:700 14px var(--f-body)}
+.tb button:disabled{opacity:.4}
+.tb .sp{flex:1}.tb input[type=search]{font:14px var(--f-body);padding:6px 10px;border-radius:9px;border:1px solid var(--line);background:var(--bg);color:var(--ink);width:180px}
+.tb label{font-size:14px;font-weight:700;display:flex;gap:4px;align-items:center}
+.addr{grid-column:1/-1;display:flex;gap:6px;align-items:center;padding:6px 12px;border-bottom:1px solid var(--line);background:var(--surface);font:600 14px var(--f-body)}
+.addr button{border:0;background:none;color:var(--acc);font:700 14px var(--f-body);padding:2px 4px;border-radius:6px}
+.tree{border-right:1px solid var(--line);background:var(--surface);overflow:auto;padding:8px 0}
+.tree div{padding:5px 10px;cursor:pointer;white-space:nowrap;font-size:15px;border-radius:8px;margin:0 6px}
+.tree div:hover{background:var(--bg)}.tree div.cur{background:color-mix(in srgb,var(--acc) 16%,transparent);font-weight:800}
+.tree div.drop{outline:2px dashed var(--acc)}
+.files{overflow:auto;padding:12px;display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;align-content:start}
+.files.list{display:block}
+.it{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;border-radius:12px;cursor:default;text-align:center;font-size:14px;word-break:break-word;border:2px solid transparent;user-select:none}
+.it .ic{font-size:40px;line-height:1}
+.it.sel{background:color-mix(in srgb,var(--acc) 16%,transparent);border-color:color-mix(in srgb,var(--acc) 50%,transparent)}
+.it.cut{opacity:.45}.it.drop{outline:2px dashed var(--acc)}
+.files.list .it{flex-direction:row;justify-content:flex-start;text-align:left;padding:4px 8px}.files.list .it .ic{font-size:22px}
+.files.list .it .meta{margin-left:auto;color:var(--muted);font:13px var(--f-mono)}
+.it input{font:14px var(--f-body);width:100%;padding:2px 4px;border:1px solid var(--acc);border-radius:6px;text-align:center}
+.empty{color:var(--muted);padding:20px;grid-column:1/-1}
+.status{grid-column:2;padding:4px 12px;color:var(--muted);font-size:13px;border-top:1px solid var(--line)}
+@media (max-width:700px){.win{grid-template-columns:1fr}.tree{display:flex;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line);padding:4px}.tree div{margin:0 2px}.status{grid-column:1}}
+</style></head><body>
+<main id="app">
+<div class="win">
+ <div class="tb" role="toolbar">
+  <button id="bNew">📁+ Нова папка</button><button id="bRen" disabled>✏️ Перейменувати</button><button id="bDel" disabled>🗑 Видалити</button>
+  <button id="bCut" disabled>✂️ Вирізати</button><button id="bCopy" disabled>📄 Копіювати</button><button id="bPaste" disabled>📋 Вставити</button>
+  <button id="bRest" hidden>♻️ Відновити</button><button id="bEmpty" hidden>🔥 Очистити кошик</button>
+  <span class="sp"></span><label><input type="checkbox" id="cExt"> розширення</label><button id="bView">☰ Таблиця</button><input id="q" type="search" placeholder="🔍 Пошук у папці">
+ </div>
+ <div class="addr" id="addr"></div>
+ <div class="tree" id="tree"></div>
+ <div class="files" id="files" tabindex="0"></div>
+ <div class="status" id="status"></div>
+</div>
+</main>
+<script src="../kit.js"></script>
+<script>
+const $=s=>document.querySelector(s);
+const ICON={folder:"📁",png:"🖼",jpg:"🖼",gif:"🖼",mp3:"🎵",wav:"🎵",mp4:"🎬",txt:"📄",docx:"📘",pptx:"📙",xlsx:"📗",pdf:"📕",tmp:"🧩",sb3:"🐱",zip:"🗜",exe:"⚙️"};
+let fs,cwd,sel=new Set(),clip=null,showExt=false,list=false,uid=1,flags={};
+const SIZES={png:"340 КБ",jpg:"1,2 МБ",mp3:"3,4 МБ",txt:"2 КБ",docx:"24 КБ",pptx:"1,8 МБ",xlsx:"18 КБ",pdf:"240 КБ",tmp:"1 КБ",sb3:"560 КБ",mp4:"24 МБ",zip:"5 МБ",gif:"80 КБ"};
+function N(name,ch){const n={id:uid++,name};if(ch)n.ch=ch;return n}
+const D=(name,...ch)=>N(name,ch);
+const START={
+ k3:()=>D("root",D("Робочий стіл",N("кіт.png"),N("сонечко.jpg"),N("пісня про осінь.mp3"),N("колискова.mp3"),N("Новий документ.txt"),N("сміття.tmp"),N("ялинка.png")),D("Документи",N("лист Миколаю.docx")),D("Малюнки"),D("Кошик",N("вірш.txt"))),
+ k5:()=>D("root",D("Робочий стіл",N("Скріншот.png")),D("Документи",N("щоденник.docx")),D("Завантаження",N("інформатика_дз.docx"),N("математика_дз.docx"),N("інформатика_тема3.pptx"),N("IMG_2041.jpg"),N("розклад_уроків.pdf"),N("~копія.tmp"),N("~чернетка.tmp"),N("setup.tmp"),N("проєкт_гра.sb3"),N("пісня.mp3")),D("Музика"),D("Кошик"))
+};
+/* ---------- модель ---------- */
+const ext=n=>{const m=/\.([a-z0-9]+)$/i.exec(n.name);return n.ch?"folder":(m?m[1].toLowerCase():"")};
+const base=n=>n.ch?n.name:n.name.replace(/\.[a-z0-9]+$/i,"");
+const dname=n=>showExt||n.ch?n.name:base(n);
+function walk(n,fn,path=[]){fn(n,path);(n.ch||[]).forEach(c=>walk(c,fn,[...path,n]))}
+function parentOf(t){let p=null;walk(fs,(n)=>{if(n.ch&&n.ch.includes(t))p=n});return p}
+function byPath(path){let n=fs;for(const part of path.split("/")){n=(n.ch||[]).find(c=>c.name.toLowerCase()===part.toLowerCase());if(!n)return null}return n}
+const bin=()=>fs.ch.find(c=>c.name==="Кошик");
+const isBinOrIn=n=>{let x=n;while(x){if(x===bin())return true;x=parentOf(x)}return false};
+const childNames=(path)=>{const n=byPath(path);return n&&n.ch?n.ch.map(c=>c.name.toLowerCase()):null};
+const has=(path,name)=>{const c=childNames(path);return !!c&&c.includes(name.toLowerCase())};
+const countWhere=fn=>{let k=0;walk(fs,(n)=>{if(fn(n))k++});return k};
+function pathOf(t){const out=[];let x=t;while(x&&x!==fs){out.unshift(x.name);x=parentOf(x)}return out}
+/* ---------- завдання ---------- */
+const SETS={
+ k3:{name:"3 клас: Скриня Тимка",cls:3,norm:12,story:"На робочому столі Тимка безлад. Допоможи розкласти файли по папках — як речі у скрині.",tasks:[
+  {t:"Перемісти всі <b>малюнки</b> з Робочого столу в папку «Малюнки».",hint:"Виділи малюнок → «Вирізати» → відкрий «Малюнки» → «Вставити». Або перетягни мишкою",ok:()=>["кіт.png","сонечко.jpg","ялинка.png"].every(f=>has("Малюнки",f))&&!["кіт.png","сонечко.jpg","ялинка.png"].some(f=>has("Робочий стіл",f))},
+  {t:"Створи на Робочому столі папку <b>«Музика»</b>.",ok:()=>!!byPath("Робочий стіл/Музика")?.ch},
+  {t:"Перемісти обидві <b>пісні</b> в папку «Музика».",ok:()=>has("Робочий стіл/Музика","пісня про осінь.mp3")&&has("Робочий стіл/Музика","колискова.mp3")},
+  {t:"Перейменуй «Новий документ» на <b>«Моя казка»</b>.",hint:"Виділи файл і натисни «Перейменувати» (або F2)",ok:()=>countWhere(n=>/^моя казка(\.txt)?$/i.test(n.name)&&!isBinOrIn(n))>0},
+  {t:"Видали файл <b>«сміття»</b> у Кошик.",ok:()=>has("Кошик","сміття.tmp")},
+  {t:"Відкрий Кошик і <b>віднови</b> «вірш» на Робочий стіл.",hint:"У Кошику виділи файл і натисни «Відновити»",ok:()=>has("Робочий стіл","вірш.txt")}]},
+ k5:{name:"5 клас: файли й папки",cls:5,norm:15,story:"Після тижня навчання папка «Завантаження» переповнена. Наведи лад: створи структуру папок, розклади файли, перейменуй і прибери тимчасові файли.",tasks:[
+  {t:"Увімкни показ <b>розширень</b> файлів.",ok:()=>flags.ext},
+  {t:"У «Документи» створи папки <b>«Інформатика»</b> і <b>«Математика»</b>.",ok:()=>!!byPath("Документи/Інформатика")?.ch&&!!byPath("Документи/Математика")?.ch},
+  {t:"Розклади домашні завдання й презентацію за предметами: файли «інформатика_…» → «Інформатика», «математика_…» → «Математика».",ok:()=>has("Документи/Інформатика","інформатика_дз.docx")&&has("Документи/Інформатика","інформатика_тема3.pptx")&&has("Документи/Математика","математика_дз.docx")},
+  {t:"Перейменуй фото «IMG_2041» на <b>«екскурсія»</b> (розширення не змінюй!).",ok:()=>countWhere(n=>n.name.toLowerCase()==="екскурсія.jpg"&&!isBinOrIn(n))>0},
+  {t:"<b>Скопіюй</b> «розклад_уроків» на Робочий стіл так, щоб він залишився і в «Завантаженнях».",ok:()=>has("Робочий стіл","розклад_уроків.pdf")&&has("Завантаження","розклад_уроків.pdf")},
+  {t:"Перемісти пісню в папку <b>«Музика»</b>.",ok:()=>has("Музика","пісня.mp3")},
+  {t:"Видали всі <b>тимчасові файли .tmp</b> і <b>очисти Кошик</b>.",ok:()=>countWhere(n=>ext(n)==="tmp")===0&&flags.emptied}]}
+};
+/* ---------- малювання ---------- */
+function save(){KIT.store({fs,cwd:pathOf(cwd).join("/"),flags,showExt,uid});KIT.refresh()}
+function render(){
+  const tree=$("#tree");tree.innerHTML="";
+  walk(fs,(n,path)=>{if(!n.ch||n===fs)return;const d=document.createElement("div");d.textContent=(n===bin()?"🗑 ":"📁 ")+n.name;d.style.paddingLeft=(10+(path.length-1)*16)+"px";d.className=n===cwd?"cur":"";d.onclick=()=>go(n);dropTarget(d,n);tree.append(d)});
+  const addr=$("#addr");addr.innerHTML="💻 ";pathOf(cwd).forEach((p,i,a)=>{const b=document.createElement("button");b.textContent=p;b.onclick=()=>go(byPath(a.slice(0,i+1).join("/")));addr.append(b);if(i<a.length-1)addr.append(" › ")});
+  const q=$("#q").value.trim().toLowerCase();const items=[];
+  if(q){walk(cwd,(n)=>{if(n!==cwd&&n.name.toLowerCase().includes(q))items.push(n)})}else items.push(...(cwd.ch||[]));
+  items.sort((a,b)=>(!!b.ch-!!a.ch)||a.name.localeCompare(b.name,"uk"));
+  const f=$("#files");f.className="files"+(list?" list":"");f.innerHTML=items.length?"":`<div class="empty">${q?"Нічого не знайдено":"Папка порожня"}</div>`;
+  items.forEach(n=>{const e=document.createElement("div");e.className="it"+(sel.has(n)?" sel":"")+(clip&&clip.cut&&clip.items.includes(n)?" cut":"");e.tabIndex=-1;
+    e.innerHTML=`<span class="ic">${ICON[ext(n)]||"📄"}</span><span class="nm">${KIT.esc(dname(n))}</span>${list?`<span class="meta">${n.ch?"папка":(ext(n).toUpperCase()+" · "+(SIZES[ext(n)]||"10 КБ"))}</span>`:""}`;
+    e.onclick=ev=>{if(ev.ctrlKey||ev.metaKey){sel.has(n)?sel.delete(n):sel.add(n)}else{sel=new Set([n])}render()};
+    e.ondblclick=()=>{if(n.ch)go(n);else KIT.toast("Відкриваємо «"+n.name+"» — у симуляторі файли не відкриваються")};
+    e.draggable=!isBinOrIn(n);e.ondragstart=ev=>{if(!sel.has(n))sel=new Set([n]);ev.dataTransfer.setData("text/plain","x")};
+    if(n.ch)dropTarget(e,n);f.append(e)});
+  const inBin=cwd===bin();$("#bRest").hidden=!inBin;$("#bEmpty").hidden=!inBin;
+  ["bRen","bDel","bCut","bCopy"].forEach(id=>$("#"+id).disabled=!sel.size||inBin&&id!=="bDel");$("#bRest").disabled=!sel.size;
+  $("#bPaste").disabled=!clip||inBin;$("#bNew").disabled=inBin;
+  $("#status").textContent=`Елементів: ${items.length}`+(sel.size?` · виділено: ${sel.size}`:"");
+}
+function go(n){cwd=n;sel=new Set();$("#q").value="";render();save()}
+function dropTarget(el,folder){el.ondragover=e=>{e.preventDefault();el.classList.add("drop")};el.ondragleave=()=>el.classList.remove("drop");el.ondrop=e=>{e.preventDefault();el.classList.remove("drop");move([...sel],folder,false)}}
+function uniq(folder,name){let nm=name,i=2;const b=name.replace(/(\.[^.]+)$/,""),x=(/(\.[^.]+)$/.exec(name)||[""])[0];while(folder.ch.some(c=>c.name.toLowerCase()===nm.toLowerCase()))nm=`${b} (${i++})${x}`;return nm}
+const clone=n=>{const c=N(n.name);if(n.ch)c.ch=n.ch.map(clone);return c};
+function move(items,folder,copy){KIT.touch();items=items.filter(n=>n!==folder&&!pathOf(folder).join("/").startsWith(pathOf(n).join("/")+"/")&&n!==fs.ch.find(c=>c===n&&["Кошик"].includes(c.name)));
+  if(!items.length)return;
+  items.forEach(n=>{if(copy){const c=clone(n);c.name=uniq(folder,n.name);folder.ch.push(c)}else{const p=parentOf(n);if(p===folder)return;p.ch.splice(p.ch.indexOf(n),1);n.name=uniq(folder,n.name);if(folder===bin())n.from=pathOf(p).join("/");folder.ch.push(n)}});
+  sel=new Set();render();save()}
+function rename(){const n=[...sel][0];if(!n)return;const e=[...$("#files").children].find(x=>x.classList.contains("sel"));if(!e)return;const span=e.querySelector(".nm");
+  const inp=document.createElement("input");inp.value=dname(n);span.replaceWith(inp);inp.focus();inp.select();
+  const done=ok=>{if(!ok){render();return}let v=inp.value.trim().replace(/[\\/:*?"<>|]/g,"");if(!v){render();return}
+    if(!n.ch&&!showExt){const x=/(\.[a-z0-9]+)$/i.exec(n.name);if(x)v+=x[1]}
+    const p=parentOf(n);if(p.ch.some(c=>c!==n&&c.name.toLowerCase()===v.toLowerCase())){KIT.toast("Тут уже є «"+v+"»");render();return}
+    if(!n.ch&&showExt&&ext({name:v})!==ext(n))KIT.toast("Увага: ти змінив розширення — файл може не відкритися!");
+    n.name=v;KIT.touch();render();save()};
+  inp.onkeydown=e=>{if(e.key==="Enter")done(true);if(e.key==="Escape")done(false)};inp.onblur=()=>done(true)}
+$("#bNew").onclick=()=>{const n=N(uniq(cwd,"Нова папка"),[]);cwd.ch.push(n);sel=new Set([n]);render();save();rename()};
+$("#bRen").onclick=rename;
+$("#bDel").onclick=()=>{if(cwd===bin()){if(!confirm("Видалити назавжди?"))return;[...sel].forEach(n=>bin().ch.splice(bin().ch.indexOf(n),1));sel=new Set();render();save();return}move([...sel],bin(),false);KIT.toast("Переміщено в Кошик")};
+$("#bCut").onclick=()=>{clip={cut:true,items:[...sel]};render()};
+$("#bCopy").onclick=()=>{clip={cut:false,items:[...sel]};KIT.toast("Скопійовано");render()};
+$("#bPaste").onclick=()=>{if(!clip)return;move(clip.items,cwd,!clip.cut);if(clip.cut)clip=null;render()};
+$("#bRest").onclick=()=>{[...sel].forEach(n=>{const to=byPath(n.from||"Робочий стіл")||byPath("Робочий стіл");move([n],to,false)});KIT.toast("Відновлено")};
+$("#bEmpty").onclick=()=>{if(!bin().ch.length){KIT.toast("Кошик уже порожній");return}if(!confirm("Очистити кошик? Файли зникнуть назавжди."))return;bin().ch=[];flags.emptied=true;render();save()};
+$("#cExt").onchange=e=>{showExt=e.target.checked;if(showExt)flags.ext=true;render();save()};
+$("#bView").onclick=()=>{list=!list;$("#bView").textContent=list?"▦ Значки":"☰ Таблиця";render()};
+$("#q").oninput=()=>render();
+document.addEventListener("keydown",e=>{const k=e.key,c=e.ctrlKey||e.metaKey;if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)||e.target.closest(".k-side"))return;
+  if(k==="F2"){e.preventDefault();rename()}else if(k==="Delete"){e.preventDefault();$("#bDel").click()}else if(c&&/^[xч]$/i.test(k)){e.preventDefault();$("#bCut").click()}else if(c&&/^[cс]$/i.test(k)){e.preventDefault();$("#bCopy").click()}else if(c&&/^[vм]$/i.test(k)){e.preventDefault();$("#bPaste").click()}
+  else if(k==="Backspace"&&cwd!==fs.ch[0]){const p=parentOf(cwd);if(p&&p!==fs)go(p)}});
+$("#files").addEventListener("click",e=>{if(e.target===$("#files")){sel=new Set();render()}});
+window.confirm=window.confirm||(()=>true);
+KIT.start({id:"providnyk",title:"Провідник",sub:"файли й папки",cls:5,sets:SETS,onSet(k,fresh){const d=!fresh&&KIT.load(null);
+  if(d){fs=d.fs;flags=d.flags||{};showExt=!!d.showExt;uid=d.uid||500}else{uid=1;fs=START[k]();flags={};showExt=false}
+  $("#cExt").checked=showExt;cwd=(d&&byPath(d.cwd))||fs.ch.find(c=>c.name===(k==="k5"?"Завантаження":"Робочий стіл"));sel=new Set();clip=null;render();if(!d)save()}});
+</script>
+</body></html>

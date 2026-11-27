@@ -1,7 +1,7 @@
 /* Форма «Повідомити про помилку / ідею». Лист надходить на пошту автора через Web3Forms — адреса пошти на сайті не показується.
    Ключ доступу Web3Forms публічний за задумом (за ним видно лише форму, не пошту). */
 (function(){
-var KEY=window.UFB_KEY||"";/* ← ключ доступу Web3Forms */
+var KEY=window.UFB_KEY||"c0c99106-d9e3-4332-b4f3-8949459ad57e";/* ← ключ доступу Web3Forms */
 if(window.UFB)return;
 function el(t,c,h){var e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e}
 var css=el("style",null,'.ufb-w{position:fixed;inset:0;background:#0009;z-index:9999;display:grid;place-items:center;padding:12px;font:15px/1.45 Nunito,system-ui,sans-serif}'+

@@ -18,3 +18,5 @@
   else{fb.style.cssText="position:fixed;left:12px;bottom:62px;z-index:9998;width:42px;height:42px;border-radius:50%;border:1px solid #0002;background:#ffffffd9;font:700 19px/1 system-ui,sans-serif;cursor:pointer;box-shadow:0 2px 8px #0002;opacity:.75";if(!document.getElementById("uFs"))fb.style.bottom="12px";(document.body||document.documentElement).appendChild(fb)}
   if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostname==="localhost"))addEventListener("load",function(){navigator.serviceWorker.register("/sw.js").catch(function(){})});
 })();
+
+(function(){if(window.LIVE||document.getElementById("liveJs"))return;var s=document.createElement("script");s.id="liveJs";s.src="/site/live.js";s.defer=true;document.head.appendChild(s)})();

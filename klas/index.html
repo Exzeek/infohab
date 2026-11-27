@@ -1,0 +1,43 @@
+<!DOCTYPE html><html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Увійти на урок — urokinfo</title><meta name="description" content="Введи 5-значний код уроку від учителя й своє ім'я, щоб учитель бачив твій прогрес.">
+<meta name="robots" content="noindex"><link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f7fb;--s:#fff;--ink:#1b1e28;--mut:#5c6375;--line:#e3e6ee;--acc:#2b8a3e}
+@media (prefers-color-scheme:dark){:root{--bg:#12141b;--s:#1b1e28;--ink:#eef0f5;--mut:#a3a9b8;--line:#2c3040;--acc:#51cf66}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:18px/1.5 Nunito,system-ui,sans-serif}
+main{max-width:520px;margin:0 auto;padding:28px 16px 60px}h1{font:800 clamp(24px,6vw,32px)/1.2 Unbounded,sans-serif;margin:0 0 6px}
+.c{background:var(--s);border:1px solid var(--line);border-radius:20px;padding:20px;display:grid;gap:12px;margin-top:16px}
+label{font-weight:800;display:grid;gap:4px}input{font:800 20px Nunito,sans-serif;padding:12px 14px;border-radius:14px;border:2px solid var(--line);background:transparent;color:inherit;width:100%}
+input:focus{outline:none;border-color:var(--acc)}#code{font:800 34px "JetBrains Mono",ui-monospace,monospace;letter-spacing:.3em;text-align:center}
+button{font:800 19px Nunito,sans-serif;border:0;border-radius:14px;padding:14px;background:var(--acc);color:#fff;cursor:pointer}button:disabled{opacity:.6}
+.err{color:#e03131;font-weight:800;min-height:1.5em}.mut{color:var(--mut)}
+#wait{display:none;text-align:center}#wait .big{font-size:60px}#wait a.go{display:block;margin-top:12px;font:800 19px Nunito;background:var(--acc);color:#fff;border-radius:14px;padding:14px;text-decoration:none}
+.out{background:none;color:var(--mut);font-size:15px;text-decoration:underline;padding:4px}
+</style><link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#5b3cc4"><link rel="apple-touch-icon" href="/site/apple-touch-icon.png"></head><body><main>
+<h1>Увійти на урок</h1><p class="mut">Код уроку покаже вчитель на екрані. Тоді вчитель бачитиме, які завдання ти вже виконав.</p>
+<form class="c" id="f"><label>Код уроку<input id="code" inputmode="numeric" maxlength="5" autocomplete="off" placeholder="•••••" required></label>
+<label>Ім'я та перша літера прізвища<input id="name" maxlength="40" autocomplete="off" placeholder="Наприклад: Оля К." required></label>
+<div class="err" id="err" role="alert"></div><button id="b">Увійти</button></form>
+<div class="c" id="wait"><div class="big">🙋</div><b id="hi"></b><span class="mut" id="wt">Чекай: учитель зараз дасть завдання.</span><a class="go" id="go" hidden></a><button class="out" id="out" type="button">Вийти з уроку</button></div>
+</main>
+<script src="/site/live.js"></script>
+<script>
+const $=s=>document.querySelector(s),q=new URLSearchParams(location.search);
+if(q.get("c"))$("#code").value=q.get("c").replace(/\D/g,"").slice(0,5);
+try{const n=localStorage.getItem("live-name");if(n)$("#name").value=n}catch(e){}
+(q.get("c")?$("#name"):$("#code")).focus();
+function waitView(){const L=LIVE.me();if(!L)return;$("#f").style.display="none";$("#wait").style.display="grid";$("#hi").textContent="Ти на уроці "+L.code+", "+L.name+"!";poll()}
+let tm=null;
+function poll(){const L=LIVE.me();if(!L)return;LIVE.meta(L.code).then(m=>{if(!m){$("#wt").textContent="Урок завершено.";$("#go").hidden=true;return}
+  if(m.task&&m.task.url){const g=$("#go");g.href=m.task.url;g.textContent="📌 "+m.task.title+" →";g.hidden=false;$("#wt").textContent="Учитель дав завдання:";
+    if(!sessionStorage.getItem("seen-"+m.task.url)){sessionStorage.setItem("seen-"+m.task.url,1);location.href=m.task.url;return}}
+}).catch(()=>{});clearTimeout(tm);tm=setTimeout(poll,5000)}
+$("#f").onsubmit=e=>{e.preventDefault();const b=$("#b");b.disabled=true;$("#err").textContent="";
+  try{localStorage.setItem("live-name",$("#name").value.trim())}catch(x){}
+  LIVE.join($("#code").value,$("#name").value).then(()=>{b.disabled=false;waitView()}).catch(x=>{b.disabled=false;$("#err").textContent=x.message&&!/^(db|auth)/.test(x.message)?x.message:"Немає зв'язку з сервером. Спробуй ще раз."})};
+$("#out").onclick=()=>{LIVE.leave();$("#wait").style.display="none";$("#f").style.display="grid";clearTimeout(tm)};
+const L0=LIVE.me();if(L0&&(!q.get("c")||q.get("c")===L0.code))waitView();
+</script>
+<script src="/site/nav.js" defer></script>
+</body></html>

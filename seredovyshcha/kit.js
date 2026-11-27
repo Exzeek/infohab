@@ -30,6 +30,7 @@ function refresh(){
   $("#kProg").style.width=(100*n/st.tasks.length)+"%";$("#kCount").textContent=n+" / "+st.tasks.length;
   const all=n===st.tasks.length&&!S.res;if(all&&!S.tAll){S.tAll=Date.now();toast("🎉 Усі завдання виконано! Натисни «Здати роботу».",4000)}
   const db=$("#kDone");if(db)db.classList.toggle("on",all);
+  if(window.LIVE)LIVE.report({env:C.title,set:st.name,d:n,t:st.tasks.length,g:S.res?S.res.grade:null,m:Math.floor(elapsed()/60000)});
   save();return n;
 }
 function compute(){

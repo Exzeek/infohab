@@ -25,6 +25,7 @@
   var f=h.querySelector("form"),i=h.querySelector("input"),m=h.querySelector(".m"),C=null;
   function say(t){m.textContent=t;m.classList.add("on");setTimeout(function(){m.classList.remove("on")},2500)}
   f.onsubmit=function(e){e.preventDefault();var c=i.value.replace(/\D/g,"");if(c.length<3){say("Введи 3–4 цифри");return}
+    if(c.length===5){location.href="/klas/?c="+c;return}
     var go=function(){if(C[c])location.href=C[c];else say("Код "+c+" не знайдено")};
     if(C)go();else fetch("/site/codes.json").then(function(r){return r.json()}).then(function(j){C=j;go()}).catch(function(){location.href="/"+c+"/"})};
 
@@ -42,3 +43,4 @@
   ft.innerHTML='<div><a href="/pro-proekt/">Про проєкт</a><a href="/yak-korystuvatysia/">Як користуватися</a><a href="/vchyteliu/">Для вчителя</a><a href="/konstruktor/">Конструктор уроку</a><a href="/vse/">Бібліотека</a><a href="/kody/">Усі коди</a><a href="/pro-proekt/#dani">Які дані збираються</a><a href="#" onclick="UFBgo(\'bug\');return false">🐞 Повідомити про помилку</a><a href="#" onclick="UFBgo(\'idea\');return false">💡 Запропонувати ідею</a><span class="sp"></span><span>urokinfo.com.ua · оновлено '+(isNaN(d)?"":d.toLocaleDateString("uk-UA"))+'</span></div>';
   document.body.appendChild(ft);
 })();
+(function(){if(window.LIVE||document.getElementById("liveJs"))return;var s=document.createElement("script");s.id="liveJs";s.src="/site/live.js";s.defer=true;document.head.appendChild(s)})();

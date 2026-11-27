@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ВекторЛаб — векторний редактор і прототип інтерфейсу онлайн, 8 клас інформатика</title>
+<meta name="description" content="Векторний графічний редактор у браузері для 8 класу (як Figma): примітиви, заливка й градієнт, обведення, групи, вирівнювання й розподіл, шари, типографіка, ефекти, екрани й клікабельний прототип. Завдання з автоперевіркою.">
+<link rel="canonical" href="https://urokinfo.com.ua/seredovyshcha/vektor/"><link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta property="og:title" content="ВекторЛаб — векторний редактор і прототип"><meta property="og:locale" content="uk_UA">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;800&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../kit.css"><link rel="stylesheet" href="../ed.css">
+<style>:root{--acc:#e8590c}@media (prefers-color-scheme:dark){:root{--acc:#ff922b}}</style>
+</head><body>
+<main id="app"></main>
+<script src="../kit.js"></script><script src="../ed.js"></script>
+<script>
+let D;const F=()=>ED.flat(D.pages.flatMap(p=>p.objs)),TOP=()=>D.pages.flatMap(p=>p.objs);
+const T=(o)=>Object.assign({type:"text",font:"Nunito",fill:"#1b1e28",bold:false,align:"left",lh:1.2},o);
+let k=1;const id=()=>"o"+(k++);
+function btn(x,y,w,label,fill,name){return{id:id(),type:"group",name,children:[{id:id(),type:"rect",x,y,w,h:52,rx:26,fill,sw:0},T({id:id(),text:label,x:x+w/2-label.length*20*.56/2,y:y+14,size:20,bold:true,fill:"#fff",align:"center"})]}}
+function docV1(){k=1;return{pages:[{id:"p1",name:"Іконка ліги",w:600,h:600,bg:"#ffffff",objs:[]}]}}
+function docV2(){k=1;return{pages:[{id:"p1",name:"Банер матчу",w:1000,h:500,bg:"#1c7ed6",bg2:"",objs:[
+ {id:id(),type:"ellipse",name:"Пляма",x:620,y:-80,w:520,h:520,fill:"#74c0fc",sw:0},
+ {id:id(),type:"img",name:"М'яч",emoji:"🏀",bg:"#ffffff00",x:700,y:110,w:240,h:240},
+ T({id:id(),name:"Заголовок",text:"Матч ліги",x:60,y:90,size:40,fill:"#ffffff"}),
+ T({id:id(),name:"Підзаголовок",text:"8-А проти 8-Б\nп'ятниця, 15:00, спортзал",x:60,y:200,size:26,fill:"#e7f5ff"}),
+ T({id:id(),name:"Підпис",text:"вхід вільний",x:60,y:400,size:22,font:"Georgia",fill:"#ffffff"})]}]}}
+function docV3(){k=1;const cards=[[40,190,280,90],[70,300,250,90],[30,440,300,90]];return{pages:[{id:"p1",name:"Екран ліги",w:360,h:640,bg:"#f8f9fa",objs:[
+ {id:id(),type:"img",name:"Логотип",emoji:"🏀",bg:"#ffe8cc",x:-20,y:20,w:70,h:70,rx:35},
+ T({id:id(),name:"Заголовок",text:"Ліга 8-Б",x:90,y:40,size:22,bold:true}),
+ T({id:id(),name:"Опис",text:"Найближчі матчі",x:40,y:130,size:30,fill:"#495057"}),
+ ...cards.map((c,i)=>({id:id(),type:"rect",name:"Картка "+(i+1),x:c[0],y:c[1],w:c[2],h:c[3],rx:16,fill:"#ffffff",stroke:"#dee2e6",sw:2})),
+ btn(130,560,200,"Записатися","#e8590c","Кнопка")]}]}}
+function docV4(){k=1;const scr=(pid,name,title,extra)=>({id:pid,name,w:360,h:640,bg:"#ffffff",notes:"",objs:[{id:id(),type:"rect",name:"Шапка",x:0,y:0,w:360,h:90,fill:"#e8590c",sw:0},T({id:id(),name:"Назва екрана",text:title,x:24,y:36,size:26,bold:true,fill:"#ffffff"}),...extra,
+  {id:id(),type:"rect",name:"Таббар",x:0,y:576,w:360,h:64,fill:"#f1f3f5",sw:0},{id:id(),type:"img",name:"Іконка Головна",emoji:"🏠",bg:"#f1f3f5",x:40,y:584,w:48,h:48},{id:id(),type:"img",name:"Іконка Розклад",emoji:"📅",bg:"#f1f3f5",x:156,y:584,w:48,h:48},{id:id(),type:"img",name:"Іконка Профіль",emoji:"👤",bg:"#f1f3f5",x:272,y:584,w:48,h:48}]});
+ return{pages:[scr("s1","Головна","Ліга 8-Б",[T({id:id(),text:"Наступний матч:\nп'ятниця, 15:00",x:24,y:130,size:24}),btn(60,420,240,"Розклад матчів","#1c7ed6","Кнопка Розклад")]),
+  scr("s2","Розклад","Розклад",[T({id:id(),text:"Пт · 8-А — 8-Б\nПн · 8-В — 8-А\nСр · 8-Б — 8-В",x:24,y:130,size:24,lh:1.6}),btn(24,480,140,"← Назад","#868e96","Кнопка Назад")]),
+  scr("s3","Профіль","Профіль",[{id:id(),type:"img",name:"Аватар",emoji:"🧑‍🎓",bg:"#fff4e6",x:120,y:130,w:120,h:120,rx:60},T({id:id(),text:"Тарас К.\n12 голів",x:120,y:270,size:24,align:"center"})])]}}
+const cx=o=>{const b=ED.bb(o);return b.x+b.w/2};
+const SETS={
+ v1:{name:"Т2–Т3. Примітиви: іконка ліги",cls:8,norm:15,story:"Намалюй іконку застосунку шкільної ліги з графічних примітивів.",start:docV1,tasks:[
+  {t:"Намалюй <b>прямокутник із заокругленими кутами</b> (заокруглення від 20).",ok:()=>F().some(o=>o.type==="rect"&&(o.rx||0)>=20)},
+  {t:"Додай <b>коло</b> (еліпс з однаковими шириною й висотою).",hint:"Перетягни кут, або впиши розміри однаковими",ok:()=>F().some(o=>o.type==="ellipse"&&Math.abs(o.w-o.h)<=3)},
+  {t:"Додай <b>зірку</b>.",ok:()=>F().some(o=>o.type==="star")},
+  {t:"Зроби <b>градієнтну заливку</b> хоча б в одного об'єкта.",ok:()=>F().some(o=>o.grad)},
+  {t:"Додай <b>обведення</b> товщиною від 4.",ok:()=>F().some(o=>o.type!=="text"&&(o.sw||0)>=4&&o.stroke&&o.stroke!=="none")},
+  {t:"Вирівняй <b>3 об'єкти по центру</b> один під одним.",hint:"Shift+клік по трьох → ⇔",ok:()=>{const C=TOP().map(cx);return C.some(c=>C.filter(d=>Math.abs(d-c)<=1).length>=3)}},
+  {t:"<b>Згрупуй</b> іконку (щонайменше 2 об'єкти).",ok:()=>TOP().some(o=>o.type==="group"&&o.children.length>=2)}]},
+ v2:{name:"Т4. Типографіка й ефекти",cls:8,norm:12,story:"Банер матчу виглядає нудно. Попрацюй зі шрифтами й ефектами, як дизайнер.",start:docV2,tasks:[
+  {t:"Заголовок — шрифт <b>Unbounded</b>, розмір від 72.",ok:()=>F().some(o=>o.name==="Заголовок"&&o.font==="Unbounded"&&o.size>=72)},
+  {t:"Зроби заголовок <b>ВЕЛИКИМИ</b> літерами з <b>інтервалом</b> від 3.",ok:()=>F().some(o=>o.name==="Заголовок"&&o.upper&&(o.ls||0)>=3)},
+  {t:"Збільш <b>міжрядковий інтервал</b> підзаголовка до 1.4+.",ok:()=>F().some(o=>o.name==="Підзаголовок"&&(o.lh||1.2)>=1.4)},
+  {t:"Додай <b>тінь</b> м'ячу.",ok:()=>F().some(o=>o.name==="М'яч"&&o.shadow)},
+  {t:"<b>Розмий</b> пляму на фоні й зроби її <b>напівпрозорою</b>.",ok:()=>F().some(o=>o.name==="Пляма"&&(o.blur||0)>0&&(o.op??1)<1)},
+  {t:"Правило типографіки: на банері <b>не більше 2 шрифтів</b>.",hint:"Шрифт «Georgia» у підписі зайвий",ok:()=>new Set(F().filter(o=>o.type==="text").map(o=>o.font)).size<=2},
+  {t:"Збережи банер як <b>PNG</b>.",ok:()=>(D.log.png||0)>=1}]},
+ v3:{name:"Т5. Композиція й макет",cls:8,norm:12,story:"Екран застосунку ліги «розсипався». Наведи лад: поля, вирівнювання, ритм та ієрархія.",start:docV3,tasks:[
+  {t:"Усі об'єкти — <b>у межах полів 16 px</b> від країв екрана.",ok:()=>TOP().every(o=>{const b=ED.bb(o);return b.x>=15&&b.y>=15&&b.x+b.w<=345&&b.y+b.h<=625})},
+  {t:"Вирівняй <b>3 картки по лівому краю</b>.",ok:()=>{const X=["Картка 1","Картка 2","Картка 3"].map(n=>F().find(o=>o.name===n)).filter(Boolean).map(o=>ED.bb(o).x);return X.length===3&&Math.max(...X)-Math.min(...X)<=1}},
+  {t:"<b>Розподіли</b> картки рівномірно по вертикалі (однакові проміжки).",ok:()=>{const C=["Картка 1","Картка 2","Картка 3"].map(n=>F().find(o=>o.name===n)).filter(Boolean).map(ED.bb).sort((a,b)=>a.y-b.y);if(C.length<3)return false;const g1=C[1].y-(C[0].y+C[0].h),g2=C[2].y-(C[1].y+C[1].h);return Math.abs(g1-g2)<=2&&g1>=0}},
+  {t:"<b>Ієрархія</b>: заголовок «Ліга 8-Б» має бути найбільшим текстом (від 28).",ok:()=>{const t=F().filter(o=>o.type==="text"),h=t.find(o=>o.name==="Заголовок");return h&&h.size>=28&&t.every(o=>o===h||o.size<h.size)}},
+  {t:"Кнопку «Записатися» розмісти <b>по центру</b> екрана.",ok:()=>{const b=TOP().find(o=>o.name==="Кнопка");return b&&Math.abs(cx(b)-180)<=2}}]},
+ v4:{name:"Т6. Прототип і документація",cls:8,norm:15,story:"Зроби з трьох екранів клікабельний прототип застосунку ліги й задокументуй його.",start:docV4,proto:1,tasks:[
+  {t:"Кнопка «Розклад матчів» на Головній веде на екран <b>Розклад</b>.",hint:"Вибери кнопку → «Перехід при натисканні»",ok:()=>{const b=ED.flat(D.pages[0].objs).find(o=>o.name==="Кнопка Розклад");return b&&b.link==="s2"}},
+  {t:"Кнопка «← Назад» на Розкладі повертає на <b>Головну</b>.",ok:()=>{const b=ED.flat(D.pages[1].objs).find(o=>o.name==="Кнопка Назад");return b&&b.link==="s1"}},
+  {t:"Іконки таббару 🏠 📅 👤 ведуть на свої екрани <b>на всіх трьох екранах</b>.",ok:()=>D.pages.slice(0,3).every(p=>[["Іконка Головна","s1"],["Іконка Розклад","s2"],["Іконка Профіль","s3"]].every(([n,t])=>{const o=p.objs.find(x=>x.name===n);return o&&(o.link===t||p.id===t)}))},
+  {t:"Додай 4-й екран <b>«Налаштування»</b> і перехід на нього з Профілю.",ok:()=>{const p=D.pages.find(q=>/налаштув/i.test(q.name));return p&&ED.flat(D.pages[2].objs).some(o=>o.link===p.id)}},
+  {t:"Опиши в <b>нотатках</b> кожного екрана, для чого він (від 15 символів).",hint:"Клацни порожнє місце екрана → «Нотатки»",ok:()=>D.pages.every(p=>(p.notes||"").trim().length>=15)},
+  {t:"Пройди прототип у <b>Перегляді</b>: відвідай усі екрани.",ok:()=>D.pages.every(p=>(D.log.visited||[]).includes(p.id))}]}
+};
+ED.setImgs([["🏀","М'яч","#fff4e6"],["⚽","Футбол","#ebfbee"],["🏆","Кубок","#fff9db"],["⭐","Зірка","#fff9db"],["🏠","Дім","#f1f3f5"],["📅","Календар","#f1f3f5"],["👤","Профіль","#f1f3f5"],["⚙️","Налаштування","#f1f3f5"],["🔔","Сповіщення","#f1f3f5"],["🧑‍🎓","Учень","#fff4e6"]]);
+let started=false;
+KIT.start({id:"vektor",title:"ВекторЛаб",sub:"векторний редактор і прототип",cls:8,sets:SETS,onSet(key,fresh){const s=SETS[key];
+ if(!started){ED.init({mount:document.getElementById("app"),tools:[["rect","⬛","Прямокутник"],["ellipse","⚪","Еліпс"],["line","／","Лінія"],["tri","🔺","Трикутник"],["star","⭐","Зірка"],["poly","⬢","Багатокутник"],["text","🔤","Текст"],["img","🖼️","Іконка"]],
+   proto:true,notes:true,addPage:true,pageWord:"Екран",toast:KIT.toast,touch:KIT.touch});started=true}
+ const d=!fresh&&KIT.load(null);D=d||s.start();ED.load(D,doc=>{D=doc;KIT.store(D);KIT.refresh()});if(!d)KIT.store(D)}});
+</script>
+</body></html>

@@ -13,7 +13,7 @@ function set(){return C.sets[setKey]}
 function fresh(){return{t0:0,tEnd:0,done:{},sub:0,res:null,err:0}}
 function save(){ls.set("env-"+C.id+"-"+setKey,S)}
 function touch(){if(!S.t0&&!S.res){S.t0=Date.now();save()}}
-function elapsed(){return S.t0?((S.tEnd||Date.now())-S.t0):0}
+function elapsed(){return S.t0?((S.tEnd||S.tAll||Date.now())-S.t0):0}
 function tick(){const t=$("#kTimer");if(t)t.textContent="⏱ "+mmss(elapsed())}
 function renderSide(){
   const st=set();
@@ -28,6 +28,8 @@ function refresh(){
   st.tasks.forEach((t,i)=>{let ok=!!S.done[i];if(!ok&&!S.res){try{ok=!!t.ok()}catch(e){ok=false}if(ok){S.done[i]=1;}}
     const li=$("#kt"+i);if(li){li.classList.toggle("ok",ok);li.classList.toggle("miss",!!S.res&&!ok)}if(ok)n++});
   $("#kProg").style.width=(100*n/st.tasks.length)+"%";$("#kCount").textContent=n+" / "+st.tasks.length;
+  const all=n===st.tasks.length&&!S.res;if(all&&!S.tAll){S.tAll=Date.now();toast("🎉 Усі завдання виконано! Натисни «Здати роботу».",4000)}
+  const db=$("#kDone");if(db)db.classList.toggle("on",all);
   save();return n;
 }
 function compute(){
@@ -38,7 +40,7 @@ function compute(){
   return{grade,n,tot,T,norm,timePen,mult,tooFast:T<0.3*norm,err:S.err};
 }
 function submit(){
-  touch();refresh();
+  touch();refresh();const sd=document.querySelector(".k-side");if(sd)sd.classList.remove("min");
   const st=set(),undone=st.tasks.length-Object.keys(S.done).length;
   S.sub=(S.sub||0)+1;S.err=(S.err||0)+undone;S.tEnd=Date.now();S.res=compute();save();
   renderRes();refresh();
@@ -46,7 +48,7 @@ function submit(){
 }
 function renderRes(){
   const box=$("#kRes"),st=set();
-  if(!S.res){box.classList.remove("on");$("#kSubmit").hidden=false;$("#kAgain").hidden=true;$("#kRedo").hidden=true;return}
+  if(!S.res){box.classList.remove("on");$("#kSubmit").hidden=false;$("#kAgain").hidden=false;$("#kRedo").hidden=true;return}
   const r=S.res;box.classList.add("on");
   $("#kGrade").textContent=r.grade;
   $("#kInfo").innerHTML=`<span>виконано ${r.n} з ${r.tot}</span><span>· невиконаних при здачі: ${r.err}</span><span>· час ${hm(r.T)} (норма ${hm(r.norm)})</span>${r.timePen?`<span>· штраф за час −${r.timePen}</span>`:""}${r.mult<1?`<span>· повторна здача ×0,8</span>`:""}${r.tooFast?`<span>· ⚠ занадто швидко</span>`:""}`;
@@ -78,10 +80,12 @@ function build(){
   main.parentNode.insertBefore(wrap,main);wrap.append(main);
   const side=document.createElement("aside");side.className="k-side";
   side.innerHTML=`<h2>Завдання <span><span id="kCount" class="sub"></span> <button class="k-toggle" id="kTog" type="button">згорнути</button></span></h2><div class="k-prog"><i id="kProg"></i></div><div class="story" id="kStory"></div><ul class="k-tasks" id="kTasks"></ul>
-<div class="k-act"><button class="btn" id="kSubmit" type="button">Здати роботу й отримати оцінку</button><button class="btn ghost" id="kRedo" type="button" hidden>Доробити й здати ще раз (×0,8)</button><button class="btn ghost" id="kAgain" type="button" hidden>Почати цей набір заново</button></div>
+<div class="k-act"><button class="btn" id="kSubmit" type="button">Здати роботу й отримати оцінку</button><button class="btn ghost" id="kRedo" type="button" hidden>Доробити й здати ще раз (×0,8)</button><button class="btn ghost" id="kAgain" type="button">↺ Почати цей набір заново</button></div>
 <div class="k-res" id="kRes"><div class="row" style="align-items:baseline;gap:10px"><span class="big" id="kGrade">—</span><span>з 12</span></div><div class="row" id="kInfo"></div>
 <input id="kName" placeholder="Прізвище та ім'я" autocomplete="name"><input id="kCls" placeholder="Клас, напр. 8-Б"><a class="btn send" id="kSend" href="#" target="_blank" rel="noopener" style="text-align:center;text-decoration:none">📤 Надіслати вчителю</a><div class="msg" id="kMsg"></div></div>`;
   wrap.append(side);document.body.insertBefore(top,wrap);
+  const bar=document.createElement("div");bar.id="kDone";bar.className="k-done";bar.innerHTML='<span>🎉 Усі завдання виконано!</span><button class="btn" type="button">Здати роботу й отримати оцінку</button>';document.body.append(bar);
+  bar.querySelector("button").onclick=()=>{side.classList.remove("min");const tg=$("#kTog");if(tg)tg.textContent="згорнути";submit();bar.classList.remove("on")};
   $("#kSet").onchange=e=>chooseSet(e.target.value,false);
   $("#kSubmit").onclick=submit;
   $("#kRedo").onclick=()=>{S.res=null;S.tEnd=0;save();renderRes();refresh();toast("Доробляй завдання й здавай ще раз")};

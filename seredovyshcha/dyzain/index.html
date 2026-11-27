@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ДизайнЛаб — онлайн-редактор плакатів, інфографіки й колажів (як Canva) для уроку інформатики</title>
+<meta name="description" content="ДизайнЛаб — редактор графіки в браузері для 5–8 класу: плакат, інфографіка, фотоколаж, допис для соцмережі, фірмовий стиль і брендбук. Шари, текст, фото в рамках, вирівнювання, палітра, експорт PNG. Завдання з автоперевіркою.">
+<link rel="canonical" href="https://urokinfo.com.ua/seredovyshcha/dyzain/"><link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta property="og:title" content="ДизайнЛаб — плакати, інфографіка, колажі"><meta property="og:locale" content="uk_UA">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;800&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../kit.css"><link rel="stylesheet" href="../ed.css">
+<style>:root{--acc:#c2255c}@media (prefers-color-scheme:dark){:root{--acc:#f06595}}</style>
+</head><body>
+<main id="app"></main>
+<script src="../kit.js"></script><script src="../ed.js"></script>
+<script>
+let D;const F=()=>ED.flat(D.pages.flatMap(p=>p.objs)),TOP=()=>D.pages[0].objs;let k=1;const id=()=>"o"+(k++);
+const T=o=>Object.assign({id:id(),type:"text",font:"Nunito",fill:"#1b1e28",bold:false,align:"left",lh:1.2},o);
+const hasDigit=s=>/\d/.test(s||"");const texts=()=>F().filter(o=>o.type==="text");
+function d1(){k=1;return{pages:[{id:"p1",name:"Плакат",w:595,h:842,bg:"#ffffff",objs:[]}]}}
+function d2(){k=1;return{pages:[{id:"p1",name:"Інфографіка",w:600,h:900,bg:"#ebfbee",objs:[T({name:"Заголовок",text:"Мікрозелень\nу цифрах",x:40,y:40,size:30,bold:true,fill:"#2b8a3e"})]}]}}
+function d3(){k=1;const fr=(x,y,w,h,r)=>({id:id(),type:"frame",x,y,w,h,rx:12,rot:r||0,stroke:"#ffffff",sw:0});
+ return{pages:[{id:"p1",name:"Колаж",w:800,h:800,bg:"#fff4e6",objs:[fr(40,40,350,330),fr(410,40,350,230),fr(410,290,350,230),fr(40,390,350,370),T({name:"Підпис",text:"Наш клас",x:430,y:600,size:48,bold:true,fill:"#c2255c"})]}]}}
+function d4(){k=1;return{pages:[{id:"p1",name:"Допис",w:800,h:800,bg:"#ffffff",objs:[{id:id(),type:"img",name:"Фото",emoji:"🌄",bg:"#ffd8a8",x:0,y:0,w:800,h:800,rx:0},
+ T({name:"Заголовок",text:"Екскурсія до IT-компанії",x:60,y:560,size:44,bold:true,fill:"#ffffff"}),T({name:"Текст",text:"Як працюють програмісти — у четвер о 10:00",x:60,y:640,size:26,fill:"#ffffff"})]}]}}
+function d5(){k=1;return{brand:{colors:[],fonts:{h:"",b:""}},pages:[{id:"p1",name:"Логотип і візитка",w:900,h:500,bg:"#ffffff",objs:[]}]}}
+const IMG5=[["🌱","Паросток","#d3f9d8"],["🥬","Мікрозелень","#ebfbee"],["💧","Вода","#d0ebff"],["☀️","Сонце","#fff3bf"],["📏","Ріст","#f1f3f5"],["🏫","Школа","#e7f5ff"],["🎨","Творчість","#fff0f6"],["📚","Книги","#fff9db"],["⚽","Спорт","#ebfbee"],["🎉","Свято","#fff0f6"],["🧒","Учень","#fff4e6"],["👩‍🏫","Вчителька","#f3f0ff"],["🌄","Краєвид","#ffd8a8"],["🏞️","Парк","#d3f9d8"],["🐱","Котик","#fff4e6"],["🚀","Ракета","#e7f5ff"],["💻","Комп'ютер","#e7f5ff"],["📸","Фото","#f1f3f5"]];
+const hx=c=>String(c||"").toLowerCase();
+const SETS={
+ d1:{name:"5 кл. Плакат",cls:5,norm:14,story:"Служба ЦифроДоп запрошує всіх на шкільний ярмарок. Зроби плакат формату A4.",start:d1,tasks:[
+  {t:"Зроби <b>кольоровий фон</b> (колір або градієнт).",hint:"Клацни порожнє місце плаката",ok:()=>hx(D.pages[0].bg)!=="#ffffff"||!!D.pages[0].bg2},
+  {t:"Додай <b>заголовок</b> розміром від 60.",ok:()=>texts().some(o=>o.size>=60)},
+  {t:"Розмісти заголовок <b>по центру</b> плаката.",hint:"Вибери заголовок → ⇔",ok:()=>texts().some(o=>{if(o.size<60)return false;const b=ED.bb(o);return Math.abs(b.x+b.w/2-297.5)<=3})},
+  {t:"Додай щонайменше <b>2 зображення</b>.",ok:()=>F().filter(o=>o.type==="img").length>=2},
+  {t:"Напиши, <b>коли</b> ярмарок (текст із датою чи часом).",ok:()=>texts().some(o=>hasDigit(o.text))},
+  {t:"Збережи плакат як <b>PNG</b>.",ok:()=>(D.log.png||0)>=1}]},
+ d2:{name:"5 кл. Інфографіка",cls:5,norm:15,story:"Покажи результати мікроферми класу як інфографіку: значки, великі числа, мало слів.",start:d2,tasks:[
+  {t:"Збільш заголовок до розміру <b>48+</b>.",ok:()=>F().some(o=>o.name==="Заголовок"&&o.size>=48)},
+  {t:"Додай <b>3 значки</b> (зображення).",ok:()=>F().filter(o=>o.type==="img").length>=3},
+  {t:"Додай <b>3 великі числа</b> (розмір 40+), напр. «7 днів», «12 лотків».",ok:()=>texts().filter(o=>o.size>=40&&hasDigit(o.text)).length>=3},
+  {t:"Вирівняй значки <b>по лівому краю</b> (в один стовпчик).",ok:()=>{const X=F().filter(o=>o.type==="img").map(o=>Math.round(ED.bb(o).x));return X.some(x=>X.filter(y=>Math.abs(y-x)<=1).length>=3)}},
+  {t:"<b>Розподіли</b> значки рівномірно по вертикалі.",ok:()=>{const B=F().filter(o=>o.type==="img").map(ED.bb).sort((a,b)=>a.y-b.y);for(let i=0;i+2<B.length;i++){const g1=B[i+1].y-(B[i].y+B[i].h),g2=B[i+2].y-(B[i+1].y+B[i+1].h);if(Math.abs(g1-g2)<=2&&g1>=0)return true}return false}},
+  {t:"Єдина палітра: <b>не більше 4 кольорів</b> тексту й фігур.",ok:()=>new Set(F().filter(o=>["text","rect","ellipse","tri","star","poly"].includes(o.type)).map(o=>hx(o.fill))).size<=4}]},
+ d3:{name:"5 кл. Фотоколаж",cls:5,norm:12,story:"Склади колаж про свій клас: 4 фото в рамках, підпис і наліпки.",start:d3,tasks:[
+  {t:"Встав фото в <b>усі 4 рамки</b>.",hint:"Двічі клацни рамку або «Вставити фото»",ok:()=>F().filter(o=>o.type==="frame").every(o=>o.photo)},
+  {t:"Додай рамкам <b>білу облямівку</b> товщиною від 8.",ok:()=>F().filter(o=>o.type==="frame").every(o=>(o.sw||0)>=8&&hx(o.stroke)==="#ffffff")},
+  {t:"<b>Поверни</b> одну рамку на невеликий кут (не 0).",ok:()=>F().some(o=>o.type==="frame"&&(o.rot||0)!==0)},
+  {t:"Додай <b>наліпку</b> — зображення поверх колажу.",ok:()=>F().some(o=>o.type==="img")},
+  {t:"Підпис зроби <b>ВЕЛИКИМИ</b> літерами з <b>тінню</b>.",ok:()=>F().some(o=>o.name==="Підпис"&&o.upper&&o.shadow)},
+  {t:"Збережи колаж як <b>PNG</b>.",ok:()=>(D.log.png||0)>=1}]},
+ d4:{name:"7 кл. Допис для соцмережі",cls:7,norm:12,story:"Текст на фото погано читається. Зроби допис, який легко прочитати в стрічці.",start:d4,tasks:[
+  {t:"Додай під текст <b>напівпрозору плашку</b> (прямокутник з прозорістю менше 1).",ok:()=>F().some(o=>o.type==="rect"&&(o.op??1)<1&&o.w>=300)},
+  {t:"Розмісти плашку <b>під</b> текстом (нижче в шарах).",hint:"Шари: стрілки ↑ ↓",ok:()=>{const A=TOP(),r=A.findIndex(o=>o.type==="rect"&&(o.op??1)<1),t=A.findIndex(o=>o.name==="Заголовок");return r>=0&&t>r}},
+  {t:"Заголовок — розмір <b>56+</b> і шрифт <b>Unbounded</b>.",ok:()=>F().some(o=>o.name==="Заголовок"&&o.size>=56&&o.font==="Unbounded")},
+  {t:"Додай <b>тінь</b> заголовку.",ok:()=>F().some(o=>o.name==="Заголовок"&&o.shadow)},
+  {t:"Додай <b>логотип школи</b> у кут (зображення до 160 px).",ok:()=>F().some(o=>o.type==="img"&&o.name!=="Фото"&&o.w<=160)},
+  {t:"Збережи допис як <b>PNG</b>.",ok:()=>(D.log.png||0)>=1}]},
+ d5:{name:"8 кл. Фірмовий стиль і брендбук",cls:8,norm:18,story:"Створи фірмовий стиль ліги класу: кольори, шрифти, логотип і сторінку брендбука.",start:d5,brand:1,tasks:[
+  {t:"Додай у фірмовий стиль <b>3+ кольори</b>.",hint:"Клацни порожнє місце → «Фірмовий стиль»",ok:()=>D.brand&&D.brand.colors.length>=3},
+  {t:"Обери <b>шрифт заголовків</b> і <b>шрифт тексту</b> (різні).",ok:()=>D.brand&&D.brand.fonts.h&&D.brand.fonts.b&&D.brand.fonts.h!==D.brand.fonts.b},
+  {t:"Створи <b>логотип</b>: група з фігури й тексту, назва шару містить «Лого».",ok:()=>F().some(o=>o.type==="group"&&/лого/i.test(o.name||"")&&ED.flat(o.children).some(c=>c.type==="text")&&ED.flat(o.children).some(c=>c.type!=="text"))},
+  {t:"Усі фігури й тексти — лише <b>фірмових кольорів</b> (плюс білий і чорний).",ok:()=>{const B=(D.brand.colors||[]).map(hx).concat(["#ffffff","#1b1e28","#000000"]);const O=F().filter(o=>["text","rect","ellipse","tri","star","poly"].includes(o.type));return O.length>=2&&O.every(o=>B.includes(hx(o.fill)))}},
+  {t:"Усі тексти — лише <b>фірмовими шрифтами</b>.",ok:()=>{const t=texts();return t.length&&t.every(o=>[D.brand.fonts.h,D.brand.fonts.b].includes(o.font))}},
+  {t:"Додай сторінку <b>«Брендбук»</b> зі зразками кольорів (3+ об'єкти).",ok:()=>D.pages.some(p=>/брендбук/i.test(p.name)&&p.objs.length>=3)},
+  {t:"Збережи логотип як <b>PNG</b>.",ok:()=>(D.log.png||0)>=1}]}
+};
+ED.setImgs(IMG5);let started=false;
+KIT.start({id:"dyzain",title:"ДизайнЛаб",sub:"плакати, інфографіка, колажі",cls:5,sets:SETS,onSet(key,fresh){const s=SETS[key];
+ if(!started){ED.init({mount:document.getElementById("app"),tools:[["rect","⬛","Прямокутник"],["ellipse","⚪","Коло"],["tri","🔺","Трикутник"],["star","⭐","Зірка"],["line","／","Лінія"],["text","🔤","Текст"],["img","🖼️","Зображення"],["frame","🔲","Рамка для фото"]],
+   proto:false,notes:false,addPage:true,pageWord:"Сторінка",brand:true,toast:KIT.toast,touch:KIT.touch});started=true}
+ const d=!fresh&&KIT.load(null);D=d||s.start();ED.load(D,doc=>{D=doc;KIT.store(D);KIT.refresh()});if(!d)KIT.store(D)}});
+</script>
+</body></html>

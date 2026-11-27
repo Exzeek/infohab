@@ -1,5 +1,6 @@
 /* Спільна шапка urokinfo: меню + поле коду. Підключення: <script src="/site/nav.js" defer></script> */
 (function(){
+  window.UFBgo=window.UFBgo||function(t){if(window.UFB)return UFB.open(t);var s=document.createElement("script");s.src="/site/feedback.js";s.onload=function(){UFB.open(t)};document.head.appendChild(s)};
   var P=location.pathname,css=document.createElement("style");
   css.textContent='.un{display:block;gap:0;position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--un-bg,#fff) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--un-line,#e3e6ee);font:600 15px/1.2 Nunito,system-ui,sans-serif}'+
   '.un>div{max-width:1200px;margin:0 auto;padding:8px 14px;display:flex;align-items:center;gap:6px}'+
@@ -38,6 +39,6 @@
   if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostname==="localhost"))addEventListener("load",function(){navigator.serviceWorker.register("/sw.js").catch(function(){})});
   /* футер */
   var d=new Date(document.lastModified),ft=document.createElement("footer");ft.className="uf";
-  ft.innerHTML='<div><a href="/pro-proekt/">Про проєкт</a><a href="/yak-korystuvatysia/">Як користуватися</a><a href="/vchyteliu/">Для вчителя</a><a href="/konstruktor/">Конструктор уроку</a><a href="/vse/">Бібліотека</a><a href="/kody/">Усі коди</a><a href="/pro-proekt/#dani">Які дані збираються</a><span class="sp"></span><span>urokinfo.com.ua · оновлено '+(isNaN(d)?"":d.toLocaleDateString("uk-UA"))+'</span></div>';
+  ft.innerHTML='<div><a href="/pro-proekt/">Про проєкт</a><a href="/yak-korystuvatysia/">Як користуватися</a><a href="/vchyteliu/">Для вчителя</a><a href="/konstruktor/">Конструктор уроку</a><a href="/vse/">Бібліотека</a><a href="/kody/">Усі коди</a><a href="/pro-proekt/#dani">Які дані збираються</a><a href="#" onclick="UFBgo(\'bug\');return false">🐞 Повідомити про помилку</a><a href="#" onclick="UFBgo(\'idea\');return false">💡 Запропонувати ідею</a><span class="sp"></span><span>urokinfo.com.ua · оновлено '+(isNaN(d)?"":d.toLocaleDateString("uk-UA"))+'</span></div>';
   document.body.appendChild(ft);
 })();

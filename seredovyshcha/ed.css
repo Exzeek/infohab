@@ -1,0 +1,33 @@
+/* Спільні стилі векторного редактора (ВекторЛаб, ДизайнЛаб) */
+.ed{display:flex;flex-direction:column;gap:8px;padding:10px;min-height:640px}
+.etb{display:flex;flex-wrap:wrap;gap:5px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:7px}
+.etb button,.eside button,.epages button{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:9px;padding:6px 9px;font:700 13.5px var(--f-body);cursor:pointer;white-space:nowrap}
+.etb button span{font-size:12.5px}.etb .pri{background:var(--acc);border-color:var(--acc);color:#fff}.etb .sep{width:1px;height:24px;background:var(--line)}.etb .sp{flex:1}
+.etb .al{display:flex;gap:3px}.etb .al button{padding:5px 7px;min-width:30px}
+.ebody{display:grid;grid-template-columns:120px minmax(0,1fr) 240px;gap:8px;flex:1;min-height:0}
+.epages{display:flex;flex-direction:column;gap:8px;overflow:auto}
+.ep{border:2px solid var(--line);border-radius:10px;padding:4px;cursor:pointer;background:var(--surface)}.ep.cur{border-color:var(--acc)}
+.ep .eth svg{width:100%;height:auto;display:block;border-radius:4px;pointer-events:none}.ep input{width:100%;margin-top:3px;font:700 12px var(--f-body);border:0;background:transparent;color:var(--ink);text-align:center}
+.ecan{display:flex;align-items:flex-start;justify-content:center;background:repeating-conic-gradient(#0000000a 0 25%,transparent 0 50%) 0 0/20px 20px;border-radius:12px;padding:14px;min-width:0;overflow:auto}
+.ecan svg{height:auto;box-shadow:0 2px 14px #0003;touch-action:none;user-select:none}
+.ecan [data-id]{cursor:move}.ecan [data-h]{cursor:nwse-resize}
+.eside{display:flex;flex-direction:column;gap:8px;min-width:0;overflow:auto}
+.eprops,.elayers{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px;font-size:13.5px}
+.eprops h4,.elayers h4{margin:0 0 6px;font:800 14px var(--f-body)}
+.eprops label{display:flex;gap:5px;align-items:center;font-weight:700;margin:6px 0 3px}
+.eprops input,.eprops select,.eprops textarea{font:13.5px var(--f-body);border:1px solid var(--line);border-radius:7px;padding:4px 6px;background:var(--bg);color:var(--ink);max-width:100%}
+.eprops textarea{width:100%}.eprops input[type=number]{width:60px}.eprops .row{display:flex;gap:8px;flex-wrap:wrap}
+.eprops .mut,.elayers .mut{color:var(--muted);font-size:13px}
+.sw{display:flex;flex-wrap:wrap;gap:4px;align-items:center}.sw button{width:22px!important;height:22px;padding:0!important;border-radius:50%!important;border:2px solid #fff!important;box-shadow:0 0 0 1px var(--line);min-width:0}
+.sw button.on{box-shadow:0 0 0 3px var(--ink)}.sw input[type=color]{width:28px;height:24px;padding:0;border:0;background:none}.sw .mini{width:auto!important;height:auto;border-radius:8px!important;padding:3px 7px!important;box-shadow:none;border:1px solid var(--line)!important}
+.elayers ul{list-style:none;margin:0;padding:0;display:grid;gap:3px}.elayers li{display:flex;gap:3px;align-items:center;border-radius:8px;padding:3px 5px;cursor:pointer}
+.elayers li span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.elayers li.cur{background:color-mix(in srgb,var(--acc) 18%,transparent)}
+.elayers li button{padding:1px 5px;font-size:12px}
+.brand{border-top:1px dashed var(--line);margin-top:8px;padding-top:6px}
+.eprev{position:fixed;inset:0;background:#111a;z-index:60;display:none;flex-direction:column;align-items:center;justify-content:center;gap:10px}.eprev.on{display:flex}
+.eprev #ePrevBox svg{max-width:92vw;max-height:84vh;width:auto;height:84vh;background:#fff;border-radius:18px;box-shadow:0 10px 40px #0008}
+.edlg{position:fixed;inset:0;background:#0008;display:none;place-items:center;z-index:70}.edlg.on{display:grid}
+.edlg>div{background:var(--surface);color:var(--ink);border-radius:16px;padding:16px;max-width:620px;width:92vw;max-height:86vh;overflow:auto}
+.edlg h3{margin:0 0 10px;font:800 17px var(--f-display)}
+.pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}.pick button{border:1px solid var(--line);border-radius:12px;padding:8px;font:700 12.5px var(--f-body);cursor:pointer;display:grid;justify-items:center;gap:3px;color:#1b1e28}.pick button span{font-size:34px}
+@media (max-width:980px){.ebody{grid-template-columns:minmax(0,1fr)}.epages{flex-direction:row;overflow-x:auto}.ep{min-width:96px}.etb button span{display:none}}

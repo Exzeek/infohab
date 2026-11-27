@@ -47,7 +47,12 @@ button{font:inherit;cursor:pointer}
 @media (max-width:860px){
  .k-wrap{flex-direction:column}
  .k-side{width:auto;border-left:0;border-top:1px solid var(--line);max-height:46vh}
- .k-side.min .k-tasks,.k-side.min .story,.k-side.min .k-act,.k-side.min .k-prog{display:none}
+ .k-side.min .k-tasks,.k-side.min .story,.k-side.min .k-prog{display:none}
+ .k-side.min .k-act{padding:8px 12px;grid-template-columns:1fr 1fr}
  .k-toggle{display:inline-block;background:none;border:1px solid var(--line);border-radius:8px;padding:2px 8px;color:var(--ink);font-size:13px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+.k-done{position:fixed;left:50%;bottom:16px;transform:translate(-50%,150%);z-index:80;display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:center;background:var(--surface);color:var(--ink);border:2px solid var(--ok,#2f9e44);border-radius:18px;padding:10px 14px;box-shadow:0 10px 30px #0004;font-weight:800;transition:transform .3s;max-width:94vw}
+.k-done.on{transform:translate(-50%,0)}
+@media (prefers-reduced-motion:reduce){.k-done{transition:none}}

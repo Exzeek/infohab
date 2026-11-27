@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Малювалка — графічний редактор для дітей онлайн, 2 клас інформатика</title>
+<meta name="description" content="Простий графічний редактор у браузері для 2–4 класу, як Тукс Пейнт: пензель, лінії, фігури, заливка замкненого контуру, штампи, магія, текст, гумка, скасувати й зберегти. Завдання з автоперевіркою.">
+<link rel="canonical" href="https://urokinfo.com.ua/seredovyshcha/maliuvalka/"><link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta property="og:title" content="Малювалка — графічний редактор для дітей"><meta property="og:locale" content="uk_UA">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;800&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../kit.css">
+<style>
+:root{--acc:#f59f00}@media (prefers-color-scheme:dark){:root{--acc:#ffc04d}}
+body{font-size:17px}
+.mv{display:grid;grid-template-columns:96px minmax(0,1fr) 120px;gap:10px;padding:10px;min-height:600px}
+.tools,.opts{display:flex;flex-direction:column;gap:6px}
+.tools button,.opts button{border:2px solid var(--line);background:var(--surface);color:var(--ink);border-radius:14px;padding:6px 4px;font:800 13px var(--f-body);cursor:pointer;display:grid;justify-items:center;gap:2px;min-height:58px}
+.tools button span,.opts button span{font-size:26px;line-height:1}
+.tools button[aria-pressed=true],.opts button[aria-pressed=true]{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 18%,var(--surface))}
+.mid{display:flex;flex-direction:column;gap:8px;min-width:0}
+.top{display:flex;gap:6px;flex-wrap:wrap}.top button{border:2px solid var(--line);background:var(--surface);color:var(--ink);border-radius:12px;padding:6px 12px;font:800 15px var(--f-body);cursor:pointer}
+canvas{width:100%;height:auto;aspect-ratio:8/5;background:#fff;border-radius:14px;box-shadow:0 3px 0 var(--line);touch-action:none;cursor:crosshair}
+.pal{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.pal button{width:38px;height:38px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 2px var(--line);cursor:pointer}
+.pal button[aria-pressed=true]{box-shadow:0 0 0 4px var(--ink)}
+.opts h3{margin:4px 0 0;font:800 13px var(--f-body);color:var(--muted);text-align:center}
+.gal{display:flex;gap:8px;flex-wrap:wrap}.gal img{width:120px;border-radius:8px;border:2px solid var(--line);cursor:pointer;background:#fff}
+.dlg{position:fixed;inset:0;background:#0008;display:none;place-items:center;z-index:50}.dlg.on{display:grid}.dlg>div{background:var(--surface);color:var(--ink);border-radius:16px;padding:16px;max-width:600px;width:92vw}
+.dlg input{font:800 22px var(--f-body);width:100%;padding:8px;border-radius:10px;border:2px solid var(--line);background:var(--bg);color:var(--ink)}
+@media (max-width:760px){.mv{grid-template-columns:1fr}.tools,.opts{flex-direction:row;flex-wrap:wrap}.tools button,.opts button{min-width:62px}}
+</style></head><body>
+<main id="app">
+<div class="mv">
+ <div class="tools" id="tools" aria-label="Інструменти"></div>
+ <div class="mid">
+  <div class="top"><button id="bUndo">↩️ Скасувати</button><button id="bRedo">↪️ Повторити</button><button id="bNew">📄 Новий</button><button id="bOpen">📂 Відкрити</button><button id="bSave">💾 Зберегти</button></div>
+  <canvas id="cv" width="800" height="500" aria-label="Аркуш для малювання"></canvas>
+  <div class="pal" id="pal" aria-label="Кольори"></div>
+ </div>
+ <div class="opts" id="opts" aria-label="Налаштування інструмента"></div>
+</div>
+</main>
+<div class="dlg" id="dlg"><div id="dlgBox"></div></div>
+<script src="../kit.js"></script>
+<script>
+const $=s=>document.querySelector(s),cv=$("#cv"),cx=cv.getContext("2d",{willReadFrequently:true});
+const TOOLS=[["paint","🖌️","Фарба"],["line","📏","Лінії"],["shape","🔺","Фігури"],["fill","🪣","Заливка"],["stamp","🐸","Штамп"],["magic","✨","Магія"],["text","🔤","Текст"],["eraser","🧽","Гумка"]];
+const COLS=["#1b1e28","#ffffff","#e03131","#f76707","#ffd43b","#2f9e44","#1c7ed6","#7048e8","#e64980","#8d5524","#868e96","#66d9e8"];
+const CN={"#1b1e28":"чорний","#ffffff":"білий","#e03131":"червоний","#f76707":"помаранчевий","#ffd43b":"жовтий","#2f9e44":"зелений","#1c7ed6":"синій","#7048e8":"фіолетовий","#e64980":"рожевий","#8d5524":"коричневий","#868e96":"сірий","#66d9e8":"блакитний"};
+const STAMPS=["🐱","🐶","🌳","🌷","🏠","☀️","⭐","🦋","🚗","🎄","🍎","🐟"];
+const MAGIC=[["rainbow","🌈","Веселка"],["grass","🌱","Трава"],["snow","❄️","Сніг"],["bricks","🧱","Цеглини"],["mirror","🪞","Дзеркало"]];
+let tool="paint",color="#e03131",size=12,shape="rect",stamp="🐱",magic="rainbow",U=[],R=[],L,hue=0;
+const SIZES=[[4,"тонкий"],[12,"середній"],[28,"товстий"]];
+/* ---------- інтерфейс ---------- */
+function drawTools(){$("#tools").innerHTML=TOOLS.map(t=>`<button data-t="${t[0]}" aria-pressed="${t[0]===tool}"><span>${t[1]}</span>${t[2]}</button>`).join("");
+ $("#pal").innerHTML=COLS.map(c=>`<button data-c="${c}" style="background:${c}" aria-label="${CN[c]}" aria-pressed="${c===color}"></button>`).join("");
+ let o="";if(["paint","line","shape","eraser"].includes(tool))o+=`<h3>Розмір</h3>`+SIZES.map(s=>`<button data-s="${s[0]}" aria-pressed="${s[0]===size}"><span style="font-size:${10+s[0]/2}px">●</span>${s[1]}</button>`).join("");
+ if(tool==="shape")o+=`<h3>Фігура</h3>`+[["rect","⬛","квадрат"],["circle","⚫","коло"],["tri","🔺","трикутник"]].map(s=>`<button data-sh="${s[0]}" aria-pressed="${s[0]===shape}"><span>${s[1]}</span>${s[2]}</button>`).join("");
+ if(tool==="stamp")o+=`<h3>Штампи</h3>`+STAMPS.map(s=>`<button data-st="${s}" aria-pressed="${s===stamp}"><span>${s}</span></button>`).join("");
+ if(tool==="magic")o+=`<h3>Ефекти</h3>`+MAGIC.map(m=>`<button data-m="${m[0]}" aria-pressed="${m[0]===magic}"><span>${m[1]}</span>${m[2]}</button>`).join("");
+ if(tool==="fill")o+=`<h3>Заливка</h3><p style="font-size:13px;color:var(--muted);text-align:center;margin:0">Клацни всередині замкненого контуру</p>`;
+ if(tool==="text")o+=`<h3>Текст</h3><p style="font-size:13px;color:var(--muted);text-align:center;margin:0">Клацни, де буде напис</p>`;
+ $("#opts").innerHTML=o}
+document.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+ if(b.dataset.t){tool=b.dataset.t;drawTools();KIT.touch()}if(b.dataset.c){color=b.dataset.c;L.colors[color]=1;drawTools();save()}
+ if(b.dataset.s){size=+b.dataset.s;drawTools()}if(b.dataset.sh){shape=b.dataset.sh;drawTools()}if(b.dataset.st){stamp=b.dataset.st;drawTools()}
+ if(b.dataset.m){magic=b.dataset.m;drawTools();if(magic==="mirror"){push();const im=cx.getImageData(0,0,800,500);const t=document.createElement("canvas");t.width=800;t.height=500;t.getContext("2d").putImageData(im,0,0);cx.save();cx.setTransform(-1,0,0,1,800,0);cx.drawImage(t,0,0);cx.restore();L.magic.mirror=1;save();KIT.toast("Малюнок віддзеркалено!")}}});
+/* ---------- історія ---------- */
+function push(){U.push(cx.getImageData(0,0,800,500));if(U.length>40)U.shift();R=[]}
+$("#bUndo").onclick=()=>{if(!U.length){KIT.toast("Немає що скасовувати");return}R.push(cx.getImageData(0,0,800,500));cx.putImageData(U.pop(),0,0);L.undo++;if(L.leak)L.undoAfterLeak=1;save()};
+$("#bRedo").onclick=()=>{if(!R.length)return;U.push(cx.getImageData(0,0,800,500));cx.putImageData(R.pop(),0,0);save()};
+$("#bNew").onclick=()=>{if(!confirm("Почати новий чистий аркуш?"))return;push();blank();L.newDone=1;save()};
+$("#bSave").onclick=()=>{const g=KIT.load(null)||{};const G=JSON.parse(localStorage.getItem("mv-gal")||"[]");G.unshift(cv.toDataURL("image/png"));try{localStorage.setItem("mv-gal",JSON.stringify(G.slice(0,6)))}catch(e){}
+ L.saved++;save();const a=document.createElement("a");a.href=cv.toDataURL("image/png");a.download="малюнок.png";KIT.toast("Малюнок збережено!");if(confirm("Малюнок збережено в Малювалці. Завантажити його ще й на комп'ютер?"))a.click()};
+$("#bOpen").onclick=()=>{const G=JSON.parse(localStorage.getItem("mv-gal")||"[]");$("#dlgBox").innerHTML=`<h3>📂 Мої малюнки</h3>${G.length?`<div class="gal">${G.map((s,i)=>`<img src="${s}" data-g="${i}" alt="Малюнок ${i+1}">`).join("")}</div>`:"<p>Ще немає збережених малюнків.</p>"}<p><button class="btn ghost" id="dX">Закрити</button></p>`;$("#dlg").classList.add("on")};
+$("#dlg").onclick=e=>{if(e.target.id==="dlg"||e.target.id==="dX")$("#dlg").classList.remove("on");const g=e.target.dataset&&e.target.dataset.g;if(g!=null){const im=new Image();im.onload=()=>{push();cx.drawImage(im,0,0);L.opened=1;save()};im.src=JSON.parse(localStorage.getItem("mv-gal")||"[]")[+g];$("#dlg").classList.remove("on")}};
+/* ---------- малювання ---------- */
+function P(e){const r=cv.getBoundingClientRect();return[(e.clientX-r.left)*800/r.width,(e.clientY-r.top)*500/r.height]}
+let down=null,snap=null,last=null;
+cv.addEventListener("pointerdown",e=>{KIT.touch();const p=P(e);cv.setPointerCapture(e.pointerId);
+ if(tool==="fill"){push();fill(p);return}
+ if(tool==="stamp"){push();cx.font="72px serif";cx.textAlign="center";cx.textBaseline="middle";cx.fillText(stamp,p[0],p[1]);L.stamps[stamp]=1;save();return}
+ if(tool==="text"){textAt(p);return}
+ if(tool==="magic"&&magic==="mirror")return;
+ push();down=p;last=p;snap=cx.getImageData(0,0,800,500);dot(p)});
+cv.addEventListener("pointermove",e=>{if(!down)return;const p=P(e);
+ if(tool==="paint"||tool==="eraser"){seg(last,p,tool==="eraser"?"#ffffff":color,size);last=p}
+ else if(tool==="magic"){magicAt(last,p);last=p}
+ else{cx.putImageData(snap,0,0);preview(down,p)}});
+cv.addEventListener("pointerup",e=>{if(!down)return;const p=P(e);
+ if(tool==="line"||tool==="shape"){cx.putImageData(snap,0,0);preview(down,p);if(tool==="line")L.lines++;else L.shapes[shape]=(L.shapes[shape]||0)+1}
+ if(tool==="paint"){L.brush++;L.colors[color]=1}if(tool==="eraser")L.eraser++;if(tool==="magic")L.magic[magic]=1;down=null;save()});
+function seg(a,b,c,w){cx.strokeStyle=c;cx.lineWidth=w;cx.lineCap="round";cx.lineJoin="round";cx.beginPath();cx.moveTo(a[0],a[1]);cx.lineTo(b[0],b[1]);cx.stroke()}
+function dot(p){if(tool==="paint"||tool==="eraser")seg(p,[p[0]+.1,p[1]],tool==="eraser"?"#fff":color,size);if(tool==="magic")magicAt(p,p)}
+function preview(a,b){cx.strokeStyle=color;cx.lineWidth=size;cx.lineCap="round";cx.beginPath();
+ if(tool==="line"){cx.moveTo(a[0],a[1]);cx.lineTo(b[0],b[1])}
+ else if(shape==="rect")cx.rect(Math.min(a[0],b[0]),Math.min(a[1],b[1]),Math.abs(b[0]-a[0]),Math.abs(b[1]-a[1]));
+ else if(shape==="circle"){cx.ellipse((a[0]+b[0])/2,(a[1]+b[1])/2,Math.abs(b[0]-a[0])/2,Math.abs(b[1]-a[1])/2,0,0,Math.PI*2)}
+ else{cx.moveTo((a[0]+b[0])/2,Math.min(a[1],b[1]));cx.lineTo(Math.max(a[0],b[0]),Math.max(a[1],b[1]));cx.lineTo(Math.min(a[0],b[0]),Math.max(a[1],b[1]));cx.closePath()}cx.stroke()}
+function magicAt(a,b){const d=Math.hypot(b[0]-a[0],b[1]-a[1]);
+ if(magic==="rainbow"){hue=(hue+6)%360;seg(a,b,`hsl(${hue},90%,55%)`,22)}
+ else if(magic==="grass"){if(d<8&&a!==b)return;for(let i=0;i<5;i++){const x=b[0]+Math.random()*30-15,h=20+Math.random()*30;cx.strokeStyle=`hsl(${100+Math.random()*30},60%,${30+Math.random()*20}%)`;cx.lineWidth=3;cx.beginPath();cx.moveTo(x,b[1]);cx.quadraticCurveTo(x+Math.random()*10-5,b[1]-h/2,x+Math.random()*14-7,b[1]-h);cx.stroke()}}
+ else if(magic==="snow"){for(let i=0;i<3;i++){cx.font=(14+Math.random()*16)+"px serif";cx.textAlign="center";cx.fillText("❄",b[0]+Math.random()*60-30,b[1]+Math.random()*60-30)}}
+ else if(magic==="bricks"){const x=Math.floor(b[0]/40)*40,y=Math.floor(b[1]/20)*20,o=(y/20)%2?20:0;cx.fillStyle="#c0392b";cx.fillRect(x+o+1,y+1,38,18);cx.strokeStyle="#7f2a1f";cx.lineWidth=1;cx.strokeRect(x+o+1,y+1,38,18)}}
+function hex(c){return[parseInt(c.slice(1,3),16),parseInt(c.slice(3,5),16),parseInt(c.slice(5,7),16)]}
+function fill(p){const x0=Math.floor(p[0]),y0=Math.floor(p[1]),im=cx.getImageData(0,0,800,500),d=im.data,W=800,H=500,i0=(y0*W+x0)*4;
+ const t=[d[i0],d[i0+1],d[i0+2]],nc=hex(color);if(Math.abs(t[0]-nc[0])+Math.abs(t[1]-nc[1])+Math.abs(t[2]-nc[2])<10)return;
+ const same=i=>Math.abs(d[i]-t[0])+Math.abs(d[i+1]-t[1])+Math.abs(d[i+2]-t[2])<90;
+ const st=[[x0,y0]],seen=new Uint8Array(W*H);let n=0;
+ while(st.length){let[x,y]=st.pop();while(x>=0&&same((y*W+x)*4)&&!seen[y*W+x])x--;x++;let up=false,dn=false;
+  while(x<W&&same((y*W+x)*4)&&!seen[y*W+x]){const i=(y*W+x)*4;seen[y*W+x]=1;d[i]=nc[0];d[i+1]=nc[1];d[i+2]=nc[2];d[i+3]=255;n++;
+   if(y>0){const s=same(((y-1)*W+x)*4)&&!seen[(y-1)*W+x];if(s&&!up){st.push([x,y-1]);up=true}else if(!s)up=false}
+   if(y<H-1){const s=same(((y+1)*W+x)*4)&&!seen[(y+1)*W+x];if(s&&!dn){st.push([x,y+1]);dn=true}else if(!s)dn=false}x++}}
+ cx.putImageData(im,0,0);L.fills++;if(n>W*H*.45){L.leak=1;KIT.toast("Ой! Фарба розлилася по всьому аркушу — контур був не замкнений. Натисни «Скасувати».")}save()}
+function textAt(p){$("#dlgBox").innerHTML=`<h3>🔤 Напиши текст</h3><input id="tx" maxlength="30" autocomplete="off" placeholder="Наприклад: МАМІ"><p><button class="btn" id="tOk">Готово</button> <button class="btn ghost" id="dX">Скасувати</button></p>`;$("#dlg").classList.add("on");setTimeout(()=>$("#tx").focus(),50);
+ const ok=()=>{const t=$("#tx").value.trim();$("#dlg").classList.remove("on");if(!t)return;push();cx.fillStyle=color;cx.font="800 44px Nunito,sans-serif";cx.textAlign="left";cx.textBaseline="middle";cx.fillText(t,p[0],p[1]);L.texts.push(t);save()};
+ $("#tOk").onclick=ok;$("#tx").onkeydown=e=>{if(e.key==="Enter")ok()}}
+/* ---------- шаблони ---------- */
+function blank(){cx.fillStyle="#fff";cx.fillRect(0,0,800,500)}
+function house(){blank();cx.strokeStyle="#1b1e28";cx.lineWidth=6;cx.lineJoin="round";
+ cx.beginPath();cx.moveTo(200,200);cx.lineTo(340,90);cx.lineTo(480,200);cx.closePath();cx.stroke();
+ cx.strokeRect(220,200,240,200);cx.strokeRect(250,240,70,60);cx.strokeRect(370,290,60,110);
+ cx.beginPath();cx.arc(660,110,55,0,Math.PI*2);cx.stroke();
+ cx.beginPath();cx.arc(620,330,40,Math.PI*.15,Math.PI*1.85);cx.stroke();cx.font="800 22px Nunito";cx.fillStyle="#868e96";cx.fillText("кулька з дірочкою",545,400)}
+const PTS={roof:[340,160],wall:[350,350],win:[285,270],door:[400,340],sun:[660,110]};
+function px(k){const[x,y]=PTS[k],d=cx.getImageData(x,y,1,1).data;return[d[0],d[1],d[2]]}
+const isCol=(k,c)=>{const p=px(k),h=hex(c);return Math.abs(p[0]-h[0])+Math.abs(p[1]-h[1])+Math.abs(p[2]-h[2])<40};
+const notWhite=k=>{const p=px(k);return p[0]+p[1]+p[2]<720};
+function save(){const s=KIT.load(null)||{};KIT.store({L,img:cv.toDataURL("image/png")});KIT.refresh()}
+function freshL(){return{brush:0,lines:0,shapes:{},fills:0,stamps:{},magic:{},texts:[],eraser:0,undo:0,saved:0,colors:{},leak:0,undoAfterLeak:0}}
+const SETS={
+ r1:{name:"Знайомство з Малювалкою",cls:2,norm:10,story:"Дослідик вперше відкрив графічний редактор. Спробуй усі головні інструменти!",tasks:[
+  {t:"Намалюй щось інструментом <b>Фарба</b> 🖌️.",ok:()=>L.brush>=1},
+  {t:"Візьми <b>2 різні кольори</b> з палітри й помалюй ними.",ok:()=>Object.keys(L.colors).length>=2&&L.brush>=2},
+  {t:"Намалюй <b>пряму лінію</b> інструментом Лінії 📏.",ok:()=>L.lines>=1},
+  {t:"Намалюй <b>коло</b> і <b>квадрат</b> інструментом Фігури 🔺.",ok:()=>L.shapes.circle&&L.shapes.rect},
+  {t:"Зітри щось <b>Гумкою</b> 🧽.",ok:()=>L.eraser>=1},
+  {t:"Натисни <b>Скасувати</b> ↩️.",ok:()=>L.undo>=1},
+  {t:"<b>Збережи</b> малюнок 💾.",ok:()=>L.saved>=1}]},
+ r2:{name:"Розмальовка: будиночок",cls:2,norm:10,story:"Зафарбуй будиночок Заливкою 🪣. Пам'ятай: фарба тримається лише в замкненому контурі!",start:"house",tasks:[
+  {t:"Залий <b>дах червоним</b>.",ok:()=>isCol("roof","#e03131")},
+  {t:"Залий <b>стіну жовтим</b>.",ok:()=>isCol("wall","#ffd43b")},
+  {t:"Залий <b>вікно блакитним</b>.",ok:()=>isCol("win","#66d9e8")},
+  {t:"Залий <b>двері коричневим</b>.",ok:()=>isCol("door","#8d5524")},
+  {t:"Залий <b>сонце</b> будь-яким кольором.",ok:()=>notWhite("sun")},
+  {t:"Спробуй залити <b>кульку з дірочкою</b>, а потім натисни <b>Скасувати</b>.",hint:"Що сталося з фарбою?",ok:()=>L.leak&&L.undoAfterLeak}]},
+ r3:{name:"Чарівна листівка",cls:2,norm:12,story:"Зроби святкову листівку для мами: штампи, магія й підпис.",tasks:[
+  {t:"Постав <b>2 різні штампи</b> 🐸.",ok:()=>Object.keys(L.stamps).length>=2},
+  {t:"Намалюй <b>Веселку</b> інструментом Магія ✨.",ok:()=>L.magic.rainbow},
+  {t:"Виростити <b>Траву</b> чарівним ефектом.",ok:()=>L.magic.grass},
+  {t:"Спробуй ефект <b>Дзеркало</b> 🪞.",ok:()=>L.magic.mirror},
+  {t:"Підпиши листівку <b>Текстом</b> 🔤 (щонайменше 3 літери).",ok:()=>L.texts.some(t=>t.replace(/\s/g,"").length>=3)},
+  {t:"<b>Збережи</b> листівку 💾.",ok:()=>L.saved>=1}]}
+};
+KIT.start({id:"maliuvalka",title:"Малювалка",sub:"графічний редактор",cls:2,sets:SETS,onSet(k,fresh){const d=!fresh&&KIT.load(null);U=[];R=[];tool="paint";
+ L=d&&d.L?d.L:freshL();if(d&&d.img){const im=new Image();im.onload=()=>cx.drawImage(im,0,0);blank();im.src=d.img}else{SETS[k].start==="house"?(house(),tool="fill"):blank();save()}drawTools()}});
+</script>
+</body></html>

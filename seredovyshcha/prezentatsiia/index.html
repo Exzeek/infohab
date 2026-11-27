@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ПрезентаціяЛаб — редактор презентацій онлайн для уроку інформатики 6 клас</title>
+<meta name="description" content="Редактор презентацій у браузері для 6 класу: слайди й макети, теми, зображення, переходи, анімація, звук і відео, діаграми, нотатки доповідача, показ і перевірка дизайну. Завдання з автоперевіркою й оцінкою.">
+<link rel="canonical" href="https://urokinfo.com.ua/seredovyshcha/prezentatsiia/"><link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta property="og:title" content="ПрезентаціяЛаб — редактор презентацій для уроку"><meta property="og:locale" content="uk_UA">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;800&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../kit.css">
+<style>
+:root{--acc:#2f9e44}@media (prefers-color-scheme:dark){:root{--acc:#69db7c}}
+.pl{display:grid;grid-template-columns:150px minmax(0,1fr);grid-template-rows:auto 1fr auto;gap:10px;padding:10px;height:100%;min-height:620px}
+.tb{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:8px}
+.tb button,.tb select{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:9px;padding:6px 10px;font:700 14px var(--f-body);cursor:pointer}
+.tb button.pri{background:var(--acc);border-color:var(--acc);color:#fff}
+.tb .sep{width:1px;height:26px;background:var(--line);margin:0 2px}
+.thumbs{display:flex;flex-direction:column;gap:8px;overflow:auto;min-height:0}
+.th{position:relative;border:2px solid var(--line);border-radius:10px;cursor:pointer;background:var(--surface);padding:3px}
+.th.cur{border-color:var(--acc)}.th b{position:absolute;left:-2px;top:-2px;background:var(--acc);color:#fff;font:800 11px var(--f-body);border-radius:8px 0 8px 0;padding:1px 6px;z-index:2}
+.th .slide{pointer-events:none}.th i{position:absolute;right:4px;bottom:3px;font-style:normal;font-size:11px;background:#0007;color:#fff;border-radius:6px;padding:0 4px;z-index:2}
+.stage{display:flex;flex-direction:column;gap:8px;min-width:0}
+.slide{position:relative;width:100%;aspect-ratio:16/9;border-radius:6px;overflow:hidden;container-type:inline-size;box-shadow:0 2px 10px #0002}
+.el{position:absolute;box-sizing:border-box;line-height:1.2;overflow:hidden;font-family:var(--f-body)}
+.ed .el{outline:1px dashed transparent;cursor:move}.ed .el:hover{outline-color:#8888}.ed .el.sel{outline:2px solid #1c7ed6}
+.el[contenteditable]{cursor:text;outline-offset:0}.ed .el.text.sel{box-shadow:inset 0 0 0 8px #1c7ed614;cursor:text}
+.el .grip{position:absolute;right:0;bottom:0;width:12px;height:12px;background:#1c7ed6;cursor:nwse-resize;display:none}.ed .el.sel .grip{display:block}
+.el.ph{color:#999!important;font-style:italic}
+.el ul{margin:0;padding-left:1.1em}.el.pic{display:grid;place-items:center}.el.pic span{font-size:calc(var(--s) * 1cqw);line-height:1}
+.el.media{display:flex;align-items:center;justify-content:center;gap:.4em;border-radius:8px;background:#0001;font-weight:800}
+.el.shape{border-radius:0}.el.shape.circle{border-radius:50%}
+.el svg{width:100%;height:100%;display:block}
+.props{display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px;font-size:14px}
+.props button{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:5px 10px;font:700 13px var(--f-body);cursor:pointer}.props label{display:flex;gap:5px;align-items:center;font-weight:700}
+.props input,.props select,.props textarea{font:14px var(--f-body);border:1px solid var(--line);border-radius:8px;padding:4px 6px;background:var(--bg);color:var(--ink)}
+.props input[type=number]{width:62px}
+.notes{grid-column:2;display:flex;gap:8px;align-items:flex-start}.notes textarea{flex:1;min-height:52px;border:1px solid var(--line);border-radius:10px;padding:8px;font:14px var(--f-body);background:var(--surface);color:var(--ink)}
+.lint{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-size:14px}.lint li{margin:2px 0}
+.dlg{position:fixed;inset:0;background:#0008;display:none;place-items:center;z-index:50}.dlg.on{display:grid}
+.dlg>div{background:var(--surface);color:var(--ink);border-radius:16px;padding:16px;max-width:560px;width:92vw;max-height:88vh;overflow:auto}
+.dlg h3{margin:0 0 10px;font:800 17px var(--f-display)}
+.pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px}
+.pick button{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:12px;padding:10px;font:700 13px var(--f-body);cursor:pointer;display:grid;gap:4px;justify-items:center}
+.pick button span{font-size:30px}
+.dt{width:100%;border-collapse:collapse;margin:8px 0}.dt td{padding:2px}.dt input{width:100%;font:14px var(--f-body);padding:4px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
+.show{position:fixed;inset:0;background:#000;z-index:60;display:none;place-items:center}.show.on{display:grid}
+.show .slide{width:min(100vw,177.7vh);box-shadow:none;border-radius:0}
+.show .hint{position:fixed;bottom:10px;left:50%;transform:translateX(-50%);color:#fff9;font:13px var(--f-body)}
+.hid{opacity:0}
+@keyframes a-fade{from{opacity:0}to{opacity:1}}@keyframes a-fly{from{opacity:0;transform:translateY(40%)}to{opacity:1;transform:none}}@keyframes a-zoom{from{opacity:0;transform:scale(.3)}to{opacity:1;transform:none}}
+.an-fade{animation:a-fade .6s both}.an-fly{animation:a-fly .6s both}.an-zoom{animation:a-zoom .6s both}
+@keyframes t-fade{from{opacity:0}}@keyframes t-push{from{transform:translateX(100%)}}@keyframes t-zoom{from{transform:scale(.2);opacity:0}}
+.tr-fade{animation:t-fade .7s}.tr-push{animation:t-push .6s}.tr-zoom{animation:t-zoom .6s}
+@media (prefers-reduced-motion:reduce){.an-fade,.an-fly,.an-zoom,.tr-fade,.tr-push,.tr-zoom{animation:none}}
+@media (max-width:760px){.pl{grid-template-columns:1fr}.thumbs{flex-direction:row;overflow-x:auto}.th{min-width:110px}.notes{grid-column:1}}
+</style></head><body>
+<main id="app">
+<div class="pl">
+ <div class="tb">
+  <select id="tLay" aria-label="Макет нового слайда"><option value="title">Титульний</option><option value="tt" selected>Заголовок і текст</option><option value="two">Два об'єкти</option><option value="only">Лише заголовок</option><option value="blank">Порожній</option></select>
+  <button class="pri" id="bAdd">＋ Слайд</button><button id="bDup" title="Дублювати слайд">⧉</button><button id="bUp" title="Слайд вище">↑</button><button id="bDn" title="Слайд нижче">↓</button><button id="bDel" title="Видалити слайд">🗑</button><span class="sep"></span>
+  <button id="iText">🔤 Текст</button><button id="iPic">🖼️ Зображення</button><button id="iShape">⬛ Фігура</button><button id="iChart">📊 Діаграма</button><button id="iMedia">🎵 Звук/відео</button><span class="sep"></span>
+  <label>Тема <select id="tTheme"><option value="light">Біла</option><option value="dark">Нічна</option><option value="eco">Еко</option><option value="sky">Небо</option></select></label>
+  <label>Перехід <select id="tTr"><option value="none">Немає</option><option value="fade">Згасання</option><option value="push">Зсув</option><option value="zoom">Наближення</option></select></label>
+  <button id="bTrAll" title="Застосувати перехід до всіх слайдів">до всіх</button><span class="sep"></span>
+  <button id="bLint">🩺 Перевірка дизайну</button><button class="pri" id="bShow">▶ Показ</button>
+ </div>
+ <div class="thumbs" id="thumbs" aria-label="Слайди"></div>
+ <div class="stage"><div class="slide ed" id="slide"></div><div class="props" id="props"></div><div class="lint" id="lint" hidden></div></div>
+ <div class="notes"><textarea id="notes" placeholder="Нотатки доповідача: що скажете на цьому слайді (бачите лише ви)"></textarea></div>
+</div>
+</main>
+<div class="dlg" id="dlg"><div id="dlgBox"></div></div>
+<div class="show" id="show"><div class="slide" id="showSl"></div><div class="hint">Клацніть або → далі · ← назад · Esc вихід</div></div>
+<script src="../kit.js"></script>
+<script>
+const $=s=>document.querySelector(s),esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c]);
+const TH={light:{bg:"#ffffff",ink:"#1b1e28",acc:"#2f9e44"},dark:{bg:"#1b1e28",ink:"#f1f3f5",acc:"#69db7c"},eco:{bg:"linear-gradient(160deg,#ebfbee,#b2f2bb)",ink:"#1b4332",acc:"#2b8a3e",solid:"#d3f9d8"},sky:{bg:"linear-gradient(160deg,#e7f5ff,#a5d8ff)",ink:"#0b3d6b",acc:"#1c7ed6",solid:"#cfe8ff"}};
+const PH={t:"Клацніть, щоб додати заголовок",s:"Клацніть, щоб додати підзаголовок",b:"Перший пункт\nДругий пункт\nТретій пункт"};
+const PICS=[["🌱","Паросток"],["🥬","Мікрозелень"],["💧","Полив"],["☀️","Сонце"],["🌡️","Температура"],["📏","Лінійка"],["🧪","Дослід"],["👩‍🔬","Дослідниця"],["📈","Ріст"],["🏫","Школа"],["🎉","Свято"],["❓","Питання"]];
+const MEDIA=[["audio","🎵","Пташиний спів","0:12"],["audio","🎹","Фонова мелодія","1:05"],["video","🎬","Як росте горох","0:45"],["video","📹","Наша ферма","1:20"]];
+let P,cur=0,sel=null,uid=1,showI=0,showStep=0;
+const id=()=>"e"+(uid++);
+function L(type){const t={id:id(),type:"text",x:8,y:6,w:84,h:16,text:PH.t,size:44,bold:true,align:"left",color:"auto",ph:1,anim:"none",ao:0};
+ if(type==="title")return[Object.assign(t,{y:30,h:20,align:"center",size:54}),{id:id(),type:"text",x:15,y:54,w:70,h:12,text:PH.s,size:26,bold:false,align:"center",color:"auto",ph:1,anim:"none",ao:0}];
+ if(type==="tt")return[t,{id:id(),type:"text",x:8,y:26,w:84,h:64,text:PH.b,size:28,list:true,align:"left",color:"auto",ph:1,anim:"none",ao:0}];
+ if(type==="two")return[t,{id:id(),type:"text",x:8,y:26,w:42,h:64,text:PH.b,size:26,list:true,align:"left",color:"auto",ph:1,anim:"none",ao:0},{id:id(),type:"pic",x:55,y:26,w:38,h:64,pic:"🖼️",ph:1,anim:"none",ao:0}];
+ if(type==="only")return[t];return[]}
+function slide(lay){return{id:id(),lay,tr:"none",notes:"",els:L(lay)}}
+function txtEl(o){return Object.assign({id:id(),type:"text",x:10,y:30,w:60,h:14,text:"Текст",size:28,align:"left",color:"auto",anim:"none",ao:0},o)}
+/* ---------- рендер ---------- */
+function bg(){return TH[P.theme].bg}
+function col(e){return e.color==="auto"?TH[P.theme].ink:e.color}
+function chartSVG(c,ink,acc){const R=c.rows.filter(r=>r[0]!==""),mx=Math.max(1,...R.map(r=>+r[1]||0)),C=[acc,"#f59f00","#1c7ed6","#e8590c","#7048e8","#c2255c"];
+ let s=`<svg viewBox="0 0 400 240"><text x="200" y="20" text-anchor="middle" font-size="16" font-weight="700" fill="${ink}">${esc(c.title||"")}</text>`;
+ if(c.type==="pie"){let a=-Math.PI/2;const tot=R.reduce((t,r)=>t+(+r[1]||0),0)||1;R.forEach((r,i)=>{const v=(+r[1]||0)/tot*Math.PI*2,x1=140+90*Math.cos(a),y1=130+90*Math.sin(a);a+=v;const x2=140+90*Math.cos(a),y2=130+90*Math.sin(a);
+   s+=`<path d="M140 130 L${x1} ${y1} A90 90 0 ${v>Math.PI?1:0} 1 ${x2} ${y2}Z" fill="${C[i%6]}"/><rect x="250" y="${44+i*22}" width="14" height="14" fill="${C[i%6]}"/><text x="270" y="${56+i*22}" font-size="13" fill="${ink}">${esc(r[0])}</text>`})}
+ else{const bw=300/R.length;s+=`<line x1="50" y1="210" x2="380" y2="210" stroke="${ink}" opacity=".4"/>`;
+  if(c.type==="line")s+=`<polyline fill="none" stroke="${acc}" stroke-width="4" points="${R.map((r,i)=>`${60+bw*i+bw/2},${210-(+r[1]||0)/mx*170}`).join(" ")}"/>`;
+  R.forEach((r,i)=>{const h=(+r[1]||0)/mx*170,x=60+bw*i;if(c.type!=="line")s+=`<rect x="${x+bw*.15}" y="${210-h}" width="${bw*.7}" height="${h}" fill="${C[i%6]}" rx="3"/>`;else s+=`<circle cx="${x+bw/2}" cy="${210-h}" r="5" fill="${acc}"/>`;
+   s+=`<text x="${x+bw/2}" y="228" text-anchor="middle" font-size="12" fill="${ink}">${esc(r[0])}</text><text x="${x+bw/2}" y="${204-h}" text-anchor="middle" font-size="12" font-weight="700" fill="${ink}">${esc(r[1])}</text>`})}
+ return s+"</svg>"}
+function elHTML(e,edit){const st=`left:${e.x}%;top:${e.y}%;width:${e.w}%;height:${e.h}%;`;const ink=TH[P.theme].ink,acc=TH[P.theme].acc;
+ if(e.type==="text"){const lines=e.text.split("\n");const inner=e.list?`<ul>${lines.map(l=>`<li>${esc(l)}</li>`).join("")}</ul>`:lines.map(esc).join("<br>");
+   return `<div class="el text${e.ph?" ph":""}${sel===e.id&&edit?" sel":""}" data-id="${e.id}" style="${st}font-size:calc(${e.size} * 100cqw / 960);font-weight:${e.bold?800:500};text-align:${e.align};color:${col(e)}">${inner}${edit?'<i class="grip"></i>':""}</div>`}
+ if(e.type==="pic")return `<div class="el pic${e.ph?" ph":""}${sel===e.id&&edit?" sel":""}" data-id="${e.id}" style="${st}--s:${Math.min(e.w,e.h*1.7)*.8}"><span>${e.pic}</span>${edit?'<i class="grip"></i>':""}</div>`;
+ if(e.type==="shape")return `<div class="el shape ${e.shape}${sel===e.id&&edit?" sel":""}" data-id="${e.id}" style="${st}background:${e.fill}">${edit?'<i class="grip"></i>':""}</div>`;
+ if(e.type==="chart")return `<div class="el${sel===e.id&&edit?" sel":""}" data-id="${e.id}" style="${st}">${chartSVG(e.chart,ink,acc)}${edit?'<i class="grip"></i>':""}</div>`;
+ if(e.type==="media")return `<div class="el media${sel===e.id&&edit?" sel":""}" data-id="${e.id}" style="${st}color:${ink};font-size:calc(22 * 100cqw / 960)"><span style="font-size:1.6em">${e.m.ic}</span>${esc(e.m.name)} <small>${e.m.len}${e.m.auto?" · авто":""}${e.m.loop?" · повтор":""}</small>${edit?'<i class="grip"></i>':""}</div>`;return""}
+function slideHTML(s,edit){return s.els.map(e=>elHTML(e,edit)).join("")}
+function draw(){const s=P.slides[cur];$("#tTheme").value=P.theme;
+ $("#thumbs").innerHTML=P.slides.map((x,i)=>`<div class="th${i===cur?" cur":""}" data-i="${i}"><b>${i+1}</b><div class="slide" style="background:${bg()}">${slideHTML(x,false)}</div>${x.tr!=="none"?"<i>✦</i>":""}</div>`).join("");
+ const sl=$("#slide");sl.style.background=bg();sl.innerHTML=s?slideHTML(s,true):"";
+ if(s){$("#tTr").value=s.tr;$("#notes").value=s.notes}
+ sl.querySelectorAll(".el.text.sel").forEach(d=>{d.contentEditable="true"});
+ props();save()}
+function save(){KIT.store(P);KIT.refresh()}
+function curS(){return P.slides[cur]}
+function E(){return sel&&curS()?curS().els.find(e=>e.id===sel):null}
+/* ---------- властивості ---------- */
+function props(){const e=E(),p=$("#props");if(!e){p.innerHTML=`<span style="color:var(--muted)">Клацніть об'єкт на слайді, щоб змінити його. Текст редагується просто на слайді.</span>`;return}
+ const anim=`<label>Анімація <select data-p="anim"><option value="none">немає</option><option value="fade">поява</option><option value="fly">виліт знизу</option><option value="zoom">збільшення</option></select></label><label>Порядок <input type="number" min="0" max="9" data-p="ao" value="${e.ao||0}"></label>`;
+ let h="";if(e.type==="text")h=`<label>Розмір <input type="number" min="8" max="96" data-p="size" value="${e.size}"></label><button data-t="bold">${e.bold?"<b>Ж</b>":"Ж"}</button><button data-t="list">${e.list?"• список ✓":"• список"}</button>
+   <label>Вирівн. <select data-p="align"><option value="left">ліворуч</option><option value="center">центр</option><option value="right">праворуч</option></select></label>
+   <label>Колір <select data-p="color"><option value="auto">як у темі</option><option value="#1b1e28">чорний</option><option value="#ffffff">білий</option><option value="#c92a2a">червоний</option><option value="#2b8a3e">зелений</option><option value="#1c7ed6">синій</option><option value="#ced4da">світло-сірий</option><option value="#fff3bf">блідо-жовтий</option></select></label>`;
+ if(e.type==="pic")h=`<button data-t="repic">Змінити зображення</button>`;
+ if(e.type==="shape")h=`<label>Колір <input type="color" data-p="fill" value="${e.fill}"></label>`;
+ if(e.type==="chart")h=`<button data-t="rechart">Змінити дані діаграми</button>`;
+ if(e.type==="media")h=`<label><input type="checkbox" data-c="auto" ${e.m.auto?"checked":""}> Автозапуск</label><label><input type="checkbox" data-c="loop" ${e.m.loop?"checked":""}> Повтор</label>`;
+ p.innerHTML=h+anim+`<button data-t="front">На передній план</button><button data-t="del">🗑 Видалити об'єкт</button>`;
+ p.querySelectorAll("[data-p]").forEach(i=>i.value=e[i.dataset.p]??i.value)}
+$("#props").addEventListener("input",ev=>{const e=E();if(!e)return;const i=ev.target;KIT.touch();
+ if(i.dataset.p){const k=i.dataset.p;e[k]=i.type==="number"?+i.value:i.value}if(i.dataset.c){e.m[i.dataset.c]=i.checked}redrawSoft()});
+$("#props").addEventListener("click",ev=>{const b=ev.target.closest("[data-t]");if(!b)return;const e=E(),t=b.dataset.t,s=curS();KIT.touch();
+ if(t==="bold")e.bold=!e.bold;if(t==="list")e.list=!e.list;if(t==="del"){s.els=s.els.filter(x=>x.id!==e.id);sel=null}
+ if(t==="front"){s.els=s.els.filter(x=>x.id!==e.id).concat([e])}if(t==="repic")return picDlg(e);if(t==="rechart")return chartDlg(e);draw()});
+function redrawSoft(){const s=curS();$("#slide").innerHTML=slideHTML(s,true);$("#slide").querySelectorAll(".el.text.sel").forEach(d=>d.contentEditable="true");
+ const th=$("#thumbs").children[cur];if(th)th.querySelector(".slide").innerHTML=slideHTML(s,false);save()}
+/* ---------- редагування на слайді ---------- */
+$("#slide").addEventListener("pointerdown",ev=>{const d=ev.target.closest(".el");if(!d){sel=null;draw();return}
+ const e=curS().els.find(x=>x.id===d.dataset.id);if(sel!==e.id){sel=e.id;draw();return}
+ if(d.isContentEditable&&!ev.target.classList.contains("grip")){const r=d.getBoundingClientRect(),ed=8;
+   if(ev.clientX>r.left+ed&&ev.clientX<r.right-ed&&ev.clientY>r.top+ed&&ev.clientY<r.bottom-ed)return}
+ ev.preventDefault();const R=$("#slide").getBoundingClientRect(),sx=ev.clientX,sy=ev.clientY,o={x:e.x,y:e.y,w:e.w,h:e.h},rs=ev.target.classList.contains("grip");
+ const mv=m=>{const dx=(m.clientX-sx)/R.width*100,dy=(m.clientY-sy)/R.height*100;
+   if(rs){e.w=Math.max(5,Math.min(100-e.x,o.w+dx));e.h=Math.max(5,Math.min(100-e.y,o.h+dy))}else{e.x=Math.max(0,Math.min(100-e.w,o.x+dx));e.y=Math.max(0,Math.min(100-e.h,o.y+dy))}
+   const el=$(`#slide [data-id="${e.id}"]`);Object.assign(el.style,{left:e.x+"%",top:e.y+"%",width:e.w+"%",height:e.h+"%"})};
+ const up=()=>{removeEventListener("pointermove",mv);removeEventListener("pointerup",up);KIT.touch();redrawSoft()};addEventListener("pointermove",mv);addEventListener("pointerup",up)});
+$("#slide").addEventListener("input",ev=>{const d=ev.target.closest(".el.text");if(!d)return;const e=curS().els.find(x=>x.id===d.dataset.id);
+ const t=e.list?[...d.querySelectorAll("li")].map(li=>li.textContent).join("\n"):d.innerText.replace(/\n$/,"");e.text=t;e.ph=0;d.classList.remove("ph");KIT.touch();
+ clearTimeout(window._sv);window._sv=setTimeout(()=>{const th=$("#thumbs").children[cur];if(th)th.querySelector(".slide").innerHTML=slideHTML(curS(),false);save()},400)});
+$("#slide").addEventListener("focusin",ev=>{const d=ev.target.closest(".el.text.ph");if(!d)return;const e=curS().els.find(x=>x.id===d.dataset.id);if(e&&e.ph){e.text=e.list?"":"";e.ph=0;d.classList.remove("ph");d.innerHTML=e.list?"<ul><li></li></ul>":"";const r=document.createRange();r.selectNodeContents(d.querySelector("li")||d);r.collapse(false);getSelection().removeAllRanges();getSelection().addRange(r)}});
+$("#thumbs").onclick=ev=>{const t=ev.target.closest(".th");if(!t)return;cur=+t.dataset.i;sel=null;draw()};
+$("#notes").oninput=e=>{curS().notes=e.target.value;KIT.touch();save()};
+/* ---------- панель ---------- */
+$("#bAdd").onclick=()=>{KIT.touch();P.slides.splice(cur+1,0,slide($("#tLay").value));cur++;sel=null;draw()};
+$("#bDup").onclick=()=>{KIT.touch();const c=JSON.parse(JSON.stringify(curS()));c.id=id();c.els.forEach(e=>e.id=id());P.slides.splice(cur+1,0,c);cur++;draw()};
+$("#bDel").onclick=()=>{if(P.slides.length<2){KIT.toast("Має лишитися хоча б один слайд");return}KIT.touch();P.slides.splice(cur,1);cur=Math.max(0,cur-1);sel=null;draw()};
+$("#bUp").onclick=()=>{if(!cur)return;KIT.touch();[P.slides[cur-1],P.slides[cur]]=[P.slides[cur],P.slides[cur-1]];cur--;draw()};
+$("#bDn").onclick=()=>{if(cur>=P.slides.length-1)return;KIT.touch();[P.slides[cur+1],P.slides[cur]]=[P.slides[cur],P.slides[cur+1]];cur++;draw()};
+$("#tTheme").onchange=e=>{KIT.touch();P.theme=e.target.value;draw()};
+$("#tTr").onchange=e=>{KIT.touch();curS().tr=e.target.value;draw()};
+$("#bTrAll").onclick=()=>{KIT.touch();const t=curS().tr;P.slides.forEach(s=>s.tr=t);draw();KIT.toast("Перехід застосовано до всіх слайдів")};
+function addEl(e){KIT.touch();while(curS().els.some(x=>Math.abs(x.x-e.x)<3&&Math.abs(x.y-e.y)<3)&&e.x<60){e.x+=6;e.y=Math.min(100-e.h,e.y+6)}if(e.type==="chart"&&curS().els.some(x=>x.type==="chart")){e.w=44;e.h=60;e.x=52;e.y=30;curS().els.filter(x=>x.type==="chart").forEach(x=>{x.w=44;x.h=60;x.x=4;x.y=30})}curS().els.push(e);sel=e.id;draw()}
+$("#iText").onclick=()=>addEl(txtEl({}));
+$("#iShape").onclick=()=>{dlg(`<h3>Фігура</h3><div class="pick"><button data-s="rect"><span>⬛</span>Прямокутник</button><button data-s="circle"><span>⚫</span>Коло</button></div>`,b=>{const s=b.closest("[data-s]");if(s){addEl({id:id(),type:"shape",shape:s.dataset.s,x:35,y:35,w:22,h:28,fill:"#ffd43b",anim:"none",ao:0});close()}})};
+function picDlg(e){dlg(`<h3>Зображення</h3><div class="pick">${PICS.map(p=>`<button data-p="${p[0]}"><span>${p[0]}</span>${p[1]}</button>`).join("")}</div>`,b=>{const p=b.closest("[data-p]");if(!p)return;KIT.touch();
+  if(e){e.pic=p.dataset.p;e.ph=0;close();draw()}else{addEl({id:id(),type:"pic",pic:p.dataset.p,x:60,y:28,w:30,h:50,anim:"none",ao:0});close()}})}
+$("#iPic").onclick=()=>{const e=E();picDlg(e&&e.type==="pic"&&e.ph?e:null)};
+$("#iMedia").onclick=()=>dlg(`<h3>Звук або відео</h3><div class="pick">${MEDIA.map((m,i)=>`<button data-m="${i}"><span>${m[1]}</span>${m[2]}<small>${m[0]==="audio"?"звук":"відео"} · ${m[3]}</small></button>`).join("")}</div>`,b=>{const m=b.closest("[data-m]");if(!m)return;const M=MEDIA[+m.dataset.m];
+  addEl({id:id(),type:"media",m:{kind:M[0],ic:M[1],name:M[2],len:M[3],auto:false,loop:false},x:M[0]==="audio"?70:30,y:M[0]==="audio"?80:30,w:M[0]==="audio"?26:40,h:M[0]==="audio"?12:40,anim:"none",ao:0});close()});
+function chartDlg(e){const c=e?e.chart:{type:"bar",title:"",rows:[["1 тиждень",2],["2 тиждень",5],["3 тиждень",9],["",""]]};const rows=c.rows.concat(Array(Math.max(0,6-c.rows.length)).fill(["",""]));
+ dlg(`<h3>Діаграма</h3><label>Вид <select id="cT"><option value="bar">Стовпчикова</option><option value="pie">Кругова</option><option value="line">Лінійна</option></select></label> <label>Назва <input id="cN" value="${esc(c.title)}" placeholder="Назва діаграми"></label>
+  <table class="dt"><tr><th>Категорія</th><th>Значення</th></tr>${rows.map((r,i)=>`<tr><td><input data-r="${i}" data-c="0" value="${esc(r[0])}"></td><td><input data-r="${i}" data-c="1" inputmode="decimal" value="${esc(r[1])}"></td></tr>`).join("")}</table><button class="btn" id="cOk">Вставити</button>`,b=>{if(b.id!=="cOk")return;
+  const R=[];document.querySelectorAll("#dlgBox [data-r]").forEach(i=>{const r=+i.dataset.r;R[r]=R[r]||["",""];R[r][+i.dataset.c]=i.value.trim()});
+  const ch={type:$("#cT").value,title:$("#cN").value.trim(),rows:R.filter(r=>r[0]!=="").map(r=>[r[0],+String(r[1]).replace(",",".")||0])};
+  if(ch.rows.length<2){KIT.toast("Заповніть хоча б 2 категорії");return}KIT.touch();if(e){e.chart=ch;close();draw()}else{addEl({id:id(),type:"chart",chart:ch,x:15,y:22,w:70,h:72,anim:"none",ao:0});close()}});
+ $("#cT").value=c.type}
+$("#iChart").onclick=()=>chartDlg(null);
+function dlg(h,on){$("#dlgBox").innerHTML=h+`<p style="margin:10px 0 0"><button class="btn ghost" id="dX">Закрити</button></p>`;$("#dlg").classList.add("on");$("#dlgBox").onclick=e=>{if(e.target.id==="dX")return close();on(e.target)}}
+function close(){$("#dlg").classList.remove("on")}
+$("#dlg").onclick=e=>{if(e.target.id==="dlg")close()};
+/* ---------- перевірка дизайну ---------- */
+function lum(h){if(!/^#/.test(h))return 1;const c=[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)/255).map(v=>v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4));return .2126*c[0]+.7152*c[1]+.0722*c[2]}
+function contrast(a,b){const x=lum(a),y=lum(b);return(Math.max(x,y)+.05)/(Math.min(x,y)+.05)}
+function lint(){const out=[],T=TH[P.theme],bgc=T.solid||T.bg;P.slides.forEach((s,i)=>{const n=i+1,tx=s.els.filter(e=>e.type==="text"&&!e.ph);
+  if(!s.els.some(e=>e.type==="text"&&e.size>=36&&!e.ph)&&s.lay!=="blank")out.push({k:"title",t:`Слайд ${n}: немає заголовка (великий текст угорі).`});
+  tx.forEach(e=>{const lines=e.text.split("\n").filter(Boolean).length;if(lines>6)out.push({k:"long",t:`Слайд ${n}: ${lines} рядків тексту — забагато, лишіть до 6 або розбийте на 2 слайди.`});
+   if(e.size<20)out.push({k:"small",t:`Слайд ${n}: текст розміром ${e.size} — задрібно, з останньої парти не видно (мінімум 20).`});
+   if(contrast(col(e),bgc)<3)out.push({k:"contrast",t:`Слайд ${n}: текст погано видно на фоні — замало контрасту.`})})});return out}
+$("#bLint").onclick=()=>{KIT.touch();P.linted=(P.linted||0)+1;const L=lint();P.lastLint=L.length;const b=$("#lint");b.hidden=false;
+ b.innerHTML=L.length?`<b>Знайдено ${L.length}:</b><ul>${L.map(x=>`<li>${esc(x.t)}</li>`).join("")}</ul>`:"<b>✅ Чудово! Проблем із дизайном не знайдено.</b>";save()};
+/* ---------- показ ---------- */
+function animEls(s){return s.els.filter(e=>e.anim!=="none").sort((a,b)=>(a.ao||0)-(b.ao||0))}
+function showDraw(tr){const s=P.slides[showI],box=$("#showSl");box.style.background=bg();box.innerHTML=slideHTML(s,false);
+ const A=animEls(s);A.forEach((e,k)=>{const d=box.querySelector(`[data-id="${e.id}"]`);if(k>=showStep)d.classList.add("hid");else if(k===showStep-1)d.classList.add("an-"+e.anim)});
+ if(tr&&s.tr!=="none"){box.classList.remove("tr-fade","tr-push","tr-zoom");void box.offsetWidth;box.classList.add("tr-"+s.tr)}}
+function showNext(){const s=P.slides[showI];if(showStep<animEls(s).length){showStep++;showDraw(false);return}
+ if(showI<P.slides.length-1){showI++;showStep=0;showDraw(true);if(showI===P.slides.length-1&&!animEls(P.slides[showI]).length)P.shownEnd=1}else{P.shownEnd=1;showExit()}save()}
+function showPrev(){if(showStep>0){showStep--;showDraw(false);return}if(showI>0){showI--;showStep=0;showDraw(false)}}
+function showExit(){$("#show").classList.remove("on");try{document.fullscreenElement&&document.exitFullscreen()}catch(e){}draw()}
+$("#bShow").onclick=()=>{KIT.touch();P.shown=(P.shown||0)+1;showI=0;showStep=0;$("#show").classList.add("on");showDraw(true);try{$("#show").requestFullscreen?.().catch(()=>{})}catch(e){}save()};
+$("#show").onclick=e=>{showNext()};
+addEventListener("keydown",e=>{if(!$("#show").classList.contains("on"))return;if(["ArrowRight","PageDown"," ","Enter"].includes(e.key)){e.preventDefault();showNext()}if(["ArrowLeft","PageUp"].includes(e.key))showPrev();if(e.key==="Escape")showExit()});
+/* ---------- стартові презентації ---------- */
+function T(o){return txtEl(o)}
+function base(){uid=1;const s1={id:id(),lay:"title",tr:"none",notes:"",els:[T({x:8,y:30,w:84,h:20,text:"Наша мікроферма",size:54,bold:true,align:"center"}),T({x:15,y:54,w:70,h:12,text:"6 клас · проєкт «Мікрозелень»",size:26,align:"center"})]};
+ const s2={id:id(),lay:"tt",tr:"none",notes:"",els:[T({x:8,y:6,w:84,h:16,text:"Що таке мікрозелень",size:44,bold:true}),T({x:8,y:26,w:54,h:64,text:"Молоді паростки рослин\nРостуть 7–14 днів\nМають багато вітамінів",size:28,list:true}),{id:id(),type:"pic",pic:"🥬",x:66,y:28,w:28,h:56,anim:"none",ao:0}]};
+ const s3={id:id(),lay:"tt",tr:"none",notes:"",els:[T({x:8,y:6,w:84,h:16,text:"Як ми доглядаємо",size:44,bold:true}),T({x:8,y:26,w:54,h:64,text:"Поливаємо щодня\nСтавимо на світло\nМіряємо ріст лінійкою",size:28,list:true}),{id:id(),type:"pic",pic:"💧",x:66,y:28,w:28,h:56,anim:"none",ao:0}]};
+ const s4={id:id(),lay:"only",tr:"none",notes:"",els:[T({x:8,y:6,w:84,h:16,text:"Наш урожай",size:44,bold:true})]};
+ return{theme:"eco",slides:[s1,s2,s3,s4]}}
+function messy(){const p=base();p.theme="light";
+ p.slides[1].els[1].text="Молоді паростки рослин\nРостуть 7–14 днів\nМають багато вітамінів\nЇх легко вирощувати вдома\nПотрібні лише лоток і вода\nНе потрібна земля\nМожна їсти сирими\nДодають у салати\nПодобаються дітям";
+ p.slides[2].els[1].color="#ced4da";p.slides[3].els[0].size=12;p.slides[3].els.push(T({x:8,y:30,w:60,h:40,text:"Горох — 120 г\nРедиска — 80 г\nСоняшник — 150 г",size:26,list:true}));
+ p.slides.push({id:id(),lay:"tt",tr:"none",notes:"",els:[T({x:8,y:30,w:84,h:40,text:"Дякуємо за увагу!\nПитання?",size:30,align:"center"})]});return p}
+const allEls=()=>P.slides.flatMap(s=>s.els);
+const SETS={
+ t1:{name:"Т1. Цікава презентація",cls:6,norm:15,story:"Клас готує презентацію про шкільну мікроферму для батьківських зборів. Створи її з нуля.",tasks:[
+  {t:"Створи щонайменше <b>4 слайди</b>.",ok:()=>P.slides.length>=4},
+  {t:"На першому слайді — назва, що містить слово <b>«мікрозелень»</b>.",hint:"Клацни заголовок і надрукуй",ok:()=>P.slides[0].els.some(e=>e.type==="text"&&!e.ph&&/мікрозелен/i.test(e.text))},
+  {t:"Застосуй <b>тему оформлення</b> (не «Біла»).",ok:()=>P.theme!=="light"},
+  {t:"Додай слайд зі <b>списком щонайменше з 3 пунктів</b>.",hint:"Макет «Заголовок і текст»",ok:()=>allEls().some(e=>e.type==="text"&&e.list&&!e.ph&&e.text.split("\n").filter(x=>x.trim()).length>=3)},
+  {t:"Встав <b>зображення</b> на будь-який слайд.",ok:()=>allEls().some(e=>e.type==="pic"&&!e.ph)},
+  {t:"Напиши <b>нотатки доповідача</b> хоча б до одного слайда (від 10 символів).",ok:()=>P.slides.some(s=>s.notes.trim().length>=10)},
+  {t:"Запусти <b>показ</b> і догорни до останнього слайда.",ok:()=>!!P.shownEnd}]},
+ t2:{name:"Т2. Переходи та анімація",cls:6,norm:12,story:"Презентація про мікроферму готова, але нудна. Додай переходи між слайдами й анімацію об'єктів.",start:base,tasks:[
+  {t:"Встанови <b>перехід для всіх слайдів</b>.",hint:"Обери перехід → «до всіх»",ok:()=>P.slides.every(s=>s.tr!=="none")},
+  {t:"Використай щонайменше <b>2 різні</b> переходи.",ok:()=>new Set(P.slides.map(s=>s.tr).filter(t=>t!=="none")).size>=2},
+  {t:"Додай <b>анімацію</b> до заголовка будь-якого слайда.",ok:()=>P.slides.some(s=>s.els.some(e=>e.type==="text"&&e.size>=36&&e.anim!=="none"))},
+  {t:"На одному слайді анімуй <b>щонайменше 2 об'єкти</b>.",ok:()=>P.slides.some(s=>s.els.filter(e=>e.anim!=="none").length>=2)},
+  {t:"Зроби так, щоб на слайді з картинкою <b>зображення з'являлося раніше</b> за список.",hint:"Поле «Порядок»: менше число — раніше",ok:()=>P.slides.some(s=>{const p=s.els.find(e=>e.type==="pic"&&e.anim!=="none"),l=s.els.find(e=>e.type==="text"&&e.list&&e.anim!=="none");return p&&l&&(p.ao||0)<(l.ao||0)})},
+  {t:"Переглянь <b>показ до кінця</b> з усіма анімаціями.",ok:()=>!!P.shownEnd}]},
+ t34:{name:"Т3–Т4. Звук, відео й діаграми",cls:6,norm:14,story:"Додай до презентації мультимедіа й покажи врожай мікроферми на діаграмах.",start:base,tasks:[
+  {t:"Встав <b>звук</b> на перший слайд.",ok:()=>P.slides[0].els.some(e=>e.type==="media"&&e.m.kind==="audio")},
+  {t:"Увімкни для звуку <b>Автозапуск</b> і <b>Повтор</b>.",ok:()=>allEls().some(e=>e.type==="media"&&e.m.kind==="audio"&&e.m.auto&&e.m.loop)},
+  {t:"Встав <b>відео</b> на будь-який слайд.",ok:()=>allEls().some(e=>e.type==="media"&&e.m.kind==="video")},
+  {t:"Додай <b>стовпчикову діаграму</b> щонайменше з 4 категорій.",hint:"Наприклад: горох, редиска, соняшник, броколі",ok:()=>allEls().some(e=>e.type==="chart"&&e.chart.type==="bar"&&e.chart.rows.length>=4)},
+  {t:"Дай діаграмі <b>назву</b>.",ok:()=>allEls().some(e=>e.type==="chart"&&e.chart.title.length>=3)},
+  {t:"Додай <b>кругову</b> діаграму.",ok:()=>allEls().some(e=>e.type==="chart"&&e.chart.type==="pie")}]},
+ t5:{name:"Т5. Перевір і виправ",cls:6,norm:12,story:"Однокласник зробив презентацію, але її погано видно з останньої парти. Знайди помилки «Перевіркою дизайну» й виправ їх.",start:messy,tasks:[
+  {t:"Запусти <b>Перевірку дизайну</b>.",ok:()=>(P.linted||0)>=1},
+  {t:"Скороти довгий список: <b>не більше 6 рядків</b> на слайді.",hint:"Зайве перенеси на новий слайд",ok:()=>!lint().some(x=>x.k==="long")},
+  {t:"Виправ <b>контраст</b> тексту на 3-му слайді.",ok:()=>!lint().some(x=>x.k==="contrast")},
+  {t:"Збільш <b>дрібний текст</b> до 20 і більше.",ok:()=>!lint().some(x=>x.k==="small")},
+  {t:"Додай <b>заголовок</b> до слайда, де його немає.",ok:()=>!lint().some(x=>x.k==="title")},
+  {t:"Повторна перевірка: <b>жодної проблеми</b>.",ok:()=>P.lastLint===0&&lint().length===0}]}
+};
+KIT.start({id:"prezentatsiia",title:"ПрезентаціяЛаб",sub:"редактор презентацій",cls:6,sets:SETS,onSet(k,fresh){const d=!fresh&&KIT.load(null);
+ if(d)P=d;else{const st=SETS[k].start;P=st?st():{theme:"light",slides:[]};if(!st){uid=1;P.slides=[slide("title")]}}
+ uid=Math.max(uid,...P.slides.flatMap(s=>[s.id,...s.els.map(e=>e.id)]).map(x=>+String(x).slice(1)||0))+1;cur=0;sel=null;$("#lint").hidden=true;draw()}});
+</script>
+</body></html>

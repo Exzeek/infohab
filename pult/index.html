@@ -35,7 +35,7 @@ td.c{text-align:center;font-weight:800;white-space:nowrap}td.c.ok{color:var(--ok
 </style><link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#5b3cc4"><link rel="apple-touch-icon" href="/site/apple-touch-icon.png"></head><body><main>
 <h1>📡 Пульт уроку</h1><p class="mut">Учні входять за кодом на телефоні чи комп'ютері, ви даєте завдання всьому класу й бачите прогрес кожного наживо. Реєстрація не потрібна.</p>
 <div class="card" id="start"><label><b>Клас / група (необов'язково)</b><br><input id="lbl" maxlength="30" placeholder="Наприклад: 5-Б"></label>
-<div id="impl" hidden class="mut"></div><button class="p" id="new">▶ Почати урок</button><div class="err" id="e1"></div>
+<div id="impl" hidden class="mut"></div><p class="mut" style="margin:0;font-size:14px">🔒 Учні вписують лише ім'я й першу літеру прізвища. Прогрес бачите тільки ви; після «Завершити урок» він видаляється, а незавершені уроки цей пристрій прибирає сам через добу.</p><button class="p" id="new">▶ Почати урок</button><div class="err" id="e1"></div>
 <p class="mut" style="margin:0">Зібрати урок з кількох завдань зручно в <a href="/konstruktor/">Конструкторі</a> (кнопка «📡 Провести наживо»), або додайте завдання тут після старту. Учні відкривають <b>urokinfo.com.ua/klas</b> або вводять 5-значний код у полі «Код» угорі будь-якої сторінки.</p></div>
 <section id="live">
  <div class="top"><div class="card code"><span class="mut">Код уроку</span><b id="cd"></b><div class="qr" id="qr"></div><span class="mut" style="font-size:14px">urokinfo.com.ua/klas</span>
@@ -58,7 +58,7 @@ const ls=(k,v)=>{try{if(v===undefined)return JSON.parse(localStorage.getItem(k)|
 function qrSvg(t){try{const q=qrcode(0,"M");q.addData(t);q.make();return q.createSvgTag({cellSize:4,margin:1,scalable:true})}catch(e){return""}}
 async function create(tasks,lbl){const b=$("#new");b.disabled=true;$("#e1").textContent="";
  try{const a=await LIVE.token();for(let i=0;i<6;i++){const c=String(10000+Math.floor(Math.random()*90000));
-   try{await LIVE.api("s/"+c,"PUT",{owner:a.uid,meta:{open:true,cur:-1,t:{".sv":"timestamp"},lbl:(lbl||$("#lbl").value).trim().slice(0,60),tasks:tasks||[]}});ls("pult",{code:c});return show(c)}catch(e){if(e.status!==401&&e.status!==403)throw e}}
+   try{await LIVE.api("s/"+c,"PUT",{owner:a.uid,meta:{open:true,cur:-1,t:{".sv":"timestamp"},lbl:(lbl||$("#lbl").value).trim().slice(0,60),tasks:tasks||[]}});ls("pult",{code:c});const H=ls("pult-hist")||[];H.push({c,t:Date.now()});ls("pult-hist",H.slice(-30));return show(c)}catch(e){if(e.status!==401&&e.status!==403)throw e}}
    throw new Error("busy")}catch(e){$("#e1").textContent="Не вдалося створити урок. Перевірте інтернет і спробуйте ще раз.";console.warn(e)}finally{b.disabled=false}}
 async function show(c){CODE=c;$("#start").style.display="none";$("#live").style.display="grid";$("#cd").textContent=$("#bigc").textContent=c;
  const u="https://urokinfo.com.ua/klas/?c="+c;$("#qr").innerHTML=$("#bigq").innerHTML=qrSvg(u);
@@ -124,6 +124,7 @@ function b64d(x){x=x.replace(/-/g,"+").replace(/_/g,"/");return decodeURICompone
 async function imp(){const m=location.hash.match(/d=([^&]+)/);if(!m)return;try{const d=JSON.parse(b64d(decodeURIComponent(m[1])));const BY={};CAT.forEach(x=>BY[x.i]=x);
  IMP={lbl:d.n||"",tasks:(d.b||[]).map(x=>x[0]==="_"?{title:String(x[3]||"Своє завдання").slice(0,120)}:BY[x[0]]?{title:(BY[x[0]].ti+(BY[x[0]].l&&BY[x[0]].l!==BY[x[0]].ti?" — "+BY[x[0]].l:"")).slice(0,120),url:BY[x[0]].u}:null).filter(Boolean).slice(0,12)};
  $("#lbl").value=IMP.lbl;$("#impl").innerHTML="<b>Урок з Конструктора:</b> "+IMP.tasks.length+" завдань<ol>"+IMP.tasks.map(t=>"<li>"+esc(t.title)+"</li>").join("")+"</ol>";$("#impl").hidden=false;$("#new").textContent="▶ Почати урок з цими завданнями"}catch(e){console.warn(e)}}
+(function(){const H=ls("pult-hist")||[],old=H.filter(x=>Date.now()-x.t>864e5);if(!old.length)return;ls("pult-hist",H.filter(x=>Date.now()-x.t<=864e5));old.forEach(x=>LIVE.api("s/"+x.c,"DELETE").catch(()=>{}))})();
 const P=ls("pult");if(P&&P.code&&!/d=/.test(location.hash))LIVE.api("s/"+P.code+"/meta").then(m=>{if(m)show(P.code);else ls("pult",null)}).catch(()=>{});
 </script>
 <script src="/site/nav.js" defer></script>

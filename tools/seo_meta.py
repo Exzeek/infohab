@@ -43,7 +43,7 @@ for i in sorted(os.listdir('a')):
     name=clean(at)
     title=cut(f'{name} — інформатика'+(f' {c}' if c and c not in name else ''),70)
     tl=[clean(x[0]['title']) for x in studs][:4]
-    desc=cut(f'{name}: інтерактивні матеріали з інформатики'+(f' для {c}у' if c else '')+'. '+('Теми: '+'; '.join(tl)+'. ' if tl else '')+'Безкоштовно, без реєстрації.',158)
+    desc=cut(f'{name}: інтерактивні матеріали з інформатики'+(f' для {c}у' if c else '')+'. '+('Теми: '+'; '.join(dict.fromkeys(x for x in tl if x not in name))+'. ' if [x for x in tl if x not in name] else '')+'Безкоштовно, без реєстрації.',158)
     lvl=[cls(k) for k in ks]
   arch=bool(studs) and all(x[1].get('kind')=='Архів' for x in studs)
   out[i]=dict(noindex=arch,title=title,desc=desc,name=name,lvl=lvl,url=f'{B}a/{i}/',_tl=[clean(x[1].get('label')) for x in studs if clean(x[1].get('label'))]+[clean(x[0]['title']) for x in studs])

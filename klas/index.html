@@ -13,13 +13,14 @@ input:focus{outline:none;border-color:var(--acc)}#code{font:800 34px "JetBrains 
 button{font:800 19px Nunito,sans-serif;border:0;border-radius:14px;padding:14px;background:var(--acc);color:#fff;cursor:pointer}button:disabled{opacity:.6}
 .err{color:#e03131;font-weight:800;min-height:1.5em}.mut{color:var(--mut)}
 #wait{display:none;text-align:center}#wait .big{font-size:60px}#wait a.go{display:block;margin-top:12px;font:800 19px Nunito;background:var(--acc);color:#fff;border-radius:14px;padding:14px;text-decoration:none}
+#tl{display:grid;gap:6px;text-align:left}#tl a,#tl div{display:flex;gap:10px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:12px;color:inherit;text-decoration:none;font-weight:700}#tl b{min-width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--line)}#tl a.cur{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 12%,transparent)}#tl .own{opacity:.7}
 .out{background:none;color:var(--mut);font-size:15px;text-decoration:underline;padding:4px}
 </style><link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#5b3cc4"><link rel="apple-touch-icon" href="/site/apple-touch-icon.png"></head><body><main>
 <h1>Увійти на урок</h1><p class="mut">Код уроку покаже вчитель на екрані. Тоді вчитель бачитиме, які завдання ти вже виконав.</p>
 <form class="c" id="f"><label>Код уроку<input id="code" inputmode="numeric" maxlength="5" autocomplete="off" placeholder="•••••" required></label>
 <label>Ім'я та перша літера прізвища<input id="name" maxlength="40" autocomplete="off" placeholder="Наприклад: Оля К." required></label>
 <div class="err" id="err" role="alert"></div><button id="b">Увійти</button></form>
-<div class="c" id="wait"><div class="big">🙋</div><b id="hi"></b><span class="mut" id="wt">Чекай: учитель зараз дасть завдання.</span><a class="go" id="go" hidden></a><button class="out" id="out" type="button">Вийти з уроку</button></div>
+<div class="c" id="wait"><div class="big">🙋</div><b id="hi"></b><span class="mut" id="wt">Чекай: учитель зараз дасть завдання.</span><a class="go" id="go" hidden></a><div id="tl"></div><button class="out" id="out" type="button">Вийти з уроку</button></div>
 </main>
 <script src="/site/live.js"></script>
 <script>
@@ -29,9 +30,13 @@ try{const n=localStorage.getItem("live-name");if(n)$("#name").value=n}catch(e){}
 (q.get("c")?$("#name"):$("#code")).focus();
 function waitView(){const L=LIVE.me();if(!L)return;$("#f").style.display="none";$("#wait").style.display="grid";$("#hi").textContent="Ти на уроці "+L.code+", "+L.name+"!";poll()}
 let tm=null;
-function poll(){const L=LIVE.me();if(!L)return;LIVE.meta(L.code).then(m=>{if(!m){$("#wt").textContent="Урок завершено.";$("#go").hidden=true;return}
-  if(m.task&&m.task.url){const g=$("#go");g.href=m.task.url;g.textContent="📌 "+m.task.title+" →";g.hidden=false;$("#wt").textContent="Учитель дав завдання:";
-    if(!sessionStorage.getItem("seen-"+m.task.url)){sessionStorage.setItem("seen-"+m.task.url,1);location.href=m.task.url;return}}
+function poll(){const L=LIVE.me();if(!L)return;LIVE.meta(L.code).then(m=>{if(!m){$("#wt").textContent="Урок завершено.";$("#go").hidden=true;$("#tl").innerHTML="";return}
+  const T=m.tasks||(m.task?[m.task]:[]),c=typeof m.cur==="number"?m.cur:(m.task?0:-1);
+  $("#wt").textContent=T.length?(c>=0?"Учитель відкрив завдання "+(c+1)+":":"Виконуй завдання по черзі:"):"Чекай: учитель зараз дасть завдання.";
+  const g=$("#go");if(c>=0&&T[c]&&T[c].url){g.href=T[c].url;g.textContent="📌 "+T[c].title+" →";g.hidden=false}else if(T.length&&T[0].url&&c<0){g.href=T[0].url;g.textContent="▶ Почати з завдання 1";g.hidden=false}else g.hidden=true;
+  $("#tl").innerHTML=T.map((t,i)=>t.url?`<a href="${t.url.replace(/"/g,"&quot;")}"${i===c?' class="cur"':''}><b>${i+1}</b><span></span></a>`:`<div class="own"><b>${i+1}</b><span></span></div>`).join("");
+  [...$("#tl").children].forEach((el,i)=>el.querySelector("span").textContent=T[i].title);
+  const key="seen-"+L.code+"-"+c;if(c>=0&&T[c]&&T[c].url&&!sessionStorage.getItem(key)){sessionStorage.setItem(key,1);location.href=T[c].url;return}
 }).catch(()=>{});clearTimeout(tm);tm=setTimeout(poll,5000)}
 $("#f").onsubmit=e=>{e.preventDefault();const b=$("#b");b.disabled=true;$("#err").textContent="";
   try{localStorage.setItem("live-name",$("#name").value.trim())}catch(x){}

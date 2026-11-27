@@ -34,8 +34,14 @@ function stream(path,cb){var es=null,stop=false;
 var last="",lastT=0,timer=null,extra={};
 function me(){return ls("live")}
 function page(){var t=document.title.split(" — ")[0].split(" | ")[0];return t.slice(0,80)}
+function norm(u){try{var x=new URL(u,location.origin);return x.pathname.replace(/\/?$/,"/")+x.search}catch(e){return u}}
+function taskIdx(m){var T=(m&&m.tasks)||[],here=norm(location.href),hp=location.pathname.replace(/\/?$/,"/"),i;
+  for(i=0;i<T.length;i++)if(T[i].url&&norm(T[i].url)===here)return i;
+  for(i=0;i<T.length;i++)if(T[i].url&&norm(T[i].url).split("?")[0]===hp&&!/\?/.test(norm(T[i].url)))return i;return -1}
+var META=null,TI=-1;
 function send(force){var L=me();if(!L)return;
   var d=Object.assign({n:L.name,pg:page(),u:location.pathname+location.search},extra);
+  if(TI>=0){d["r/"+TI]={v:1,d:extra.d==null?null:extra.d,t:extra.t==null?null:extra.t,g:extra.g==null?null:extra.g};d.ti=TI}else d.ti=-1;
   var sig=JSON.stringify(d);if(!force&&sig===last&&Date.now()-lastT<45000)return;last=sig;lastT=Date.now();
   d.ts={".sv":"timestamp"};
   token().then(function(a){return api("s/"+L.code+"/st/"+a.uid,"PATCH",d)}).catch(function(e){if(e.status===401||e.status===403){badge("⛔ Урок завершено")}});
@@ -61,15 +67,22 @@ function badge(txt){var L=me();if(!L||/^\/(pult|klas)\//.test(location.pathname)
   b.firstChild.textContent=txt||("🟢 Урок "+L.code+" · "+L.name);
   b.querySelector("a").onclick=function(e){e.preventDefault();if(confirm("Вийти з уроку "+L.code+"?"))leave()};
 }
-var task0=null;
-function watchTask(){var L=me();if(!L||/^\/(pult|klas)\//.test(location.pathname))return;
-  meta(L.code).then(function(m){if(!m){badge("⛔ Урок завершено");return}
-    var t=m.task&&m.task.url;if(task0===null){task0=t||"";return}
-    if(t&&t!==task0){task0=t;var b=document.getElementById("liveB");if(b){b.firstChild.innerHTML="";var a=document.createElement("a");a.href=t;a.style.cssText="color:#fff";a.textContent="📌 Нове завдання: "+m.task.title+" →";b.firstChild.appendChild(a)}}
+var cur0=null;
+function nextLink(){var T=(META&&META.tasks)||[];if(!T.length)return null;var n=TI+1;
+  if(TI>=0&&n<T.length&&T[n].url)return{href:T[n].url,txt:"Далі: "+(n+1)+"/"+T.length+" →"};return{href:"/klas/",txt:"📋 Завдання уроку"}}
+function drawBadge(){var L=me();if(!L)return;var T=(META&&META.tasks)||[];
+  badge(TI>=0?"🟢 "+L.name+" · завдання "+(TI+1)+"/"+T.length:"🟢 Урок "+L.code+" · "+L.name);
+  var b=document.getElementById("liveB"),nl=nextLink();if(b&&nl){var a=document.createElement("a");a.href=nl.href;a.textContent=nl.txt;a.style.cssText="color:#2b8a3e;background:#fff;border-radius:999px;padding:2px 10px;text-decoration:none;white-space:nowrap";b.insertBefore(a,b.lastChild)}}
+function watchTask(first){var L=me();if(!L||/^\/(pult|klas)\//.test(location.pathname))return;
+  meta(L.code).then(function(m){if(!m){META=null;badge("⛔ Урок завершено");return}
+    var was=TI;META=m;TI=taskIdx(m);if(first||was!==TI){drawBadge();if(TI!==was)send(true)}
+    var T=m.tasks||[],c=typeof m.cur==="number"?m.cur:-1;
+    if(cur0===null){cur0=c;return}
+    if(c!==cur0){cur0=c;if(c>=0&&T[c]&&T[c].url&&c!==TI){location.href=T[c].url}}
   }).catch(function(){})}
 window.LIVE={join:join,leave:leave,report:report,me:me,meta:meta,api:api,stream:stream,token:token,send:send};
 if(me()){
-  var go=function(){badge();send(true);watchTask();setInterval(function(){if(!document.hidden)send()},30000);setInterval(watchTask,20000)};
+  var go=function(){badge();watchTask(true);send(true);setInterval(function(){if(!document.hidden)send()},30000);setInterval(watchTask,20000)};
   document.readyState==="loading"?document.addEventListener("DOMContentLoaded",go):go();
   document.addEventListener("visibilitychange",function(){if(!document.hidden)send(true)});
 }

@@ -27,23 +27,25 @@ td.nm{font-weight:800;white-space:nowrap}.dot{display:inline-block;width:10px;he
 .empty{padding:28px;text-align:center;color:var(--mut)}
 #big{position:fixed;inset:0;background:var(--bg);z-index:10000;display:none;place-items:center;text-align:center;padding:20px}#big.on{display:grid}
 #big b{font:800 min(22vw,200px)/1 "JetBrains Mono",monospace;letter-spacing:.1em;color:var(--acc)}#big .qr{width:min(40vh,300px);margin:16px auto;background:#fff;padding:10px;border-radius:14px}#big p{font:800 clamp(18px,3vw,30px) Nunito}
+#tl{margin:0;padding:0;list-style:none;display:grid;gap:6px;counter-reset:t}#tl li{display:flex;gap:8px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:12px;counter-increment:t}#tl li::before{content:counter(t);min-width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--line);font-weight:800}#tl li.cur{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 10%,transparent)}#tl li a,#tl li span{flex:1;min-width:0;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:inherit}#tl li button{padding:4px 8px;font-size:13px}
+td.c{text-align:center;font-weight:800;white-space:nowrap}td.c.ok{color:var(--ok)}td.c .v{color:var(--mut)}th.c{text-align:center}details summary{cursor:pointer;font-weight:800}
 .err{color:var(--bad);font-weight:800}
 @media (max-width:720px){.top{grid-template-columns:1fr}th.h,td.h{display:none}}
 </style><link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#5b3cc4"><link rel="apple-touch-icon" href="/site/apple-touch-icon.png"></head><body><main>
 <h1>📡 Пульт уроку</h1><p class="mut">Учні входять за кодом на телефоні чи комп'ютері, ви даєте завдання всьому класу й бачите прогрес кожного наживо. Реєстрація не потрібна.</p>
 <div class="card" id="start"><label><b>Клас / група (необов'язково)</b><br><input id="lbl" maxlength="30" placeholder="Наприклад: 5-Б"></label>
-<button class="p" id="new">▶ Почати урок</button><div class="err" id="e1"></div>
-<p class="mut" style="margin:0">Учні відкривають <b>urokinfo.com.ua/klas</b> або вводять 5-значний код у полі «Код» угорі будь-якої сторінки.</p></div>
+<div id="impl" hidden class="mut"></div><button class="p" id="new">▶ Почати урок</button><div class="err" id="e1"></div>
+<p class="mut" style="margin:0">Зібрати урок з кількох завдань зручно в <a href="/konstruktor/">Конструкторі</a> (кнопка «📡 Провести наживо»), або додайте завдання тут після старту. Учні відкривають <b>urokinfo.com.ua/klas</b> або вводять 5-значний код у полі «Код» угорі будь-якої сторінки.</p></div>
 <section id="live">
  <div class="top"><div class="card code"><span class="mut">Код уроку</span><b id="cd"></b><div class="qr" id="qr"></div><span class="mut" style="font-size:14px">urokinfo.com.ua/klas</span>
    <div class="row" style="justify-content:center"><button id="bigb">⛶ Код на весь екран</button></div></div>
-  <div class="card task"><div class="row" style="justify-content:space-between"><b>📌 Завдання для класу</b><span class="mut" id="lb"></span></div>
-   <div class="cur" id="cur">Ще не обрано: учні бачать «Чекай завдання».</div>
-   <div class="row"><select id="tk"><option value="">Усі класи</option></select><input id="tq" placeholder="Пошук: назва, тема або код" style="flex:1"></div>
-   <div id="res"></div>
-   <div class="row"><button id="clr">✕ Прибрати завдання</button><button id="lock">🔒 Закрити вхід</button><button id="hide">🙈 Сховати імена</button><button id="csv">⬇ CSV</button><button class="d" id="end">⏹ Завершити урок</button></div></div></div>
+  <div class="card task"><div class="row" style="justify-content:space-between"><b>📌 Завдання уроку</b><span class="mut" id="lb"></span></div>
+   <ol id="tl"></ol>
+   <div class="row"><button id="mode" title="Як учні проходять завдання"></button><span class="mut" id="modeh" style="font-size:14px"></span></div>
+   <details id="add"><summary>➕ Додати завдання з бібліотеки</summary><div class="row" style="margin-top:8px"><select id="tk"><option value="">Усі класи</option></select><input id="tq" placeholder="Пошук: назва, тема або код" style="flex:1"></div><div id="res" style="margin-top:6px"></div></details>
+   <div class="row"><button id="lock">🔒 Закрити вхід</button><button id="hide">🙈 Сховати імена</button><button id="csv">⬇ CSV</button><button class="d" id="end">⏹ Завершити урок</button></div></div></div>
  <div class="stats" id="stats"></div>
- <table><thead><tr><th data-s="n">Учень</th><th data-s="pg" class="h">Де зараз</th><th data-s="p">Прогрес</th><th data-s="m" class="h">Хв</th><th data-s="g">Оцінка</th></tr></thead><tbody id="tb"></tbody></table>
+ <div style="overflow-x:auto"><table><thead id="th"></thead><tbody id="tb"></tbody></table></div>
 </section></main>
 <div id="big"><div><p>Заходь на <u>urokinfo.com.ua/klas</u></p><b id="bigc"></b><div class="qr" id="bigq"></div><button id="bigx">✕ Закрити</button></div></div>
 <script src="/site/qrcode.js"></script><script src="/site/live.js"></script>
@@ -52,9 +54,9 @@ const $=s=>document.querySelector(s),esc=s=>String(s??"").replace(/[&<>"]/g,c=>(
 let CODE=null,META={},ST={},SEEN={},SORT="n",HIDE=false,STR=null,CAT=[];
 const ls=(k,v)=>{try{if(v===undefined)return JSON.parse(localStorage.getItem(k)||"null");v===null?localStorage.removeItem(k):localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
 function qrSvg(t){try{const q=qrcode(0,"M");q.addData(t);q.make();return q.createSvgTag({cellSize:4,margin:1,scalable:true})}catch(e){return""}}
-async function create(){const b=$("#new");b.disabled=true;$("#e1").textContent="";
+async function create(tasks,lbl){const b=$("#new");b.disabled=true;$("#e1").textContent="";
  try{const a=await LIVE.token();for(let i=0;i<6;i++){const c=String(10000+Math.floor(Math.random()*90000));
-   try{await LIVE.api("s/"+c,"PUT",{owner:a.uid,meta:{open:true,t:{".sv":"timestamp"},lbl:$("#lbl").value.trim().slice(0,30)}});ls("pult",{code:c});return show(c)}catch(e){if(e.status!==401&&e.status!==403)throw e}}
+   try{await LIVE.api("s/"+c,"PUT",{owner:a.uid,meta:{open:true,cur:-1,t:{".sv":"timestamp"},lbl:(lbl||$("#lbl").value).trim().slice(0,60),tasks:tasks||[]}});ls("pult",{code:c});return show(c)}catch(e){if(e.status!==401&&e.status!==403)throw e}}
    throw new Error("busy")}catch(e){$("#e1").textContent="Не вдалося створити урок. Перевірте інтернет і спробуйте ще раз.";console.warn(e)}finally{b.disabled=false}}
 async function show(c){CODE=c;$("#start").style.display="none";$("#live").style.display="grid";$("#cd").textContent=$("#bigc").textContent=c;
  const u="https://urokinfo.com.ua/klas/?c="+c;$("#qr").innerHTML=$("#bigq").innerHTML=qrSvg(u);
@@ -65,35 +67,52 @@ function onEv(type,path,data){if(type==="cancel")return;const p=(path||"/").spli
  else{const id=p[0];SEEN[id]=Date.now();if(p.length===1){if(data===null)delete ST[id];else ST[id]=type==="patch"?Object.assign(ST[id]||{},data):data}
   else{ST[id]=ST[id]||{};if(data===null)delete ST[id][p[1]];else ST[id][p[1]]=data}}
  draw()}
-function drawMeta(){$("#cur").innerHTML=META.task?`<a href="${esc(META.task.url)}" target="_blank" rel="noopener">${esc(META.task.title)}</a>`:"Ще не обрано: учні бачать «Чекай завдання».";
+function T(){return META.tasks||[]}
+function drawMeta(){const L=T(),c=typeof META.cur==="number"?META.cur:-1;
+ $("#tl").innerHTML=L.length?L.map((t,i)=>`<li class="${i===c?"cur":""}">${t.url?`<a href="${esc(t.url)}" target="_blank" rel="noopener">${esc(t.title)}</a>`:`<span>📝 ${esc(t.title)}</span>`}${t.url?`<button data-cur="${i}" title="Відкрити це завдання в усіх учнів">${i===c?"✔ відкрито":"▶ всім"}</button>`:""}<button data-up="${i}" title="Вище" ${i?"":"disabled"}>↑</button><button data-del="${i}" title="Прибрати">✕</button></li>`).join(""):'<li style="justify-content:center;color:var(--mut)">Ще немає завдань — додайте з бібліотеки нижче</li>';
+ if(!L.length)$("#add").open=true;
+ $("#mode").textContent=c>=0?"👣 Крок за кроком":"🏃 Кожен у своєму темпі";$("#modeh").textContent=c>=0?"учні бачать завдання, яке ви відкрили":"учні проходять список по черзі самі";
  $("#lock").textContent=META.open?"🔒 Закрити вхід":"🔓 Відкрити вхід";$("#lb").textContent=META.lbl||""}
 function online(s,id){return !s.off&&(Date.now()-(SEEN[id]||0)<75000||Date.now()-(s.ts||0)<75000)}
-function rows(){return Object.entries(ST).filter(([,s])=>s&&s.n).map(([id,s])=>({id,...s,on:online(s,id),p:s.t?s.d/s.t:0}))}
-function draw(){const R=rows();R.sort((a,b)=>SORT==="n"?String(a.n).localeCompare(b.n,"uk"):SORT==="pg"?String(a.pg).localeCompare(b.pg,"uk"):SORT==="g"?(b.g||0)-(a.g||0):SORT==="m"?(b.m||0)-(a.m||0):b.p-a.p);
- const on=R.filter(r=>r.on).length,fin=R.filter(r=>r.g).length,avg=R.length?Math.round(100*R.reduce((s,r)=>s+r.p,0)/R.length):0,gs=R.filter(r=>r.g),ag=gs.length?(gs.reduce((s,r)=>s+r.g,0)/gs.length).toFixed(1):"—";
- $("#stats").innerHTML=`<div><span>${R.length}</span>учнів</div><div><span>${on}</span>онлайн</div><div><span>${avg}%</span>середній прогрес</div><div><span>${fin}</span>здали</div><div><span>${ag}</span>середня оцінка</div>`;
- $("#tb").innerHTML=R.length?R.map((r,i)=>`<tr><td class="nm"><span class="dot${r.on?" on":""}"></span>${HIDE?"Учень "+(i+1):esc(r.n)}</td><td class="h"><div class="pg" title="${esc(r.u)}">${esc(r.env?r.env+" · "+(r.set||""):r.pg)}</div></td>
-  <td>${r.t?`<div class="row" style="flex-wrap:nowrap"><div class="bar" style="flex:1"><i style="width:${Math.round(100*r.p)}%"></i></div><b>${r.d}/${r.t}</b></div>`:'<span class="mut">—</span>'}</td><td class="h">${r.m??"—"}</td><td class="g">${r.g||'<span class="mut" style="font:700 14px Nunito">—</span>'}</td></tr>`).join("")
-  :`<tr><td colspan="5" class="empty">Поки нікого. Покажіть учням код <b>${CODE}</b> — вони з'являться тут.</td></tr>`}
+function cell(r){if(!r)return"";if(r.g)return r.g;if(r.t)return r.d+"/"+r.t;return '<span class="v">👁</span>'}
+function prog(s){const L=T(),R=s.r||{};if(!L.length)return s.t?s.d/s.t:0;let sum=0,n=0;L.forEach((t,i)=>{if(!t.url)return;n++;const x=R[i];if(x)sum+=x.g?1:x.t?x.d/x.t:0.5});return n?sum/n:0}
+function rows(){return Object.entries(ST).filter(([,s])=>s&&s.n).map(([id,s])=>({id,...s,on:online(s,id),p:prog(s)}))}
+function draw(){const R=rows(),L=T();R.sort((a,b)=>SORT==="n"?String(a.n).localeCompare(b.n,"uk"):SORT==="pg"?(a.ti??-1)-(b.ti??-1):SORT==="g"?(b.g||0)-(a.g||0):b.p-a.p);
+ const on=R.filter(r=>r.on).length,avg=R.length?Math.round(100*R.reduce((s,r)=>s+r.p,0)/R.length):0,G=[];R.forEach(r=>Object.values(r.r||{}).forEach(x=>x&&x.g&&G.push(x.g)));
+ $("#stats").innerHTML=`<div><span>${R.length}</span>учнів</div><div><span>${on}</span>онлайн</div><div><span>${avg}%</span>середній прогрес</div><div><span>${G.length}</span>здано робіт</div><div><span>${G.length?(G.reduce((a,b)=>a+b,0)/G.length).toFixed(1):"—"}</span>середня оцінка</div>`;
+ $("#th").innerHTML=`<tr><th data-s="n">Учень</th><th data-s="pg" class="h">Де зараз</th><th data-s="p">Прогрес</th>${L.map((t,i)=>`<th class="c" title="${esc(t.title)}">${i+1}</th>`).join("")}</tr>`;
+ $("#th").querySelectorAll("th[data-s]").forEach(th=>th.onclick=()=>{SORT=th.dataset.s;draw()});
+ $("#tb").innerHTML=R.length?R.map((r,i)=>`<tr><td class="nm"><span class="dot${r.on?" on":""}"></span>${HIDE?"Учень "+(i+1):esc(r.n)}</td><td class="h"><div class="pg" title="${esc(r.u)}">${r.ti>=0?"<b>"+(r.ti+1)+".</b> ":""}${esc(r.env?r.env+" · "+(r.set||""):r.pg)}</div></td>
+  <td><div class="row" style="flex-wrap:nowrap"><div class="bar" style="flex:1"><i style="width:${Math.round(100*r.p)}%"></i></div><b>${Math.round(100*r.p)}%</b></div></td>${L.map((t,j)=>{const x=(r.r||{})[j];return`<td class="c${x&&(x.g||x.t&&x.d===x.t)?" ok":""}">${cell(x)}</td>`}).join("")}</tr>`).join("")
+  :`<tr><td colspan="${3+L.length}" class="empty">Поки нікого. Покажіть учням код <b>${CODE}</b> — вони з'являться тут.</td></tr>`}
 setInterval(()=>{if(CODE)draw()},10000);
-document.querySelectorAll("th[data-s]").forEach(th=>th.onclick=()=>{SORT=th.dataset.s;draw()});
-async function setMeta(o){Object.assign(META,o);for(const k in o)if(o[k]===null)delete META[k];drawMeta();try{await LIVE.api("s/"+CODE+"/meta","PATCH",o)}catch(e){alert("Немає зв'язку з сервером")}}
+async function setMeta(o){Object.assign(META,o);for(const k in o)if(o[k]===null)delete META[k];drawMeta();draw();try{await LIVE.api("s/"+CODE+"/meta","PATCH",o)}catch(e){alert("Немає зв'язку з сервером")}}
 function search(){const q=$("#tq").value.trim().toLowerCase(),k=$("#tk").value;
  const R=CAT.filter(x=>(!k||String(x.k)===k)&&(!q||(x.c===q)||(x.ti+" "+x.l+" "+x.n+" "+(x.s||"")).toLowerCase().includes(q))).slice(0,40);
- $("#res").innerHTML=R.map(x=>`<button data-u="${esc(x.u)}" data-t="${esc(x.ti+(x.l&&x.l!==x.ti?" — "+x.l:""))}"><span>${esc(x.ti)}<br><small>${esc(x.n)} · ${esc(x.l||"")}</small></span><small>${x.k?x.k+" кл":""} ${x.c?"· "+x.c:""}</small></button>`).join("")||'<span class="mut">Нічого не знайдено</span>'}
-$("#res").onclick=e=>{const b=e.target.closest("button[data-u]");if(b)setMeta({task:{title:b.dataset.t.slice(0,120),url:b.dataset.u}})};
-$("#tq").oninput=search;$("#tk").onchange=search;
-$("#clr").onclick=()=>setMeta({task:null});$("#lock").onclick=()=>setMeta({open:!META.open});
+ $("#res").innerHTML=R.map(x=>`<button data-u="${esc(x.u)}" data-t="${esc(x.ti+(x.l&&x.l!==x.ti?" — "+x.l:""))}"><span>➕ ${esc(x.ti)}<br><small>${esc(x.n)} · ${esc(x.l||"")}</small></span><small>${x.k?x.k+" кл":""} ${x.c?"· "+x.c:""}</small></button>`).join("")||'<span class="mut">Нічого не знайдено</span>'}
+$("#res").onclick=e=>{const b=e.target.closest("button[data-u]");if(!b)return;const L=T().slice();if(L.length>=12)return alert("Максимум 12 завдань");L.push({title:b.dataset.t.slice(0,120),url:b.dataset.u});setMeta({tasks:L})};
+$("#tl").onclick=e=>{const b=e.target.closest("button");if(!b)return;const L=T().slice(),d=b.dataset;
+ if(d.cur!=null){setMeta({cur:+d.cur===META.cur?-1:+d.cur})}
+ if(d.up!=null){const i=+d.up;[L[i-1],L[i]]=[L[i],L[i-1]];setMeta({tasks:L,cur:-1})}
+ if(d.del!=null){if(!confirm("Прибрати завдання «"+L[+d.del].title+"»?"))return;L.splice(+d.del,1);setMeta({tasks:L,cur:-1})}};
+$("#mode").onclick=()=>{const L=T();const i=L.findIndex(t=>t.url);setMeta({cur:typeof META.cur==="number"&&META.cur>=0?-1:Math.max(0,i)})};
+$("#tq").oninput=search;$("#tk").onchange=search;$("#lock").onclick=()=>setMeta({open:!META.open});
 $("#hide").onclick=()=>{HIDE=!HIDE;$("#hide").textContent=HIDE?"👁 Показати імена":"🙈 Сховати імена";draw()};
-$("#csv").onclick=()=>{const R=rows(),q=s=>'"'+String(s??"").replace(/"/g,'""')+'"';const t="﻿Учень;Середовище/сторінка;Набір;Виконано;Усього;Хвилин;Оцінка\n"+R.map(r=>[r.n,r.env||r.pg,r.set,r.d,r.t,r.m,r.g].map(q).join(";")).join("\n");
+$("#csv").onclick=()=>{const R=rows(),L=T(),q=s=>'"'+String(s??"").replace(/"/g,'""')+'"';
+ const t="﻿"+["Учень","Прогрес %"].concat(L.map((x,i)=>(i+1)+". "+x.title)).map(q).join(";")+"\n"+R.map(r=>[r.n,Math.round(100*r.p)].concat(L.map((x,i)=>{const c=(r.r||{})[i];return !c?"":c.g?"оцінка "+c.g:c.t?c.d+"/"+c.t:"відкрив"})).map(q).join(";")).join("\n");
  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([t],{type:"text/csv"}));a.download="urok-"+CODE+".csv";a.click()};
 $("#end").onclick=async()=>{if(!confirm("Завершити урок "+CODE+"? Учні вийдуть, а список прогресу буде видалено. Спершу можна зберегти CSV."))return;
  try{await LIVE.api("s/"+CODE,"DELETE")}catch(e){}if(STR)STR.close();ls("pult",null);CODE=null;ST={};$("#live").style.display="none";$("#start").style.display="grid"};
 $("#bigb").onclick=()=>{$("#big").classList.add("on");document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})};
 $("#bigx").onclick=()=>{$("#big").classList.remove("on");document.fullscreenElement&&document.exitFullscreen()};
-$("#new").onclick=create;
-fetch("/site/catalog.json").then(r=>r.json()).then(j=>{CAT=j;const ks=[...new Set(j.map(x=>x.k).filter(Boolean))].sort((a,b)=>a-b);$("#tk").insertAdjacentHTML("beforeend",ks.map(k=>`<option value="${k}">${k} клас</option>`).join(""));search()}).catch(()=>{});
-const P=ls("pult");if(P&&P.code)LIVE.api("s/"+P.code+"/meta").then(m=>{if(m)show(P.code);else ls("pult",null)}).catch(()=>{});
+$("#new").onclick=()=>create(IMP&&IMP.tasks,IMP&&IMP.lbl);
+fetch("/site/catalog.json").then(r=>r.json()).then(j=>{CAT=j;const ks=[...new Set(j.map(x=>x.k).filter(Boolean))].sort((a,b)=>a-b);$("#tk").insertAdjacentHTML("beforeend",ks.map(k=>`<option value="${k}">${k} клас</option>`).join(""));search();imp()}).catch(()=>{});
+let IMP=null;
+function b64d(x){x=x.replace(/-/g,"+").replace(/_/g,"/");return decodeURIComponent(escape(atob(x)))}
+async function imp(){const m=location.hash.match(/d=([^&]+)/);if(!m)return;try{const d=JSON.parse(b64d(decodeURIComponent(m[1])));const BY={};CAT.forEach(x=>BY[x.i]=x);
+ IMP={lbl:d.n||"",tasks:(d.b||[]).map(x=>x[0]==="_"?{title:String(x[3]||"Своє завдання").slice(0,120)}:BY[x[0]]?{title:(BY[x[0]].ti+(BY[x[0]].l&&BY[x[0]].l!==BY[x[0]].ti?" — "+BY[x[0]].l:"")).slice(0,120),url:BY[x[0]].u}:null).filter(Boolean).slice(0,12)};
+ $("#lbl").value=IMP.lbl;$("#impl").innerHTML="<b>Урок з Конструктора:</b> "+IMP.tasks.length+" завдань<ol>"+IMP.tasks.map(t=>"<li>"+esc(t.title)+"</li>").join("")+"</ol>";$("#impl").hidden=false;$("#new").textContent="▶ Почати урок з цими завданнями"}catch(e){console.warn(e)}}
+const P=ls("pult");if(P&&P.code&&!/d=/.test(location.hash))LIVE.api("s/"+P.code+"/meta").then(m=>{if(m)show(P.code);else ls("pult",null)}).catch(()=>{});
 </script>
 <script src="/site/nav.js" defer></script>
 </body></html>

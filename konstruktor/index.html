@@ -74,7 +74,7 @@ select,input,textarea{font:15px Nunito,sans-serif;padding:7px 10px;border-radius
   <div class="time" id="tm"><div class="bar"><i></i></div><span></span></div>
   <div class="acts">
    <button class="btn pri" id="bShare">🔗 Посилання й QR для учнів</button>
-   <button class="btn" id="bScreen">🖥️ Провести на екрані</button>
+   <button class="btn pri" id="bLive" title="Учні входять за кодом, ви бачите прогрес кожного по всіх завданнях">📡 Провести наживо</button><button class="btn" id="bScreen">🖥️ Провести на екрані</button>
    <button class="btn" id="bSave">💾 Зберегти</button>
    <button class="btn" id="bPrint">🖨️ План уроку</button>
    <button class="btn" id="bNew">＋ Новий</button>
@@ -130,6 +130,7 @@ function need(){if(!L.b.length){toast("Спершу додай хоча б од�
 $("#bShare").onclick=()=>{if(!need())return;const u=link(false);$("#lnk").value=u;$("#bOpen").href=u;$("#sh").classList.add("on");
  try{const q=qrcode(0,u.length>900?"L":"M");q.addData(u);q.make();$("#qr").innerHTML=q.createSvgTag({scalable:true,margin:0})}catch(e){$("#qr").textContent="Посилання задовге для QR — скоротіть нотатки"}};
 $("#bCopy").onclick=()=>{navigator.clipboard?.writeText($("#lnk").value).then(()=>toast("Посилання скопійовано"),()=>{$("#lnk").select();toast("Натисни Ctrl+C")})};
+$("#bLive").onclick=()=>{if(need())location.href="/pult/#d="+b64e(JSON.stringify(data()))};
 $("#bScreen").onclick=()=>{if(need())window.open(link(true),"_blank","noopener")};
 $("#bPrint").onclick=()=>{if(need())print()};
 $("#bNew").onclick=()=>{if(L.b.length&&!confirm("Почати новий урок? Незбережені зміни зникнуть."))return;L={n:"",k:"",b:[],id:null};save();draw()};

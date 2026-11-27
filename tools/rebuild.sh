@@ -21,3 +21,4 @@ python3 /home/claude/infohab/tools/codes_apply.py
 python3 /home/claude/infohab/tools/nav_apply.py
 python3 /home/claude/infohab/tools/env_index.py
 python3 /home/claude/infohab/tools/og_apply.py
+python3 /home/claude/infohab/tools/fonts_apply.py

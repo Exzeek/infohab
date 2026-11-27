@@ -4,8 +4,8 @@
 <meta name="description" content="Git-тренажер у браузері: справжні команди git init, add, commit, branch, switch, merge, розв'язання конфлікту й наочний граф комітів. 8 клас, тема «Система…">
 <link rel="canonical" href="https://urokinfo.com.ua/seredovyshcha/git/"><link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta property="og:title" content="Git-тренажер — система контролю версій"><meta property="og:locale" content="uk_UA">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;800&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/site/fonts.css">
 <link rel="stylesheet" href="../kit.css">
 <style>
 :root{--acc:#e8590c}@media (prefers-color-scheme:dark){:root{--acc:#ff922b}}
@@ -144,8 +144,8 @@ const SETS={
  basics:{name:"Коміти й гілки (8 клас)",cls:8,norm:15,story:"Команда розробляє сайт ліги. Постав проєкт під контроль Git, збережи версії, зроби окрему гілку для дизайну й об'єднай її з основною.",tasks:[
   {t:"Створи репозиторій.",hint:"<b>git init</b>",ok:()=>R.init},
   {t:"Додай усі файли й зроби перший коміт з описом.",hint:'<b>git add .</b> → <b>git commit -m "Перша версія"</b>',ok:()=>R.commits.length>=1&&Object.keys(R.commits[0].snap).length===3},
-  {t:"Зміни README.md (допиши опис сайту) і зроби другий коміт.",ok:()=>commitsOn("main").some(c=>c.parents.length&&c.snap["README.md"]!==FILES0["README.md"])},
-  {t:"Створи гілку <b>dizain</b> і перейди на неї.",hint:"<b>git switch -c dizain</b>",ok:()=>!!R.br.dizain&&(R.head==="dizain"||R.log.some(l=>/(switch|checkout)\s+(-c\s+|-b\s+)?dizain/.test(l)))},
+  {bit:{say:"Коміт зберігає лише останню версію, попередні зникають.",ok:false,why:"Коміт — знімок стану проєкту. Усі попередні коміти зберігаються в історії, до них можна повернутися."},t:"Зміни README.md (допиши опис сайту) і зроби другий коміт.",ok:()=>commitsOn("main").some(c=>c.parents.length&&c.snap["README.md"]!==FILES0["README.md"])},
+  {bit:{say:"Зміни на гілці dizain не зачеплять main, доки ми їх не зіллємо.",ok:true,why:"Саме так: гілка — окрема лінія розробки."},t:"Створи гілку <b>dizain</b> і перейди на неї.",hint:"<b>git switch -c dizain</b>",ok:()=>!!R.br.dizain&&(R.head==="dizain"||R.log.some(l=>/(switch|checkout)\s+(-c\s+|-b\s+)?dizain/.test(l)))},
   {t:"На гілці dizain зміни колір заголовка в style.css і закоміть.",ok:()=>commitsOn("dizain").some(c=>c.branch==="dizain"&&c.snap["style.css"]!==FILES0["style.css"])},
   {t:"Повернись на <b>main</b> і злий у неї гілку dizain.",hint:"<b>git switch main</b> → <b>git merge dizain</b>",ok:()=>R.br.dizain&&ancestors(R.br.main||"").has(R.br.dizain)&&snapOf("main")["style.css"]!==FILES0["style.css"]},
   {t:"Переглянь історію комітів однією командою.",ok:()=>R.log.some(l=>/^git log/.test(l))&&R.commits.length>=3}]},

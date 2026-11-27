@@ -22,3 +22,9 @@
 (function(){if(window.LIVE||document.getElementById("liveJs"))return;var s=document.createElement("script");s.id="liveJs";s.src="/site/live.js";s.defer=true;document.head.appendChild(s)})();
 
 (function(){var h=location.hostname;if(window.__ugd||location.protocol==="file:"||/(^|\.)urokinfo\.com\.ua$|github\.io$|^localhost$|^127\./.test(h))return;window.__ugd=1;var f=function(){if(document.getElementById("ugd"))return;var b=document.createElement("a");b.id="ugd";b.href="https://urokinfo.com.ua"+location.pathname;b.textContent="Цей матеріал скопійовано з urokinfo.com.ua без дозволу — відкрити оригінал →";b.style.cssText="position:fixed;left:0;right:0;top:0;z-index:2147483647;background:#e03131;color:#fff;font:800 15px system-ui,sans-serif;padding:10px;text-align:center;text-decoration:none";document.body.appendChild(b)};document.readyState==="loading"?document.addEventListener("DOMContentLoaded",f):f()})();
+
+(function(){function load(){if(document.getElementById("spkJs")){window.USPEAK&&USPEAK.enable();return}var s=document.createElement("script");s.id="spkJs";s.src="/site/speak.js";s.onload=function(){window.USPEAK&&USPEAK.enable()};document.head.appendChild(s)}
+window.USPEAK_LOAD=load;
+function chk(){try{var L=[].slice.call(document.querySelectorAll('script[type="application/ld+json"]')).map(function(x){try{return JSON.parse(x.textContent)}catch(e){return{}}});
+  for(var i=0;i<L.length;i++){var lv=L[i].educationalLevel;if(lv&&lv.length&&lv.every(function(v){return/^[234] клас/.test(v)})){load();return}}}catch(e){}}
+document.readyState==="loading"?document.addEventListener("DOMContentLoaded",chk):chk()})();

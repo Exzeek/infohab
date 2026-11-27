@@ -20,7 +20,9 @@ function renderSide(){
   $("#kStory").textContent=st.story||"";
   const ul=$("#kTasks");ul.innerHTML="";
   st.tasks.forEach((t,i)=>{const li=document.createElement("li");li.id="kt"+i;
-    li.innerHTML=`<span class="n">${i+1}</span><span class="tx">${t.t}${t.hint?`<span class="hint">${t.hint}</span>`:""}</span>`;ul.append(li)});
+    li.innerHTML=`<span class="n">${i+1}</span><span class="tx">${t.t}${t.hint?`<span class="hint">${t.hint}</span>`:""}${t.bit?`<span class="kbit"><span class="kbs">🤖 <b>Біт:</b> «${t.bit.say}» Біт правий?</span><span class="kbb"><button type="button" data-v="1">👍 Так</button><button type="button" data-v="0">✋ Ні, помиляється</button></span><span class="kbr" hidden></span></span>`:""}</span>`;ul.append(li);
+    if(t.bit){const bx=li.querySelector(".kbit"),key="env-bit-"+C.id+"-"+setKey+"-"+i,show=(v)=>{const r=bx.querySelector(".kbr"),good=(v==="1")===!!t.bit.ok;r.hidden=false;r.className="kbr "+(good?"ok":"bad");r.innerHTML=(good?"✅ Так! ":"🤔 Подумай ще: ")+t.bit.why;bx.querySelectorAll("button").forEach(b=>{b.disabled=true;b.classList.toggle("on",b.dataset.v===v)})};
+      const was=ls.get(key,null);if(was!=null)show(was);bx.onclick=e=>{const b=e.target.closest("button");if(!b||b.disabled)return;e.stopPropagation();ls.set(key,b.dataset.v);show(b.dataset.v);touch()}}});
   refresh();renderRes();
 }
 function refresh(){
@@ -62,6 +64,7 @@ function line(name,cls){
   return["v1",st.cls||C.cls||"—",C.title+" · "+st.name,clean(cls),clean(name),ls.get("env-att-"+C.id+"-"+setKey,1),"середовище",r.grade,r.n+" з "+r.tot,Math.round(100*r.n/r.tot),r.err||0,hm(r.T),hm(r.norm),r.tooFast?"занадто швидко":"",S.res?"завершено":"не завершено",tasks].join("|");
 }
 function chooseSet(k,reset){
+  if(reset){try{Object.keys(localStorage).filter(x=>x.indexOf("env-bit-"+C.id+"-"+k+"-")===0).forEach(x=>localStorage.removeItem(x))}catch(e){}}
   setKey=k;ls.set("env-last-"+C.id,k);
   try{const M={t:C.title,p:location.pathname,s:{}};Object.entries(C.sets).forEach(([sk,v])=>M.s[sk]={n:v.name,c:v.cls||C.cls,tot:v.tasks.length});ls.set("env-meta-"+C.id,M);
     const u=location.pathname+"?set="+k,h=ls.get("ui-hist",[]).filter(x=>x.u!==u);h.unshift({u,t:C.title+" · "+C.sets[k].name,ts:Date.now()});ls.set("ui-hist",h.slice(0,40))}catch(e){}
@@ -69,6 +72,7 @@ function chooseSet(k,reset){
   if(reset){save()}
   const sel=$("#kSet");if(sel)sel.value=k;
   C.onSet&&C.onSet(k,!!reset||!ls.get("env-"+C.id+"-"+k+"-started",false));
+  {const cl=C.sets[k].cls||C.cls;const tryS=()=>{if(window.USPEAK_LOAD){if(cl<=4)USPEAK_LOAD()}else setTimeout(tryS,500)};tryS();}
   ls.set("env-"+C.id+"-"+k+"-started",true);
   renderSide();
 }

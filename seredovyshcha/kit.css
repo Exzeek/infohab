@@ -56,3 +56,5 @@ button{font:inherit;cursor:pointer}
 .k-done{position:fixed;left:50%;bottom:16px;transform:translate(-50%,150%);z-index:80;display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:center;background:var(--surface);color:var(--ink);border:2px solid var(--ok,#2f9e44);border-radius:18px;padding:10px 14px;box-shadow:0 10px 30px #0004;font-weight:800;transition:transform .3s;max-width:94vw}
 .k-done.on{transform:translate(-50%,0)}
 @media (prefers-reduced-motion:reduce){.k-done{transition:none}}
+
+.kbit{display:grid;gap:6px;margin-top:8px;padding:8px 10px;border-radius:12px;background:color-mix(in srgb,#1c7ed6 10%,transparent);border:1px dashed #1c7ed6;font-size:14px}.kbb{display:flex;gap:6px;flex-wrap:wrap}.kbb button{border:1px solid #1c7ed6;background:transparent;color:inherit;border-radius:999px;padding:4px 10px;font:800 13px Nunito,sans-serif;cursor:pointer}.kbb button.on{background:#1c7ed6;color:#fff}.kbb button:disabled{cursor:default;opacity:.85}.kbr{font-weight:700}.kbr.ok{color:#2b8a3e}.kbr.bad{color:#e8590c}

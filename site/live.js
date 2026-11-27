@@ -87,7 +87,7 @@ function parseRow(r){var f=String(r).split("|");if(f[0]!=="v1"||f.length<15)retu
   var fin=/^завершено/.test(f[14]||""),g=parseInt(f[7],10);
   return{d:items.length?d:null,t:items.length||null,e:parseInt(f[10],10)||0,g:fin&&g>0?g:null,x:x.slice(0,600)}}
 var rowFn=null,rowTried=0;
-function findRowFn(){var c=[];for(var k in window){try{var f=window[k];if(typeof f==="function"&&f.length<=3&&!/^on|^__/.test(k)){var src=Function.prototype.toString.call(f);if(src.indexOf('"v1"')>-1&&/join\(["']\|["']\)/.test(src))c.push(f)}}catch(e){}}
+function findRowFn(){if(typeof window.__urow==="function")return window.__urow;var c=[];for(var k in window){try{var f=window[k];if(typeof f==="function"&&f.length<=3&&!/^on|^__/.test(k)){var src=Function.prototype.toString.call(f);if(src.indexOf('"v1"')>-1&&/join\(["']\|["']\)/.test(src))c.push(f)}}catch(e){}}
   for(var i=0;i<c.length;i++){try{var r=c[i]("·","·");if(typeof r==="string"&&r.indexOf("v1|")===0)return c[i]}catch(e){}}return null}
 function lessonTick(){if(!rowFn&&rowTried<3){rowTried++;rowFn=findRowFn()}if(!rowFn)return;
   try{var o=parseRow(rowFn("·","·"));if(o)report(o)}catch(e){}}

@@ -1433,7 +1433,7 @@ function getGrade(o,x){
   try{ if(typeof grade==="function"){ const g=grade(); if(g) return g; } }catch(e){}
   const i=o.header.findIndex(h=>/Оцінка/i.test(h)); return i>=0&&o.row[i]!==""?o.row[i]:"—";
 }
-function line(name,cls){
+try{window.__urow=line}catch(_e){}function line(name,cls){
   const o=getRow(), x=extra(), g=getGrade(o,x);
   let ok=0,tot=0; const det=[];
   o.header.forEach((h,i)=>{ if(i<3&&/ПІБ|Ім'я|Клас|Дата/i.test(h)) return;

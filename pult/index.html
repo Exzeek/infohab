@@ -32,7 +32,7 @@ td.c{text-align:center;font-weight:800;white-space:nowrap}td.c.ok{color:var(--ok
 #hl{display:grid;gap:6px;margin-top:8px}#hl .hr{display:grid;grid-template-columns:70px minmax(0,1fr) auto;gap:10px;align-items:center}#hl .hr b{font-family:"JetBrains Mono",monospace}#hl .hb{height:12px;border-radius:6px;background:var(--line);overflow:hidden;display:flex}#hl .hb i{background:var(--bad)}#hl .hb u{background:#f59f00}
 .err{color:var(--bad);font-weight:800}
 @media (max-width:720px){.top{grid-template-columns:1fr}th.h,td.h{display:none}}
-</style><link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#5b3cc4"><link rel="apple-touch-icon" href="/site/apple-touch-icon.png"></head><body><main>
+/*a11y*/@media (prefers-color-scheme:dark){button.p{color:#120a2e}main a{color:#b197fc}}</style><link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#5b3cc4"><link rel="apple-touch-icon" href="/site/apple-touch-icon.png"></head><body><main>
 <h1>📡 Пульт уроку</h1><p class="mut">Учні входять за кодом на телефоні чи комп'ютері, ви даєте завдання всьому класу й бачите прогрес кожного наживо. Реєстрація не потрібна.</p>
 <div class="card" id="start"><label><b>Клас / група (необов'язково)</b><br><input id="lbl" maxlength="30" placeholder="Наприклад: 5-Б"></label>
 <div id="impl" hidden class="mut"></div><p class="mut" style="margin:0;font-size:14px">🔒 Учні вписують лише ім'я й першу літеру прізвища. Прогрес бачите тільки ви; після «Завершити урок» він видаляється, а незавершені уроки цей пристрій прибирає сам через добу.</p><button class="p" id="new">▶ Почати урок</button><div class="err" id="e1"></div>

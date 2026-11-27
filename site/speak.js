@@ -14,7 +14,7 @@ function say(t,el){speechSynthesis.cancel();if(!t)return;var u=new SpeechSynthes
   u.onend=u.onerror=function(){if(cur)cur.style.outline="";cur=null};speechSynthesis.speak(u)}
 function setOn(v){on=v;btn.setAttribute("aria-pressed",v);btn.innerHTML=v?"👆 Торкнись тексту":"🔊 Прочитати";document.documentElement.style.cursor=v?"help":""}
 function make(){btn=document.createElement("button");btn.type="button";btn.id="uSpeak";
-  btn.style.cssText="position:fixed;left:12px;bottom:12px;z-index:9996;border:0;border-radius:999px;padding:10px 16px;font:800 16px Nunito,system-ui,sans-serif;background:#1c7ed6;color:#fff;box-shadow:0 3px 12px #0004;cursor:pointer";
+  btn.style.cssText="position:fixed;left:12px;bottom:12px;z-index:9996;border:0;border-radius:999px;padding:10px 16px;font:800 16px Nunito,system-ui,sans-serif;background:#1864ab;color:#fff;box-shadow:0 3px 12px #0004;cursor:pointer";
   btn.title="Натисни, а потім торкнись тексту — він прочитається вголос";setOn(false);
   btn.onclick=function(e){e.stopPropagation();if(speechSynthesis.speaking){speechSynthesis.cancel()}
     if(!voice&&!btn._warned){btn._warned=1;try{alert("На цьому пристрої може не бути українського голосу. Якщо читання звучить дивно — попроси вчителя ввімкнути український голос у налаштуваннях системи.")}catch(x){}}

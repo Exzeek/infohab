@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Мій перший ПК — симулятор робочого столу й браузера для уроку інформатики 2–5 клас</title>
+<meta name="description" content="Безпечний віртуальний комп'ютер у браузері: робочий стіл, вікна (згорнути, розгорнути, закрити), меню Пуск, налаштування, Блокнот і браузер з вкладками, пошуком, закладками, історією та розпізнаванням небезпечних сайтів. 2–5 клас.">
+<link rel="canonical" href="https://urokinfo.com.ua/seredovyshcha/pk/"><link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta property="og:title" content="Мій перший ПК — робочий стіл і браузер"><meta property="og:locale" content="uk_UA">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;800&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../kit.css">
+<style>
+:root{--acc:#1c7ed6}@media (prefers-color-scheme:dark){:root{--acc:#74c0fc}}
+.pc{position:relative;height:min(78vh,720px);min-height:520px;margin:10px;border-radius:14px;overflow:hidden;box-shadow:0 4px 18px #0003;font-family:Nunito,system-ui,sans-serif;--fs:1}
+.pc.dark{--w:#1f232b;--wi:#eef0f5;--wl:#343a46}.pc{--w:#ffffff;--wi:#1b1e28;--wl:#dee2e6}
+.desk{position:absolute;inset:0 0 48px 0;padding:10px;display:grid;grid-auto-flow:column;grid-template-rows:repeat(auto-fill,92px);grid-auto-columns:92px;gap:6px;align-content:start}
+.ic{display:grid;justify-items:center;gap:2px;padding:6px 2px;border-radius:10px;border:2px solid transparent;color:#fff;text-shadow:0 1px 3px #000a;font-weight:800;font-size:calc(13px*var(--fs));cursor:pointer;background:none;text-align:center}
+.ic span{font-size:38px;line-height:1}.ic.sel{background:#ffffff40;border-color:#ffffff90}
+.tbar{position:absolute;left:0;right:0;bottom:0;height:48px;background:#1b1e28e6;color:#fff;display:flex;align-items:center;gap:6px;padding:0 8px;backdrop-filter:blur(6px);z-index:900}
+.tbar button{background:none;border:0;color:#fff;font:800 14px Nunito,sans-serif;border-radius:8px;padding:6px 10px;cursor:pointer;display:flex;gap:6px;align-items:center}
+.tbar button:hover,.tbar button.on{background:#ffffff26}.tbar .start{font-size:22px}.tbar .sp{flex:1}.tbar .clk{font:700 13px "JetBrains Mono",monospace;text-align:right;line-height:1.1}
+.tbar .tw{max-width:150px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;border-bottom:3px solid transparent}.tbar .tw.act{border-bottom-color:#74c0fc}
+.menu{position:absolute;left:8px;bottom:54px;width:270px;background:var(--w);color:var(--wi);border-radius:14px;box-shadow:0 10px 30px #0006;padding:10px;z-index:950;display:none}.menu.on{display:block}
+.menu button{display:flex;width:100%;gap:10px;align-items:center;border:0;background:none;color:inherit;font:700 calc(15px*var(--fs)) Nunito,sans-serif;padding:8px;border-radius:8px;cursor:pointer;text-align:left}.menu button:hover{background:#1c7ed622}
+.menu hr{border:0;border-top:1px solid var(--wl);margin:6px 0}
+.win{position:absolute;background:var(--w);color:var(--wi);border-radius:10px;box-shadow:0 10px 30px #0005;display:flex;flex-direction:column;overflow:hidden;min-width:260px;font-size:calc(15px*var(--fs))}
+.win.max{left:0!important;top:0!important;width:100%!important;height:calc(100% - 48px)!important;border-radius:0}
+.win.min{display:none}
+.wt{display:flex;align-items:center;gap:6px;padding:6px 6px 6px 12px;background:var(--wl);cursor:move;user-select:none;font-weight:800;touch-action:none}
+.wt span{flex:1}.wt button{width:34px;height:28px;border:0;border-radius:6px;background:transparent;color:inherit;font:800 15px Nunito,sans-serif;cursor:pointer}.wt button:hover{background:#0002}.wt .x:hover{background:#e03131;color:#fff}
+.wb{flex:1;overflow:auto;padding:10px;min-height:0}
+.set{display:grid;gap:12px}.set h4{margin:0}.set .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.set button.wp{width:70px;height:46px;border-radius:8px;border:3px solid transparent;cursor:pointer}.set button.wp.on{border-color:var(--acc)}
+.set .opt button{border:1px solid var(--wl);background:transparent;color:inherit;border-radius:8px;padding:6px 10px;font:700 14px Nunito,sans-serif;cursor:pointer}.set .opt button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.np{display:flex;flex-direction:column;height:100%;gap:6px}.np textarea{flex:1;font:calc(16px*var(--fs)) "JetBrains Mono",monospace;border:1px solid var(--wl);border-radius:6px;padding:8px;background:transparent;color:inherit;resize:none}
+.np .bar{display:flex;gap:6px}.np button,.br button{border:1px solid var(--wl);background:transparent;color:inherit;border-radius:7px;padding:5px 9px;font:700 13px Nunito,sans-serif;cursor:pointer}
+/* браузер */
+.br{display:flex;flex-direction:column;height:100%;margin:-10px}
+.tabs{display:flex;gap:2px;background:var(--wl);padding:4px 4px 0;overflow-x:auto}
+.tab{display:flex;align-items:center;gap:6px;max-width:170px;padding:6px 8px;border-radius:8px 8px 0 0;background:#0001;cursor:pointer;font-size:13px;font-weight:700;white-space:nowrap}
+.tab.on{background:var(--w)}.tab span{overflow:hidden;text-overflow:ellipsis}.tab b{font-weight:800;padding:0 3px;border-radius:4px}.tab b:hover{background:#0002}
+.tabs .nt{border:0;background:none;color:inherit;font:800 18px Nunito;cursor:pointer;padding:0 8px}
+.nav{display:flex;gap:4px;align-items:center;padding:6px;border-bottom:1px solid var(--wl)}
+.nav input{flex:1;font:14px Nunito,sans-serif;padding:6px 10px;border-radius:18px;border:1px solid var(--wl);background:transparent;color:inherit;min-width:60px}
+.nav .lock{border:0;background:none;font-size:16px;cursor:pointer;padding:2px 4px}
+.bmk{display:flex;gap:6px;padding:4px 8px;border-bottom:1px solid var(--wl);font-size:12.5px;min-height:26px;flex-wrap:wrap}.bmk a{cursor:pointer;color:inherit;text-decoration:none;background:#0001;border-radius:6px;padding:2px 8px}
+.pg{flex:1;overflow:auto;padding:14px 18px;background:#fff;color:#1b1e28}
+.pg h1{font:800 24px Unbounded,Nunito,sans-serif;margin:0 0 8px}.pg a.l{color:#1c64d6;text-decoration:underline;cursor:pointer}
+.pg .res{margin:10px 0}.pg .res small{color:#2b8a3e;display:block}.pg .warn{background:#fff5f5;border:2px solid #e03131;border-radius:12px;padding:12px;margin:10px 0}
+.pg .big{font-size:64px;text-align:center}.pg .srch{display:flex;gap:6px;margin:14px 0}.pg .srch input{flex:1;font:16px Nunito;padding:10px 14px;border-radius:24px;border:2px solid #74c0fc}
+.pg .srch button{border:0;background:#1c7ed6;color:#fff;border-radius:24px;padding:10px 18px;font:800 15px Nunito;cursor:pointer}
+.pg .btnr{border:0;border-radius:10px;padding:10px 16px;font:800 15px Nunito;cursor:pointer;color:#fff;background:#e03131}.pg .btng{background:#2f9e44}
+.pop{position:absolute;z-index:2000;background:var(--w);color:var(--wi);border:1px solid var(--wl);border-radius:12px;box-shadow:0 10px 30px #0005;padding:12px;max-width:300px;font-size:14px}
+.off{position:absolute;inset:0;background:#000;color:#fff;display:grid;place-items:center;z-index:3000;text-align:center;font:800 20px Nunito}
+.off button{margin-top:14px;border:0;border-radius:12px;padding:10px 16px;font:800 16px Nunito;cursor:pointer}
+.hist{font-size:14px}.hist div{padding:4px 0;border-bottom:1px solid #eee;cursor:pointer}
+</style><link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#5b3cc4"><link rel="apple-touch-icon" href="/site/apple-touch-icon.png"><script src="/site/app.js" defer></script></head><body>
+<main id="app"><div class="pc" id="pc"><div class="desk" id="desk"></div><div id="wins"></div><div class="menu" id="menu"></div><div class="tbar" id="tbar"></div></div></main>
+<script src="../kit.js"></script>
+<script>
+const $=s=>document.querySelector(s),esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c]);
+const WPS={sky:"linear-gradient(160deg,#4dabf7,#1864ab)",meadow:"linear-gradient(160deg,#8ce99a,#2b8a3e)",sunset:"linear-gradient(160deg,#ffa94d,#c2255c)",space:"radial-gradient(circle at 30% 30%,#5f3dc4,#100b2e)"};
+const APPS={notepad:["📝","Блокнот"],browser:["🌐","Браузер"],settings:["⚙️","Налаштування"],docs:["📁","Документи"],trash:["🗑️","Кошик"]};
+/* ---------- сайти «інтернету» ---------- */
+const SITES={
+ "shukaiko.ua":{t:"Шукайко",lock:1,page:()=>`<h1>🔎 Шукайко</h1><p>Дитячий пошуковик. Введіть, що шукаєте:</p><div class="srch"><input id="q" placeholder="Наприклад: дельфін"><button data-search>Знайти</button></div>`},
+ "shkola.ua":{t:"Школа №1",lock:1,page:()=>`<h1>🏫 Школа №1</h1><p>Розклад, новини, гуртки.</p><p>📢 У п'ятницю — ярмарок! Гурток робототехніки — щосереди.</p><p><a class="l" data-go="shkola.ua/gurtky">Гуртки школи →</a></p>`},
+ "shkola.ua/gurtky":{t:"Гуртки",lock:1,page:()=>`<h1>🤖 Гуртки</h1><p>Робототехніка (ср), Шахи (пн), Scratch (пт).</p>`},
+ "dytiacha-wiki.ua/delfin":{t:"Дельфін — Дитяча вікі",lock:1,page:()=>`<div class="big">🐬</div><h1>Дельфін</h1><p>Дельфіни — розумні морські ссавці. Вони дихають повітрям і спілкуються свистом.</p>`},
+ "dytiacha-wiki.ua/akula":{t:"Акула — Дитяча вікі",lock:1,page:()=>`<div class="big">🦈</div><h1>Акула</h1><p>Акули — риби. Вони живуть у морях понад 400 мільйонів років.</p>`},
+ "dytiacha-wiki.ua/kosmos":{t:"Планети — Дитяча вікі",lock:1,page:()=>`<div class="big">🪐</div><h1>Планети Сонячної системи</h1><p>Навколо Сонця обертаються 8 планет: Меркурій, Венера, Земля, Марс, Юпітер, Сатурн, Уран, Нептун.</p>`},
+ "kosmos-dlia-ditei.ua":{t:"Космос для дітей",lock:1,page:()=>`<div class="big">🚀</div><h1>Космос для дітей</h1><p>Відео й ігри про космос і космонавтів.</p>`},
+ "pohoda.ua":{t:"Погода",lock:1,page:()=>`<div class="big">⛅</div><h1>Погода у Львові</h1><p>Завтра +7°, хмарно з проясненнями.</p>`},
+ "vygrash-iphone.xyz":{t:"ВИ ВИГРАЛИ!!!",lock:0,bad:1,page:()=>`<h1 style="color:#e03131">🎁 ВІТАЄМО! ВИ ВИГРАЛИ ТЕЛЕФОН!!!</h1><p>Щоб забрати приз, введіть пароль від пошти й номер картки батьків!</p><p><input placeholder="пароль" style="font:16px Nunito;padding:8px"> <button class="btnr" data-trap>Забрати приз</button></p>
+  <div class="warn"><b>🛡 Підказка Дослідника:</b> тут немає замочка, дивна адреса й поспіх. Це шахраї! <br><br><button class="btnr btng" data-leave>Покинути сайт</button> <button class="btnr" data-report>⚠ Повідомити про небезпечний сайт</button></div>`},
+ "free-games-download.club":{t:"Безкоштовні ігри",lock:0,bad:1,page:()=>`<h1>🎮 СКАЧАЙ УСІ ІГРИ БЕЗКОШТОВНО</h1><p>Натисни «Скачати» — і отримай 1000 ігор!</p><button class="btnr" data-trap>⬇ Скачати</button><div class="warn"><b>🛡</b> Невідомий сайт без замочка просить щось завантажити. Так поширюються віруси.<br><br><button class="btnr btng" data-leave>Покинути сайт</button> <button class="btnr" data-report>⚠ Повідомити про небезпечний сайт</button></div>`}
+};
+const IDX=[["дельфін дельфіни море ссавці","dytiacha-wiki.ua/delfin","Дельфін — Дитяча вікі","Дельфіни — розумні морські ссавці…"],["акула море риба","dytiacha-wiki.ua/akula","Акула — Дитяча вікі","Акули — риби, що живуть у морях…"],
+ ["космос планети сонце","dytiacha-wiki.ua/kosmos","Планети Сонячної системи — Дитяча вікі","8 планет обертаються навколо Сонця…"],["космос ракета космонавти","kosmos-dlia-ditei.ua","Космос для дітей","Відео й ігри про космос…"],
+ ["телефон ігри приз виграш планети космос","vygrash-iphone.xyz","🎁 Ви виграли телефон! Терміново!","Тільки сьогодні! Заберіть приз…"],["ігри скачати безкоштовно дельфін","free-games-download.club","Скачати всі ігри безкоштовно","1000 ігор без реєстрації…"],
+ ["школа гуртки розклад","shkola.ua","Школа №1 — офіційний сайт","Розклад, новини, гуртки"],["погода львів","pohoda.ua","Погода у Львові","Завтра +7°…"]];
+let S,Z=10,dragW=null;
+function freshS(){return{wp:"sky",vol:70,lang:"УКР",fs:1,dark:false,wins:[],files:[],log:{},tabs:[],ctab:0,bm:[],hist:[],off:false}}
+const L=(k,v)=>{S.log[k]=v===undefined?(S.log[k]||0)+1:v;save()};
+function save(){KIT.store(S);KIT.refresh()}
+/* ---------- малювання ---------- */
+function draw(){const pc=$("#pc");pc.style.background=WPS[S.wp];pc.style.setProperty("--fs",S.fs);pc.classList.toggle("dark",S.dark);
+ $("#desk").innerHTML=Object.entries(APPS).map(([k,a])=>`<button class="ic" data-app="${k}"><span>${a[0]}</span>${a[1]}</button>`).join("");
+ $("#wins").innerHTML=S.wins.map(w=>`<div class="win${w.max?" max":""}${w.min?" min":""}" data-w="${w.id}" style="left:${w.x}px;top:${w.y}px;width:${w.w}px;height:${w.h}px;z-index:${w.z}"><div class="wt" data-drag="${w.id}"><span>${APPS[w.app][0]} ${APPS[w.app][1]}</span><button data-wmin="${w.id}" title="Згорнути">—</button><button data-wmax="${w.id}" title="${w.max?"Відновити":"Розгорнути"}">${w.max?"❐":"☐"}</button><button class="x" data-wx="${w.id}" title="Закрити">✕</button></div><div class="wb">${body(w)}</div></div>`).join("");
+ const top=Math.max(0,...S.wins.filter(w=>!w.min).map(w=>w.z));
+ const t=new Date(),cl=String(t.getHours()).padStart(2,"0")+":"+String(t.getMinutes()).padStart(2,"0");
+ $("#tbar").innerHTML=`<button class="start" data-start title="Пуск">🪟</button>${S.wins.map(w=>`<button class="tw${w.z===top&&!w.min?" act":""}" data-tw="${w.id}">${APPS[w.app][0]} ${APPS[w.app][1]}</button>`).join("")}<span class="sp"></span><button data-vol title="Гучність">${S.vol?S.vol<40?"🔉":"🔊":"🔇"} ${S.vol}%</button><button data-lang title="Мова клавіатури">${S.lang}</button><span class="clk">${cl}<br>${t.toLocaleDateString("uk-UA")}</span>`;
+ if(S.off){$("#wins").insertAdjacentHTML("beforeend",`<div class="off"><div>💤 Комп'ютер вимкнено<br><button data-on>🔘 Увімкнути</button></div></div>`)}
+ const br=$("#wins .br input.addr");if(br&&document.activeElement!==br){}}
+function body(w){if(w.app==="notepad")return`<div class="np"><div class="bar"><button data-npsave="${w.id}">💾 Зберегти як…</button><button data-npnew="${w.id}">📄 Новий</button></div><textarea data-np="${w.id}" placeholder="Пишіть тут…">${esc(w.text||"")}</textarea></div>`;
+ if(w.app==="settings")return`<div class="set"><div><h4>🖼️ Фон робочого столу</h4><div class="row">${Object.keys(WPS).map(k=>`<button class="wp${S.wp===k?" on":""}" data-wp="${k}" style="background:${WPS[k]}" aria-label="${k}"></button>`).join("")}</div></div>
+  <div><h4>🔊 Гучність: <span id="vv">${S.vol}</span>%</h4><input type="range" min="0" max="100" step="5" value="${S.vol}" data-volr style="width:100%"></div>
+  <div class="opt"><h4>🔠 Розмір тексту</h4><div class="row">${[[1,"100%"],[1.25,"125%"],[1.5,"150%"]].map(f=>`<button class="${S.fs===f[0]?"on":""}" data-fs="${f[0]}">${f[1]}</button>`).join("")}</div></div>
+  <div class="opt"><h4>🌗 Тема</h4><div class="row"><button class="${!S.dark?"on":""}" data-dark="0">☀️ Світла</button><button class="${S.dark?"on":""}" data-dark="1">🌙 Темна</button></div></div>
+  <div class="opt"><h4>⌨️ Мова клавіатури</h4><div class="row">${["УКР","ENG"].map(l=>`<button class="${S.lang===l?"on":""}" data-langs="${l}">${l}</button>`).join("")}</div></div></div>`;
+ if(w.app==="docs")return S.files.length?`<div>${S.files.map(f=>`<div style="padding:6px 0">📄 <b>${esc(f.n)}.txt</b> <small style="opacity:.7">${f.text.length} символів</small></div>`).join("")}</div>`:"<p>Тут з'являться збережені файли.</p>";
+ if(w.app==="trash")return"<p>Кошик порожній.</p>";
+ if(w.app==="browser")return browser(w);return""}
+/* ---------- браузер ---------- */
+function curTab(){return S.tabs[S.ctab]}
+function browser(w){if(!S.tabs.length){S.tabs=[{h:["shukaiko.ua"],i:0}];S.ctab=0}const t=curTab(),u=t.h[t.i],site=SITES[u.split("?")[0]];
+ const prot=site&&site.lock?"https://":"http://";const isBm=S.bm.includes(u);
+ let pg="";if(u==="history")pg=`<h1>🕘 Історія</h1><div class="hist">${S.hist.slice().reverse().map(h=>`<div data-go="${esc(h)}">${esc((SITES[h.split("?")[0]]||{t:h}).t)} <small style="color:#868e96">${esc(h.startsWith("shukaiko.ua?q=")?"пошук: "+decodeURIComponent(h.split("q=")[1]):h)}</small></div>`).join("")||"Порожньо"}</div>`;
+ else if(u.startsWith("shukaiko.ua?q=")){const q=decodeURIComponent(u.split("q=")[1]).toLowerCase().trim(),W=q.split(/\s+/);const R=IDX.filter(r=>W.every(x=>r[0].includes(x)||r[2].toLowerCase().includes(x)));
+   pg=`<h1>🔎 Шукайко</h1><div class="srch"><input id="q" value="${esc(q)}"><button data-search>Знайти</button></div><p>Знайдено: ${R.length}</p>${R.map(r=>`<div class="res"><a class="l" data-go="${r[1]}">${esc(r[2])}</a><small>${SITES[r[1]].lock?"🔒 https://":"⚠ http://"}${r[1]}</small>${esc(r[3])}</div>`).join("")||"<p>Нічого не знайдено. Спробуйте інше слово.</p>"}`}
+ else if(site)pg=site.page();else pg=`<h1>😕 Сайт не знайдено</h1><p>Перевірте адресу «${esc(u)}». Можливо, у ній помилка.</p>`;
+ return`<div class="br"><div class="tabs">${S.tabs.map((x,i)=>{const uu=x.h[x.i],s=SITES[uu.split("?")[0]];return`<div class="tab${i===S.ctab?" on":""}" data-tab="${i}"><span>${esc(uu==="history"?"Історія":uu.startsWith("shukaiko.ua?q")?"Пошук":s?s.t:uu)}</span><b data-tclose="${i}" title="Закрити вкладку">✕</b></div>`}).join("")}<button class="nt" data-tnew title="Нова вкладка">＋</button></div>
+ <div class="nav"><button data-back title="Назад" ${t.i?"":"disabled"}>←</button><button data-fwd title="Вперед" ${t.i<t.h.length-1?"":"disabled"}>→</button><button data-reload title="Оновити">⟳</button><button data-home title="Домашня сторінка">🏠</button>
+ <button class="lock" data-lock title="Інформація про сайт">${u==="history"?"🕘":site&&!site.lock?"⚠️":"🔒"}</button><input class="addr" data-addr value="${esc(u==="history"?"history":prot+u)}" aria-label="Адресний рядок"><button data-bm title="Додати в закладки">${isBm?"⭐":"☆"}</button><button data-histo title="Історія">🕘</button></div>
+ <div class="bmk">${S.bm.map(b=>`<a data-go="${esc(b)}">⭐ ${esc((SITES[b.split("?")[0]]||{t:b}).t)}</a>`).join("")||'<span style="opacity:.6">Панель закладок порожня</span>'}</div><div class="pg">${pg}</div></div>`}
+function go(u,newTab){u=u.trim().replace(/^https?:\/\//,"").replace(/\/$/,"");if(!u)return;if(!SITES[u.split("?")[0]]&&!u.startsWith("shukaiko.ua?q=")&&u!=="history"&&!/\./.test(u)){u="shukaiko.ua?q="+encodeURIComponent(u)}
+ if(newTab){S.tabs.push({h:[u],i:0});S.ctab=S.tabs.length-1;L("newtab")}else{const t=curTab();t.h=t.h.slice(0,t.i+1);t.h.push(u);t.i++}
+ if(u!=="history"){S.hist.push(u);L("visit:"+u.split("?")[0],1)}if(u.startsWith("shukaiko.ua?q="))L("q:"+decodeURIComponent(u.split("q=")[1]).toLowerCase().trim(),1);if(SITES[u]&&SITES[u].bad)L("badvisit");draw()}
+/* ---------- вікна ---------- */
+function open(app){if(S.off)return;KIT.touch();const ex=S.wins.find(w=>w.app===app);if(ex){ex.min=false;ex.z=++Z;L("focus");draw();return}
+ const n=S.wins.length,pc=$("#pc").getBoundingClientRect();const w={id:"w"+Date.now()%1e6,app,x:40+n*30,y:20+n*24,w:Math.min(pc.width-60,app==="browser"?640:440),h:Math.min(pc.height-110,app==="browser"?440:340),z:++Z,min:false,max:false,text:""};
+ S.wins.push(w);L("open:"+app,1);if(S.wins.filter(x=>!x.min).length>=2)L("two",1);$("#menu").classList.remove("on");draw()}
+const W=id=>S.wins.find(w=>w.id===id);
+$("#pc").addEventListener("click",e=>{const t=e.target,b=t.closest("[data-app],[data-wmin],[data-wmax],[data-wx],[data-tw],[data-start],[data-menu],[data-wp],[data-fs],[data-dark],[data-langs],[data-lang],[data-vol],[data-on],[data-npsave],[data-npnew],[data-tab],[data-tclose],[data-tnew],[data-back],[data-fwd],[data-reload],[data-home],[data-lock],[data-bm],[data-histo],[data-go],[data-search],[data-leave],[data-report],[data-trap]");
+ if(!t.closest("#menu")&&!t.closest("[data-start]"))$("#menu").classList.remove("on");
+ const pop=document.querySelector(".pop");if(pop&&!t.closest(".pop"))pop.remove();
+ if(!b){if(t.closest(".desk")&&!t.closest(".ic"))document.querySelectorAll(".ic.sel").forEach(x=>x.classList.remove("sel"));return}KIT.touch();const d=b.dataset;
+ if(d.app){document.querySelectorAll(".ic.sel").forEach(x=>x.classList.remove("sel"));b.classList.add("sel");if(e.detail>=2||matchMedia("(pointer:coarse)").matches&&b._t&&Date.now()-b._t<500){L("dbl");open(d.app)}b._t=Date.now();return}
+ if(d.wmin){W(d.wmin).min=true;L("min");draw()}if(d.wmax){const w=W(d.wmax);w.max=!w.max;w.z=++Z;if(w.max)L("max");draw()}if(d.wx){S.wins=S.wins.filter(w=>w.id!==d.wx);L("close");draw()}
+ if(d.tw){const w=W(d.tw);const top=Math.max(...S.wins.filter(x=>!x.min).map(x=>x.z),0);if(!w.min&&w.z===top){w.min=true}else{w.min=false;w.z=++Z;L("switch")}draw()}
+ if(d.start!=null){const m=$("#menu");m.innerHTML=`<b style="padding:6px 8px;display:block">Пуск</b>${Object.entries(APPS).map(([k,a])=>`<button data-menu="${k}">${a[0]} ${a[1]}</button>`).join("")}<hr><button data-menu="off">⏻ Завершення роботи</button>`;m.classList.toggle("on");L("startmenu");return}
+ if(d.menu){if(d.menu==="off"){if(confirm("Завершити роботу комп'ютера?")){S.off=true;S.wins=[];L("shutdown",1);$("#menu").classList.remove("on");draw()}return}L("startopen:"+d.menu,1);open(d.menu)}
+ if(d.on!=null){S.off=false;draw()}
+ if(d.wp){S.wp=d.wp;L("wp",1);draw()}if(d.fs){S.fs=+d.fs;draw();save()}if(d.dark){S.dark=d.dark==="1";draw();save()}if(d.langs){S.lang=d.langs;draw();save()}
+ if(d.lang!=null){S.lang=S.lang==="УКР"?"ENG":"УКР";L("langswitch");draw()}
+ if(d.vol!=null){const p=document.createElement("div");p.className="pop";p.style.right="60px";p.style.bottom="56px";p.innerHTML=`<b>🔊 Гучність ${S.vol}%</b><br><input type="range" min="0" max="100" step="5" value="${S.vol}" data-volr style="width:220px">`;$("#pc").append(p);return}
+ if(d.npsave){const w=W(d.npsave),n=(prompt("Назва файлу:","нотатки")||"").trim();if(!n)return;const f=S.files.find(x=>x.n===n);if(f)f.text=w.text;else S.files.push({n,text:w.text||""});KIT.toast("Файл «"+n+".txt» збережено в Документи");save();draw()}
+ if(d.npnew){W(d.npnew).text="";draw();save()}
+ if(d.tab){S.ctab=+d.tab;draw();save()}if(d.tclose){S.tabs.splice(+d.tclose,1);L("tabclose");if(!S.tabs.length)S.tabs=[{h:["shukaiko.ua"],i:0}];S.ctab=Math.min(S.ctab,S.tabs.length-1);draw();e.stopPropagation()}
+ if(d.tnew!=null)go("shukaiko.ua",true);if(d.back!=null){const t=curTab();if(t.i){t.i--;L("back");draw()}}if(d.fwd!=null){const t=curTab();if(t.i<t.h.length-1){t.i++;draw()}}
+ if(d.reload!=null){draw()}if(d.home!=null)go("shukaiko.ua");if(d.histo!=null){go("history");L("history",1)}
+ if(d.bm!=null){const u=curTab().h[curTab().i];if(u==="history")return;S.bm.includes(u)?S.bm=S.bm.filter(x=>x!==u):(S.bm.push(u),L("bookmark"));draw()}
+ if(d.lock!=null){const u=curTab().h[curTab().i],s=SITES[u.split("?")[0]];const p=document.createElement("div");p.className="pop";const r=b.getBoundingClientRect(),pr=$("#pc").getBoundingClientRect();p.style.left=(r.left-pr.left)+"px";p.style.top=(r.bottom-pr.top+6)+"px";
+  p.innerHTML=s&&s.lock?`<b>🔒 З'єднання захищене</b><p>Сайт <b>${esc(u.split("?")[0])}</b> використовує https: дані передаються зашифровано.</p>`:`<b>⚠️ З'єднання НЕ захищене</b><p>Немає замочка (http). Не вводьте тут паролі й особисті дані!</p>`;$("#pc").append(p);L(s&&s.lock?"lockok":"lockbad",1);e.stopPropagation();return}
+ if(d.go){go(d.go,e.ctrlKey||e.metaKey||e.button===1)}
+ if(d.search!=null){const q=$("#q").value.trim();if(q)go("shukaiko.ua?q="+encodeURIComponent(q))}
+ if(d.leave!=null){L("leftbad",1);go("shukaiko.ua")}if(d.report!=null){L("reported",1);KIT.toast("Дякуємо! Сайт позначено як небезпечний.");go("shukaiko.ua")}if(d.trap!=null){L("trapped");KIT.toast("😱 Стоп! Це пастка шахраїв. Нічого не вводь і покинь сайт.")}});
+$("#pc").addEventListener("auxclick",e=>{const g=e.target.closest("[data-go]");if(g&&e.button===1){e.preventDefault();go(g.dataset.go,true)}});
+$("#pc").addEventListener("contextmenu",e=>{const g=e.target.closest("[data-go]");if(!g)return;e.preventDefault();const p=document.createElement("div");p.className="pop";const pr=$("#pc").getBoundingClientRect();p.style.left=(e.clientX-pr.left)+"px";p.style.top=(e.clientY-pr.top)+"px";p.innerHTML=`<button class="np" style="border:0;background:none;color:inherit;font:700 14px Nunito;cursor:pointer" data-nt="${esc(g.dataset.go)}">Відкрити в новій вкладці</button>`;$("#pc").append(p);p.querySelector("button").onclick=ev=>{ev.stopPropagation();p.remove();go(g.dataset.go,true)}});
+$("#pc").addEventListener("input",e=>{const t=e.target;if(t.dataset.np){W(t.dataset.np).text=t.value;clearTimeout(window._s);window._s=setTimeout(save,300)}
+ if(t.dataset.volr!=null){S.vol=+t.value;const v=$("#vv");if(v)v.textContent=S.vol;const vb=$("[data-vol]");if(vb)vb.textContent=(S.vol?S.vol<40?"🔉":"🔊":"🔇")+" "+S.vol+"%";L("vol",1)}});
+$("#pc").addEventListener("keydown",e=>{if(e.key!=="Enter")return;if(e.target.dataset.addr!=null){L("typed",1);go(e.target.value)}if(e.target.id==="q"){const q=e.target.value.trim();if(q)go("shukaiko.ua?q="+encodeURIComponent(q))}});
+$("#pc").addEventListener("dblclick",e=>{const i=e.target.closest("[data-app]");if(i){L("dbl");open(i.dataset.app)}});
+$("#pc").addEventListener("pointerdown",e=>{const wv=e.target.closest(".win");if(wv){const w=W(wv.dataset.w);if(w&&w.z!==Z){w.z=++Z;wv.style.zIndex=w.z;if(S.wins.length>1)L("switch")}}
+ const h=e.target.closest("[data-drag]");if(!h||e.target.closest("button"))return;const w=W(h.dataset.drag);if(w.max)return;const sx=e.clientX,sy=e.clientY,ox=w.x,oy=w.y,el=h.parentNode;
+ const mv=m=>{w.x=Math.max(-200,ox+m.clientX-sx);w.y=Math.max(0,oy+m.clientY-sy);el.style.left=w.x+"px";el.style.top=w.y+"px"};const up=()=>{removeEventListener("pointermove",mv);removeEventListener("pointerup",up);L("drag")};addEventListener("pointermove",mv);addEventListener("pointerup",up)});
+setInterval(()=>{const c=$(".clk");if(c){const t=new Date();c.innerHTML=String(t.getHours()).padStart(2,"0")+":"+String(t.getMinutes()).padStart(2,"0")+"<br>"+t.toLocaleDateString("uk-UA")}},20000);
+const G=k=>S.log[k];
+const SETS={
+ k2:{name:"2–3 кл. Вікна й меню Пуск",cls:2,norm:8,story:"Дослідик сів за новий комп'ютер. Навчи його працювати з вікнами!",tasks:[
+  {t:"Відкрий <b>Блокнот</b> подвійним клацанням по значку 📝.",hint:"Клац-клац швидко",ok:()=>G("open:notepad")&&G("dbl")},
+  {t:"<b>Згорни</b> вікно кнопкою — .",ok:()=>G("min")},
+  {t:"Поверни вікно з панелі задач і <b>розгорни</b> на весь екран кнопкою ☐.",ok:()=>G("max")},
+  {t:"<b>Закрий</b> вікно хрестиком ✕.",ok:()=>G("close")},
+  {t:"Відкрий <b>Налаштування</b> через кнопку <b>Пуск</b> 🪟.",ok:()=>G("startopen:settings")},
+  {t:"<b>Заверши роботу</b> комп'ютера через Пуск.",ok:()=>G("shutdown")}]},
+ k5:{name:"5 кл. ОС і налаштування",cls:5,norm:10,story:"Налаштуй комп'ютер служби ЦифроДоп під себе й збережи нотатку.",tasks:[
+  {t:"Зміни <b>фон робочого столу</b>.",ok:()=>S.wp!=="sky"},
+  {t:"Встанови <b>гучність</b> від 30 до 50%.",ok:()=>S.vol>=30&&S.vol<=50},
+  {t:"Збільш <b>розмір тексту</b> до 125%.",ok:()=>S.fs===1.25},
+  {t:"Увімкни <b>темну тему</b>.",ok:()=>S.dark},
+  {t:"Перемкни <b>мову клавіатури</b> на ENG на панелі задач.",ok:()=>S.lang==="ENG"},
+  {t:"У Блокноті напиши щонайменше 10 символів і <b>збережи файл «нотатки»</b>.",ok:()=>S.files.some(f=>f.n.toLowerCase()==="нотатки"&&f.text.trim().length>=10)},
+  {t:"Відкрий <b>2 вікна</b> одночасно й <b>перемкнися</b> між ними.",ok:()=>G("two")&&G("switch")}]},
+ b3:{name:"3 кл. Браузер: Інтернет-місто",cls:3,norm:10,story:"Тимко вирушає в Інтернет-місто. Покажи йому, як ходити сайтами.",tasks:[
+  {t:"Відкрий <b>Браузер</b> 🌐.",ok:()=>G("open:browser")},
+  {t:"Введи в адресному рядку <b>shkola.ua</b> і натисни Enter.",ok:()=>G("typed")&&G("visit:shkola.ua")},
+  {t:"Знайди в Шукайку слово <b>дельфін</b>.",ok:()=>Object.keys(S.log).some(k=>k.startsWith("q:")&&k.includes("дельфін"))},
+  {t:"Відкрий сторінку <b>про дельфіна</b> з дитячої вікі.",ok:()=>G("visit:dytiacha-wiki.ua/delfin")},
+  {t:"Повернися <b>назад</b> кнопкою ←.",ok:()=>G("back")},
+  {t:"Додай сторінку в <b>закладки</b> ☆.",ok:()=>S.bm.length>=1}]},
+ b5:{name:"5 кл. Інтернет-серфінг і безпека",cls:5,norm:12,story:"Досліди, як працює браузер, і навчися помічати небезпечні сайти.",tasks:[
+  {t:"Відкрий щонайменше <b>2 вкладки</b>.",ok:()=>S.tabs.length>=2||G("newtab")},
+  {t:"Знайди <b>«космос планети»</b> (два слова) і відкрий статтю про планети.",ok:()=>G("visit:dytiacha-wiki.ua/kosmos")},
+  {t:"Клацни <b>замочок 🔒</b> біля адреси й дізнайся, чи захищене з'єднання.",ok:()=>G("lockok")},
+  {t:"Серед результатів є <b>сайт шахраїв</b>. Знайди його й натисни «Покинути сайт» або «Повідомити».",hint:"Немає замочка, дивна адреса, «терміново»",ok:()=>G("leftbad")||G("reported")},
+  {t:"Переглянь <b>Історію</b> 🕘.",ok:()=>G("history")},
+  {t:"<b>Закрий</b> зайву вкладку ✕.",ok:()=>G("tabclose")}]}
+};
+KIT.start({id:"pk",title:"Мій перший ПК",sub:"робочий стіл і браузер",cls:2,sets:SETS,onSet(k,fresh){const d=!fresh&&KIT.load(null);S=d||freshS();if(!S.tabs)S.tabs=[];Z=Math.max(10,...S.wins.map(w=>w.z));
+ if(!d&&(k==="b3"||k==="b5")){}draw();if(!d)save()}});
+</script>
+</body></html>

@@ -2,15 +2,15 @@
 <!--seo-->
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#5b3cc4"><link rel="apple-touch-icon" href="/site/apple-touch-icon.png"><script src="/site/app.js" defer></script>
-<meta name="description" content="Гра на урок з інформатики, 2 клас, розділ «Карта року: ігри на великий екран». Острови 1–16 (нові: 13 «Дії з об&#x27;єктами», 14 «Середовища об&#x27;єктів», 15…">
+<meta name="description" content="Гра на урок з інформатики, 2 клас, розділ «Карта року: ігри на великий екран». Острови 1–25 (нові: 17–25 — розділ «Малюнки й моделі»: графічний редактор,…">
 <link rel="canonical" href="https://urokinfo.com.ua/a/N8nWk6s9qJxtMWec8NqHsV/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Інтерактивні уроки інформатики">
 <meta property="og:locale" content="uk_UA">
 <meta property="og:title" content="Карта року з Дослідиком — інформатика 2 клас, гра на урок">
-<meta property="og:description" content="Гра на урок з інформатики, 2 клас, розділ «Карта року: ігри на великий екран». Острови 1–16 (нові: 13 «Дії з об&#x27;єктами», 14 «Середовища об&#x27;єктів», 15…">
+<meta property="og:description" content="Гра на урок з інформатики, 2 клас, розділ «Карта року: ігри на великий екран». Острови 1–25 (нові: 17–25 — розділ «Малюнки й моделі»: графічний редактор,…">
 <meta property="og:url" content="https://urokinfo.com.ua/a/N8nWk6s9qJxtMWec8NqHsV/">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "LearningResource", "name": "Карта року з Дослідиком", "description": "Гра на урок з інформатики, 2 клас, розділ «Карта року: ігри на великий екран». Острови 1–16 (нові: 13 «Дії з об'єктами», 14 «Середовища об'єктів», 15…", "url": "https://urokinfo.com.ua/a/N8nWk6s9qJxtMWec8NqHsV/", "inLanguage": "uk", "isAccessibleForFree": true, "educationalLevel": ["2 клас"], "about": "Інформатика", "learningResourceType": "інтерактивний урок", "publisher": {"@type": "Organization", "name": "Інтерактивні уроки інформатики", "url": "https://urokinfo.com.ua/"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "LearningResource", "name": "Карта року з Дослідиком", "description": "Гра на урок з інформатики, 2 клас, розділ «Карта року: ігри на великий екран». Острови 1–25 (нові: 17–25 — розділ «Малюнки й моделі»: графічний редактор,…", "url": "https://urokinfo.com.ua/a/N8nWk6s9qJxtMWec8NqHsV/", "inLanguage": "uk", "isAccessibleForFree": true, "educationalLevel": ["2 клас"], "about": "Інформатика", "learningResourceType": "інтерактивний урок", "publisher": {"@type": "Organization", "name": "Інтерактивні уроки інформатики", "url": "https://urokinfo.com.ua/"}}</script>
 <script>(function(){var t="Карта року з Дослідиком — інформатика 2 клас, гра на урок";addEventListener("load",function(){setTimeout(function(){document.title=t},300)});try{var u=location.pathname+location.search,h=JSON.parse(localStorage.getItem("ui-hist")||"[]").filter(function(x){return x.u!==u});h.unshift({u:u,t:t,ts:Date.now()});localStorage.setItem("ui-hist",JSON.stringify(h.slice(0,40)))}catch(e){}})();</script>
 <!--/seo-->
 </head><body>
@@ -77,15 +77,15 @@ main{position:absolute;top:3.2rem;left:0;right:0;bottom:0;padding:.6rem 1rem;dis
 </style>
 </head>
 <body>
-<header><span class="emo" style="font-size:1.6rem">🤖</span><h1>2 клас · Карта року з Дослідиком</h1><div id="yb" title="Скільки островів пройдено за рік"><span class="bi"><i id="ybi"></i></span><b id="ybp">0 / 34</b></div></header>
+<header><span class="emo" style="font-size:1.6rem">🤖</span><h1>2 клас · Карта року з Дослідиком</h1><button id="mFs" type="button" title="Повний екран" aria-label="Повний екран" onclick="document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen().catch(function(){})" style="background:#2b2100;color:#fff;border-radius:999px;padding:.3rem .7rem;font-weight:900">⛶</button><div id="yb" title="Скільки островів пройдено за рік"><span class="bi"><i id="ybi"></i></span><b id="ybp">0 / 34</b></div></header>
 <main>
   <div class="sea" id="sea"></div>
   <div class="card" id="card"></div>
 </main>
 <div id="bot"></div>
 <script>
-const LESSONS={"1":"t01.html","2":"t02.html","3":"t03.html","4":"t04.html","5":"t05.html","6":"t06.html","7":"t07.html","8":"t08.html","9":"t09.html","10":"t10.html","11":"t11.html","12":"t12.html","13":"t13.html","14":"t14.html","15":"t15.html","16":"t16.html"};
-const STAGES={"1":3,"2":3,"3":3,"4":3,"5":3,"6":3,"7":3,"8":3,"9":3,"10":3,"11":4,"12":4,"13":4,"14":4,"15":4,"16":4};
+const LESSONS={"1":"t01.html","2":"t02.html","3":"t03.html","4":"t04.html","5":"t05.html","6":"t06.html","7":"t07.html","8":"t08.html","9":"t09.html","10":"t10.html","11":"t11.html","12":"t12.html","13":"t13.html","14":"t14.html","15":"t15.html","16":"t16.html","17":"t17.html","18":"t18.html","19":"t19.html","20":"t20.html","21":"t21.html","22":"t22.html","23":"t23.html","24":"t24.html","25":"t25.html"};
+const STAGES={"1":3,"2":3,"3":3,"4":3,"5":3,"6":3,"7":3,"8":3,"9":3,"10":3,"11":4,"12":4,"13":4,"14":4,"15":4,"16":4,"17":4,"18":4,"19":4,"20":4,"21":4,"22":4,"23":4,"24":4,"25":4};
 const A=[
  {n:"Інформація",e:"💡",t:["Як я можу досліджувати світ навколо себе?","Як я сприймаю інформацію?","Якою буває інформація?","Як я можу перевірити правдивість інформації?","Чи правильно я обмінююсь інформацією?"],i:["🔍","👂","🖼️","✅","💬"]},
  {n:"Пристрої",e:"💻",t:["Якими інструментами я вмію користуватися?","Як я можу захистити себе під час роботи з комп’ютером?","Які пристрої я використовую для роботи з відео й зображеннями?","Які пристрої будуть корисними для роботи зі звуком?","Яким буває папір і пристрої для роботи з ним?","Як комп’ютер може допомогти під час обчислень?"],i:["🛠️","🛡️","📷","🎧","🖨️","🧮"]},

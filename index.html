@@ -495,7 +495,8 @@ const TOPICS=[
  {k:8,r:5,t:"Т6",title:"Координація команди. Система контролю версій",story:"Епізод 32 · Реліз сайту ліги — спідран + повторення розділу (Git, Kanban)",res:[
    {kind:"Урок",label:"Розминка, 10 вправ, спідран розділу",url:A("A3ufM1tpL6uhWQmQ3Jhakb"),who:"s",priv:true}]},
  {k:5,r:5,t:"Т1",title:"Типи та формати зображень",story:"Епізод 25 · Біт і загадка пікселів — майстерня форматів",res:[
-   {kind:"Урок",label:"Розминка, 10 вправ, майстерня-конструктор",url:A("LtxAo5XY8QhYsTuRKtoox8"),who:"s",priv:true}]},
+   {kind:"Урок",label:"Розминка, 10 вправ, майстерня-конструктор",url:A("LtxAo5XY8QhYsTuRKtoox8"),who:"s",priv:true},
+   {kind:"Слайди",label:"Canva-презентація",url:"https://canva.link/r8h1q33lgtowmqn",who:"t"}]},
  {k:5,r:5,t:"Т2",title:"Створюємо плакат",story:"Епізод 26 · Біт і плакат для свята — служба підтримки",res:[
    {kind:"Урок",label:"Розминка, 10 вправ, заявки клієнтів",url:A("2YPspiwS7A9haMjirZyWQD"),who:"s",priv:true}]},
  {k:5,r:5,t:"Т3",title:"Інфографіка",story:"Епізод 27 · Біт і сейф інфографіки — квест-кімната",res:[
@@ -1219,7 +1220,7 @@ function noSl(t){ return needSl(t)&&!t.res.some(x=>x.kind==="Слайди"); }
 function cardHTML(t,c){
   const kindCls=r=>r.kind==="Архів"?" arch":r.who==="t"?" t":"";
   const lbl=t.sum?"Підсумок розділу":"";
-  return `<article class="card${t.sum?" sum":""}" id="t${TOPICS.indexOf(t)}" style="--c:var(${c.c})"><div class="code"><span>${esc(t.t)}</span>${lbl?`<small>${lbl}</small>`:""}</div><h3>${esc(t.title)}</h3>${t.story?`<p class="story">${esc(t.story)}</p>`:""}${st.mode==="t"&&noSl(t)?`<span class="nosl">⚠ без слайдів</span>`:""}<div class="res">`+
+  return `<article class="card${t.sum?" sum":""}" id="t${TOPICS.indexOf(t)}" style="--c:var(${c.c})"><div class="code"><span>${esc(t.t)}</span>${lbl?`<small>${lbl}</small>`:""}</div><h3>${esc(t.title)}</h3>${t.story?`<p class="story">${esc(t.story)}</p>`:""}<div class="res">`+
     visibleRes(t).map(r=>`<div class="r"><a class="go" href="${r.url}" target="_blank" rel="noopener"><span class="kind${kindCls(r)}">${r.kind}</span><span class="lbl">${esc(r.label)}${r.short&&!/^(a\/|https:\/\/exzeek)/.test(r.url)?`<small>tinyurl.com/${r.short}</small>`:""}${URLCODE[r.url]?`<span class="code">код ${URLCODE[r.url]}</span>`:""}</span></a>${st.mode==="t"?`<button class="copy" data-u="${r.url}">Копіювати</button>`:""}</div>`).join("")+
     `</div></article>`;
 }
@@ -1239,7 +1240,7 @@ function overview(){
     const cur=curSec(k), nTop=items.filter(t=>!t.sum).length;
     const name=k===12?"<b>Математика</b>":k===1?"<b>Читання</b> та інше":k===0?"<b>Для вчителя</b>":`<b>${k===10?"10–11":k}</b> клас`;
     const now=cur!=null?`<div class="now"><small>Зараз вивчаємо</small>Розділ ${cur} · ${esc(secName(k,cur))}</div>`:"";
-    const nNo=st.mode==="t"?items.filter(noSl).length:0;
+    const nNo=0;
     return `<article class="ovc" style="--c:var(${c.c})"><h3>${name}</h3><span class="ks">${esc(c.story)} · ${nTop} ${plural(nTop,"тема","теми","тем")}</span>${nNo?`<span class="nosl">⚠ без слайдів: ${nNo}</span>`:""}${now}<div class="btns">${cur!=null?`<button class="pri" data-go="${k}|${cur}">Поточний розділ →</button>`:""}<button data-go="${k}|">${cur!=null?"Усі розділи":"Відкрити →"}</button></div></article>`;
   }).join("");
   $("#list").innerHTML=`<section class="klass"><div class="ov">${tiles}</div></section>`;
@@ -1298,7 +1299,7 @@ function render(){
       let miss="";
       if(st.mode==="t"){
         const nNo=tops.filter(noSl).length;
-        miss=nNo?`<span class="miss">⚠ без слайдів: ${nNo}</span>`:"";
+        miss="";
       }
       const key=k+"|"+r;
       const numbered=typeof r==="number";
@@ -1331,7 +1332,7 @@ const CODES={"001":"/a/QTVdiBQeMhqoXe8x3bsbsE/","002":"/a/J8Pzh21iXq2B7Lp3qzQzRB
 i.addEventListener("input",()=>{i.value=i.value.replace(/\D/g,"").slice(0,5);m.textContent=""});
 f.addEventListener("submit",e=>{e.preventDefault();const c=i.value.trim();
 if(CODES[c]){location.href=CODES[c].replace(/^\//,"")}
-else if(/^\d{5}$/.test(c)){m.textContent="Коди з 5 цифр (живий урок) запрацюють згодом. Перевір код у вчителя."}
+else if(/^\d{5}$/.test(c)){location.href="klas/?c="+c}
 else m.textContent=c?"Такого коду немає. Перевір цифри або відкрий «Усі коди».":"Введи код з 3 або 4 цифр."});})();
 $("#tpQr").onclick=()=>{$("#qrov").hidden=false;$("#qrClose").focus()};$("#qrClose").onclick=()=>{$("#qrov").hidden=true};$("#qrov").onclick=e=>{if(e.target.id==="qrov")$("#qrov").hidden=true};addEventListener("keydown",e=>{if(e.key==="Escape")$("#qrov").hidden=true});
 $("#m-s").onclick=()=>setMode("s");

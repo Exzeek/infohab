@@ -10,6 +10,7 @@ try{eval(sc+";global.__T=TOPICS;global.__S=SECT;")}catch(e){console.error("ERR",
 fs.writeFileSync("/tmp/topics.json",JSON.stringify({T:global.__T,S:global.__S}));
 const out=[];for(const t of global.__T){for(const r of t.res||[]){out.push({k:t.k,r:t.r,t:t.t,title:t.title,kind:r.kind,label:r.label,url:r.url,who:r.who})}}
 fs.writeFileSync("/tmp/res.json",JSON.stringify({res:out,sect:global.__S}));'
+python3 /home/claude/infohab/tools/islands_x.py >/dev/null
 python3 /home/claude/infohab/tools/seo_meta.py >/dev/null
 python3 /home/claude/infohab/tools/seo_inject.py >/dev/null
 cp /home/claude/infohab/tools/data/codes.json /tmp/codes_prev.json

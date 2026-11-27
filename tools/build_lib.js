@@ -9,6 +9,9 @@ const CC={2:'#d98a00',3:'#1e8fd6',4:'#7a4fd8',5:'#c2255c',6:'#2f9e4f',7:'#364fc7
 const ORDER=[2,3,4,5,6,7,8,9,10,12,1,0];
 const TYPE=k=>/Середовище|Лабораторія|Тренажер|Інструмент/.test(k)?'env':/Гра|Квест|Пульт|Екран|Тренування/.test(k)?'game':/Проєкт|Практична|Творчий/.test(k)?'proj':/Слайди/.test(k)?'slides':/Урок|Картки|Тест|Читанка/.test(k)?'ex':'other';
 const TN={ex:['📘','Уроки й вправи'],game:['🎮','Ігри'],env:['🧪','Середовища'],proj:['🛠️','Проєкти й практичні'],slides:['🖥️','Презентації'],other:['📎','Матеріали']};
+const CTA={ex:'Почати урок →',game:'▶ Грати',env:'Відкрити середовище →',proj:'Почати проєкт →',slides:'Слайди →',other:'Відкрити →'};
+const FMT=lb=>{lb=String(lb);let m=lb.match(/^([^:]{3,40}):\s*розминка/i);if(m)return m[1].trim();m=lb.match(/^розминка,\s*\d+\s*вправ,\s*(.{3,40})$/i);return m?m[1].trim().replace(/^./,c=>c.toUpperCase()):''};
+const FI=f=>/Детектив/i.test(f)?'🕵️':/Квест/i.test(f)?'🗝️':/Симулятор|Кібер/i.test(f)?'🖥️':/Аркада|Спідран|на час/i.test(f)?'⏱️':/Рольова|тікет|Служба/i.test(f)?'🎧':/Майстерня|Конструктор/i.test(f)?'🧩':/Пісочниця|PRIMM|передбач/i.test(f)?'🔬':/Дослідн/i.test(f)?'🔎':/пар|водій/i.test(f)?'👥':'🎯';
 const secName=(k,r)=>{const s=(d.sect[k]||[]).find(x=>String(x[0])===String(r));if(!s)return '';return typeof s[0]==='number'?`Р${s[0]}. ${s[1]}`:s[1]};
 const items=d.res.filter(r=>r.kind!=='Архів'&&r.url);
 const fnv=s=>{let h=0x811c9dc5;for(const ch of Buffer.from(s,'utf8')){h^=ch;h=Math.imul(h,0x01000193)>>>0}return h.toString(36)};
@@ -38,12 +41,14 @@ for(const k of ORDER){
     const top=`<span class="top"><span class="kd">${TN[t][0]} ${esc(kd)}</span>${w==='t'?'<span class="tch">вчителю</span>':''}${L.length===1&&L[0].code?`<span class="kc">${L[0].code}</span>`:''}</span>`;
     const foot=sec||topic?`<small>${esc(topic)}${esc(sec)}</small>`:'';
     if(L.length===1){const x=L[0];
-      body+=`<a class="c" href="${esc(x.href)}"${x.ext?' target="_blank" rel="noopener"':''} data-t="${t}" data-w="${w}" data-q="${esc(q)}">${top}<b>${esc(tt)}</b><span class="lb">${esc(x.lb)}</span>${foot}</a>`;}
+      const f=t==='ex'?FMT(x.lb):'';const lbh=f?`<span class="fmt">${FI(f)} ${esc(f)}</span>`:`<span class="lb">${esc(x.lb)}</span>`;
+      body+=`<a class="c t-${t}" href="${esc(x.href)}"${x.ext?' target="_blank" rel="noopener"':''} data-t="${t}" data-w="${w}" data-q="${esc(q)}"><i class="wm" aria-hidden="true">${TN[t][0]}</i>${top}<b>${esc(tt)}</b>${lbh}${foot}<span class="cta">${CTA[t]}</span></a>`;}
     else{
-      body+=`<div class="c multi" data-t="${t}" data-w="${w}" data-q="${esc(q)}">${top}<b>${esc(tt)}</b><span class="sets">${L.map(x=>`<a href="${esc(x.href)}"${x.ext?' target="_blank" rel="noopener"':''}><span>${esc(kinds.length>1&&!x.lb.includes(x.kind)?x.kind+': '+x.lb:x.lb)}</span>${x.code?`<span class="kc">${x.code}</span>`:''}</a>`).join('')}</span>${foot}</div>`;}
+      body+=`<div class="c multi t-${t}" data-t="${t}" data-w="${w}" data-q="${esc(q)}"><i class="wm" aria-hidden="true">${TN[t][0]}</i>${top}<b>${esc(tt)}</b><span class="sets">${L.map(x=>`<a href="${esc(x.href)}"${x.ext?' target="_blank" rel="noopener"':''}><span>${esc(kinds.length>1&&!x.lb.includes(x.kind)?x.kind+': '+x.lb:x.lb)}</span>${x.code?`<span class="kc">${x.code}</span>`:''}</a>`).join('')}</span>${foot}</div>`;}
   }
   body+='</div></section>';
 }
+fs.writeFileSync('/home/claude/infohab/site/stats.json',JSON.stringify(cnt));
 const total=Object.values(kc).reduce((a,b)=>a+b,0);
 const kChips=`<button data-k="" aria-pressed="true">Усі класи</button>`+ORDER.filter(k=>kc[k]).map(k=>`<button data-k="${k}" aria-pressed="false" style="--cc:${CC[k]}">${CN[k]}</button>`).join('');
 const tChips=`<button data-t="" aria-pressed="true">Усе</button>`+Object.keys(TN).filter(t=>cnt[t]).map(t=>`<button data-t="${t}" aria-pressed="false">${TN[t][0]} ${TN[t][1]} <i>${cnt[t]}</i></button>`).join('');
@@ -79,6 +84,19 @@ section h2{font:800 20px Unbounded,sans-serif;color:var(--cc);margin:22px 0 10px
 .c .kc{font:700 12px ui-monospace,Menlo,monospace;padding:1px 7px;border-radius:7px;background:color-mix(in srgb,var(--cc) 14%,transparent);color:var(--cc)}
 .c .tch{padding:1px 7px;border-radius:7px;background:#ffb02033;color:inherit}
 .c b{font-size:15.5px;line-height:1.25}.c .sets{display:grid;gap:5px;margin:4px 0 2px}.c .sets a{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 9px;border:1px solid var(--line);border-radius:10px;color:var(--ink);text-decoration:none;font-size:14px;font-weight:700}.c .sets a:hover{border-color:var(--cc)}.c.multi:hover{box-shadow:none}.c .lb{font-size:14px;color:var(--mut)}.c small{margin-top:auto;font-size:12px;color:var(--mut)}
+.c{position:relative;overflow:hidden}.c>*{position:relative}.c .wm{position:absolute;right:-6px;bottom:-14px;font-style:normal;font-size:78px;line-height:1;opacity:.09;pointer-events:none;transform:rotate(-12deg)}
+.c .cta{font:800 13px Nunito,sans-serif;color:var(--tc,var(--cc));margin-top:4px}.c.multi .cta{display:none}
+.c .fmt{align-self:flex-start;font-size:13px;font-weight:800;padding:2px 9px;border-radius:999px;background:color-mix(in srgb,var(--cc) 12%,transparent);color:var(--cc)}
+.c.t-ex{border-top-width:4px}
+.c.t-game{--tc:#e8590c;border:0;border-top:0;background:linear-gradient(140deg,color-mix(in srgb,var(--tc) 16%,var(--s)),color-mix(in srgb,var(--cc) 14%,var(--s)));box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--tc) 35%,transparent)}
+.c.t-game .wm{opacity:.22;font-size:92px}.c.t-game .cta{align-self:flex-start;background:var(--tc);color:#fff;border-radius:999px;padding:4px 12px}
+.c.t-env{--tc:#2b8a3e;border:2px solid var(--tc);border-radius:12px;padding-top:30px;background:linear-gradient(var(--tc) 0 22px,var(--s) 22px)}
+.c.t-env::before{content:"● ● ●";position:absolute;top:3px;left:10px;font-size:10px;letter-spacing:2px;color:#ffffffd0}.c.t-env::after{content:"тренажер";position:absolute;top:3px;right:10px;font:800 10px ui-monospace,Menlo,monospace;color:#ffffffd0;letter-spacing:.08em}.c.t-env .kd{color:var(--tc)}
+.c.t-env .sets a{font-family:ui-monospace,Menlo,monospace;font-size:13px}
+.c.t-proj{--tc:#1971c2;border:2px dashed color-mix(in srgb,var(--tc) 55%,var(--line));border-top:2px dashed color-mix(in srgb,var(--tc) 55%,var(--line));background:repeating-linear-gradient(0deg,transparent 0 19px,color-mix(in srgb,var(--tc) 7%,transparent) 19px 20px),repeating-linear-gradient(90deg,transparent 0 19px,color-mix(in srgb,var(--tc) 7%,transparent) 19px 20px),var(--s)}
+.c.t-proj .kd::after{content:" · окрема оцінка";font-weight:700}.c.t-proj .kd{color:var(--tc)}
+.c.t-slides{min-height:auto;border-top-width:2px;background:color-mix(in srgb,var(--s) 70%,var(--bg))}.c.t-slides b{font-size:14.5px}.c.t-slides .wm{font-size:56px}
+@media (prefers-color-scheme:dark){.c .wm{opacity:.14}.c.t-env{--tc:#40c057}.c.t-env::before,.c.t-env::after{color:#0b1a10}}
 .hide{display:none!important}.empty{padding:30px;text-align:center;color:var(--mut)}
 </style></head><body>
 <div class="hd"><h1>Бібліотека інтерактивів</h1><p style="margin:0 0 6px"><a href="/konstruktor/" style="color:var(--acc);font-weight:800">🧩 Зібрати свій урок з цих блоків →</a></p><p>Усі уроки, ігри, середовища й проєкти з інформатики 2–11 клас за підручниками Біос. Обери клас і тип, клацни картку — відкриється одразу, без реєстрації. Число на картці — код для учнів.</p></div>

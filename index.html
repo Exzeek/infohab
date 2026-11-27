@@ -1344,6 +1344,6 @@ if(jump) setTimeout(()=>goTo(jump),80);
 try{const qr=qrcode(0,"M");qr.addData(HUB);qr.make();const box=$("#qr");box.innerHTML=qr.createSvgTag({cellSize:4,margin:1,scalable:true});box.hidden=false}catch(e){}
 </script>
 
-<script src="/site/nav.js" defer></script><script>fetch("/site/catalog.json").then(r=>r.json()).then(c=>{const n=y=>c.filter(x=>x.y===y).length,env=new Set(c.filter(x=>/seredovyshcha\/[a-z]/.test(x.u)).map(x=>x.u.split("?")[0])).size;
-const L=[["📘",n("ex"),"уроків і вправ","vse/?t=ex"],["🎮",n("game"),"ігор","vse/?t=game"],["🧪",env,"середовищ","seredovyshcha/"],["🛠️",n("proj"),"проєктів","vse/?t=proj"],["🖥️",n("slides"),"презентацій","vse/?t=slides&w=t"]];
-const h=document.getElementById("hstat");if(h)h.innerHTML=L.map(x=>`<a href="${x[3]}">${x[0]} <b>${x[1]}</b>${x[2]}</a>`).join("")}).catch(()=>{});</script></body></html>
+<script src="/site/nav.js" defer></script><script>fetch("/site/stats.json").then(r=>r.json()).then(n=>{
+const L=[["📘",n.ex,"уроків і вправ","vse/?t=ex"],["🎮",n.game,"ігор","vse/?t=game"],["🧪",n.env,"середовищ і наборів","vse/?t=env"],["🛠️",n.proj,"проєктів","vse/?t=proj"],["🖥️",n.slides,"презентацій","vse/?t=slides&w=t"]];
+const h=document.getElementById("hstat");if(h)h.innerHTML=L.filter(x=>x[1]).map(x=>`<a href="${x[3]}">${x[0]} <b>${x[1]}</b>${x[2]}</a>`).join("")}).catch(()=>{});</script></body></html>

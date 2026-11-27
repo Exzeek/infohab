@@ -9,6 +9,7 @@ const CC={2:'#d98a00',3:'#1e8fd6',4:'#7a4fd8',5:'#c2255c',6:'#2f9e4f',7:'#364fc7
 const ORDER=[2,3,4,5,6,7,8,9,10,12,1,0];
 const TYPE=k=>/Середовище|Лабораторія|Тренажер|Інструмент/.test(k)?'env':/Гра|Квест|Пульт|Екран|Тренування/.test(k)?'game':/Проєкт|Практична|Творчий/.test(k)?'proj':/Слайди/.test(k)?'slides':/Урок|Картки|Тест|Читанка/.test(k)?'ex':'other';
 const TN={ex:['📘','Уроки й вправи'],game:['🎮','Ігри'],env:['🧪','Середовища'],proj:['🛠️','Проєкти й практичні'],slides:['🖥️','Презентації'],other:['📎','Матеріали']};
+const ENVI=t=>{const R=[[/Git/,'🌿','#2f9e44'],[/HTML|CSS/,'🌐','#e8590c'],[/Python/,'🐍','#1971c2'],[/сортуван/i,'📶','#7048e8'],[/Бджілка/,'🐝','#f59f00'],[/Браузер/,'🧭','#1c7ed6'],[/Вектор/,'✏️','#7048e8'],[/баз[аи]|БазаЛаб/i,'🗄️','#0c8599'],[/Дизайн/,'🎨','#d6336c'],[/Документ/,'📄','#1864ab'],[/Scratch/,'🐱','#f76707'],[/Логічн/,'🔀','#5f3dc4'],[/Micro:?Bit/i,'🔌','#2b8a3e'],[/блок-схем/i,'🔷','#1971c2'],[/Маленький комп/,'💻','#495057'],[/Малювалка/,'🖍️','#f08c00'],[/Мереж/,'🕸️','#0b7285'],[/Мишка/,'🖱️','#5c7cfa'],[/ПК/,'🖥️','#1c7ed6'],[/Пошт/,'✉️','#c2255c'],[/Презентац/,'🎞️','#e8590c'],[/Провідник/,'📁','#f59f00'],[/Рандом/,'🎲','#ae3ec9'],[/читання/i,'📖','#9c36b5'],[/кавомашин/i,'☕','#8d5524'],[/Таблиц/,'📊','#2b8a3e'],[/середовища й інструменти/,'🧰','#495057']];for(const [re,e,c] of R)if(re.test(t))return[e,c];return['🧪','#2b8a3e']};
 const CTA={ex:'Почати урок →',game:'▶ Грати',env:'Відкрити середовище →',proj:'Почати проєкт →',slides:'Слайди →',other:'Відкрити →'};
 const FMT=lb=>{lb=String(lb);let m=lb.match(/^([^:]{3,40}):\s*розминка/i);if(m)return m[1].trim();m=lb.match(/^розминка,\s*\d+\s*вправ,\s*(.{3,40})$/i);return m?m[1].trim().replace(/^./,c=>c.toUpperCase()):''};
 const FI=f=>/Детектив/i.test(f)?'🕵️':/Квест/i.test(f)?'🗝️':/Симулятор|Кібер/i.test(f)?'🖥️':/Аркада|Спідран|на час/i.test(f)?'⏱️':/Рольова|тікет|Служба/i.test(f)?'🎧':/Майстерня|Конструктор/i.test(f)?'🧩':/Пісочниця|PRIMM|передбач/i.test(f)?'🔬':/Дослідн/i.test(f)?'🔎':/пар|водій/i.test(f)?'👥':'🎯';
@@ -42,9 +43,11 @@ for(const k of ORDER){
     const foot=sec||topic?`<small>${esc(topic)}${esc(sec)}</small>`:'';
     if(L.length===1){const x=L[0];
       const f=t==='ex'?FMT(x.lb):'';const lbh=f?`<span class="fmt">${FI(f)} ${esc(f)}</span>`:`<span class="lb">${esc(x.lb)}</span>`;
-      body+=`<a class="c t-${t}" href="${esc(x.href)}"${x.ext?' target="_blank" rel="noopener"':''} data-t="${t}" data-w="${w}" data-q="${esc(q)}"><i class="wm" aria-hidden="true">${TN[t][0]}</i>${top}<b>${esc(tt)}</b>${lbh}${foot}<span class="cta">${CTA[t]}</span></a>`;}
+      const ei=t==='env'?ENVI(tt):null;
+      body+=`<a class="c t-${t}"${ei?` style="--tc:${ei[1]}"`:''} href="${esc(x.href)}"${x.ext?' target="_blank" rel="noopener"':''} data-t="${t}" data-w="${w}" data-q="${esc(q)}"><i class="wm" aria-hidden="true">${ei?ei[0]:TN[t][0]}</i>${(ei?top.replace(TN.env[0],'<span class="ei">'+ei[0]+'</span>'):top)}<b>${esc(tt)}</b>${lbh}${foot}<span class="cta">${CTA[t]}</span></a>`;}
     else{
-      body+=`<div class="c multi t-${t}" data-t="${t}" data-w="${w}" data-q="${esc(q)}"><i class="wm" aria-hidden="true">${TN[t][0]}</i>${top}<b>${esc(tt)}</b><span class="sets">${L.map(x=>`<a href="${esc(x.href)}"${x.ext?' target="_blank" rel="noopener"':''}><span>${esc(kinds.length>1&&!x.lb.includes(x.kind)?x.kind+': '+x.lb:x.lb)}</span>${x.code?`<span class="kc">${x.code}</span>`:''}</a>`).join('')}</span>${foot}</div>`;}
+      const ej=t==='env'?ENVI(tt):null;
+      body+=`<div class="c multi t-${t}"${ej?` style="--tc:${ej[1]}"`:''} data-t="${t}" data-w="${w}" data-q="${esc(q)}"><i class="wm" aria-hidden="true">${ej?ej[0]:TN[t][0]}</i>${ej?top.replace(TN.env[0],'<span class="ei">'+ej[0]+'</span>'):top}<b>${esc(tt)}</b><span class="sets">${L.map(x=>`<a href="${esc(x.href)}"${x.ext?' target="_blank" rel="noopener"':''}><span>${esc(kinds.length>1&&!x.lb.includes(x.kind)?x.kind+': '+x.lb:x.lb)}</span>${x.code?`<span class="kc">${x.code}</span>`:''}</a>`).join('')}</span>${foot}</div>`;}
   }
   body+='</div></section>';
 }
@@ -90,13 +93,14 @@ section h2{font:800 20px Unbounded,sans-serif;color:var(--cc);margin:22px 0 10px
 .c.t-ex{border-top-width:4px}
 .c.t-game{--tc:#e8590c;border:0;border-top:0;background:linear-gradient(140deg,color-mix(in srgb,var(--tc) 16%,var(--s)),color-mix(in srgb,var(--cc) 14%,var(--s)));box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--tc) 35%,transparent)}
 .c.t-game .wm{opacity:.22;font-size:92px}.c.t-game .cta{align-self:flex-start;background:var(--tc);color:#fff;border-radius:999px;padding:4px 12px}
-.c.t-env{--tc:#2b8a3e;border:2px solid var(--tc);border-radius:12px;padding-top:30px;background:linear-gradient(var(--tc) 0 22px,var(--s) 22px)}
+.c.t-env{border:2px solid var(--tc);border-radius:12px;padding-top:30px;background:linear-gradient(var(--tc) 0 22px,var(--s) 22px)}
 .c.t-env::before{content:"● ● ●";position:absolute;top:3px;left:10px;font-size:10px;letter-spacing:2px;color:#ffffffd0}.c.t-env::after{content:"тренажер";position:absolute;top:3px;right:10px;font:800 10px ui-monospace,Menlo,monospace;color:#ffffffd0;letter-spacing:.08em}.c.t-env .kd{color:var(--tc)}
 .c.t-env .sets a{font-family:ui-monospace,Menlo,monospace;font-size:13px}
 .c.t-proj{--tc:#1971c2;border:2px dashed color-mix(in srgb,var(--tc) 55%,var(--line));border-top:2px dashed color-mix(in srgb,var(--tc) 55%,var(--line));background:repeating-linear-gradient(0deg,transparent 0 19px,color-mix(in srgb,var(--tc) 7%,transparent) 19px 20px),repeating-linear-gradient(90deg,transparent 0 19px,color-mix(in srgb,var(--tc) 7%,transparent) 19px 20px),var(--s)}
 .c.t-proj .kd::after{content:" · окрема оцінка";font-weight:700}.c.t-proj .kd{color:var(--tc)}
 .c.t-slides{min-height:auto;border-top-width:2px;background:color-mix(in srgb,var(--s) 70%,var(--bg))}.c.t-slides b{font-size:14.5px}.c.t-slides .wm{font-size:56px}
-@media (prefers-color-scheme:dark){.c .wm{opacity:.14}.c.t-env{--tc:#40c057}.c.t-env::before,.c.t-env::after{color:#0b1a10}}
+@media (prefers-color-scheme:dark){.c .wm{opacity:.14}.c.t-env::before,.c.t-env::after{color:#0b1a10}}
+.c.t-env{--tc:#2b8a3e}.c.t-env .wm{opacity:.28;font-size:84px}.c .ei{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:8px;background:color-mix(in srgb,var(--tc) 18%,transparent);font-size:16px;margin-right:2px;vertical-align:middle}
 .hide{display:none!important}.empty{padding:30px;text-align:center;color:var(--mut)}
 </style></head><body>
 <div class="hd"><h1>Бібліотека інтерактивів</h1><p style="margin:0 0 6px"><a href="/konstruktor/" style="color:var(--acc);font-weight:800">🧩 Зібрати свій урок з цих блоків →</a></p><p>Усі уроки, ігри, середовища й проєкти з інформатики 2–11 клас за підручниками Біос. Обери клас і тип, клацни картку — відкриється одразу, без реєстрації. Число на картці — код для учнів.</p></div>

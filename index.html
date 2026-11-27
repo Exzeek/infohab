@@ -21,7 +21,19 @@
 .subh{margin:18px 0 8px;font:800 13px var(--f-body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .totop{position:fixed;right:16px;bottom:16px;z-index:20;width:48px;height:48px;border-radius:50%;border:0;background:var(--accent);color:#fff;font:800 22px var(--f-body);cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.18)}
 @media (prefers-reduced-motion:reduce){.secbox>summary.sech::after{transition:none}}
-</style></head><body>
+
+.tpan{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:12px}
+.tp{display:flex;flex-direction:column;gap:2px;text-align:left;font:inherit;color:var(--ink);text-decoration:none;background:var(--surface);border:2px solid var(--line,#e3e6ee);border-radius:16px;padding:12px 14px;cursor:pointer}
+.tp:hover{border-color:var(--accent)}.tp span{font-size:24px}.tp b{font-size:16px}.tp small{color:var(--muted,#5c6375);font-size:13.5px}
+.span{margin-top:12px;background:var(--surface);border:1px solid var(--line,#e3e6ee);border-radius:16px;padding:12px 14px}
+.span h2{font-size:15px;margin:0 0 8px}.span ul{list-style:none;margin:0;padding:0;display:flex;gap:8px;flex-wrap:wrap}
+.span a{display:inline-block;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:7px 12px;border-radius:999px;border:1px solid var(--line,#e3e6ee);color:var(--ink);text-decoration:none;font-weight:700;font-size:14px}
+.qrov{position:fixed;inset:0;z-index:100;background:#0b0d14ee;display:grid;place-items:center;padding:20px}
+.qrov>div{background:#fff;color:#1b1e28;border-radius:26px;padding:28px;text-align:center;max-width:min(92vw,640px)}
+.qrov .qr{width:min(60vh,420px);height:min(60vh,420px);margin:0 auto 12px;background:#fff}.qrov .qr svg{width:100%;height:100%;display:block}
+.qrov b{display:block;font:800 clamp(28px,6vw,54px)/1.1 ui-monospace,Menlo,monospace}.qrov p{margin:8px 0 14px;font-size:18px}
+.qrov button{font:800 16px inherit;padding:10px 20px;border-radius:12px;border:1px solid #ccd;background:#f3f4f8;cursor:pointer}
+</style><link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#5b3cc4"><link rel="apple-touch-icon" href="/site/apple-touch-icon.png"></head><body>
 <title>Інтерактивні уроки інформатики 2–11 клас — urokinfo.com.ua</title><link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta name="description" content="Безкоштовні інтерактивні уроки, вправи, ігри на великий екран і практичні проєкти з інформатики для 2–11 класів за підручниками Біос. Без реєстрації.">
 <link rel="canonical" href="https://urokinfo.com.ua/">
@@ -228,12 +240,15 @@ footer{color:var(--muted);font-size:13px;border-top:1px solid var(--line);paddin
     </div>
   </header>
 
-  <div class="golink" role="note" aria-label="Адреса сайту">
-    <svg class="art" viewBox="0 0 240 140" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><rect class="s" x="40" y="14" width="160" height="98" rx="10"/><rect class="t" x="54" y="28" width="132" height="14" rx="7"/><path d="M66 58h70M66 74h104M66 90h80"/><path class="t" d="M28 112h184l12 14H16z"/><path class="f" stroke="none" d="M168 70l30 12-13 4-4 13z"/></g></svg>
-    <div class="gl-t"><small>Адреса сайту — набери в браузері:</small><b id="glAddr">exzeek.github.io/infohab</b></div>
-    <div class="qr" id="qr" role="img" aria-label="QR-код адреси сайту" hidden></div>
-    <button class="copy" id="glCopy" type="button">Копіювати</button>
-  </div>
+  <section class="tpan" id="tpan" hidden aria-label="Інструменти вчителя">
+    <a class="tp" href="/konstruktor/"><span>🧩</span><b>Конструктор уроку</b><small>Зберіть заняття з блоків, проведіть на екрані з таймером</small></a>
+    <button class="tp" type="button" id="tpQr"><span>📱</span><b>Адреса й QR на екран</b><small>Великий QR для проектора — учні відкриють сайт з телефона</small></button>
+    <a class="tp" href="/vse/?w=t&amp;t=slides"><span>🖥️</span><b>Презентації</b><small>Слайди на 15 хв до кожної теми</small></a>
+    <a class="tp" href="/kody/"><span>🔢</span><b>Коди для друку</b><small>Список кодів по класах для кабінету</small></a>
+    <a class="tp" href="/vchyteliu/"><span>📋</span><b>Як провести урок</b><small>3 кроки й усі матеріали для вчителя</small></a>
+  </section>
+  <section class="span" id="span" hidden aria-label="Продовжити"></section>
+  <div class="qrov" id="qrov" hidden role="dialog" aria-label="Адреса сайту для учнів"><div><div class="qr" id="qr" role="img" aria-label="QR-код адреси сайту"></div><b id="glAddr">urokinfo.com.ua</b><p>Відкрий сайт і введи код уроку вгорі сторінки</p><button type="button" id="qrClose">Закрити</button></div></div>
 
 
   <div class="codebox" role="search">
@@ -1204,6 +1219,10 @@ function render(){
   $("#m-s").setAttribute("aria-pressed",st.mode==="s");
   $("#m-t").setAttribute("aria-pressed",st.mode==="t");
   $("#liveBan").hidden = st.mode!=="t";
+  $("#tpan").hidden = st.mode!=="t";
+  document.querySelector(".codebox").hidden = st.mode==="t";
+  try{const H=JSON.parse(localStorage.getItem("ui-hist")||"[]").slice(0,4);const sp=$("#span");sp.hidden=st.mode==="t"||!H.length;
+    sp.innerHTML=H.length?`<h2>Продовжити, де зупинився</h2><ul>${H.map(x=>`<li><a href="${esc(x.u)}">${esc(x.t)}</a></li>`).join("")}</ul>`:""}catch(e){}
   $("#lead").textContent=st.mode==="s"
     ?"Безкоштовні уроки, вправи, ігри й проєкти з інформатики для 2–11 класу. Обери клас → розділ → тему."
     :"Режим вчителя: до кожної теми додано презентацію, конспекти, ігри на великий екран і попередні версії уроків.";
@@ -1282,7 +1301,7 @@ f.addEventListener("submit",e=>{e.preventDefault();const c=i.value.trim();
 if(CODES[c]){location.href=CODES[c].replace(/^\//,"")}
 else if(/^\d{5}$/.test(c)){m.textContent="Коди з 5 цифр (живий урок) запрацюють згодом. Перевір код у вчителя."}
 else m.textContent=c?"Такого коду немає. Перевір цифри або відкрий «Усі коди».":"Введи код з 3 або 4 цифр."});})();
-$("#glCopy").onclick=e=>{const b=e.currentTarget;navigator.clipboard?.writeText(HUB).then(()=>{b.textContent="Скопійовано";setTimeout(()=>b.textContent="Копіювати",1500)},()=>{})};
+$("#tpQr").onclick=()=>{$("#qrov").hidden=false;$("#qrClose").focus()};$("#qrClose").onclick=()=>{$("#qrov").hidden=true};$("#qrov").onclick=e=>{if(e.target.id==="qrov")$("#qrov").hidden=true};addEventListener("keydown",e=>{if(e.key==="Escape")$("#qrov").hidden=true});
 $("#m-s").onclick=()=>setMode("s");
 $("#m-t").onclick=()=>setMode("t");
 $("#q").oninput=e=>{st.q=e.target.value;render()};

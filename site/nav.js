@@ -7,6 +7,9 @@
   '.un nav{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0}.un nav::-webkit-scrollbar{display:none}'+
   '.un nav a{padding:8px 11px;border-radius:999px;color:var(--un-mut,#5c6375);text-decoration:none;white-space:nowrap}.un nav a:hover{color:var(--un-ink,#1b1e28);background:var(--un-hov,#eef0f6)}'+
   '.un nav a[aria-current]{color:var(--un-ink,#1b1e28);background:var(--un-hov,#eef0f6);font-weight:800}'+
+  '.un .ux{flex:none;border:1px solid var(--un-line,#d6d9e3);background:var(--un-bg,#fff);color:var(--un-ink,#1b1e28);border-radius:10px;padding:6px 10px;font:800 14px Nunito,system-ui,sans-serif;cursor:pointer}.un .ux:hover{background:var(--un-hov,#eef0f6)}'+
+  '.uf{border-top:1px solid var(--un-line,#e3e6ee);margin-top:30px;font:14px/1.6 Nunito,system-ui,sans-serif;color:var(--un-mut,#5c6375);background:var(--un-bg,#fff)}.uf>div{max-width:1200px;margin:0 auto;padding:18px 14px 26px;display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center}.uf a{color:inherit;font-weight:700}.uf .sp{flex:1}'+
+  '@media print{.un,.uf{display:none!important}}'+
   '.un form{display:flex;gap:0;flex:none;position:relative}.un input{width:74px;padding:7px 9px;border:1px solid var(--un-line,#d6d9e3);border-right:0;border-radius:10px 0 0 10px;font:700 15px ui-monospace,Menlo,monospace;background:var(--un-bg,#fff);color:var(--un-ink,#1b1e28)}'+
   '.un button{border:1px solid #c2255c;background:#c2255c;color:#fff;border-radius:0 10px 10px 0;padding:7px 10px;font:800 14px Nunito,system-ui,sans-serif;cursor:pointer}'+
   '.un .m{position:absolute;right:0;top:110%;background:#1b1e28;color:#fff;font-size:13px;padding:6px 10px;border-radius:8px;white-space:nowrap;display:none}.un .m.on{display:block}'+
@@ -16,11 +19,25 @@
   var L=[["/","Уроки","Уроки",/^\/($|\d+-klas|10-11-klas|matematyka|chytannia)/],["/vse/","Інтерактиви","Інтерактиви",/^\/(vse|seredovyshcha)\//],["/vchyteliu/","Для вчителя","Вчителю",/^\/(vchyteliu|kody|konstruktor)\//],["/progres/","Мій прогрес","Прогрес",/^\/progres\//]];
   var h=document.createElement("header");h.className="un";
   h.innerHTML='<div><a class="b" href="/">urok<span>info</span></a><nav aria-label="Головне меню">'+L.map(function(x){return '<a href="'+x[0]+'"'+(x[3].test(P)?' aria-current="page"':'')+'><span class="un-f">'+x[1]+'</span><span class="un-s">'+x[2]+'</span></a>'}).join("")+
-   '</nav><form role="search" aria-label="Перейти за кодом"><input inputmode="numeric" enterkeyhint="go" maxlength="5" placeholder="код" aria-label="Код уроку чи гри"><button type="submit">→</button><span class="m" role="status"></span></form></div>';
+   '</nav><button type="button" class="ux" id="unInst" hidden title="Встановити як застосунок">⬇ Встановити</button><button type="button" class="ux" id="unFs" title="Повний екран (Esc — вийти)" aria-label="Повний екран">⛶</button><form role="search" aria-label="Перейти за кодом"><input inputmode="numeric" enterkeyhint="go" maxlength="5" placeholder="код" aria-label="Код уроку чи гри"><button type="submit">→</button><span class="m" role="status"></span></form></div>';
   document.body.insertBefore(h,document.body.firstChild);
   var f=h.querySelector("form"),i=h.querySelector("input"),m=h.querySelector(".m"),C=null;
   function say(t){m.textContent=t;m.classList.add("on");setTimeout(function(){m.classList.remove("on")},2500)}
   f.onsubmit=function(e){e.preventDefault();var c=i.value.replace(/\D/g,"");if(c.length<3){say("Введи 3–4 цифри");return}
     var go=function(){if(C[c])location.href=C[c];else say("Код "+c+" не знайдено")};
     if(C)go();else fetch("/site/codes.json").then(function(r){return r.json()}).then(function(j){C=j;go()}).catch(function(){location.href="/"+c+"/"})};
+
+  /* повний екран */
+  var fb=h.querySelector("#unFs");if(!document.fullscreenEnabled)fb.hidden=true;
+  fb.onclick=function(){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen().catch(function(){})};
+  /* встановлення (PWA) */
+  var ib=h.querySelector("#unInst"),dp=null;
+  addEventListener("beforeinstallprompt",function(e){e.preventDefault();dp=e;ib.hidden=false});
+  ib.onclick=function(){if(!dp)return;dp.prompt();dp.userChoice.finally(function(){dp=null;ib.hidden=true})};
+  addEventListener("appinstalled",function(){ib.hidden=true});
+  if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostname==="localhost"))addEventListener("load",function(){navigator.serviceWorker.register("/sw.js").catch(function(){})});
+  /* футер */
+  var d=new Date(document.lastModified),ft=document.createElement("footer");ft.className="uf";
+  ft.innerHTML='<div><a href="/pro-proekt/">Про проєкт</a><a href="/yak-korystuvatysia/">Як користуватися</a><a href="/vchyteliu/">Для вчителя</a><a href="/konstruktor/">Конструктор уроку</a><a href="/vse/">Бібліотека</a><a href="/kody/">Усі коди</a><a href="/pro-proekt/#dani">Які дані збираються</a><span class="sp"></span><span>urokinfo.com.ua · оновлено '+(isNaN(d)?"":d.toLocaleDateString("uk-UA"))+'</span></div>';
+  document.body.appendChild(ft);
 })();

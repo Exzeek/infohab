@@ -60,6 +60,8 @@ function line(name,cls){
 }
 function chooseSet(k,reset){
   setKey=k;ls.set("env-last-"+C.id,k);
+  try{const M={t:C.title,p:location.pathname,s:{}};Object.entries(C.sets).forEach(([sk,v])=>M.s[sk]={n:v.name,c:v.cls||C.cls,tot:v.tasks.length});ls.set("env-meta-"+C.id,M);
+    const u=location.pathname+"?set="+k,h=ls.get("ui-hist",[]).filter(x=>x.u!==u);h.unshift({u,t:C.title+" · "+C.sets[k].name,ts:Date.now()});ls.set("ui-hist",h.slice(0,40))}catch(e){}
   S=reset?fresh():ls.get("env-"+C.id+"-"+k,null)||fresh();
   if(reset){save()}
   const sel=$("#kSet");if(sel)sel.value=k;

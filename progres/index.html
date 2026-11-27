@@ -1,0 +1,38 @@
+<!DOCTYPE html><html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Мій прогрес — urokinfo</title><meta name="description" content="Твої результати в середовищах і нещодавно відкриті уроки на цьому пристрої.">
+<link rel="canonical" href="https://urokinfo.com.ua/progres/"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><meta name="robots" content="noindex,follow">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f7fb;--s:#fff;--ink:#1b1e28;--mut:#5c6375;--line:#e3e6ee;--acc:#c2255c;--ok:#2b8a3e}
+@media (prefers-color-scheme:dark){:root{--bg:#12141b;--s:#1b1e28;--ink:#eef0f5;--mut:#a3a9b8;--line:#2c3040;--acc:#f06595;--ok:#69db7c}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Nunito,system-ui,sans-serif}
+main{max-width:1000px;margin:0 auto;padding:20px 14px 40px}h1{font:800 clamp(22px,4.5vw,32px)/1.15 Unbounded,sans-serif;margin:0 0 6px}
+h2{font:800 18px Unbounded,sans-serif;margin:26px 0 10px}.lead{color:var(--mut);margin:0;max-width:760px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.c{background:var(--s);border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:4px;color:var(--ink);text-decoration:none}
+a.c:hover{border-color:var(--acc)}.c b{font-size:16px}.c span,.c small{color:var(--mut);font-size:14px}
+.btn{display:inline-block;border:1px solid var(--line);background:var(--s);color:var(--ink);border-radius:10px;padding:7px 12px;font:700 14px Nunito,sans-serif;cursor:pointer;text-decoration:none}
+</style></head><body><main>
+<style>.bar{height:8px;border-radius:99px;background:var(--line);overflow:hidden;margin:4px 0}.bar i{display:block;height:100%;background:var(--ok)}
+.g{font:800 22px Unbounded,sans-serif;color:var(--acc)}.row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.h{list-style:none;padding:0;margin:0;display:grid;gap:6px}.h a{display:flex;justify-content:space-between;gap:10px;background:var(--s);border:1px solid var(--line);border-radius:12px;padding:9px 12px;color:var(--ink);text-decoration:none}.h small{color:var(--mut);white-space:nowrap}
+.note{background:var(--s);border:1px dashed var(--line);border-radius:12px;padding:10px 14px;color:var(--mut);font-size:14px;margin-top:14px}</style>
+<h1>Мій прогрес</h1><p class="lead" id="hi">Тут видно, що ти вже зробив на сайті.</p>
+<h2>Середовища</h2><div class="grid" id="env"></div>
+<h2>Нещодавно відкриті</h2><ul class="h" id="hist"></ul>
+<div class="note">Прогрес зберігається лише в цьому браузері на цьому пристрої — без реєстрації. На іншому комп'ютері він буде порожній. Щоб учитель побачив результат, натисни «Надіслати вчителю» на сторінці уроку чи середовища.
+<p><button class="btn" id="clr">Очистити історію</button></p></div>
+<script>
+const g=(k,d)=>{try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c]);
+const who=g("env-who",null);if(who&&who.n)document.getElementById("hi").textContent="Привіт, "+who.n+(who.c?" ("+who.c+")":"")+"! Ось що ти вже зробив на сайті.";
+const E=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);const m=/^env-meta-(.+)$/.exec(k);if(m)E.push(m[1])}
+let h="";E.forEach(id=>{const M=g("env-meta-"+id,null);if(!M)return;Object.entries(M.s).forEach(([sk,v])=>{const S=g("env-"+id+"-"+sk,null);if(!S||!S.t0&&!Object.keys(S.done||{}).length)return;
+ const n=Object.keys(S.done||{}).length,p=Math.round(100*n/v.tot);
+ h+=`<a class="c" href="${esc(M.p||"/seredovyshcha/")}?set=${sk}"><div class="row"><b>${esc(M.t)}</b>${S.res?`<span class="g">${S.res.grade}</span>`:""}</div><span>${esc(v.n)}</span><div class="bar"><i style="width:${p}%"></i></div><small>${n} з ${v.tot} завдань · ${S.res?"здано":"продовжити →"}</small></a>`})});
+document.getElementById("env").innerHTML=h||'<p class="lead">Ще немає. Спробуй будь-яке <a href="/seredovyshcha/">середовище</a>.</p>';
+const H=g("ui-hist",[]),ago=t=>{const m=Math.round((Date.now()-t)/60000);return m<1?"щойно":m<60?m+" хв тому":m<1440?Math.round(m/60)+" год тому":Math.round(m/1440)+" дн тому"};
+document.getElementById("hist").innerHTML=H.length?H.map(x=>`<li><a href="${esc(x.u)}"><span>${esc(x.t)}</span><small>${ago(x.ts)}</small></a></li>`).join(""):'<li class="lead">Тут з’являться уроки, які ти відкриватимеш.</li>';
+document.getElementById("clr").onclick=()=>{if(confirm("Очистити список нещодавно відкритих? Результати в середовищах залишаться.")){localStorage.removeItem("ui-hist");location.reload()}};
+</script><script src="/site/nav.js" defer></script></body></html>

@@ -1146,6 +1146,7 @@ Object.assign(STAGE_FN,{catch:stCatch,balloons:stBalloons,doors:stDoors,bug:stBu
 
 
 
+
 /* ======== 4th-grade stage types ======== */
 function KBhtml(digits){const rows=(digits?[['1','2','3','4','5','6','7','8','9','0']]:[]).concat(KB);
   return `<div class="kb">${rows.map(r=>`<div class="kr">${r.map(c=>`<button class="key" data-k="${c}">${c}</button>`).join('')}</div>`).join('')}

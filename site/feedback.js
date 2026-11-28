@@ -7,15 +7,43 @@ function el(t,c,h){var e=document.createElement(t);if(c)e.className=c;if(h!=null
 var css=el("style",null,'.ufb-w{position:fixed;inset:0;background:#0009;z-index:9999;display:grid;place-items:center;padding:12px;font:15px/1.45 Nunito,system-ui,sans-serif}'+
 '.ufb{background:#fff;color:#1b1e28;border-radius:18px;padding:18px;width:min(520px,100%);max-height:94vh;overflow:auto;box-shadow:0 20px 60px #0006}'+
 '.ufb h3{margin:0 0 4px;font:800 19px Unbounded,Nunito,sans-serif}.ufb p{margin:0 0 10px;color:#5c6375;font-size:14px}'+
-'.ufb .ty{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}.ufb .ty label{border:2px solid #e3e6ee;border-radius:12px;padding:7px 12px;cursor:pointer;font-weight:800}'+
+'.ufb .ty{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}.ufb>b{display:block;margin:8px 0 6px;font-size:14px}.ufb .ty label{border:2px solid #e3e6ee;border-radius:12px;padding:7px 12px;cursor:pointer;font-weight:800}'+
 '.ufb .ty input{position:absolute;opacity:0}.ufb .ty label:has(input:checked){border-color:#c2255c;background:#fff0f6}'+
 '.ufb textarea,.ufb input[type=text]{width:100%;box-sizing:border-box;font:15px Nunito,system-ui,sans-serif;border:1px solid #d6d9e3;border-radius:10px;padding:9px;margin:4px 0 8px;background:#fff;color:#1b1e28}'+
 '.ufb textarea{min-height:110px;resize:vertical}.ufb small{color:#868e96;display:block;margin-bottom:8px}'+
 '.ufb .row{display:flex;gap:8px;justify-content:flex-end;margin-top:6px}.ufb button{border:0;border-radius:12px;padding:10px 16px;font:800 15px Nunito,sans-serif;cursor:pointer}'+
 '.ufb .go{background:#c2255c;color:#fff}.ufb .no{background:#f1f3f5;color:#1b1e28}.ufb .msg{font-weight:800;margin-top:8px}.ufb .msg.ok{color:#2b8a3e}.ufb .msg.bad{color:#e03131}'+
 '@media (prefers-color-scheme:dark){.ufb{background:#1b1e28;color:#eef0f5}.ufb textarea,.ufb input[type=text]{background:#12141b;color:#eef0f5;border-color:#2c3040}.ufb .ty label{border-color:#2c3040}.ufb .ty label:has(input:checked){background:#3a1a2a}.ufb .no{background:#2c3040;color:#eef0f5}}');
+function openT(){if(document.querySelector(".ufb-w"))return;if(!document.getElementById("ufbcss"))(css.id="ufbcss",document.head.appendChild(css));
+ var w=el("div","ufb-w"),f=el("form","ufb");w.appendChild(f);var K="";for(var i=2;i<=11;i++)K+='<label><input type="checkbox" name="k" value="'+i+'">'+i+'</label>';
+ f.innerHTML='<h3>Відгук учителя 🍎</h3><p>2 хвилини — і сайт стане кращим для вашого класу. Усі поля, крім одного, необов\'язкові.</p>'+
+ '<b>У яких класах ви ведете інформатику?</b><div class="ty">'+K+'</div>'+
+ '<b>Ви вже пробували сайт?</b><div class="ty"><label><input type="radio" name="u" value="Лише подивився(-лась)" checked>👀 Лише подивився</label><label><input type="radio" name="u" value="Провів(-ла) урок">🧑‍🏫 Провів урок</label><label><input type="radio" name="u" value="Учні працюють регулярно">🔁 Регулярно</label></div>'+
+ '<b>Наскільки корисно для ваших уроків?</b><div class="ty">'+[1,2,3,4,5].map(function(n){return '<label><input type="radio" name="r" value="'+n+'"'+(n==4?' checked':'')+'>'+"⭐".repeat(n)+'</label>'}).join("")+'</div>'+
+ '<label>Що найбільше сподобалось?<textarea name="g" placeholder="Напр.: Пульт уроку, тренажер таблиць, острови для 2 класу"></textarea></label>'+
+ '<label>Чого бракує або що незручно? *<textarea name="m" required minlength="3" placeholder="Напр.: немає теми …, на інтерактивній дошці дрібний шрифт, хочу друковані картки"></textarea></label>'+
+ '<label>Ім\'я, школа, місто (необов\'язково)<input type="text" name="n" maxlength="100"></label>'+
+ '<label>Куди відповісти (необов\'язково)<input type="text" name="c" maxlength="80" placeholder="Пошта або Telegram"></label>'+
+ '<div class="ty"><label><input type="checkbox" name="beta" value="так">🚀 Хочу першим пробувати нові уроки</label></div>'+
+ '<input type="checkbox" name="botcheck" style="display:none" tabindex="-1" autocomplete="off">'+
+ '<div class="row"><button type="button" class="no">Скасувати</button><button type="submit" class="go">Надіслати відгук</button></div><div class="msg" role="status"></div>';
+ document.body.appendChild(w);
+ var close=function(){w.remove()};f.querySelector(".no").onclick=close;w.onclick=function(e){if(e.target===w)close()};
+ document.addEventListener("keydown",function k(e){if(e.key==="Escape"){close();document.removeEventListener("keydown",k)}});
+ f.onsubmit=function(e){e.preventDefault();var M=f.querySelector(".msg");if(f.botcheck.checked)return;
+  var txt=f.m.value.trim();if(txt.length<3){M.className="msg bad";M.textContent="Напишіть хоч кілька слів, чого бракує";return}
+  var last=+(localStorage.getItem("ufb-last")||0);if(Date.now()-last<30000){M.className="msg bad";M.textContent="Зачекайте пів хвилини перед наступним повідомленням";return}
+  var kl=[].map.call(f.querySelectorAll("input[name=k]:checked"),function(x){return x.value}).join(", ")||"—",b=f.querySelector(".go");b.disabled=true;b.textContent="Надсилаю…";
+  var r=f.querySelector("input[name=r]:checked").value;
+  var data={access_key:KEY,subject:"urokinfo · Відгук учителя · "+r+"⭐ · класи "+kl,from_name:"urokinfo.com.ua","Тип":"Відгук учителя","Класи":kl,
+   "Досвід":f.querySelector("input[name=u]:checked").value,"Оцінка":r+" з 5","Сподобалось":f.g.value.trim()||"—","Бракує":txt,"Хто":f.n.value.trim()||"—","Контакт":f.c.value.trim()||"—",
+   "Бета-тестер":f.beta.checked?"так":"ні","Звідки":document.referrer||"—","Сторінка":location.href,"Екран":innerWidth+"×"+innerHeight,"Час":new Date().toLocaleString("uk-UA")};
+  fetch("https://api.web3forms.com/submit",{method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify(data)})
+   .then(function(x){return x.json()}).then(function(j){if(!j.success)throw 0;localStorage.setItem("ufb-last",Date.now());localStorage.setItem("ufb-teacher","1");M.className="msg ok";M.textContent="Дякуємо! Ваш відгук уже в автора 💌";setTimeout(close,2000)})
+   .catch(function(){b.disabled=false;b.textContent="Надіслати відгук";M.className="msg bad";M.textContent="Не вдалося надіслати. Перевірте інтернет і спробуйте ще раз."})};
+}
 function ctx(){var c={};try{var K=window.KIT;var s=document.querySelector("#kSet");if(s)c.set=s.options[s.selectedIndex].text;var k=document.querySelector("#kCount");if(k)c.progress=k.textContent}catch(e){}return c}
-function open(type){if(document.querySelector(".ufb-w"))return;if(!document.getElementById("ufbcss"))(css.id="ufbcss",document.head.appendChild(css));
+function open(type){if(type==="teacher")return openT();if(document.querySelector(".ufb-w"))return;if(!document.getElementById("ufbcss"))(css.id="ufbcss",document.head.appendChild(css));
  var w=el("div","ufb-w"),f=el("form","ufb");w.appendChild(f);
  f.innerHTML='<h3>Напишіть нам</h3><p>Знайшли помилку, маєте ідею чи побажання? Повідомлення прочитає автор сайту.</p>'+
  '<div class="ty"><label><input type="radio" name="t" value="Помилка" '+(type!=="idea"?"checked":"")+'>🐞 Помилка</label><label><input type="radio" name="t" value="Ідея" '+(type==="idea"?"checked":"")+'>💡 Ідея</label><label><input type="radio" name="t" value="Інше">💬 Інше</label></div>'+

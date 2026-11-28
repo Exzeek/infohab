@@ -1,7 +1,7 @@
 import glob,os
 os.chdir('/home/claude/infohab')
 TAG='<script src="/site/nav.js" defer></script>'
-files=['index.html','404.html','yak-korystuvatysia/index.html','pro-proekt/index.html','offline/index.html','kody/index.html','seredovyshcha/index.html','vse/index.html','progres/index.html','vchyteliu/index.html','konstruktor/index.html','urok/index.html','infobytva/index.html']
+files=['index.html','404.html','yak-korystuvatysia/index.html','pro-proekt/index.html','offline/index.html','kody/index.html','seredovyshcha/index.html','vse/index.html','progres/index.html','vchyteliu/index.html','konstruktor/index.html','urok/index.html','infobytva/index.html','start/index.html']
 for pat in ['*-klas/**/index.html','matematyka/**/index.html','chytannia/**/index.html','instrumenty/**/index.html']:
   files+=glob.glob(pat,recursive=True)
 n=0

@@ -22,7 +22,7 @@ for c,v in sorted(C.items()):
   k=k[:m.end()-8]+row+k[m.end()-8:];add+=1
 open('kody/index.html','w').write(k)
 s=open('sitemap.xml').read();d=datetime.date.today().isoformat();sm=0
-for u in ['seredovyshcha/','vchyteliu/','konstruktor/','yak-korystuvatysia/','pro-proekt/','infobytva/']+sorted({v['url'][1:].split('?')[0] for v in C.values() if v['url'].startswith('/seredovyshcha/')}):
+for u in ['seredovyshcha/','vchyteliu/','konstruktor/','yak-korystuvatysia/','pro-proekt/','infobytva/','start/']+sorted({v['url'][1:].split('?')[0] for v in C.values() if v['url'].startswith('/seredovyshcha/')}):
   loc=f'https://urokinfo.com.ua/{u}'
   if f'<loc>{loc}</loc>' in s: continue
   s=s.replace('</urlset>',f'<url><loc>{loc}</loc><lastmod>{d}</lastmod><priority>0.8</priority></url>\n</urlset>');sm+=1
